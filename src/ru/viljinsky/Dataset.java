@@ -6,6 +6,7 @@
 
 package ru.viljinsky;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -20,22 +21,20 @@ import java.util.Map;
  */
 
 public class Dataset extends ArrayList<Object[]> implements IDataset {
-    DataModule dataModule;
-    Map<Integer, Column> columns;
-    String selectSQL;
-    String insertSQL;
-    String deleteSQL;
-    String updateSQL;
-    String tableName;
+    DataModule dataModule = DataModule.getInstance();
+    DatasetInfo info;
+    Map<Integer, Column> columns = new HashMap<>();
+//    String selectSQL;
+//    String tableName;
     Boolean active = false;
 
-    public Dataset() {
-        columns = new HashMap<>();
+    public Dataset(DatasetInfo info) {
+        this.info=info;
     }
 
     @Override
     public String getTableName() {
-        return tableName;
+        return info.tableName;
     }
     
     @Override
@@ -94,7 +93,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             Statement stmt = null;
             try {
                 stmt = dataModule.con.createStatement();
-                ResultSet rs = stmt.executeQuery(selectSQL);
+                ResultSet rs = stmt.executeQuery(info.selectSQL);
                 Object[] rowset;
                 while (rs.next()) {
                     rowset = new Object[getColumnCount()];
@@ -130,11 +129,38 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         Statement stmt = null;
         try {
             stmt = dataModule.con.createStatement();
-            ResultSet rs = stmt.executeQuery(selectSQL);
+            ResultSet rs = stmt.executeQuery(info.selectSQL);
             ResultSetMetaData rsmeta = rs.getMetaData();
             for (int i = 0; i < rsmeta.getColumnCount(); i++) {
                 columns.put(i, new Column(rsmeta, i));
             }
+            
+            //insert
+            String s1 = "";
+            String s2 = "";
+            // delete
+            String s3 = "";
+            
+            for (int col:columns.keySet()){
+                if (!s1.isEmpty()) s1+=",";
+                s1+=columns.get(col).columnName;
+                if (!s2.isEmpty()) s2+=",";
+                s2+="?";
+            }
+            String[] sss =info.primaryKey.split(";");
+            for (String s:sss){
+                if (!s3.isEmpty()) s3+=" and ";
+                s3+=s+"=?";
+            }
+                    
+            info.insertSQL="insert into "+info.tableName +"("+s1+") values ("+s2+");";
+            info.deleteSQL="delete from "+info.tableName +" where "+s3+";";
+            
+            System.out.println(info.insertSQL);
+            System.out.println(info.deleteSQL);
+            System.out.println();
+            
+            
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -151,7 +177,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         if (!active){
             System.out.println("Dataset not active");
         }
-        System.out.println(selectSQL);
+        System.out.println(info.selectSQL);
         for (int i=0;i<getRowCount();i++){
             values = getValues(i);
             for (String columnName:values.keySet()){
@@ -172,6 +198,18 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
 
     @Override
     public Integer appned(Map<String, Object> values) throws Exception {
+        
+        String sql = info.insertSQL;
+        PreparedStatement pstmt = dataModule.con.prepareStatement(sql);
+        
+        int n=1;
+        for (String k:values.keySet()){
+            pstmt.setObject(n++, values.get(k));
+        }
+        
+        pstmt.execute();
+        
+        
         Object[] rowset = new Object[getColumnCount()];
         for (String columnName:values.keySet()){
             rowset[getColumnIndex(columnName)]= values.get(columnName);
@@ -183,6 +221,20 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     @Override
     public Boolean delete(Integer rowIndex) {
         Object[] rowset = get(rowIndex);
+        
+        try{
+            PreparedStatement pstmt = dataModule.con.prepareStatement(info.deleteSQL);
+            String[] keys = info.primaryKey.split(";");
+            int n=1;
+            for (String k:keys){
+                pstmt.setObject(n++, rowset[getColumnIndex(k)]);
+            }
+            pstmt.execute();
+        
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        
         return remove(rowset);
     }
 

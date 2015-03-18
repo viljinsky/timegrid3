@@ -324,8 +324,8 @@ public class Main extends JFrame{
         Dataset dataset ;
         try{
             dataModule.open();
-            for (String tableName:dataModule.getTableNames()){
-                dataset = dataModule.getTable(tableName);
+            for (DatasetInfo info :dataModule.infoList){
+                dataset = dataModule.getTable(info.tableName);
                 dataset.open();
                 grid = new Grid();
                 grid.owner=Main.this;
