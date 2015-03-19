@@ -24,10 +24,13 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     DataModule dataModule = DataModule.getInstance();
     DatasetInfo info;
     Map<Integer, Column> columns = new HashMap<>();
-//    String selectSQL;
-//    String tableName;
     Boolean active = false;
+    Boolean editable = false;
 
+    @Override
+    public boolean isEditable(){
+        return editable;
+    }
     public Dataset(DatasetInfo info) {
         this.info=info;
     }
@@ -135,51 +138,56 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
                 columns.put(i, new Column(rsmeta, i));
             }
             
-            if (!info.primaryKey.isEmpty())
-                for (String p:info.primaryKey.split(";")){
+            editable = !info.primaryKey.isEmpty();
+            if (editable){
+                for (String p:info.primaryKey.split(";"))
                     getColumnByName(p).primary=true;
+                
+            
+            
+                // create appendSQL
+                String s1 = "";
+                String s2 = "";
+                for (int col:columns.keySet()){
+                    if (!s1.isEmpty()) s1+=",";
+                    s1+=columns.get(col).columnName;
+                    if (!s2.isEmpty()) s2+=",";
+                    s2+="?";
                 }
-            
-            //insert
-            String s1 = "";
-            String s2 = "";
-            // delete
-            String s3 = "";
-            
-            for (int col:columns.keySet()){
-                if (!s1.isEmpty()) s1+=",";
-                s1+=columns.get(col).columnName;
-                if (!s2.isEmpty()) s2+=",";
-                s2+="?";
-            }
-            String[] sss =info.primaryKey.split(";");
-            for (String s:sss){
-                if (!s3.isEmpty()) s3+=" and ";
-                s3+=s+"=?";
-            }
-            
-            String strSet="",strWhere="";
-            for (Integer col:columns.keySet()){
-                if (!strSet.isEmpty()) strSet+=",";
-                strSet += columns.get(col).columnName+"= ?";
-            }
-            
-            for (Integer col:columns.keySet()){
-                Column column = columns.get(col);
-                if (column.isPrimary()){
-                    if (!strWhere.isEmpty()) strWhere+=" and ";
-                    strWhere += column.columnName +"=?";
+
+                // creare deleteSQL
+                String s3 = "";
+                String[] sss =info.primaryKey.split(";");
+                for (String s:sss){
+                    if (!s3.isEmpty()) s3+=" and ";
+                    s3+=s+"=?";
                 }
+
+                // create updateSQL
+                String strSet="",strWhere="";
+                for (Integer col:columns.keySet()){
+                    if (!strSet.isEmpty()) strSet+=",";
+                    strSet += columns.get(col).columnName+"= ?";
+                }
+
+                for (Integer col:columns.keySet()){
+                    Column column = columns.get(col);
+                    if (column.isPrimary()){
+                        if (!strWhere.isEmpty()) strWhere+=" and ";
+                        strWhere += column.columnName +"=?";
+                    }
+                }
+
+
+                info.insertSQL="insert into "+info.tableName +"("+s1+") values ("+s2+");";
+                info.deleteSQL="delete from "+info.tableName +" where "+s3+";";
+                info.updateSQL="update "+info.tableName+" set "+strSet+" where "+strWhere;
+
+                System.out.println(info.insertSQL);
+                System.out.println(info.deleteSQL);
+                System.out.println(info.updateSQL);
+                System.out.println();
             }
-            
-            info.insertSQL="insert into "+info.tableName +"("+s1+") values ("+s2+");";
-            info.deleteSQL="delete from "+info.tableName +" where "+s3+";";
-            info.updateSQL="update "+info.tableName+" set "+strSet+" where "+strWhere;
-            
-            System.out.println(info.insertSQL);
-            System.out.println(info.deleteSQL);
-            System.out.println(info.updateSQL);
-            System.out.println();
             
             
             return true;

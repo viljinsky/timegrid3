@@ -24,25 +24,23 @@ class DatasetInfo {
     String updateSQL;
     
     String primaryKey = "";
-    Map<String, String> references;
+    Map<String, String> references = new HashMap<>();
 
-    public DatasetInfo() {
-        references = new HashMap<>();
-    }
+    public DatasetInfo() {}
     
     public DatasetInfo(String tableName,DatabaseMetaData meta) throws Exception{
-        references = new HashMap<>();        
         this.tableName= tableName;
         selectSQL = "select * from "+tableName;
-        ResultSet rs1;
-        rs1 = meta.getImportedKeys(null,null, tableName);
-        while (rs1.next()){
-            references.put(rs1.getString("FKCOLUMN_NAME"), rs1.getString("PKTABLE_NAME")+"."+rs1.getString("PKCOLUMN_NAME"));
+        ResultSet rs;
+        rs = meta.getImportedKeys(null,null, tableName);
+        while (rs.next()){
+            references.put(rs.getString("FKCOLUMN_NAME"),
+                    rs.getString("PKTABLE_NAME")+"."+rs.getString("PKCOLUMN_NAME"));
         }
 
-        rs1 = meta.getPrimaryKeys(null, null, tableName);
-        while (rs1.next())
-            addPrimaryKey(rs1.getString("COLUMN_NAME"));
+        rs = meta.getPrimaryKeys(null, null, tableName);
+        while (rs.next())
+            addPrimaryKey(rs.getString("COLUMN_NAME"));
     }
 
     public void addPrimaryKey(String column_name) {

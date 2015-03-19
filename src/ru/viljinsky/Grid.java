@@ -7,25 +7,187 @@
 package ru.viljinsky;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Map;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+//import static javax.swing.Action.ACTION_COMMAND_KEY;
+import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
 
 /**
  *
  * @author вадик
  */
+
+class GridCommand implements ICommand{
+    Action[] actions = {new Act("add"),new Act("edit"),new Act("delete"),new Act("refresh")};
+    Grid grid = null;
+    
+    class Act extends AbstractAction{
+
+        public Act(String name) {
+            super(name);
+            putValue(ACTION_COMMAND_KEY, name);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            doCommand(e.getActionCommand());
+        }
+    }
+    
+    
+    public GridCommand(Grid grid){
+        this.grid=grid;
+    }
+
+    @Override
+    public void doCommand(String command) {
+        System.out.println(command);
+        switch(command){
+            case "add":
+                grid.append();
+                break;
+            case "edit":
+                grid.edit();
+                break;
+            case "delete":
+                grid.delete();
+                break;
+            case "refresh":
+                grid.refresh();
+                break;
+        }
+        updateActionList();
+    }
+
+    @Override
+    public void updateAction(Action a) {
+        String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
+        switch (command){
+            case "add":case "edit": case "delete":
+                a.setEnabled(grid.isEditable());
+                break;
+        }
+        System.out.println(command);
+    }
+
+    @Override
+    public void updateActionList() {
+        for (Action a:actions){
+            updateAction(a);
+        }
+    }
+
+    @Override
+    public JPopupMenu getPopup() {
+        JPopupMenu result = new JPopupMenu();
+        for (Action a:actions)
+            if (a==null)
+                result.addSeparator();
+            else
+                result.add(a);
+        return result;
+    }
+
+    @Override
+    public void addMenu(JMenu menu) {
+        for (Action a:actions)
+            if (a==null)
+                menu.addSeparator();
+            else
+                menu.add(a);
+    }
+}
+
+
 class Grid extends JTable {
     Component owner = null;
     GridModel model;
     ICommand commands = null;
+    
+    public boolean isEditable(){
+        return model!=null && model.dataset.isEditable();
+    }
+    abstract class AppendDialog extends DataEntryDialog {
+
+        public AppendDialog(IDataset datset) {
+            super();
+            panel.setDataset(datset);
+        }
+
+    }
+    
+    abstract class EdtDialog extends DataEntryDialog{
+        
+        public EdtDialog(IDataset dataset,Map<String,Object> values){
+            super();
+            panel.setDataset(dataset);
+            panel.setValues(values);
+        }
+
+    }
+    
+    
+class GridModel extends AbstractTableModel{
+    IDataset dataset;
+    public GridModel(Dataset dataset){
+        this.dataset=dataset;
+    }
+    
+    @Override
+    public int getRowCount() {
+        return dataset.getRowCount();
+    }
+
+    @Override
+    public int getColumnCount() {
+        return dataset.getColumnCount();
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+//        Object[] rowset = dataset.get(rowIndex);
+        Map<String,Object> values = dataset.getValues(rowIndex);
+        return values.get(dataset.getColumn(columnIndex).columnName);
+    }
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        Map<String,Object> values = dataset.getValues(rowIndex);
+        values.put(dataset.getColumn(columnIndex).columnName, aValue);
+        try{
+        dataset.setVlaues(rowIndex, values);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return false;
+    }
+
+    @Override
+    public String getColumnName(int column) {
+        return dataset.getColumn(column).columnName;// getColumnName(column);
+    }
+    
+    
+}
+
+    
+    
 
     public Grid() {
         super();
@@ -58,6 +220,9 @@ class Grid extends JTable {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount()==2){
+                    edit();
+                }
             }
 
             @Override
@@ -72,6 +237,7 @@ class Grid extends JTable {
 
             public void showPopup(MouseEvent e) {
                 if (e.isPopupTrigger() && commands != null) {
+                    commands.updateActionList();
                     JPopupMenu popupMenu = commands.getPopup();
                     popupMenu.show(Grid.this, e.getX(), e.getY());
                 }
@@ -84,77 +250,22 @@ class Grid extends JTable {
         setModel(model);
     }
 
-    abstract class AppendDialog extends DataEntryDialog {
-
-        public AppendDialog(IDataset datset) {
-            super();
-            panel.setDataset(datset);
-        }
-
-        @Override
-        public void doOnEntry() throws Exception {
-            onAddValues();
-        }
-
-        public abstract void onAddValues() throws Exception;
-    }
 
     public void append() {
         BaseDialog dlg = new AppendDialog(model.dataset) {
+
             @Override
-            public void onAddValues() throws Exception {
+            public void doOnEntry() throws Exception {
                 IDataset dataset = model.dataset;
                 int row = dataset.appned(panel.getValues());
                 model.fireTableDataChanged();
                 getSelectionModel().setSelectionInterval(row, row);
                 scrollRectToVisible(getCellRect(row, getSelectedColumn(), true));
+                getSelectionModel().setSelectionInterval(row, row);
+                scrollRectToVisible(getCellRect(row, getSelectedColumn(), true));
             }
         };
         dlg.showModal(owner);
-    }
-
-    public void delete() {
-        IDataset dataset = model.dataset;
-        int row = getSelectedRow();
-        if (row >= 0) {
-            dataset.delete(row);
-            model.fireTableRowsDeleted(row, row);
-        }
-    }
-
-    class EditDialog extends DataEntryDialog {
-
-        public EditDialog(IDataset dataset, Map<String, Object> values) {
-            super();
-            panel.setDataset(dataset);
-            panel.setValues(values);
-        }
-
-        @Override
-        public void doOnEntry() throws Exception {
-            try {
-                System.out.println(panel.getValues());
-                int row = getSelectedRow();
-                model.dataset.edit(row, panel.getValues());
-            } catch (Exception e) {
-            }
-        }
-    }
-    
-    abstract class EdtDialog extends DataEntryDialog{
-        public EdtDialog(IDataset dataset,Map<String,Object> values){
-            super();
-            panel.setDataset(dataset);
-            panel.setValues(values);
-        }
-
-        @Override
-        public void doOnEntry() throws Exception {
-            f1(panel.getValues());
-        }
-        
-        abstract void f1(Map<String,Object> values) throws Exception;
-        
     }
 
     public void edit() {
@@ -163,20 +274,35 @@ class Grid extends JTable {
             Map<String, Object> values = model.dataset.getValues(row);
             
             BaseDialog dlg = new EdtDialog(model.dataset, values) {
-                
+
                 @Override
-                void f1(Map<String, Object> values) throws Exception {
+                public void doOnEntry() throws Exception {
                     int row = getSelectedRow();
-                    model.dataset.edit(row, values);
+                    model.dataset.edit(row, panel.getValues());
                 }
+                
             };
-            dlg.showModal(owner);
-//            EditDialog dlg = new EditDialog(model.dataset, values);
-//            if (dlg.showModal(owner) == BaseDialog.RESULT_OK) {
-//                JOptionPane.showMessageDialog(null, "OK");
-//            }
+            
+            if (dlg.showModal(owner)==BaseDialog.RESULT_OK){
+                updateUI();
+            };
         }
     }
+    
+    public void delete() {
+        IDataset dataset = model.dataset;
+        int row = getSelectedRow();
+        if (row >= 0 && JOptionPane.showConfirmDialog(owner, "Удалить","Внимание",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION) {
+            dataset.delete(row);
+            model.fireTableRowsDeleted(row, row);
+            if (row>=dataset.getRowCount())
+                row=dataset.getColumnCount()-1;
+            if (row>=0){
+                getSelectionModel().setSelectionInterval(row, row);
+            }
+        }
+    }
+
 
     public void refresh() {
     }

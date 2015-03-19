@@ -28,6 +28,8 @@ public interface IDataset{
     public void edit(Integer rowIndex,Map<String,Object> values) throws Exception;
     public Boolean delete(Integer rowIndex);
     public void close() throws Exception;
+    
+    public boolean isEditable();
 
 }
     

@@ -15,33 +15,24 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
-import sun.nio.ch.FileChannelImpl;
 
 /**
  *
  * @author вадик
  */
-public class BaseDialog extends JDialog implements ActionListener{
+public abstract class BaseDialog extends JDialog implements ActionListener{
     public static int RESULT_NONE = 0;
     public static int RESULT_OK = 1;
     public static int RESULT_CANCEL = 2;
@@ -95,22 +86,6 @@ public class BaseDialog extends JDialog implements ActionListener{
         content.add(buttonPanel,BorderLayout.PAGE_END);
         
         
-//        p.setFocusable(true);
-//        InputMap inputMap = p.getInputMap();
-//        KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-//        
-//        inputMap.put(keyStroke, "key1");
-//        ActionMap actionMap = p.getActionMap();
-//        actionMap.put("key1",new AbstractAction() {
-//
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                modalResult=RESULT_CANCEL;
-//                System.out.println("OK");
-//                setVisible(false);
-//            }
-//        });
-        
     }
 
     @Override
@@ -119,11 +94,11 @@ public class BaseDialog extends JDialog implements ActionListener{
             case "OK":
                 try{
                     doOnEntry();
+                    modalResult=RESULT_OK;
+                    setVisible(false);
                 } catch(Exception ex){
                     JOptionPane.showMessageDialog(rootPane, ex.getMessage());
                 }
-                modalResult=RESULT_OK;
-                setVisible(false);
                 break;
             case "CANCEL":
                 modalResult=RESULT_CANCEL;
@@ -132,8 +107,8 @@ public class BaseDialog extends JDialog implements ActionListener{
         }
     }
     
-    public void doOnEntry() throws Exception{
-    }
+    public abstract void doOnEntry() throws Exception;
+    
     
     public Container getPanel(){
         JPanel panel = new JPanel();
@@ -142,15 +117,15 @@ public class BaseDialog extends JDialog implements ActionListener{
     }
     
     
-    public static BaseDialog createEntreDialog(IDataset dataset,Map<String,Object> values){
-        DataEntryDialog dlg = new DataEntryDialog();
-        dlg.setTitle(dataset.getTableName());
-        dlg.setDataset(dataset);
-        if (values!=null){
-            dlg.panel.setValues(values);
-        }
-        return dlg;
-    }
+//    public static BaseDialog createEntreDialog(IDataset dataset,Map<String,Object> values){
+//        DataEntryDialog dlg = new DataEntryDialog();
+//        dlg.setTitle(dataset.getTableName());
+//        dlg.setDataset(dataset);
+//        if (values!=null){
+//            dlg.panel.setValues(values);
+//        }
+//        return dlg;
+//    }
     
 }
 
@@ -249,7 +224,7 @@ class EntryPanel extends JPanel{
     }
 }
 
-class DataEntryDialog extends BaseDialog{
+abstract class DataEntryDialog extends BaseDialog{
     protected EntryPanel panel;
 
     @Override
@@ -263,10 +238,10 @@ class DataEntryDialog extends BaseDialog{
         panel.setDataset(dataset);
     }
 
-    @Override
-    public void doOnEntry() throws Exception {
-        System.out.println("88888"+panel.getValues());
-    }
+//    @Override
+//    public void doOnEntry() throws Exception {
+//        System.out.println("88888"+panel.getValues());
+//    }
     
     
 }
