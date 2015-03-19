@@ -10,10 +10,14 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class DataModule {
@@ -117,7 +121,7 @@ public class DataModule {
         }
         
     }
-    
+    //--------------------------------------------------------------------------
     public void startTrans() throws Exception{
         con.setAutoCommit(false);
     }
@@ -133,6 +137,41 @@ public class DataModule {
         } finally {
             con.setAutoCommit(true);
         }
+    }
+    
+    
+    class KeyMap extends HashMap<Integer,Object>{
+    }
+    class DataMap extends HashMap<String,Object>{
+        
+    }
+    
+    public void execute(String sql) throws Exception{
+        Statement stmt=null;
+        try{
+            stmt=con.createStatement();
+            stmt.execute(sql);
+        } catch (Exception e){
+            throw new Exception(e.getMessage());
+        } finally {
+            if (stmt!=null) try {stmt.close();} catch (Exception e){}
+        }
+    }
+    
+    public void execute(String sql,KeyMap map) throws Exception{
+        PreparedStatement stmt=null;
+        try{
+            stmt=con.prepareStatement(sql);
+            for (Integer key:map.keySet()){
+                stmt.setObject(key, map.get(key));
+            }
+            stmt.execute(sql);
+        } catch (Exception e){
+            throw new Exception(e.getMessage());
+        } finally {
+            if (stmt!=null) try {stmt.close();} catch (Exception e){}
+        }
+        
     }
     
 }

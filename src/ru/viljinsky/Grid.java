@@ -292,7 +292,7 @@ class GridModel extends AbstractTableModel{
                 }
                 
             };
-            
+            dlg.setTitle(model.dataset.getTableName());
             if (dlg.showModal(owner)==BaseDialog.RESULT_OK){
                 updateUI();
             };

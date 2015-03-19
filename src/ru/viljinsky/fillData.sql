@@ -47,6 +47,8 @@ insert into shift_type(id,caption) values (3,'График помещения');
 insert into shift(id,shift_type_id,name) values(1,1,'Первая смена');  
 insert into shift(id,shift_type_id,name) values(2,1,'Вторая смена');  
 
+insert into shift(id,shift_type_id,name) values(5,3,'Обычный кабинет');  
+
 --
 --                Предметы
 --                 
@@ -65,7 +67,7 @@ insert into teacher (id,last_name,first_name,patronymic,profile_id) values (3,'�
 insert into teacher (id,last_name,first_name,patronymic) values (4,'Романова','Татьяна','');
 insert into teacher (id,last_name,first_name,patronymic,profile_id) values (5,'Галкина','Клавдия','',4);
 
-insert into room(id,name,shift_id,profile_id) values (1,'каб 31',1,1);
+insert into room(id,name,shift_id,profile_id) values (1,'каб 31',5,5);
 
 
 insert into skill(id,caption) values(1,'8-класс');
