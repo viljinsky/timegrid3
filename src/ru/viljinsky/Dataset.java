@@ -135,6 +135,11 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
                 columns.put(i, new Column(rsmeta, i));
             }
             
+            if (!info.primaryKey.isEmpty())
+                for (String p:info.primaryKey.split(";")){
+                    getColumnByName(p).primary=true;
+                }
+            
             //insert
             String s1 = "";
             String s2 = "";
@@ -152,12 +157,28 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
                 if (!s3.isEmpty()) s3+=" and ";
                 s3+=s+"=?";
             }
-                    
+            
+            String strSet="",strWhere="";
+            for (Integer col:columns.keySet()){
+                if (!strSet.isEmpty()) strSet+=",";
+                strSet += columns.get(col).columnName+"= ?";
+            }
+            
+            for (Integer col:columns.keySet()){
+                Column column = columns.get(col);
+                if (column.isPrimary()){
+                    if (!strWhere.isEmpty()) strWhere+=" and ";
+                    strWhere += column.columnName +"=?";
+                }
+            }
+            
             info.insertSQL="insert into "+info.tableName +"("+s1+") values ("+s2+");";
             info.deleteSQL="delete from "+info.tableName +" where "+s3+";";
+            info.updateSQL="update "+info.tableName+" set "+strSet+" where "+strWhere;
             
             System.out.println(info.insertSQL);
             System.out.println(info.deleteSQL);
+            System.out.println(info.updateSQL);
             System.out.println();
             
             
@@ -236,6 +257,29 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         }
         
         return remove(rowset);
+    }
+
+    @Override
+    public void edit(Integer rowIndex, Map<String, Object> values) throws Exception {
+        Object[] oldValues = get(rowIndex);
+        Map<Integer,Object> keyMap = new HashMap<>();
+        int n=1;
+        for (int col:columns.keySet()){
+            keyMap.put(n++, values.get(columns.get(col).columnName));
+        }
+        for (int col:columns.keySet()){
+            if (columns.get(col).isPrimary()){
+                keyMap.put(n++, oldValues[col]);
+            }
+        }
+        
+        PreparedStatement pstmt = dataModule.con.prepareStatement(info.updateSQL);
+        for (int m:keyMap.keySet()){
+            pstmt.setObject(m, keyMap.get(m));
+        }
+        pstmt.execute();
+        
+        setVlaues(rowIndex, values);
     }
 
 }

@@ -25,6 +25,7 @@ public interface IDataset{
     public void open() throws Exception;
     public Integer appned();
     public Integer appned(Map<String,Object> values) throws Exception;
+    public void edit(Integer rowIndex,Map<String,Object> values) throws Exception;
     public Boolean delete(Integer rowIndex);
     public void close() throws Exception;
 

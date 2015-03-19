@@ -18,6 +18,7 @@ public class Column {
     String displayLabel;
     String columnTypeName;
     String columnClassName;
+    boolean primary = false;
 
     public Column() {
     }
@@ -31,6 +32,10 @@ public class Column {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    public boolean isPrimary(){
+        return primary;
     }
 
     @Override

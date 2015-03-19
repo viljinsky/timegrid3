@@ -15,10 +15,15 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -28,7 +33,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
+import sun.nio.ch.FileChannelImpl;
 
 /**
  *
@@ -83,8 +90,27 @@ public class BaseDialog extends JDialog implements ActionListener{
         buton= new JButton("CANCEL");
         buton.addActionListener(this);
         buttonPanel.add(buton);
-        content.add(getPanel());
+        JPanel p = (JPanel)getPanel();
+        content.add(p);
         content.add(buttonPanel,BorderLayout.PAGE_END);
+        
+        
+//        p.setFocusable(true);
+//        InputMap inputMap = p.getInputMap();
+//        KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+//        
+//        inputMap.put(keyStroke, "key1");
+//        ActionMap actionMap = p.getActionMap();
+//        actionMap.put("key1",new AbstractAction() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                modalResult=RESULT_CANCEL;
+//                System.out.println("OK");
+//                setVisible(false);
+//            }
+//        });
+        
     }
 
     @Override
