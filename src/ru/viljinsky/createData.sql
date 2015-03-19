@@ -63,22 +63,43 @@ create table depart(
     curriculum_id integer references curriculum(id) 
 );
 
-create table subject_group (depart_id integer references depart(id),
+create table subject_group (
+    group_id integer,
+    depart_id integer references depart(id),
     subject_id integer references subject(id),
     default_teacher_id integer references teacher(id),
-    default_room_id integer references room(id));
+    default_room_id integer references room(id),
+    primary key (depart_id,subject_id,group_id)
+);
 
 create table curriculum(id integer primary key autoincrement,caption varchar(18));
+
+create table group_type(
+    id integer primary key,
+    group_type_caption varchar(40)
+);
 
 create table curriculum_detail(
     curriculum_id integer references curriculun(id),
     subject_id integer references subject(id),
     hour_per_day integer,
     hour_per_week integer,
-    group_type_id integer);
+    group_type_id integer references group_type(id),
+    primary key (curriculum_id,subject_id)
+
+);
 
 create table work_plan (depart_id integer);
 create table day_list (day_no integer primary key,day_caption);
 create table bell_list (bell_id integer primary key,time_start time,time_end time);
+create table schedule (
+    day_id integer,
+    bell_id integer,
+    depart_id integer,
+    subject_id integer,
+    group_id integer,
+    teacher_id integer,
+    room_id integer
+);
 
 

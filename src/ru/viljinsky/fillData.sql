@@ -1,3 +1,9 @@
+
+insert into group_type (id,group_type_caption) values (0,'весь класс');
+insert into group_type (id,group_type_caption) values (1,'м.-д.');
+insert into group_type (id,group_type_caption) values (2,'группы');
+
+
 insert into day_list(day_no,day_caption) values (1,'Понедельник');
 insert into day_list(day_no,day_caption) values (2,'Вторник');
 insert into day_list(day_no,day_caption) values (3,'Среда');
@@ -9,6 +15,12 @@ insert into day_list(day_no,day_caption) values (7,'Воскресение');
 insert into bell_list(bell_id,time_start,time_end) values (1,'10:00','10:45');
 insert into bell_list(bell_id,time_start,time_end) values (2,'11:00','11:45');
 insert into bell_list(bell_id,time_start,time_end) values (3,'12:00','12:45');
+insert into bell_list(bell_id,time_start,time_end) values (4,'13:00','13:45');
+insert into bell_list(bell_id,time_start,time_end) values (5,'14:00','14:45');
+insert into bell_list(bell_id,time_start,time_end) values (6,'15:00','15:45');
+insert into bell_list(bell_id,time_start,time_end) values (7,'16:00','16:45');
+insert into bell_list(bell_id,time_start,time_end) values (8,'17:00','17:45');
+insert into bell_list(bell_id,time_start,time_end) values (9,'18:00','18:45');
 
 insert into profile_type(id,caption) values (1,'Профиль преподавателя');
 insert into profile_type(id,caption) values (2,'Профиль помещения');
@@ -32,6 +44,9 @@ insert into shift_type(id,caption) values (1,'График класса');
 insert into shift_type(id,caption) values (2,'График преподователя');
 insert into shift_type(id,caption) values (3,'График помещения');
 
+insert into shift(id,shift_type_id,name) values(1,1,'Первая смена');  
+insert into shift(id,shift_type_id,name) values(2,1,'Вторая смена');  
+
 --
 --                Предметы
 --                 
@@ -49,6 +64,8 @@ insert into teacher (id,last_name,first_name,patronymic,profile_id) values (2,'�
 insert into teacher (id,last_name,first_name,patronymic,profile_id) values (3,'Сидорова','Лариса','',3);
 insert into teacher (id,last_name,first_name,patronymic) values (4,'Романова','Татьяна','');
 insert into teacher (id,last_name,first_name,patronymic,profile_id) values (5,'Галкина','Клавдия','',4);
+
+insert into room(id,name,shift_id,profile_id) values (1,'каб 31',1,1);
 
 
 insert into skill(id,caption) values(1,'8-класс');

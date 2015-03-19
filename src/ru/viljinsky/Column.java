@@ -7,6 +7,8 @@
 package ru.viljinsky;
 
 import java.sql.ResultSetMetaData;
+import java.sql.Time;
+import java.util.Date;
 
 /**
  *
@@ -18,17 +20,58 @@ public class Column {
     String displayLabel;
     String columnTypeName;
     String columnClassName;
+    Integer columnWidth; 
+    Integer scale;
+    Integer precision;
+    String columnLabel;
+    Integer displaySize;
+    boolean autoIncrement;
     boolean primary = false;
+    Integer columnType;
 
     public Column() {
     }
 
     public Column(ResultSetMetaData rsmeta, Integer columnIndex) throws Exception {
         try {
-            columnName = rsmeta.getColumnName(columnIndex + 1);
-            displayLabel = columnName;
-            tableName = rsmeta.getTableName(columnIndex + 1);
+            tableName       = rsmeta.getTableName(columnIndex + 1);
+            columnName      = rsmeta.getColumnName(columnIndex + 1);
+            displayLabel    = columnName;
+            
             columnClassName = rsmeta.getColumnClassName(columnIndex + 1);
+            precision       = rsmeta.getPrecision(columnIndex+1);
+            scale           = rsmeta.getScale(columnIndex+1);
+            columnLabel     = rsmeta.getColumnLabel(columnIndex+1);
+            displaySize     = rsmeta.getColumnDisplaySize(columnIndex+1);
+            autoIncrement   = rsmeta.isAutoIncrement(columnIndex+1);
+            columnType      = rsmeta.getColumnType(columnIndex+1);
+            columnTypeName  = rsmeta.getColumnTypeName(columnIndex+1);
+            
+            switch (columnType){
+                case java.sql.Types.INTEGER:
+                    columnClassName = Integer.class.getName();
+                    break;
+                case java.sql.Types.VARCHAR:
+                    columnClassName = String.class.getName();
+                    break;
+                case java.sql.Types.REAL:
+                    columnClassName = Float.class.getName();
+                    break;
+                case java.sql.Types.FLOAT:
+                    columnClassName = Float.class.getName();
+                    break;
+                case java.sql.Types.DATE:
+                    columnClassName = Date.class.getName();
+                    break;
+//                case java.sql.Types.TIME:
+//                    columnClassName = Time.class.getName();
+//                    break;
+                case java.sql.Types.BOOLEAN:
+                    columnClassName = Boolean.class.getName();
+                    break;
+                    
+            };
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -38,9 +81,27 @@ public class Column {
         return primary;
     }
 
+    public Class<?> getColumnClass(){
+        try{
+            return Class.forName(columnClassName);
+        } catch (Exception e){
+            return Object.class;
+        }
+    } 
+    
     @Override
     public String toString() {
-        return tableName + "." + columnName + " (" + columnTypeName + ")";
+        return tableName + "." + columnName + " (" + columnTypeName + ")\n"
+                +"columnLanel     = "+columnLabel+"\n"
+                +"columnTypeName  = "+columnTypeName+"\n"
+                +"columnType      = "+columnType+"\n"
+                +"columnWidth     ="+columnWidth+"\n"
+                +"cloumnClassName = "+columnClassName+"\n"
+                +"displaySize     = "+ displaySize+"\n"
+                +"scale           = "+scale+"\n"
+                +"precision       = "+precision+"\n"
+                +"autoIncrement   = "+autoIncrement+"\n"
+                +"\n";
     }
     
 }

@@ -157,7 +157,6 @@ class GridModel extends AbstractTableModel{
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-//        Object[] rowset = dataset.get(rowIndex);
         Map<String,Object> values = dataset.getValues(rowIndex);
         return values.get(dataset.getColumn(columnIndex).columnName);
     }
@@ -182,6 +181,17 @@ class GridModel extends AbstractTableModel{
     public String getColumnName(int column) {
         return dataset.getColumn(column).columnName;// getColumnName(column);
     }
+
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            Column column = dataset.getColumn(columnIndex);
+            return column.getColumnClass();
+//            System.out.println("-->"+column.columnClassName);
+                    
+//            return super.getColumnClass(columnIndex); //To change body of generated methods, choose Tools | Templates.
+        }
+    
+    
     
     
 }

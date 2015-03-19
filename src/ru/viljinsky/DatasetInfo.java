@@ -28,6 +28,10 @@ class DatasetInfo {
 
     public DatasetInfo() {}
     
+//    public String getReferences(String columnName){
+//        return references.get(columnName);
+//    }
+    
     public DatasetInfo(String tableName,DatabaseMetaData meta) throws Exception{
         this.tableName= tableName;
         selectSQL = "select * from "+tableName;

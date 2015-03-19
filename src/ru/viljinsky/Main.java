@@ -39,12 +39,18 @@ public class Main extends JFrame{
         try{
             dataModule.open();
             for (DatasetInfo info :dataModule.infoList){
+//                if (!info.tableName.equals("depart"))
+//                    continue;
                 dataset = dataModule.getTable(info.tableName);
                 dataset.open();
                 grid = new Grid();
                 grid.owner=Main.this;
                 grid.setDataset(dataset);
                 tabs.addTab(dataset.getTableName(), new JScrollPane(grid));
+                
+                for (int i=0;i<dataset.getColumnCount();i++){
+                    System.out.println(dataset.getColumn(i).toString()+"\n");
+                }
                 
             }
 

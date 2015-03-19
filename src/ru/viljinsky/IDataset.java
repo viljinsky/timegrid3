@@ -31,6 +31,9 @@ public interface IDataset{
     
     public boolean isEditable();
 
+    public String getReferences(String columnName);
+    public Map<Object,String> getLookup(String columnName) throws Exception;
+    
 }
     
 

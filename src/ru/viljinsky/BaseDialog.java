@@ -19,7 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -27,6 +29,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListDataListener;
 
 /**
  *
@@ -45,6 +48,7 @@ public abstract class BaseDialog extends JDialog implements ActionListener{
     }
     
     public Integer showModal(Component owner){
+        setMinimumSize(new Dimension(400,300));
         pack();
         
         int x,y;
@@ -116,17 +120,6 @@ public abstract class BaseDialog extends JDialog implements ActionListener{
         return panel;
     }
     
-    
-//    public static BaseDialog createEntreDialog(IDataset dataset,Map<String,Object> values){
-//        DataEntryDialog dlg = new DataEntryDialog();
-//        dlg.setTitle(dataset.getTableName());
-//        dlg.setDataset(dataset);
-//        if (values!=null){
-//            dlg.panel.setValues(values);
-//        }
-//        return dlg;
-//    }
-    
 }
 
 
@@ -135,6 +128,81 @@ interface IEntryControl{
     public JComponent getComponent();
     public void setValue(Object value);
     public Object getValue();
+}
+
+class ComboControl extends JComboBox implements IEntryControl{
+    
+    Map<Object,String> map = new HashMap<>();
+    Object value;
+    Column column;
+    
+    class Model implements ComboBoxModel{
+        
+        @Override
+        public void setSelectedItem(Object anItem) {
+            for (Object k:map.keySet()){
+                if (map.get(k).equals(anItem)){
+                    value=k;
+                    break;
+                }
+            }
+        }
+
+        @Override
+        public Object getSelectedItem() {
+            return map.get(value);
+        }
+
+        @Override
+        public int getSize() {
+            return map.size();
+        }
+
+        @Override
+        public Object getElementAt(int index) {
+            Object[] k = map.keySet().toArray();
+            return map.get(k[index]);
+        }
+
+        @Override
+        public void addListDataListener(ListDataListener l) {
+        }
+
+        @Override
+        public void removeListDataListener(ListDataListener l) {
+        }
+    }
+    
+    
+    public ComboControl(Column column,Map<Object,String> lookup){
+        this.column = column;
+        this.map=lookup;
+        Model model = new Model();
+        setModel(model);
+        
+       
+    }
+
+    @Override
+    public String getColumnName() {
+        return column.columnName;
+    }
+
+    @Override
+    public JComponent getComponent() {
+        return this;
+    }
+
+    @Override
+    public void setValue(Object value) {
+        this.value=value;
+        
+    }
+
+    @Override
+    public Object getValue() {
+        return value;
+    }
 }
 
 class EditControl extends JTextField implements IEntryControl{
@@ -181,14 +249,29 @@ class EntryPanel extends JPanel{
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         
         controls = new IEntryControl[dataset.getColumnCount()];
+        Column column;
+        IEntryControl cntr;
+        Map<Object,String> lookupValues = null;
+        
         for (int i=0;i<controls.length;i++){
-            EditControl cntr = new EditControl(dataset.getColumn(i).columnName);
+            column = dataset.getColumn(i);
+            try{
+                lookupValues = dataset.getLookup(column.columnName);
+            } catch (Exception e){
+                lookupValues=null;
+                e.printStackTrace();
+            }
+            
+            if (lookupValues!=null)
+                cntr = new ComboControl(column,lookupValues);
+            else
+                cntr = new EditControl(column.columnName);
             controls[i]=cntr;
             
             Box box = Box.createHorizontalBox();
             box.add(new JLabel(dataset.getColumn(i).columnName));
             box.add(Box.createHorizontalStrut(6));
-            box.add(cntr);
+            box.add(cntr.getComponent());
             box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
             add(box);
             add(Box.createVerticalStrut(12));
@@ -238,10 +321,5 @@ abstract class DataEntryDialog extends BaseDialog{
         panel.setDataset(dataset);
     }
 
-//    @Override
-//    public void doOnEntry() throws Exception {
-//        System.out.println("88888"+panel.getValues());
-//    }
-    
     
 }

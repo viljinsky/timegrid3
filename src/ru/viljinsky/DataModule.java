@@ -117,4 +117,22 @@ public class DataModule {
         }
         
     }
+    
+    public void startTrans() throws Exception{
+        con.setAutoCommit(false);
+    }
+    
+    public void StopTrans() throws Exception{
+        try{
+            try{
+                con.commit();                
+            } catch (SQLException e){
+                con.rollback();
+                throw new Exception("Ошибка сохранения\n"+e.getMessage());
+            }
+        } finally {
+            con.setAutoCommit(true);
+        }
+    }
+    
 }

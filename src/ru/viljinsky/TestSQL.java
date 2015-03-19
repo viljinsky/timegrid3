@@ -37,6 +37,9 @@ public class TestSQL extends JFrame {
             Dataset dataset = dataModule.getQuery("select * from teacher inner join profile on teacher.profile_id=profile.id");
             dataset.open();
             grid.setDataset(dataset);
+            for (int i=0;i<dataset.getColumnCount();i++){
+                System.out.println(dataset.getColumn(i));
+            }
         } catch (Exception e){
             JOptionPane.showMessageDialog(rootPane, e.getMessage());
         }

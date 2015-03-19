@@ -183,10 +183,10 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
                 info.deleteSQL="delete from "+info.tableName +" where "+s3+";";
                 info.updateSQL="update "+info.tableName+" set "+strSet+" where "+strWhere;
 
-                System.out.println(info.insertSQL);
-                System.out.println(info.deleteSQL);
-                System.out.println(info.updateSQL);
-                System.out.println();
+//                System.out.println(info.insertSQL);
+//                System.out.println(info.deleteSQL);
+//                System.out.println(info.updateSQL);
+//                System.out.println();
             }
             
             
@@ -288,6 +288,57 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         pstmt.execute();
         
         setVlaues(rowIndex, values);
+    }
+
+    @Override
+    public String getReferences(String columnName) {
+        return info.references.get(columnName);
+    }
+    
+    public Map<Object,String> getLookup(String columnName) throws Exception{
+        Map<Object,String> map = new HashMap<>();
+        String lookup = info.references.get(columnName);
+        if (lookup== null)
+            return null;
+        String tName = lookup.split("\\.")[0];
+        String cName = lookup.split("\\.")[1];
+        System.out.println("-->"+tName + "  "+ cName);
+        String rName = cName;
+        switch (tName){
+            case "shift":
+                rName = "name";
+                break;
+            case "subject":
+                rName = "subject_name";
+                break;
+            case "group_type":
+                rName ="group_type_caption";
+                break;
+            case "skill":
+                rName = "caption";
+                break;
+            case "curriculum":
+                rName = "caption";
+                break;
+            case "profile":
+                rName = "name";
+                break;
+        }
+                
+        Dataset lookupDataset = dataModule.getTable(tName);
+        lookupDataset.open();
+        Map<String,Object> values;
+        for (int i=0;i<lookupDataset.getRowCount();i++){
+            values = lookupDataset.getValues(i);
+            try{
+            map.put(values.get(cName),values.get(rName).toString());
+            } catch (Exception e){
+                System.err.println(tName+" "+cName );
+            }
+            
+        }
+        System.out.println(map);
+        return map;
     }
 
 }
