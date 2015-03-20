@@ -102,4 +102,7 @@ create table schedule (
     room_id integer
 );
 
+create view v_teacher as
+select a.id,a.first_name,a.last_name from teacher a;
+
 

@@ -17,10 +17,8 @@ import java.net.URL;
 import java.sql.*;
 
 abstract class SQLReader{
-    public SQLReader(){
-    }
-
-    public abstract void sqlredy(String sql);
+    
+    public abstract void sqlredy(String sql) throws Exception;
 
     public void execute(String fileName) throws Exception{
         String line;
@@ -30,7 +28,7 @@ abstract class SQLReader{
 
         URL url = CreateData.class.getResource(fileName);
         if (url==null)
-            throw new Exception ("file "+fileName+"not found");
+            throw new Exception ("Не найден файл '"+fileName+"'");
         try{
             file = new File(url.getFile());
             reader = new BufferedReader(new FileReader(file));
@@ -39,7 +37,7 @@ abstract class SQLReader{
                 if (!line.isEmpty()){
                     line = line.trim();
                     if (!line.startsWith("--")){
-                        sql.append(line);
+                        sql.append(line+"\n");
                         if (line.endsWith(";")){
                             sqlredy(sql.toString());
                             sql = new StringBuilder();
@@ -48,8 +46,6 @@ abstract class SQLReader{
                 }
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             if (reader!=null) reader.close();
         }
@@ -62,54 +58,61 @@ public class CreateData {
     Statement stmt = null;
     SQLReader reader;
     
-    public void run(boolean force) {
-        String fileName = "example.db";
+    public void run(String fileName,boolean force,String[] SQLscript) throws Exception {
         
         try{
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e){
-            System.err.println("class not found");
-            return;
+            throw new Exception("class not found");
         }
         
         File file = new File(fileName);
         if (file.exists()){
-            System.err.println("file exists");
-            if (force)
+            if (force) {
                 if (!file.delete()){
-                    return;
-                } else {
-                    System.out.println("file has been deleted");
+                    throw new Exception("Не удалось удалить файл '"+fileName+"'");
                 }
+            } else {
+                throw new Exception("База данных '"+fileName+"' уже существует");
+            }
         }
         
         
         Connection con = null;
         try{
             con = DriverManager.getConnection(String.format("jdbc:sqlite:%s",fileName));
-            con.setAutoCommit(false);
             stmt = con.createStatement();
             
             reader = new SQLReader() {
 
                 @Override
-                public void sqlredy(String sql) {
+                public void sqlredy(String sql) throws Exception {
                     try{
                         stmt.execute(sql);
                     } catch (SQLException e){
-                        System.err.println(sql+"\n"+e.getMessage());
+                        throw new Exception("Ошибка при выполнении запроса\nSQL : '"+sql+"'\nMessage:"+e.getMessage());
                     }
                 }
             };
             
             
-           reader.execute("createData.sql");
-           con.commit();
-           reader.execute("fillData.sql");
-           con.commit();
+            con.setAutoCommit(false);
+            try{
+                for (String script:SQLscript) {
+                    try{
+                        reader.execute(script);
+                        con.commit();
+                    } catch (Exception e){
+                        con.rollback();
+                        throw new Exception("Ошибка при выполнении скрипта '"+script+"'\n"+e.getMessage());
+                    }
+                }
+            } finally {
+                con.setAutoCommit(true);
+            }
             
         } catch (Exception e){
-            e.printStackTrace();
+            throw new Error(e.getMessage());
         } finally {
             if (stmt!=null)
                 try {stmt.close();} catch (Exception e){};
@@ -117,12 +120,19 @@ public class CreateData {
                 try {con.close();} catch (Exception e){};
             }
         }
-        
-        
     }
     
     public static void main(String[] args){
-        new CreateData().run(true);
+        String fileName = "example.db";
+        String[] script = {"createData.sql","fillData.sql"};
+        CreateData cd = new CreateData();
+        System.out.println("Создаётся новая база данных...");
+        try{
+            cd.run(fileName,true,script);
+            System.out.println("База данных создана '"+fileName+"'");
+        } catch (Exception e){
+            System.err.println("Ошибка при создании базы данных:\n"+e.getMessage());
+        }
     }
     
 }

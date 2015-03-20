@@ -17,6 +17,7 @@ import java.util.Map;
  */
 class DatasetInfo {
 
+    String tableType; // TABLE or VIEW
     String tableName;
     String selectSQL;
     String insertSQL;
@@ -27,10 +28,6 @@ class DatasetInfo {
     Map<String, String> references = new HashMap<>();
 
     public DatasetInfo() {}
-    
-//    public String getReferences(String columnName){
-//        return references.get(columnName);
-//    }
     
     public DatasetInfo(String tableName,DatabaseMetaData meta) throws Exception{
         this.tableName= tableName;
@@ -54,6 +51,9 @@ class DatasetInfo {
         primaryKey += column_name;
     }
 
+    public boolean isTable(){
+        return tableType.equals("TABLE");
+    }
     @Override
     public String toString() {
         String result = "";

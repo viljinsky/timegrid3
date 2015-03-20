@@ -325,7 +325,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
                 break;
         }
                 
-        Dataset lookupDataset = dataModule.getTable(tName);
+        Dataset lookupDataset = dataModule.getDataset(tName);
         lookupDataset.open();
         Map<String,Object> values;
         for (int i=0;i<lookupDataset.getRowCount();i++){

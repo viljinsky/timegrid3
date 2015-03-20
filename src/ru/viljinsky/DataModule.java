@@ -19,12 +19,38 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+class KeyMap extends HashMap<Integer,Object>{
+}
+class DataMap extends HashMap<String,Object>{
+}
 
-public class DataModule {
+interface IDataModule{
+    public void open() throws Exception;
+    public void close() throws Exception;
+    public boolean isActive();
+    // Получение датасетов
+    
+    // Список имён базовых таблиц
+    public String[] getTableNames();
+    // Получение набора записей базовой таблицы
+    public Dataset getDataset(String tableName) throws Exception;
+    // Получение набора записей из запроса
+    public Dataset getSQLDataset(String sql) throws Exception;
+    //Получение набора записей из запроса с параметрами
+    public Dataset getSQLDataset(String sql,KeyMap params) throws Exception;
+    // Выполнение запроса
+    public void execute(String sql) throws Exception; 
+     // Выполнение запроса с параметрами
+    public void execute(String sql,KeyMap params) throws Exception;
+}
+
+public class DataModule implements IDataModule {
+    private static DataModule instance = null;
+    Boolean active = false;
     List<Dataset> datasetList;
     List<DatasetInfo> infoList = new ArrayList<>();
     Connection con = null;
-    private static DataModule instance = null;
+
     private DataModule(){
         datasetList = new ArrayList<>();
     }
@@ -36,41 +62,19 @@ public class DataModule {
         return instance;
     }
     
-    public String[] getTableNames(){
-        String[] result = new String[infoList.size()];
-        int i=0;
-        for (DatasetInfo info:infoList){
-            result[i++]=info.tableName;
-        }
-        return result;
+    @Override
+    public boolean isActive(){
+        return active;
     }
     
-    public Dataset getTable(String tableName){
-        Dataset dataset;
-        for (DatasetInfo info:infoList){
-            if (info.tableName.equals(tableName)){
-                dataset = new Dataset(info);
-                datasetList.add(dataset);
-                return dataset;
-            }
-        }
-        return null;
-    }
-    
-    public Dataset getQuery(String sql){
-        DatasetInfo info = new DatasetInfo();
-        info.selectSQL = sql;
-        Dataset dataset = new Dataset(info);
-        datasetList.add(dataset);
-//        dataset.dataModule = this;
-        return dataset;
-    }
-    
+    @Override
     public void open() throws Exception{
         open("example.db");
     }
     
     public void open(String fileName) throws Exception{
+        if (active)
+            throw new Exception("data is active");
         File file = new File(fileName);
         if (!file.exists()){
             throw new Exception("file "+fileName+" not found");
@@ -85,42 +89,78 @@ public class DataModule {
         try{
             con = DriverManager.getConnection(String.format("jdbc:sqlite:%s",fileName));
             DatabaseMetaData meta = con.getMetaData();
-            ResultSet rs = meta.getTables(null,null,null, new String[]{"TABLE"});
+            ResultSet rs = meta.getTables(null,null,null, new String[]{"TABLE","VIEW"});
             String tableName;
-            DatasetInfo info = new DatasetInfo();
+            DatasetInfo info;
             while (rs.next()){
                 tableName = rs.getString("TABLE_NAME");
                 info = new DatasetInfo(tableName,meta);
+                info.tableType = rs.getString("TABLE_TYPE");
                 infoList.add(info);
             }
-            
+            active = true;
         } catch (SQLException e){
             throw new Exception ("Ошбка приокрытии бд:\n"+e.getMessage());
         }
         
     }
     
+    @Override
     public void close() throws Exception{
-        
+        if (!active)
+            throw new Exception("data is not active");
+        for (Dataset dataset:datasetList){
+            System.out.println(dataset.getTableName());
+            dataset.close();
+        }
+        datasetList.clear();
+        infoList.clear();
+        con.close();
+        con=null;
+        active = false;
     }
     
-    public static void main(String[] args){
-        DataModule dm = DataModule.getInstance();
-        Dataset dataset;
-        try{
-            dm.open();
-            for (String tableName:dm.getTableNames()){
-                dataset = dm.getTable(tableName);
-                dataset.test();
-                dataset.open();
-                dataset.print();
-            }
-            
-        } catch (Exception e){
-            e.printStackTrace();
+    
+    
+    @Override
+    public String[] getTableNames(){
+        String[] result = new String[infoList.size()];
+        int i=0;
+        for (DatasetInfo info:infoList){
+            result[i++]=info.tableName;
         }
-        
+        return result;
     }
+    
+    @Override
+    public Dataset getDataset(String tableName){
+        Dataset dataset;
+        for (DatasetInfo info:infoList){
+            if (info.tableName.equals(tableName)){
+                dataset = new Dataset(info);
+                datasetList.add(dataset);
+                return dataset;
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public Dataset getSQLDataset(String sql){
+        DatasetInfo info = new DatasetInfo();
+        info.selectSQL = sql;
+        Dataset dataset = new Dataset(info);
+        datasetList.add(dataset);
+//        dataset.dataModule = this;
+        return dataset;
+    }
+    
+    @Override
+    public Dataset getSQLDataset(String sql,KeyMap params){
+        return null;
+    }
+    
+    
     //--------------------------------------------------------------------------
     public void startTrans() throws Exception{
         con.setAutoCommit(false);
@@ -140,12 +180,7 @@ public class DataModule {
     }
     
     
-    class KeyMap extends HashMap<Integer,Object>{
-    }
-    class DataMap extends HashMap<String,Object>{
-        
-    }
-    
+    @Override
     public void execute(String sql) throws Exception{
         Statement stmt=null;
         try{
@@ -158,18 +193,37 @@ public class DataModule {
         }
     }
     
-    public void execute(String sql,KeyMap map) throws Exception{
+    @Override
+    public void execute(String sql,KeyMap params) throws Exception{
         PreparedStatement stmt=null;
         try{
             stmt=con.prepareStatement(sql);
-            for (Integer key:map.keySet()){
-                stmt.setObject(key, map.get(key));
+            for (Integer key:params.keySet()){
+                stmt.setObject(key, params.get(key));
             }
             stmt.execute(sql);
         } catch (Exception e){
             throw new Exception(e.getMessage());
         } finally {
             if (stmt!=null) try {stmt.close();} catch (Exception e){}
+        }
+        
+    }
+    
+    public static void main(String[] args){
+        DataModule dm = DataModule.getInstance();
+        Dataset dataset;
+        try{
+            dm.open();
+            for (String tableName:dm.getTableNames()){
+                dataset = dm.getDataset(tableName);
+                dataset.test();
+                dataset.open();
+                dataset.print();
+            }
+            
+        } catch (Exception e){
+            e.printStackTrace();
         }
         
     }
