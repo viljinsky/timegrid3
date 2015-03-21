@@ -111,7 +111,7 @@ class GridCommand implements ICommand{
 }
 
 
-class Grid extends JTable {
+public class Grid extends JTable {
     Component owner = null;
     GridModel model;
     ICommand commands = null;

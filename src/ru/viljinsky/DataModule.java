@@ -24,26 +24,6 @@ class KeyMap extends HashMap<Integer,Object>{
 class DataMap extends HashMap<String,Object>{
 }
 
-interface IDataModule{
-    public void open() throws Exception;
-    public void close() throws Exception;
-    public boolean isActive();
-    // Получение датасетов
-    
-    // Список имён базовых таблиц
-    public String[] getTableNames();
-    // Получение набора записей базовой таблицы
-    public Dataset getDataset(String tableName) throws Exception;
-    // Получение набора записей из запроса
-    public Dataset getSQLDataset(String sql) throws Exception;
-    //Получение набора записей из запроса с параметрами
-    public Dataset getSQLDataset(String sql,KeyMap params) throws Exception;
-    // Выполнение запроса
-    public void execute(String sql) throws Exception; 
-     // Выполнение запроса с параметрами
-    public void execute(String sql,KeyMap params) throws Exception;
-}
-
 public class DataModule implements IDataModule {
     private static DataModule instance = null;
     Boolean active = false;
@@ -55,6 +35,9 @@ public class DataModule implements IDataModule {
         datasetList = new ArrayList<>();
     }
     
+    public List<DatasetInfo> getInfoList(){
+        return infoList;
+    }
     public static DataModule getInstance(){
         if (instance==null){
             instance = new DataModule();

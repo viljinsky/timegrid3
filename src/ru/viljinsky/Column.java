@@ -91,17 +91,23 @@ public class Column {
     
     @Override
     public String toString() {
-        return tableName + "." + columnName + " (" + columnTypeName + ")\n"
-                +"columnLanel     = "+columnLabel+"\n"
-                +"columnTypeName  = "+columnTypeName+"\n"
-                +"columnType      = "+columnType+"\n"
-                +"columnWidth     ="+columnWidth+"\n"
-                +"cloumnClassName = "+columnClassName+"\n"
-                +"displaySize     = "+ displaySize+"\n"
-                +"scale           = "+scale+"\n"
-                +"precision       = "+precision+"\n"
-                +"autoIncrement   = "+autoIncrement+"\n"
-                +"\n";
+        return columnName;
+//        return tableName + "." + columnName + " (" + columnTypeName + ")\n"
+//                +"columnLanel     = "+columnLabel+"\n"
+//                +"columnTypeName  = "+columnTypeName+"\n"
+//                +"columnType      = "+columnType+"\n"
+//                +"columnWidth     ="+columnWidth+"\n"
+//                +"cloumnClassName = "+columnClassName+"\n"
+//                +"displaySize     = "+ displaySize+"\n"
+//                +"scale           = "+scale+"\n"
+//                +"precision       = "+precision+"\n"
+//                +"autoIncrement   = "+autoIncrement+"\n"
+//                +"\n";
+    }
+
+    public String getColumnName() {
+        return columnName;
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -130,9 +131,14 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
 
     public boolean test() throws Exception {
         Statement stmt = null;
+        ResultSet rs;
         try {
             stmt = dataModule.con.createStatement();
-            ResultSet rs = stmt.executeQuery(info.selectSQL);
+            try{
+                rs = stmt.executeQuery(info.selectSQL+" where null");
+            } catch (Exception e){
+                throw new Exception("TestError:\n"+e.getMessage());
+            }
             ResultSetMetaData rsmeta = rs.getMetaData();
             for (int i = 0; i < rsmeta.getColumnCount(); i++) {
                 columns.put(i, new Column(rsmeta, i));
@@ -193,6 +199,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
+//            throw new Exception(e.getMessage());
         } finally {
             if (stmt!=null)
                 stmt.close();
@@ -218,12 +225,6 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         
     }
 
-    @Override
-    public Integer appned() {
-        Object[] rowset = new Object[getColumnCount()];
-        add(rowset);
-        return  indexOf(rowset);
-    }
 
     @Override
     public Integer appned(Map<String, Object> values) throws Exception {
@@ -302,7 +303,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             return null;
         String tName = lookup.split("\\.")[0];
         String cName = lookup.split("\\.")[1];
-        System.out.println("-->"+tName + "  "+ cName);
+//        System.out.println("-->"+tName + "  "+ cName);
         String rName = cName;
         switch (tName){
             case "shift":
@@ -331,14 +332,64 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         for (int i=0;i<lookupDataset.getRowCount();i++){
             values = lookupDataset.getValues(i);
             try{
-            map.put(values.get(cName),values.get(rName).toString());
+                map.put(values.get(cName),values.get(rName).toString());
             } catch (Exception e){
                 System.err.println(tName+" "+cName );
             }
             
         }
-        System.out.println(map);
+//        System.out.println(map);
         return map;
     }
 
+    @Override
+    public Column[] getColumns() {
+        Column[] result = new Column[columns.size()];
+        for (int i=0;i<result.length;i++){
+            result[i]=columns.get(i);
+        }
+        return result;
+    }
+
+    public Map<String,String> getDetails(){
+        Map<String,String> result = new HashMap<>();
+        Map<String,String> map;
+        for (DatasetInfo info:dataModule.infoList){
+            map=info.references;
+            String rf;
+            for (String columnName:map.keySet()){
+                rf=map.get(columnName).split("\\.")[0];
+                if (rf.equals(this.info.tableName)){
+                    System.out.println(info.tableName+" "+columnName);
+                    result.put(info.tableName, columnName);
+                }
+            }
+        }
+        return result;
+    }
+
+    public Dataset[] getForeignDataset() {
+        List<Dataset> list = new ArrayList<>();
+        Dataset dataset;
+        Map<String,String> map = new HashMap<>();
+        for (DatasetInfo info:dataModule.infoList){
+            map=info.references;
+            String rf;
+            for (String columnName:map.keySet()){
+                rf=map.get(columnName).split("\\.")[0];
+                if (rf.equals(this.info.tableName)){
+                    dataset = dataModule.getDataset(info.tableName);
+                    try{
+                        dataset.test();
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                    list.add(dataset);
+                }
+            }
+        }
+        
+        return list.toArray(new Dataset[list.size()]);
+        
+    }
 }

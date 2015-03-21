@@ -34,7 +34,8 @@ create table shift(
 create table shift_detail(
     shift_id integer references shift(id),
     day_id integer references day_list(id),
-    bell_id integer references bell_list(id)
+    bell_id integer references bell_list(id),
+    unique (shift_id,day_id,bell_id)
 );
 
 create table teacher(
@@ -95,11 +96,11 @@ create table bell_list (bell_id integer primary key,time_start time,time_end tim
 create table schedule (
     day_id integer,
     bell_id integer,
-    depart_id integer,
+    depart_id integer references depart(id),
     subject_id integer,
     group_id integer,
-    teacher_id integer,
-    room_id integer
+    teacher_id integer references teacher(id),
+    room_id integer integer references room(id) 
 );
 
 create view v_teacher as

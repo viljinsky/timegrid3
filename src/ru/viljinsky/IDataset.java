@@ -14,6 +14,9 @@ import java.util.Map;
  */
 
 public interface IDataset{
+    public void open() throws Exception;
+    public void close() throws Exception;
+    
     public String getTableName();
     public Integer getColumnCount();
     public Integer getRowCount();
@@ -22,17 +25,15 @@ public interface IDataset{
     public void setVlaues(Integer rowIndex,Map<String,Object> aValues) throws Exception;
     public Integer getColumnIndex(String columnName) throws Exception;
     
-    public void open() throws Exception;
-    public Integer appned();
+    public boolean isEditable();
     public Integer appned(Map<String,Object> values) throws Exception;
     public void edit(Integer rowIndex,Map<String,Object> values) throws Exception;
     public Boolean delete(Integer rowIndex);
-    public void close() throws Exception;
     
-    public boolean isEditable();
 
     public String getReferences(String columnName);
     public Map<Object,String> getLookup(String columnName) throws Exception;
+    public Column[] getColumns();
     
 }
     

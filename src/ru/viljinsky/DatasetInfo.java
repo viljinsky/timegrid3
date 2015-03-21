@@ -15,10 +15,18 @@ import java.util.Map;
  *
  * @author вадик
  */
-class DatasetInfo {
+public class DatasetInfo {
 
     String tableType; // TABLE or VIEW
     String tableName;
+
+    public String getTableType() {
+        return tableType;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
     String selectSQL;
     String insertSQL;
     String deleteSQL;
@@ -56,11 +64,12 @@ class DatasetInfo {
     }
     @Override
     public String toString() {
-        String result = "";
-        for (String s : references.keySet()) {
-            result += s + "=" + references.get(s) + "\n";
-        }
-        return "table " + tableName + "\n primary:" + primaryKey + "\n" + result;
+        return tableName+" ("+tableType+")";
+//        String result = "";
+//        for (String s : references.keySet()) {
+//            result += s + "=" + references.get(s) + "\n";
+//        }
+//        return tableType+" " + tableName + "\n primary:" + primaryKey + "\n" + result;
     }
     
 }
