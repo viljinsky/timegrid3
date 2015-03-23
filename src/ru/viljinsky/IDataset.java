@@ -16,6 +16,7 @@ import java.util.Map;
 public interface IDataset{
     public void open() throws Exception;
     public void close() throws Exception;
+    public boolean isEmpty();
     
     public String getTableName();
     public Integer getColumnCount();
@@ -34,6 +35,14 @@ public interface IDataset{
     public String getReferences(String columnName);
     public Map<Object,String> getLookup(String columnName) throws Exception;
     public Column[] getColumns();
+    
+    /**
+     * Установка фильтра на датасет 
+     * @param filterMap карта фильтра <имя_роля><операция> = <шаблон>
+     */
+    public void setFilter(Map<String,Object> filterMap) throws Exception;
+    public void setFiltered(boolean aFiltered);
+    public boolean isFiltered();
     
 }
     

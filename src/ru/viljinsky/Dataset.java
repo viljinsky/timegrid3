@@ -94,6 +94,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     @Override
     public void open() throws Exception {
         if (test()){
+            clear();
             Statement stmt = null;
             try {
                 stmt = dataModule.con.createStatement();
@@ -104,7 +105,8 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
                     for (int i = 0; i < rowset.length; i++) {
                         rowset[i] = rs.getObject(i + 1);
                     }
-                    add(rowset);
+                    if (!filtered || checkFilter(rowset))
+                        add(rowset);
                 }
                 this.active = true;
             } finally {
@@ -324,6 +326,9 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             case "profile":
                 rName = "name";
                 break;
+            case "shift_type":
+                rName = "caption";
+                break;
         }
                 
         Dataset lookupDataset = dataModule.getDataset(tName);
@@ -391,5 +396,39 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         
         return list.toArray(new Dataset[list.size()]);
         
+    }
+    //////////////////////    FILTER ///////////////////////////////////////////
+    
+    boolean filtered = false;
+    Map<Integer,Object> filter;
+
+    @Override
+    public void setFilter(Map<String, Object> filterMap) throws Exception{
+        filter = new HashMap<>();
+        for (String columnName:filterMap.keySet())
+            try{
+                filter.put(getColumnIndex(columnName), filterMap.get(columnName));
+            } catch (Exception e){
+                throw  new Exception ("ОШИБКА установка фильтра:\n"+e.getMessage());
+            }
+        filtered = !filter.isEmpty();
+    }
+
+    @Override
+    public void setFiltered(boolean aFiltered) {
+        
+    }
+
+    @Override
+    public boolean isFiltered() {
+        return filtered;
+    }
+    
+    public boolean checkFilter(Object[] rowset){
+        for (int i:filter.keySet()){
+            if (!filter.get(i).equals(rowset[i]))
+                return false;
+        }
+        return true;
     }
 }

@@ -111,8 +111,8 @@ public class SQLMonitor extends JFrame implements MenuConstants{
 
             @Override
             public void stateChanged(ChangeEvent e) {
-                System.out.println(panels.getSelectedIndex());
-                System.out.println(panels.getSelectedComponent().getClass().getName());
+//                System.out.println(panels.getSelectedIndex());
+//                System.out.println(panels.getSelectedComponent().getClass().getName());
                 sqlPanel = (SQLPanel)panels.getSelectedComponent();
             }
         });
@@ -153,41 +153,41 @@ public class SQLMonitor extends JFrame implements MenuConstants{
 
         public SQLTree(){
 
-        addTreeSelectionListener(new TreeSelectionListener() {
+            addTreeSelectionListener(new TreeSelectionListener() {
 
-                @Override
-                public void valueChanged(TreeSelectionEvent e) {
+                    @Override
+                    public void valueChanged(TreeSelectionEvent e) {
 
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) getLastSelectedPathComponent();
-                    if (node!=null){
-                        Object d = node.getUserObject();
-                        if (d instanceof DatasetInfo){
-                            DatasetInfo info = (DatasetInfo)d;
-                            datasetInfoClick(info);
-                        } else if ( d instanceof Column){
-                            columnClick((Column)d);
+                        DefaultMutableTreeNode node = (DefaultMutableTreeNode) getLastSelectedPathComponent();
+                        if (node!=null){
+                            Object d = node.getUserObject();
+                            if (d instanceof DatasetInfo){
+                                DatasetInfo info = (DatasetInfo)d;
+                                datasetInfoClick(info);
+                            } else if ( d instanceof Column){
+                                columnClick((Column)d);
+                            }
                         }
                     }
-                }
             });
 
             addMouseListener(new MouseAdapter() {
 
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    showPopup(e);
-                }
-
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    showPopup(e);
-                }
-
-                protected void showPopup(MouseEvent e){
-                    if (e.isPopupTrigger()){
-                        showPopup1(e.getX(),e.getY());
+                    @Override
+                    public void mouseReleased(MouseEvent e) {
+                        MyByshow(e);
                     }
-                }
+
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        MyByshow(e);
+                    }
+
+                    protected void MyByshow(MouseEvent e){
+                        if (e.isPopupTrigger()){
+                            showPopup(e.getX(),e.getY());
+                        }
+                    }
 
             });
 
@@ -201,7 +201,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
             return result;        
         }
         
-        public  void showPopup1(Integer x,Integer y){
+        public  void showPopup(Integer x,Integer y){
             JPopupMenu popupMenu = new JPopupMenu();
             for (Action a:actions){
                 popupMenu.add(a);
@@ -217,32 +217,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
             System.out.println(column);
         }
 
-        public void open(){
-            fill();
-//            DefaultMutableTreeNode root = new DefaultMutableTreeNode("База данных");
-//            DefaultMutableTreeNode node,columnNode;
-//            Dataset dataset ;
-//
-//            for (DatasetInfo info:dataModule.getInfoList()){
-//                node= new DefaultMutableTreeNode(info);
-//                root.add(node);
-//                try{
-//                    dataset = dataModule.getDataset(info.getTableName());
-//                    dataset.test();
-//                    for (Column column:dataset.getColumns()){
-//                        columnNode = new DefaultMutableTreeNode(column);
-//                        node.add(columnNode);
-//                    }
-//                } catch (Exception e){
-//                }
-//
-//            }
-//
-//            DefaultTreeModel  model = new DefaultTreeModel(root);
-//            setModel(model);
-        }
-        
-        public DatasetInfo getDelectedDataset(){
+        public DatasetInfo getSelectedDataset(){
             DefaultMutableTreeNode node = (DefaultMutableTreeNode)getLastSelectedPathComponent();
             Object userObject = node.getUserObject();
             if (userObject!=null){
@@ -250,10 +225,6 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                     return (DatasetInfo)userObject;
             }
             return null;
-        }
-
-        private void refresh() {
-            fill();
         }
         
         public void fill(){
@@ -372,28 +343,27 @@ public class SQLMonitor extends JFrame implements MenuConstants{
 
  ///////////////////////////////////////////////////////////////////////////////
 
-        public void executeSql(String sql){
-            System.out.println(sql);
+        synchronized  public void executeSql(String sql){
+            System.out.print("EXECUTE:\n'"+sql+"'....");
+            try{
             if (sql.startsWith("select")){
-                System.out.println("SELECT");
-                try{
+//                System.out.println("SELECT");
+                
                     Dataset dataset = dataModule.getSQLDataset(sql);
                     dataset.open();
                     Grid grid = new Grid();
                     grid.setDataset(dataset);
                     tabs.addTab("sql", new JScrollPane(grid));
                     tabs.setSelectedIndex(tabs.getTabCount()-1);
-                } catch(Exception e){
-                    JOptionPane.showMessageDialog(null, e.getMessage());
-                }
 
 
             } else {
-                try{
                     dataModule.execute(sql);
-                } catch (Exception e){
-                    JOptionPane.showMessageDialog(null, e.getMessage());
-                }
+            }
+                System.out.println("OK");
+            } catch (Exception e){
+                System.out.println("ERROR:\n"+e.getMessage());
+                
             }
         }
 
@@ -437,9 +407,10 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                     continue;
 
                 sql+=line.trim()+"\n";
-                if (line.endsWith(";"))
+                if (line.endsWith(";")){
                     executeSql(sql);
                     sql="";
+                }
             }
         }
 
@@ -447,9 +418,10 @@ public class SQLMonitor extends JFrame implements MenuConstants{
         }
 
         public void addSQL(){
-            DatasetInfo info = tree.getDelectedDataset();
+            DatasetInfo info = tree.getSelectedDataset();
             if (info!=null){
                 sqlPanel.textEditor.append("select * from "+info.getTableName()+";\n");
+                
             }
         }
     
@@ -543,7 +515,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                     sqlPanel.addSQL();
                     break;
                 case treeRefresh:
-                    tree.refresh();
+                    tree.fill();
             }
         } catch (Exception e){
             JOptionPane.showMessageDialog(rootPane, e.getMessage());
@@ -551,7 +523,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
     }
     
     public void open(){
-        tree.open();
+        tree.fill();
     }
     
     //-------------------------------------------------------------------------
@@ -566,6 +538,9 @@ public class SQLMonitor extends JFrame implements MenuConstants{
 }
 
 interface MenuConstants{
+    
+    final String dataConnect    ="connect";
+    final String dataDisconnect ="disconnect";
     
     final String fileOpen       = "open";
     final String fileSave       = "save";

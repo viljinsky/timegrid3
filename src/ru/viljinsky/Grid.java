@@ -260,7 +260,10 @@ class GridModel extends AbstractTableModel{
         setModel(model);
     }
 
-
+    public IDataset getDataset(){
+        return model.dataset;
+    }
+            
     public void append() {
         BaseDialog dlg = new AppendDialog(model.dataset) {
 
@@ -315,6 +318,7 @@ class GridModel extends AbstractTableModel{
 
 
     public void refresh() {
+        model.fireTableDataChanged();
     }
 
     public void gridSelectionChange() {

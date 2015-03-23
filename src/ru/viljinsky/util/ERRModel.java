@@ -8,7 +8,6 @@ package ru.viljinsky.util;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -185,10 +184,6 @@ class Desktop extends JPanel{
                 
                 for (Link link:links){
                         link.selected=link.hitTest(x, y);
-//                    link.selected=false;
-//                    if (link.hitTest(x, y)){
-////                        onLinkClick(link);
-//                    }
                 }
                 
                 for (int i=list.size()-1;i>=0;i--){
@@ -328,8 +323,7 @@ public class ERRModel extends JFrame {
             JOptionPane.showMessageDialog(rootPane, "Ошибка при выполнении firstOperation"+e.getMessage());
         }
     }
-    
-    
+        
     public static void showModel(){
         ERRModel frame = new ERRModel();
         frame.pack();
@@ -338,7 +332,7 @@ public class ERRModel extends JFrame {
     }
     
     public static void main(String[] args) throws Exception{
-        DataModule.getInstance().open();// getInsatnce().open();
+        DataModule.getInstance().open();
         
         ERRModel frame = new ERRModel();
         frame.setDefaultCloseOperation(EXIT_ON_CLOSE);

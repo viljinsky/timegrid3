@@ -33,8 +33,8 @@ create table shift(
 
 create table shift_detail(
     shift_id integer references shift(id),
-    day_id integer references day_list(id),
-    bell_id integer references bell_list(id),
+    day_id integer references day_list(day_no),
+    bell_id integer references bell_list(bell_id),
     unique (shift_id,day_id,bell_id)
 );
 
