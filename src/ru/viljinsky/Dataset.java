@@ -365,6 +365,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         return result;
     }
     
+    @Override
     public Map<Object,String> getLookup(String columnName) throws Exception{
         
         Map<Object,String> map = new HashMap<>();
@@ -373,38 +374,11 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             return null;
         String tName = lookup.split("\\.")[0];
         String cName = lookup.split("\\.")[1];
-//        System.out.println("-->"+tName + "  "+ cName);
         String rName = cName;
         rName = getLookupMap().get(tName);
         if (rName == null)
             rName = cName;
         
-//        switch (tName){
-//            case "shift":
-//                rName = "name";
-//                break;
-//            case "subject":
-//                rName = "subject_name";
-//                break;
-//            case "group_type":
-//                rName ="group_type_caption";
-//                break;
-//            case "skill":
-//                rName = "caption";
-//                break;
-//            case "curriculum":
-//                rName = "caption";
-//                break;
-//            case "profile":
-//                rName = "name";
-//                break;
-//            case "shift_type":
-//                rName = "caption";
-//                break;
-//            case "profile_type":
-//                rName="caption";
-//                break;
-//        }
                 
         Dataset lookupDataset = dataModule.getDataset(tName);
         lookupDataset.open();
@@ -420,7 +394,6 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             }
             
         }
-//        System.out.println(map);
         return map;
     }
 

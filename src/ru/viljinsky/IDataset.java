@@ -15,6 +15,7 @@ import java.util.Map;
 
 public interface IDataset{
     public void open() throws Exception;
+    public boolean test() throws Exception;
     public void close() throws Exception;
     public boolean isEmpty();
     

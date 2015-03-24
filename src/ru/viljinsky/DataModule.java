@@ -19,8 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class KeyMap extends HashMap<Integer,Object>{
-}
 class DataMap extends HashMap<String,Object>{
 }
 
@@ -133,6 +131,7 @@ public class DataModule implements IDataModule {
         DatasetInfo info = new DatasetInfo();
         info.selectSQL = sql;
         Dataset dataset = new Dataset(info);
+        
         datasetList.add(dataset);
 //        dataset.dataModule = this;
         return dataset;
@@ -178,17 +177,17 @@ public class DataModule implements IDataModule {
     
     @Override
     public void execute(String sql,KeyMap params) throws Exception{
-        PreparedStatement stmt=null;
+        PreparedStatement pstmt=null;
         try{
-            stmt=con.prepareStatement(sql);
+            pstmt=con.prepareStatement(sql);
             for (Integer key:params.keySet()){
-                stmt.setObject(key, params.get(key));
+                pstmt.setObject(key, params.get(key));
             }
-            stmt.execute(sql);
+            pstmt.execute();
         } catch (Exception e){
             throw new Exception(e.getMessage());
         } finally {
-            if (stmt!=null) try {stmt.close();} catch (Exception e){}
+            if (pstmt!=null) try {pstmt.close();} catch (Exception e){}
         }
         
     }

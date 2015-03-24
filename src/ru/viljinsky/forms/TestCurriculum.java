@@ -9,8 +9,11 @@ package ru.viljinsky.forms;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -59,6 +62,10 @@ class GridPanel extends JPanel{
     
     protected void gridSelectionChange(){
         lblStatus.setText(String.format("Запись %d  из %d",grid.getSelectedRow(),grid.getRowCount()));
+    }
+
+    void AddButton(JButton button) {
+        titlePanel.add(button);
     }
 }
 
@@ -182,6 +189,54 @@ class CurriculumPanel extends MasterDetailPanel{
     }
 }
 
+class SchedulePanel extends JPanel implements ActionListener{
+    Grid grid = new Grid();
+    DataModule dataModule = DataModule.getInstance();
+    GridPanel panel;
+    
+    public SchedulePanel(){
+        super(new BorderLayout());
+        panel = new GridPanel("Schedule", grid);
+        add(panel,BorderLayout.CENTER);
+        JButton button;
+        
+        button = new JButton("Clear");
+        button.addActionListener(this);
+        panel.AddButton(button);
+        
+        button = new JButton("Fill");
+        button.addActionListener(this);
+        panel.AddButton(button);
+        
+        
+    }
+    public void open(){
+        try{
+            Dataset dataset = dataModule.getDataset("schedule");
+            dataset.open();
+            grid.setDataset(dataset);
+        } catch (Exception e){
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        try{
+            switch (e.getActionCommand()){
+                case "Fill":
+                    DataTask.proc1();
+                    break;
+                case "Clear":
+                    DataTask.proc2();
+                    break;
+            }
+            grid.requery();
+        } catch (Exception ee){
+            JOptionPane.showMessageDialog(panel, ee.getMessage());
+        }
+        
+    }
+}
 
 public class TestCurriculum extends JPanel{
     
@@ -189,10 +244,12 @@ public class TestCurriculum extends JPanel{
         
         CurriculumPanel curriculumPanel = new CurriculumPanel();        
         DepartPanel departPanel = new DepartPanel();
+        SchedulePanel schedulePanel = new SchedulePanel();
         
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("curriculum", curriculumPanel);
         tabbedPane.addTab("depart",departPanel);
+        tabbedPane.addTab("schedule", schedulePanel);
         JFrame frame = new JFrame("Test curriculumn");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(tabbedPane);
@@ -204,6 +261,7 @@ public class TestCurriculum extends JPanel{
             DataModule.getInstance().open();        
             curriculumPanel.open();
             departPanel.open();
+            schedulePanel.open();
         } catch (Exception e){
             JOptionPane.showMessageDialog(frame, e.getMessage());
         }

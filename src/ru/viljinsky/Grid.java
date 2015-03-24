@@ -317,6 +317,10 @@ class GridModel extends AbstractTableModel{
         }
     }
 
+    public void requery() throws Exception{
+        model.dataset.open();
+        model.fireTableDataChanged();
+    }
 
     public void refresh() {
         model.fireTableDataChanged();
