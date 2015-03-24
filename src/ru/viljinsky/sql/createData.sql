@@ -81,7 +81,7 @@ create table group_type(
 );
 
 create table curriculum_detail(
-    curriculum_id integer references curriculun(id),
+    curriculum_id integer references curriculum(id),
     subject_id integer references subject(id),
     hour_per_day integer,
     hour_per_week integer,

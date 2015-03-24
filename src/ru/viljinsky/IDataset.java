@@ -23,6 +23,7 @@ public interface IDataset{
     public Integer getRowCount();
     public Column getColumn(Integer columnIndex);
     public Map<String,Object> getValues(Integer rowIndex);
+    public Map<String,Object> getNewValues();
     public void setVlaues(Integer rowIndex,Map<String,Object> aValues) throws Exception;
     public Integer getColumnIndex(String columnName) throws Exception;
     

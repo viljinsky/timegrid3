@@ -1,0 +1,8 @@
+select * from profile_item;
+select * from profile;
+select * from subject;
+
+insert into profile_item (profile_id,subject_id)
+select profile.id,subject.id from profile,subject;
+
+select * from profile_item;

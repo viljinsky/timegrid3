@@ -52,6 +52,15 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     }
     
     @Override
+    public Map<String,Object> getNewValues(){
+        Map<String,Object> result = new HashMap<>();
+        for (int i : columns.keySet()){
+            result.put(getColumnName(i), null);
+        }
+        return result;
+    }
+    
+    @Override
     public Map<String,Object> getValues(Integer rowIndex){
         Map<String,Object> result = new HashMap<>();
         Object[] rowset;
@@ -63,6 +72,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         }
         return result;
     }
+    
     
     @Override
     public void setVlaues(Integer rowIndex, Map<String, Object> aValues) throws Exception {
@@ -228,8 +238,40 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     }
 
 
+    /**
+     * Для SQLite получение нового значение 
+     * @return 
+     */
+    public Integer getNextValue(){
+        Statement stmt=null;
+        ResultSet rs =null;
+        try{
+            stmt = dataModule.con.createStatement();
+            rs = stmt.executeQuery("select seq from sqlite_sequence where name ='"+getTableName()+"';");
+            while (rs.next()){
+                return rs.getInt("seq")+1;
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        } finally {
+            if (rs!=null) try {rs.close();} catch (SQLException e){};
+            if (stmt!=null) try {stmt.close();} catch (SQLException e){};
+        }
+        return 1;
+    }
+    
     @Override
     public Integer appned(Map<String, Object> values) throws Exception {
+        // проверка автоинкремента
+        Column column ;
+        for (int col:columns.keySet()){
+            column=columns.get(col);
+            if (column.autoIncrement){
+                if (values.get(column.columnName)==null){
+                    values.put(column.columnName, getNextValue());
+                }
+            }
+        }
         
         String sql = info.insertSQL;
         PreparedStatement pstmt = dataModule.con.prepareStatement(sql);
@@ -297,8 +339,34 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     public String getReferences(String columnName) {
         return info.references.get(columnName);
     }
+
+    private static final String[] strLookupMap={
+        "shift=name",
+        "subject=subject_name",
+        "group_type=group_type_caption",
+        "skill=caption",
+        "curriculum=caption",
+        "profile=name",
+        "shift_type=caption",
+        "profile_type=caption",
+        "day_list=day_caption",
+        "bell_list=time_start"
+    } ;
+    
+    public Map<String,String> getLookupMap(){
+        Map<String,String> result= new HashMap<>();
+        String key,value;
+        String s[];
+        for (String line:strLookupMap){
+            s=line.split("=");
+            key=s[0];value=s[1];
+            result.put(key, value);
+        }
+        return result;
+    }
     
     public Map<Object,String> getLookup(String columnName) throws Exception{
+        
         Map<Object,String> map = new HashMap<>();
         String lookup = info.references.get(columnName);
         if (lookup== null)
@@ -307,39 +375,48 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         String cName = lookup.split("\\.")[1];
 //        System.out.println("-->"+tName + "  "+ cName);
         String rName = cName;
-        switch (tName){
-            case "shift":
-                rName = "name";
-                break;
-            case "subject":
-                rName = "subject_name";
-                break;
-            case "group_type":
-                rName ="group_type_caption";
-                break;
-            case "skill":
-                rName = "caption";
-                break;
-            case "curriculum":
-                rName = "caption";
-                break;
-            case "profile":
-                rName = "name";
-                break;
-            case "shift_type":
-                rName = "caption";
-                break;
-        }
+        rName = getLookupMap().get(tName);
+        if (rName == null)
+            rName = cName;
+        
+//        switch (tName){
+//            case "shift":
+//                rName = "name";
+//                break;
+//            case "subject":
+//                rName = "subject_name";
+//                break;
+//            case "group_type":
+//                rName ="group_type_caption";
+//                break;
+//            case "skill":
+//                rName = "caption";
+//                break;
+//            case "curriculum":
+//                rName = "caption";
+//                break;
+//            case "profile":
+//                rName = "name";
+//                break;
+//            case "shift_type":
+//                rName = "caption";
+//                break;
+//            case "profile_type":
+//                rName="caption";
+//                break;
+//        }
                 
         Dataset lookupDataset = dataModule.getDataset(tName);
         lookupDataset.open();
         Map<String,Object> values;
         for (int i=0;i<lookupDataset.getRowCount();i++){
             values = lookupDataset.getValues(i);
-            try{
-                map.put(values.get(cName),values.get(rName).toString());
-            } catch (Exception e){
-                System.err.println(tName+" "+cName );
+            if (values!=null){
+                try{
+                    map.put(values.get(cName),values.get(rName).toString());
+                } catch (Exception e){
+                    System.err.println(tName+" "+cName );
+                }
             }
             
         }
@@ -425,8 +502,12 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     }
     
     public boolean checkFilter(Object[] rowset){
+        Object v;
         for (int i:filter.keySet()){
-            if (!filter.get(i).equals(rowset[i]))
+            v=filter.get(i);
+            if (v==null)
+                return false;
+            if (!v.equals(rowset[i]))
                 return false;
         }
         return true;

@@ -46,7 +46,8 @@ insert into shift_type(id,caption) values (3,'График помещения');
 
 insert into shift(id,shift_type_id,name) values(1,1,'Первая смена');  
 insert into shift(id,shift_type_id,name) values(2,1,'Вторая смена');  
-
+insert into shift(id,shift_type_id,name) values(3,2,'График преподавателя 1');  
+insert into shift(id,shift_type_id,name) values(4,3,'График преподавателя 2');  
 insert into shift(id,shift_type_id,name) values(5,3,'Обычный кабинет');  
 
 --

@@ -15,7 +15,6 @@ import java.awt.event.MouseEvent;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-//import static javax.swing.Action.ACTION_COMMAND_KEY;
 import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -29,8 +28,20 @@ import javax.swing.table.AbstractTableModel;
  * @author вадик
  */
 
-class GridCommand implements ICommand{
-    Action[] actions = {new Act("add"),new Act("edit"),new Act("delete"),new Act("refresh")};
+interface IGridConstants{
+    public static String GRID_APPEND = "add";
+    public static String GRID_EDIT = "edit";
+    public static String GRID_DELETE = "delete";
+    public static String GRID_REFRESH = "refresh";
+}
+
+class GridCommand implements ICommand,IGridConstants{
+    public Action[] actions = {
+        new Act(GRID_APPEND),
+        new Act(GRID_EDIT),
+        new Act(GRID_DELETE),
+        new Act(GRID_REFRESH)
+    };
     Grid grid = null;
     
     class Act extends AbstractAction{
@@ -55,16 +66,16 @@ class GridCommand implements ICommand{
     public void doCommand(String command) {
         System.out.println(command);
         switch(command){
-            case "add":
+            case GRID_APPEND:
                 grid.append();
                 break;
-            case "edit":
+            case GRID_EDIT:
                 grid.edit();
                 break;
-            case "delete":
+            case GRID_DELETE:
                 grid.delete();
                 break;
-            case "refresh":
+            case GRID_REFRESH:
                 grid.refresh();
                 break;
         }
@@ -75,7 +86,7 @@ class GridCommand implements ICommand{
     public void updateAction(Action a) {
         String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
         switch (command){
-            case "add":case "edit": case "delete":
+            case GRID_APPEND:case GRID_EDIT: case GRID_DELETE:
                 a.setEnabled(grid.isEditable());
                 break;
         }
@@ -116,16 +127,9 @@ public class Grid extends JTable {
     GridModel model;
     ICommand commands = null;
     
+    
     public boolean isEditable(){
         return model!=null && model.dataset.isEditable();
-    }
-    abstract class AppendDialog extends DataEntryDialog {
-
-        public AppendDialog(IDataset datset) {
-            super();
-            panel.setDataset(datset);
-        }
-
     }
     
     abstract class EdtDialog extends DataEntryDialog{
@@ -133,7 +137,8 @@ public class Grid extends JTable {
         public EdtDialog(IDataset dataset,Map<String,Object> values){
             super();
             panel.setDataset(dataset);
-            panel.setValues(values);
+            if (values!=null)
+                panel.setValues(values);
         }
 
     }
@@ -186,18 +191,9 @@ class GridModel extends AbstractTableModel{
         public Class<?> getColumnClass(int columnIndex) {
             Column column = dataset.getColumn(columnIndex);
             return column.getColumnClass();
-//            System.out.println("-->"+column.columnClassName);
-                    
-//            return super.getColumnClass(columnIndex); //To change body of generated methods, choose Tools | Templates.
         }
     
-    
-    
-    
 }
-
-    
-    
 
     public Grid() {
         super();
@@ -264,8 +260,9 @@ class GridModel extends AbstractTableModel{
         return model.dataset;
     }
             
-    public void append() {
-        BaseDialog dlg = new AppendDialog(model.dataset) {
+    public void append(Map<String,Object> values){
+        
+        BaseDialog dlg = new EdtDialog(model.dataset,values) {
 
             @Override
             public void doOnEntry() throws Exception {
@@ -279,6 +276,10 @@ class GridModel extends AbstractTableModel{
             }
         };
         dlg.showModal(owner);
+        
+    }
+    public void append() {
+        append(null);
     }
 
     public void edit() {
@@ -328,6 +329,12 @@ class GridModel extends AbstractTableModel{
             Map<String, Object> map = model.dataset.getValues(row);
             System.out.println(map);
         }
+    }
+    
+    public void setFilter(Map<String,Object> filter) throws Exception{
+        model.dataset.setFilter(filter);
+        model.dataset.open();
+        model.fireTableDataChanged();
     }
     
 }

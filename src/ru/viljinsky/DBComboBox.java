@@ -18,7 +18,7 @@ import javax.swing.event.ListDataListener;
  *
  * @author вадик
  */
-class DBComboBox extends JComboBox<String> {
+public class DBComboBox extends JComboBox<String> {
     Model model;
 
     class Model implements ComboBoxModel {
