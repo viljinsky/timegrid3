@@ -341,4 +341,31 @@ class GridModel extends AbstractTableModel{
         model.fireTableDataChanged();
     }
     
+    ///////////////////////////// Получение значение грида //////////////////
+    /**
+     * Получение значений из выделенной строки
+     * @return 
+     * @throws Exception  если нет выделенной строки
+     */
+    private Map<String,Object> getSelectedValues() throws Exception{
+        int row = getSelectedRow();
+        if (row<0)
+            throw new Exception("TABLE_HAS_NOT_SELECTED");
+        Map<String,Object> map = model.dataset.getValues(row);
+        return map;
+    }
+    
+    public Integer getInegerValue(String columnName) throws Exception{
+        Map<String,Object> values = getSelectedValues();
+        if (!values.containsKey(columnName))
+            throw new Exception("COLUMN_NOT_FOUND");
+        return Integer.valueOf(values.get(columnName).toString());
+    }
+    
+    public String getStringValue(String columnName) throws Exception{
+        Map<String,Object> values = getSelectedValues();
+        if (!values.containsKey(columnName))
+            throw new Exception("COLUMN_NOT_FOUND");
+        return (String)values.get(columnName);
+    }
 }

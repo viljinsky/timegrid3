@@ -22,7 +22,12 @@ import java.util.Map;
 class DataMap extends HashMap<String,Object>{
 }
 
-public class DataModule implements IDataModule {
+interface IDataModuleConsts {
+    public static final String  DATABASE_NOT_ACTIVE = "База данных не открыта";
+    public static final String  DATABASE_IS_ACTIVE  = "База открыта";
+}
+
+public class DataModule implements IDataModule,IDataModuleConsts {
     private static DataModule instance = null;
     Boolean active = false;
     List<Dataset> datasetList;
@@ -31,6 +36,10 @@ public class DataModule implements IDataModule {
 
     private DataModule(){
         datasetList = new ArrayList<>();
+    }
+    
+    public Connection getConnection(){
+        return con;
     }
     
     public List<DatasetInfo> getInfoList(){
@@ -53,9 +62,34 @@ public class DataModule implements IDataModule {
         open("example.db");
     }
     
+    public void reopen() throws Exception{
+        if (active){
+            for (Dataset dataset:datasetList)
+                dataset.close();
+            datasetList.clear();
+            infoList.clear();
+            //    duplicate
+            DatabaseMetaData meta = con.getMetaData();
+            ResultSet rs = meta.getTables(null,null,null, new String[]{"TABLE","VIEW"});
+            String tableName;
+            DatasetInfo info;
+            while (rs.next()){
+                tableName = rs.getString("TABLE_NAME");
+                info = new DatasetInfo(tableName,meta);
+                info.tableType = rs.getString("TABLE_TYPE");
+                infoList.add(info);
+            }
+            //
+            
+            
+        } else {
+            throw new Exception(DATABASE_NOT_ACTIVE);
+        }
+    }
+    
     public void open(String fileName) throws Exception{
         if (active)
-            throw new Exception("data is active");
+            throw new Exception(DATABASE_IS_ACTIVE);
         File file = new File(fileName);
         if (!file.exists()){
             throw new Exception("file "+fileName+" not found");
@@ -69,6 +103,7 @@ public class DataModule implements IDataModule {
         
         try{
             con = DriverManager.getConnection(String.format("jdbc:sqlite:%s",fileName));
+            // duplicate
             DatabaseMetaData meta = con.getMetaData();
             ResultSet rs = meta.getTables(null,null,null, new String[]{"TABLE","VIEW"});
             String tableName;
@@ -79,6 +114,7 @@ public class DataModule implements IDataModule {
                 info.tableType = rs.getString("TABLE_TYPE");
                 infoList.add(info);
             }
+            // 
             active = true;
         } catch (SQLException e){
             throw new Exception ("Ошбка приокрытии бд:\n"+e.getMessage());
@@ -89,7 +125,7 @@ public class DataModule implements IDataModule {
     @Override
     public void close() throws Exception{
         if (!active)
-            throw new Exception("data is not active");
+            throw new Exception(DATABASE_NOT_ACTIVE);
         for (Dataset dataset:datasetList){
             System.out.println(dataset.getTableName());
             dataset.close();
@@ -114,7 +150,9 @@ public class DataModule implements IDataModule {
     }
     
     @Override
-    public Dataset getDataset(String tableName){
+    public Dataset getDataset(String tableName) throws Exception{
+        if (!active)
+            throw new Exception(DATABASE_NOT_ACTIVE);
         Dataset dataset;
         for (DatasetInfo info:infoList){
             if (info.tableName.equals(tableName)){
@@ -148,7 +186,7 @@ public class DataModule implements IDataModule {
         con.setAutoCommit(false);
     }
     
-    public void StopTrans() throws Exception{
+    public void stopTrans() throws Exception{
         try{
             try{
                 con.commit();                

@@ -156,6 +156,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
         menu.add(new Act(scriptNew));
         menu.add(new Act(scriptOpen));
         menu.add(new Act(scriptSave));
+        menu.add(new Act(scriptClose));
         menu.addSeparator();
         menu.add(new Act(exit));
         return menu;
@@ -184,6 +185,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
         };
 
         public SQLTree(){
+            clear();
 
             addTreeSelectionListener(new TreeSelectionListener() {
 
@@ -283,6 +285,16 @@ public class SQLMonitor extends JFrame implements MenuConstants{
 
             DefaultTreeModel  model = new DefaultTreeModel(root);
             setModel(model);
+        }
+        
+        public void clear(){
+            DefaultMutableTreeNode root;
+            root = new DefaultMutableTreeNode("База данных");
+            DefaultTreeModel model = new DefaultTreeModel(root);
+            setModel(model);
+            
+            removeAll();
+            
         }
 
 
@@ -425,19 +437,25 @@ public class SQLMonitor extends JFrame implements MenuConstants{
             String sql="";
             tabs.removeAll();
 
-            lines = textEditor.getText().split("\n");
-            for (String line:lines){
-                if (line.isEmpty())
-                    continue;
+            dataModule.startTrans();
+            try{
 
-                if (line.trim().startsWith("--"))
-                    continue;
+                lines = textEditor.getText().split("\n");
+                for (String line:lines){
+                    if (line.isEmpty())
+                        continue;
 
-                sql+=line.trim()+"\n";
-                if (line.endsWith(";")){
-                    executeSql(sql);
-                    sql="";
+                    if (line.trim().startsWith("--"))
+                        continue;
+
+                    sql+=line.trim()+"\n";
+                    if (line.endsWith(";")){
+                        executeSql(sql);
+                        sql="";
+                    }
                 }
+            } finally {
+                dataModule.stopTrans();
             }
         }
 
@@ -517,7 +535,13 @@ public class SQLMonitor extends JFrame implements MenuConstants{
             }
         }
     }
-    
+    public void scriptClose() throws Exception{
+       Integer index = panels.getSelectedIndex();
+       if (index>=0){
+            panels.remove(index);
+       }
+        
+    }
     public void scriptNew(){
         panels.addTab("new", new SQLPanel());
         panels.setSelectedIndex(panels.getTabCount()-1);
@@ -542,6 +566,9 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                 case scriptSave:
                     scriptSave();
                     break;
+                case scriptClose:
+                    scriptClose();
+                    break;
                     
                 case exit:
                     System.exit(0);
@@ -560,7 +587,9 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                     sqlPanel.addSQL();
                     break;
                 case treeRefresh:
+                    dataModule.reopen();
                     tree.fill();
+                    break;
             }
         } catch (Exception e){
             JOptionPane.showMessageDialog(rootPane, e.getMessage());
@@ -584,8 +613,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
     public void close() throws Exception{
         dataModule.close();
         panels.removeAll();
-        DefaultTreeModel model = new DefaultTreeModel(new DefaultMutableTreeNode("База данных"));
-        tree.setModel(model);
+        tree.clear();
     }
     
     //-------------------------------------------------------------------------
@@ -606,6 +634,7 @@ interface MenuConstants{
     final String scriptOpen     = "open";
     final String scriptSave     = "save";
     final String scriptNew      = "new";
+    final String scriptClose    = "close";
     
     final String exit           = "Exit";
     

@@ -431,15 +431,17 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             map=info.references;
             String rf;
             for (String columnName:map.keySet()){
+                dataset = null;
                 rf=map.get(columnName).split("\\.")[0];
                 if (rf.equals(this.info.tableName)){
-                    dataset = dataModule.getDataset(info.tableName);
                     try{
+                        dataset = dataModule.getDataset(info.tableName);
                         dataset.test();
                     } catch (Exception e){
                         e.printStackTrace();
                     }
-                    list.add(dataset);
+                    if (dataset!=null)
+                        list.add(dataset);
                 }
             }
         }

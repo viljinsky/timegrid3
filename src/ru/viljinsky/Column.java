@@ -46,7 +46,6 @@ public class Column {
             autoIncrement   = rsmeta.isAutoIncrement(columnIndex+1);
             columnType      = rsmeta.getColumnType(columnIndex+1);
             columnTypeName  = rsmeta.getColumnTypeName(columnIndex+1);
-            
             switch (columnType){
                 case java.sql.Types.INTEGER:
                     columnClassName = Integer.class.getName();
@@ -71,7 +70,7 @@ public class Column {
                     break;
                     
             };
-            
+//            System.out.println(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -91,7 +90,7 @@ public class Column {
     
     @Override
     public String toString() {
-        return columnName;
+        return columnName+" "+columnType;
 //        return tableName + "." + columnName + " (" + columnTypeName + ")\n"
 //                +"columnLanel     = "+columnLabel+"\n"
 //                +"columnTypeName  = "+columnTypeName+"\n"

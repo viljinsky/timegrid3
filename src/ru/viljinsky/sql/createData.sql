@@ -1,7 +1,11 @@
 drop table if exists subject;
 create table subject(
     id integer primary key autoincrement,
-    subject_name varchar(20)
+    subject_name varchar(20),
+    default_hour_per_week integer,
+    default_group_type_id integer references group_type(id),
+    default_hour_per_day integer ,
+    color integer
 );
 drop table if exists profile_type;
 create table profile_type (
@@ -71,9 +75,14 @@ create table skill(
 drop table if exists depart;
 create table depart(
     id integer primary key autoincrement,
+    label varchar(10),
     skill_id integer references skill(id),
     shift_id integer references shift(id),
-    curriculum_id integer references curriculum(id) 
+    curriculum_id integer references curriculum(id),
+    class_room integer references room(id),
+    class_former integer references teacher(id),
+    boy_count integer,
+    gerl_count integer 
 );
 
 drop table if exists subject_group;

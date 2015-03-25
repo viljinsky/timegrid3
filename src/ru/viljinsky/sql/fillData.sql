@@ -54,13 +54,20 @@ insert into shift(id,shift_type_id,name) values(5,3,'Обычный кабине
 --                Предметы
 --                 
 
-insert into subject(id,subject_name) values (1,'Русский яз');
-insert into subject(id,subject_name) values (2,'Литература');
-insert into subject(id,subject_name) values (3,'Алгебра');
-insert into subject(id,subject_name) values (4,'Физика');
-insert into subject(id,subject_name) values (5,'Химия');
-insert into subject(id,subject_name) values (6,'Иностранный яз.');
-insert into subject(id,subject_name) values (7,'Физ.культура');
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week) 
+    values (1,'Русский яз',1,0,4);
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
+    values (2,'Литература',1,0,2);
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
+    values (3,'Алгебра',1,0,2);
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
+    values (4,'Физика',1,0,2);
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
+    values (5,'Химия',1,0,2);
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
+    values (6,'Иностранный яз.',1,2,2);
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
+     values (7,'Физ.культура',1,1,2);
         
 insert into teacher (id,last_name,first_name,patronymic,profile_id) values (1,'Иванова','Ирина','',1);
 insert into teacher (id,last_name,first_name,patronymic,profile_id) values (2,'Петрова','Людмила','',2);
