@@ -1,4 +1,4 @@
-/*
+/**
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -110,33 +110,11 @@ public class DataTask implements IDataTaskConstants{
     
     
     
-    
-//    public static void proc2() throws Exception{
-//        dataModule.execute("delete from schedule");
-//    }
-//    
-//    public static void proc1() throws Exception{
-//        Dataset dataset = dataModule.getSQLDataset("select * from subject_group");
-//        dataset.open();
-//        Map<String,Object> values;
-//        
-//        String sql = "insert into schedule (day_id,bell_id,depart_id,subject_id,group_id) values (?,?,?,?,?);";
-//        KeyMap map = new KeyMap();
-//        for (int i=0;i<dataset.size();i++){
-//            values= dataset.getValues(i);
-//            map.clear();
-//            map.put(1,1);
-//            map.put(2, 1);
-//            map.put(3, values.get("depart_id"));
-//            map.put(4, values.get("subject_id"));
-//            map.put(5, values.get("group_id"));
-//            System.out.println(map);
-//            dataModule.execute(sql, map);
-//        }
-//        
-//        
-//    }
-    
+    /**
+     * Заполнение расписания класса
+     * @param depart_id
+     * @throws Exception 
+     */
     public static void fillSchedule(Integer depart_id) throws Exception{
         if (depart_id==null)
             throw new Exception("DEPART IS NULL");
@@ -201,7 +179,11 @@ public class DataTask implements IDataTaskConstants{
         }
                 
     }
-    
+    /**
+     * Очистка расписания класса
+     * @param depart_id
+     * @throws Exception 
+     */
     public static void clearSchedule(Integer depart_id) throws Exception{
         System.out.println("clear depart_id="+depart_id);
         String sql = "delete from schedule where depart_id="+depart_id+";";
@@ -211,4 +193,17 @@ public class DataTask implements IDataTaskConstants{
     }
     
     
+    public static void fillProfile(Integer profile_id) throws Exception{
+        String sql = "insert into profile_item (profile_id,subject_id)\n"
+                + "select profile.id,subject.id from profile,subject where profile.id="+profile_id;
+        dataModule.execute(sql);
+        
+    }
+    
+    public static void fillShift(Integer shift_id) throws Exception{
+        String sql = "insert into shift_detail(shift_id,day_id,bell_id) \n"
+                + "select shift.id,day_no,bell_id from shift,day_list,bell_list\n"
+                + "where shift.id="+shift_id;
+        dataModule.execute(sql);
+    }
 }

@@ -31,7 +31,7 @@ public interface IDataset{
     public boolean isEditable();
     public Integer appned(Map<String,Object> values) throws Exception;
     public void edit(Integer rowIndex,Map<String,Object> values) throws Exception;
-    public Boolean delete(Integer rowIndex);
+    public Boolean delete(Integer rowIndex) throws Exception;
     
 
     public String getReferences(String columnName);

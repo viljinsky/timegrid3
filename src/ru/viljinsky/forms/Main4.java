@@ -7,175 +7,91 @@
 package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import ru.viljinsky.DBComboBox;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
-import ru.viljinsky.IDataset;
+import ru.viljinsky.util.SQLMonitor;
 
-/**
- *
- * @author вадик
- */
 
-class GridPanel extends JPanel{
-    Grid grid;
-    JLabel lblStatus = new JLabel("Status");
-    JLabel lblTitle = new JLabel("Title");
-    JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    public GridPanel(String title,Grid grid){
+interface IOpenedForm{
+    public void open() throws Exception;
+    public String getCaption();
+    public JComponent getPanel();
+}
+
+class TeacherPanel extends JPanel implements IOpenedForm{
+    Grid grid = new Grid();
+    DataModule dataModule = DataModule.getInstance();
+    
+    public TeacherPanel(){
+        setLayout(new BorderLayout());
+        add(new JScrollPane(grid));
+        
+    }
+    
+    @Override
+    public void open() throws Exception {
+        Dataset dataset = dataModule.getDataset("teacher");
+        dataset.open();
+        grid.setDataset(dataset);
+    }
+
+    @Override
+    public String getCaption() {
+        return "TEACHER";
+    }
+
+    @Override
+    public JComponent getPanel() {
+        return this;
+    }
+};
+
+class RoomPanel extends JPanel implements IOpenedForm{
+    Grid grid = new Grid();
+    DataModule dataModule = DataModule.getInstance();
+
+    public RoomPanel(){
         super(new BorderLayout());
-        this.grid=grid;
-        statusPanel.add(lblStatus);
-        titlePanel.add(lblTitle);
-        lblTitle.setText(title);
-        
-        add(titlePanel,BorderLayout.PAGE_START);
-        add(new JScrollPane(grid),BorderLayout.CENTER);
-        add(statusPanel,BorderLayout.PAGE_END);
-        
-        grid.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                gridSelectionChange();
-            }
-        });
-        
+        add(new JScrollPane(grid));
     }
     
-    protected void gridSelectionChange(){
-        lblStatus.setText(String.format("Запись %d  из %d",grid.getSelectedRow(),grid.getRowCount()));
+    @Override
+    public void open() throws Exception {
+        Dataset dataset=dataModule.getDataset("room");
+        dataset.open();
+        grid.setDataset(dataset);
     }
 
-    void AddButton(JComponent component) {
-        titlePanel.add(component);
+    @Override
+    public String getCaption() {
+        return "ROOM";
     }
-}
 
-interface IMasterDetailConsts{
-    public static final String MASTER_DATASET = "masterDataset";
-    public static final String MASTER_SQL = "masterSQL";
-    public static final String SLAVE_DATASET = "slaveDataset";
-    public static final String SLAVE_SQL = "slaveSQL";
-    public static final String REFERENCES = "references";
-}
+    @Override
+    public JComponent getPanel() {
+        return this;
+    }
+    
+};
 
-abstract class MasterDetailPanel extends JPanel implements IMasterDetailConsts{
-    protected DataModule dataModule =DataModule.getInstance();
-    Grid grid1;
-    Grid grid2;
-    GridPanel masterPanel;
-    GridPanel detailPanel;
-    Map<String,String> params;
-    
-    public MasterDetailPanel(){
-        super(new BorderLayout());
-        params = getParams();
-        setPreferredSize(new Dimension(800,600));
-        grid1 = new MasterGrid();
-        grid2 = new DetailGrid();
-        masterPanel= new GridPanel(params.get(MASTER_DATASET), grid1);
-        detailPanel = new GridPanel(params.get(SLAVE_DATASET), grid2);
-        
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        splitPane.setTopComponent(masterPanel);
-        splitPane.setBottomComponent(detailPanel);
-        splitPane.setResizeWeight(0.5);
-        add(splitPane);
-    }
-    
-    public void addMasterControl(JComponent component){
-        masterPanel.titlePanel.add(component);
-    }
-    
-    class MasterGrid extends Grid{
-
-        @Override
-        public void gridSelectionChange() {
-            String[] ss = params.get(REFERENCES).split("=");
-            String keys = ss[0];
-            String vv = ss[1];
-            IDataset dataset = grid1.getDataset();
-            int row = getSelectedRow();
-            if (row>=0){
-                Map<String,Object> values = dataset.getValues(row);
-                Map<String,Object> filter = new HashMap<>();
-                filter.put(keys, values.get(vv));
-                try{
-                    grid2.setFilter(filter);
-                } catch (Exception e){
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(null, e.getMessage());
-                }
-                
-            }
-        }
-    }
-    
-    class DetailGrid extends Grid{
-
-        @Override
-        public void append() {
-            int row = grid1.getSelectedRow();
-            if (row>=0){
-                
-                String[] ss = params.get(REFERENCES).split("=");
-                String keys = ss[0];
-                String vv = ss[1];
-                
-                
-                Map<String,Object> v1 = grid1.getDataset().getValues(row);
-                Map<String,Object> values=getDataset().getNewValues();
-                values.put(keys, v1.get(vv));
-                super.append(values); //To change body of generated methods, choose Tools | Templates.
-            }
-        }
-        
-    }
-    
-    public void open(){
-        try{
-            
-            Dataset dataset1,dataset2 ;
-            dataset1 = dataModule.getDataset(params.get(MASTER_DATASET));
-            dataset1.test();
-            grid1.setDataset(dataset1);
-            
-            dataset2= dataModule.getDataset(params.get(SLAVE_DATASET));
-            dataset2.test();
-            grid2.setDataset(dataset2);
-            
-            dataset1.open();
-            
-        } catch (Exception e){
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }
-    }
-    
-    public abstract Map<String,String> getParams();
-}
-////////////////////////////  DEPART PANEL ////////////////////////////////////
-
-class DepartPanel extends MasterDetailPanel implements ActionListener{
+class DepartPanel extends MasterDetailPanel implements ActionListener,IOpenedForm{
 
     @Override
     public Map<String, String> getParams() {
@@ -234,12 +150,22 @@ class DepartPanel extends MasterDetailPanel implements ActionListener{
         grid2.requery();
     }
 
+    @Override
+    public String getCaption() {
+        return "DEPART";
+    }
+
+    @Override
+    public JComponent getPanel() {
+        return this;
+    }
+
 
 }
 
 /////////////////////   CURRICULUM PANEL //////////////////////////////////////
 
-class CurriculumPanel extends MasterDetailPanel implements ActionListener{
+class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpenedForm{
     @Override
     public Map<String, String> getParams() {
         Map<String,String> map = new HashMap<>();
@@ -279,7 +205,7 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener{
         doCommand(e.getActionCommand());
     }
     
-    protected void fillCurriculumnDetail() throws Exception{
+    protected void fillCurriculumnDetail() throws Exception {
         Integer curriculum_id = grid1.getInegerValue("id");
         DataTask.fillCurriculumn(curriculum_id);
         grid2.requery();
@@ -290,12 +216,22 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener{
         DataTask.removeCurriculum(curriculum_id);
         grid2.requery();
     }
+
+    @Override
+    public String getCaption() {
+        return "CURRICULUMN";
+    }
+
+    @Override
+    public JComponent getPanel() {
+        return this;
+    }
     
 }
 
 ///////////////////////////  SCHEDULE PANEL ///////////////////////////////////
 
-class SchedulePanel extends JPanel implements ActionListener{
+class SchedulePanel extends JPanel implements ActionListener,IOpenedForm{
     Grid grid = new Grid();
     DataModule dataModule = DataModule.getInstance();
     GridPanel panel;
@@ -337,6 +273,7 @@ class SchedulePanel extends JPanel implements ActionListener{
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
+    @Override
     public void open(){
         Dataset dataset;
         try{
@@ -358,32 +295,145 @@ class SchedulePanel extends JPanel implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         doCommand(e.getActionCommand());
     }
+
+    @Override
+    public String getCaption() {
+        return "SCHEDULE";
+    }
+
+    @Override
+    public JComponent getPanel() {
+        return this;
+    }
 }
 
-public class TestCurriculum extends JPanel{
+////////////////////////    MAIN 4 ////////////////////////////////////////////
+
+public class Main4 extends JPanel{
+    SQLMonitor monitor;
+    TestShift2 testShift;
+    Dictonary dictionary;
+    
+    public Main4(){
+        super();
+        
+        monitor = new SQLMonitor();
+        monitor.pack();
+        monitor.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        
+        testShift = new TestShift2();
+        testShift.pack();
+        testShift.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        
+        dictionary = new Dictonary();
+        dictionary.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        dictionary.pack();
+        
+        
+    }
+    class Act extends AbstractAction{
+
+        public Act(String name) {
+            super(name);
+            putValue(ACTION_COMMAND_KEY, name);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            doCommand(e.getActionCommand());
+        }
+    }
+    
+    private void doCommand(String command){
+        try{
+            switch(command){
+                case "DICTIONARY":
+//                    dictionary.open();
+                    dictionary.setVisible(true);
+                    break;
+                case "sqlMonitor":
+                    if (!monitor.isVisible()){
+//                        monitor.open();
+                        monitor.setVisible(true);
+                    };
+                    break;
+                case "testShift":
+                    
+                    testShift.setVisible(true);
+                    break;
+                case "exit":
+                    System.exit(0);
+                    break;
+            }
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+        
+    }
+    public JMenuBar createMenuBar(){
+        JMenuBar result = new JMenuBar();
+        result.add(createFileMenu());
+        result.add(createUtilMenu());
+        return result;
+    }
+    
+    public JMenu createFileMenu(){
+        JMenu result = new JMenu("File");
+        result.add(new Act("fileOpen"));
+        result.add(new Act("fileClose"));
+        result.addSeparator();
+        result.add(new Act("exit"));
+        return result;
+    }
+    public JMenu createUtilMenu(){
+        JMenu result = new JMenu("Util");
+        result.add(new Act("sqlMonitor"));
+        result.add(new Act("testShift"));
+        result.add(new Act("DICTIONARY"));
+        return result;
+    }
     
     public static void main(String[] args) throws Exception{
+        IOpenedForm[] forms = {
+            new CurriculumPanel(),
+            new DepartPanel(),
+            new SchedulePanel(),
+            new TeacherPanel(),
+            new RoomPanel()
+        };
         
-        CurriculumPanel curriculumPanel = new CurriculumPanel();        
-        DepartPanel departPanel = new DepartPanel();
-        SchedulePanel schedulePanel = new SchedulePanel();
         
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("curriculum", curriculumPanel);
-        tabbedPane.addTab("depart",departPanel);
-        tabbedPane.addTab("schedule", schedulePanel);
-        JFrame frame = new JFrame("Test curriculumn");
+        for (IOpenedForm form:forms){
+            tabbedPane.addTab(form.getCaption(), form.getPanel());
+        }
+                
+        JFrame frame = new JFrame("Main4");
+        Main4 panel = new Main4();
+        panel.setLayout(new BorderLayout());
+        panel.add(tabbedPane);
+        
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setContentPane(tabbedPane);
+        frame.setContentPane(panel);
+        frame.setJMenuBar(panel.createMenuBar());
         frame.pack();
         frame.setVisible(true);
 
       
         try{
-            DataModule.getInstance().open();        
-            curriculumPanel.open();
-            departPanel.open();
-            schedulePanel.open();
+            DataModule.getInstance().open(); 
+            
+            panel.monitor.open();
+            panel.testShift.open();
+            panel.dictionary.open();
+
+            for (IOpenedForm form:forms){
+                form.open();
+            }
+            
+            DataModule.getInstance().execute("PRAGMA foreign_keys = ON;");
+        
+            
         } catch (Exception e){
             JOptionPane.showMessageDialog(frame, e.getMessage());
         }

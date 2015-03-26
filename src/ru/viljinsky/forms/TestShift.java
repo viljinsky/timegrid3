@@ -7,12 +7,14 @@
 package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Panel;
+import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -57,6 +59,7 @@ public class TestShift extends Panel{
     Grid grid1 = new MasterGrid();
     Grid grid2 = new Grid();
     Controls controls = new Controls();
+    ControlDetails controlDetails = new ControlDetails();
     
     String masterDataset;
     String slaveDataset;
@@ -67,24 +70,94 @@ public class TestShift extends Panel{
     String comboLookupKey;
     String comboLookupValue;
     
+    public TestShift(){
+//        setPreferredSize(new Dimension(800,600));
+        setLayout(new BorderLayout());
+        JPanel details = new JPanel(new BorderLayout());
+        details.add(new JScrollPane(grid2));
+        details.add(controlDetails,BorderLayout.PAGE_START);
+                
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        splitPane.setTopComponent(new JScrollPane(grid1));
+        splitPane.setBottomComponent(details);
+        splitPane.setResizeWeight(.5);
+        
+        add(controls,BorderLayout.PAGE_START);
+        add(splitPane,BorderLayout.CENTER);
+    }
     
     
+    public void setParams(Map<String,String> params){
+
+        masterDataset       = params.get("masterDataset");
+        slaveDataset        = params.get("slaveDataset");
+        refrenence          = params.get("refrenence");
+
+        comboDataset        = params.get("comboDataset");
+        comboIdColumn       = params.get("comboIdColumn");
+        comboLookupKey      = params.get("comboLookupKey");
+        comboLookupValue    = params.get("comboLookupValue");
+    }
+    
+
+    
+    class Act extends AbstractAction{
+
+        public Act(String name) {
+            super(name);
+            putValue(ACTION_COMMAND_KEY, name);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            doCommand(e.getActionCommand());
+        }
+    }
+    
+    public void doCommand(String command){
+        try{
+            switch (command ){
+                case "INCLUDE":
+                    break;
+                case "EXCLUDE":
+                    break;
+                case "FILL":
+                    break;
+                case "ADD":
+                    break;
+                case "EDIT":
+                    break;
+                case "DELETE":
+                    break;
+                    
+            }
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
+    }
     /**
      * Управление подчинённым датасетом
      */
     class ControlDetails extends JPanel{
-        JButton btnFill;
-        JButton btnInclude;
-        JButton btnExclude;
+        Action[] deatilsAction = {new Act("FILL"),new Act("INCLUDE"),new Act("EXCLUDE")};
+//        JButton btnFill;
+//        JButton btnInclude;
+//        JButton btnExclude;
         
         public ControlDetails(){
             super(new FlowLayout(FlowLayout.LEFT));
-            btnFill = new JButton("fill");
-            btnInclude = new JButton("include");
-            btnExclude = new JButton("exclude");
-            add(btnFill);
-            add(btnInclude);
-            add(btnExclude);
+            JButton btn;
+            for (Action a:deatilsAction){
+                btn=new JButton(a);
+                add(btn);
+            }
+            
+//            btnFill = new JButton("fill");
+//            btnInclude = new JButton("include");
+//            btnExclude = new JButton("exclude");
+//            add(btnFill);
+//            add(btnInclude);
+//            add(btnExclude);
         }
     }
     
@@ -156,33 +229,6 @@ public class TestShift extends Panel{
         
     }
     
-    public TestShift(){
-        setPreferredSize(new Dimension(800,600));
-        setLayout(new BorderLayout());
-        JPanel details = new JPanel(new BorderLayout());
-        details.add(new JScrollPane(grid2));
-        details.add(new ControlDetails(),BorderLayout.PAGE_START);
-                
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        splitPane.setTopComponent(new JScrollPane(grid1));
-        splitPane.setBottomComponent(details);
-        splitPane.setResizeWeight(.5);
-        
-        add(controls,BorderLayout.PAGE_START);
-        add(splitPane,BorderLayout.CENTER);
-    }
-    
-    public void setParans(Map<String,String> params){
-
-        masterDataset       = params.get("masterDataset");
-        slaveDataset        = params.get("slaveDataset");
-        refrenence          = params.get("refrenence");
-
-        comboDataset        = params.get("comboDataset");
-        comboIdColumn       = params.get("comboIdColumn");
-        comboLookupKey      = params.get("comboLookupKey");
-        comboLookupValue    = params.get("comboLookupValue");
-    }
     
     public void open(){
         DataModule dataModule= DataModule.getInstance();
@@ -245,22 +291,23 @@ public class TestShift extends Panel{
     public static void createAndShow(){
     }
     
+    
     public static void main(String[] args) throws Exception{
         DataModule.getInstance().open();
         initParams();
                 
         TestShift panel = new TestShift();
-        panel.setParans(params1);
+        panel.setParams(params1);
         panel.open();
         
         TestShift panel2 = new TestShift();
-        panel2.setParans(params2);
+        panel2.setParams(params2);
         panel2.open();
         
         JFrame frame = new JFrame("TestShift");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        Container content  = frame.getContentPane();
         JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setPreferredSize(new Dimension(500,400));
         tabbedPane.addTab("profile",panel);
         tabbedPane.addTab("shift",panel2);
         frame.setContentPane(tabbedPane);

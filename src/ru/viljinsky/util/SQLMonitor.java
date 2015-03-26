@@ -597,7 +597,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
     }
     
     public void open() throws Exception{
-        dataModule.open();
+//        dataModule.open();
         tree.fill();
         scriptNew();
     }

@@ -82,12 +82,12 @@ insert into skill(id,caption) values(1,'8-класс');
 insert into skill(id,caption) values(2,'9-класс');
 insert into skill(id,caption) values(3,'10-класс');
 
-insert into depart(id,skill_id,shift_id) values (1,1,1);
-insert into depart(id,skill_id,shift_id) values (2,1,1);
-insert into depart(id,skill_id,shift_id) values (3,1,1);
-insert into depart(id,skill_id,shift_id) values (4,1,1);
-insert into depart(id,skill_id,shift_id) values (5,1,1);
-insert into depart(id,skill_id,shift_id) values (6,1,1);
+insert into depart(id,label,skill_id,shift_id) values (1,'1-a',1,1);
+insert into depart(id,label,skill_id,shift_id) values (2,'1-б',1,1);
+insert into depart(id,label,skill_id,shift_id) values (3,'1-в',1,1);
+insert into depart(id,label,skill_id,shift_id) values (4,'2-a',1,1);
+insert into depart(id,label,skill_id,shift_id) values (5,'2-б',1,1);
+insert into depart(id,label,skill_id,shift_id) values (6,'2-в',1,1);
 
 insert into curriculum (id,caption) values (1,'Учебный план 1');
 insert into curriculum (id,caption) values (2,'Учебный план 2');

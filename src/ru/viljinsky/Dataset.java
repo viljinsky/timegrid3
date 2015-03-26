@@ -293,7 +293,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     }
 
     @Override
-    public Boolean delete(Integer rowIndex) {
+    public Boolean delete(Integer rowIndex) throws Exception {
         Object[] rowset = get(rowIndex);
         
         try{
@@ -307,6 +307,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         
         } catch (Exception e){
             e.printStackTrace();
+            throw new Exception("DATASET_DELETE_ERROR:\n"+e.getMessage());
         }
         
         return remove(rowset);

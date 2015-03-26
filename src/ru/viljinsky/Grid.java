@@ -65,7 +65,8 @@ class GridCommand implements ICommand,IGridConstants{
     @Override
     public void doCommand(String command) {
         System.out.println(command);
-        switch(command){
+        try{
+        switch(command){            
             case GRID_APPEND:
                 grid.append();
                 break;
@@ -78,6 +79,9 @@ class GridCommand implements ICommand,IGridConstants{
             case GRID_REFRESH:
                 grid.refresh();
                 break;
+        }
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(grid, e.getMessage());
         }
         updateActionList();
     }
@@ -210,6 +214,7 @@ class GridModel extends AbstractTableModel{
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
+                try{
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER:
                         edit();
@@ -220,6 +225,8 @@ class GridModel extends AbstractTableModel{
                     case KeyEvent.VK_DELETE:
                         delete();
                         break;
+                }} catch (Exception ee){
+                    JOptionPane.showMessageDialog(Grid.this, ee.getMessage());
                 }
             }
         });
@@ -303,7 +310,7 @@ class GridModel extends AbstractTableModel{
         }
     }
     
-    public void delete() {
+    public void delete() throws Exception {
         IDataset dataset = model.dataset;
         int row = getSelectedRow();
         if (row >= 0 && JOptionPane.showConfirmDialog(owner, "Удалить","Внимание",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION) {
@@ -359,6 +366,9 @@ class GridModel extends AbstractTableModel{
         Map<String,Object> values = getSelectedValues();
         if (!values.containsKey(columnName))
             throw new Exception("COLUMN_NOT_FOUND");
+        Object value = values.get(columnName);
+        if (value==null)
+            return null;
         return Integer.valueOf(values.get(columnName).toString());
     }
     
