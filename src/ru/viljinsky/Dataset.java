@@ -152,43 +152,46 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
                 for (String p:info.primaryKey.split(";"))
                     getColumn(p).primary=true;
             
-                // create appendSQL
-                String s1 = "";
-                String s2 = "";
-                for (int col:info.columns.keySet()){
-                    if (!s1.isEmpty()) s1+=",";
-                    s1+=info.columns.get(col).columnName;
-                    if (!s2.isEmpty()) s2+=",";
-                    s2+="?";
+            // create appendSQL
+            String s1 = "";
+            String s2 = "";
+            String columnName;
+            for (int col:info.columns.keySet()){
+                columnName = info.columns.get(col).columnName;
+                if (!s1.isEmpty()) s1+=",";
+                s1+= columnName;
+                if (!s2.isEmpty()) s2+=",";
+                s2+="%"+columnName;
+            }
+
+            // creare deleteSQL
+            String s3 = "";
+            String[] sss =info.primaryKey.split(";");
+            for (String s:sss){
+                if (!s3.isEmpty()) s3+=" and ";
+                s3+=s+"=?";
+            }
+
+            // create updateSQL
+            String strSet="",strWhere="";
+            for (Integer col:info.columns.keySet()){
+                columnName=info.columns.get(col).columnName;
+                if (!strSet.isEmpty()) strSet+=",";
+                strSet += columnName + "=%"+columnName;
+            }
+
+            for (Integer col:info.columns.keySet()){
+                Column column = info.columns.get(col);
+                if (column.isPrimary()){
+                    if (!strWhere.isEmpty()) strWhere+=" and ";
+                    strWhere += column.columnName +"=%"+column.columnName;
                 }
-
-                // creare deleteSQL
-                String s3 = "";
-                String[] sss =info.primaryKey.split(";");
-                for (String s:sss){
-                    if (!s3.isEmpty()) s3+=" and ";
-                    s3+=s+"=?";
-                }
-
-                // create updateSQL
-                String strSet="",strWhere="";
-                for (Integer col:info.columns.keySet()){
-                    if (!strSet.isEmpty()) strSet+=",";
-                    strSet += info.columns.get(col).columnName+"= ?";
-                }
-
-                for (Integer col:info.columns.keySet()){
-                    Column column = info.columns.get(col);
-                    if (column.isPrimary()){
-                        if (!strWhere.isEmpty()) strWhere+=" and ";
-                        strWhere += column.columnName +"=?";
-                    }
-                }
+            }
 
 
-                info.insertSQL="insert into "+info.tableName +"("+s1+") values ("+s2+");";
-                info.deleteSQL="delete from "+info.tableName +" where "+s3+";";
-                info.updateSQL="update "+info.tableName+" set "+strSet+" where "+strWhere;
+            info.insertSQL="insert into "+info.tableName +"("+s1+") values ("+s2+");";
+            info.deleteSQL="delete from "+info.tableName +" where "+s3+";";
+            info.updateSQL="update "+info.tableName+" set "+strSet+" where "+strWhere;
 
 //                System.out.println(info.insertSQL);
 //                System.out.println(info.deleteSQL);
@@ -253,44 +256,44 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     public Integer appned(Map<String, Object> values) throws Exception {
         // проверка автоинкремента
         Column column ;
-        PreparedStatement pstmt = null;
-        try{
-            for (int col:info.columns.keySet()){
-                column=info.columns.get(col);
-                if (column.autoIncrement){
-                    if (values.get(column.columnName)==null){
-                        values.put(column.columnName, getNextValue());
-                    }
+        for (int col:info.columns.keySet()){
+            column=info.columns.get(col);
+            if (column.autoIncrement){
+                if (values.get(column.columnName)==null){
+                    values.put(column.columnName, getNextValue());
                 }
             }
-
-            String sql = info.insertSQL;
-            pstmt = dataModule.con.prepareStatement(sql);
-
-            int n=1;
-            for (String k:values.keySet()){
-                column = getColumn(k);
-                pstmt.setObject(n++, values.get(k));
-            }
-
-            try{
-                pstmt.execute();
-            } catch (Exception e){
-                System.err.println(sql);
-                System.err.println(values);
-                throw new Exception("SQL ERROR\n:"+e.getMessage());
-            }
-
-
-            Object[] rowset = new Object[getColumnCount()];
-            for (String columnName:values.keySet()){
-                rowset[getColumnIndex(columnName)]= values.get(columnName);
-            }
-            add(rowset);
-            return indexOf(rowset);
-        }finally {
-            if (pstmt!=null);pstmt.close();
         }
+
+        String sql = info.insertSQL;
+        String newSql = new String(sql);
+        for (String s:values.keySet()){
+            if (values.get(s)==null)
+                newSql= newSql.replace("%"+s,"null");
+            else
+                newSql= newSql.replace("%"+s,"'"+values.get(s)+"'");
+        }
+        
+        Statement stmt = null;
+        try{
+            stmt = dataModule.con.createStatement();
+            stmt.execute(newSql);
+        } catch (SQLException e){
+            System.err.println(sql);
+            System.err.println(newSql);
+            throw new Exception(e.getMessage());
+        } finally {
+            if (stmt!=null) stmt.close();
+        }
+            
+        Object[] rowset = new Object[getColumnCount()];
+        for (String columnName:values.keySet()){
+            rowset[getColumnIndex(columnName)]= values.get(columnName);
+        }
+        
+        add(rowset);
+        
+        return indexOf(rowset);
     }
 
     @Override
@@ -328,11 +331,29 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             }
         }
         
-        PreparedStatement pstmt = dataModule.con.prepareStatement(info.updateSQL);
-        for (int m:keyMap.keySet()){
-            pstmt.setObject(m, keyMap.get(m));
+        String sql = new String(info.updateSQL);
+        for (String k:values.keySet()){
+            if (values.get(k)==null)
+                sql = sql.replace("%"+k, "null");
+            else
+                sql = sql.replace("%"+k, "'"+values.get(k)+"'");
         }
-        pstmt.execute();
+        Statement stmt =null;
+        try{
+            stmt= dataModule.con.createStatement();
+            stmt.execute(sql);
+        } catch (SQLException e){
+            System.err.println(sql);
+            throw  new Exception (e.getMessage());
+        } finally{
+            if (stmt!=null) stmt.close();
+        }
+        
+//        PreparedStatement pstmt = dataModule.con.prepareStatement(info.updateSQL);
+//        for (int m:keyMap.keySet()){
+//            pstmt.setObject(m, keyMap.get(m));
+//        }
+//        pstmt.execute();
         
         setVlaues(rowIndex, values);
     }

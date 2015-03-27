@@ -7,10 +7,12 @@ create table building(
 drop table if exists room;
 create table room(
     id integer primary key autoincrement,
-    name varchar(18),
-    building_id integer references building(id),
+    name varchar(18) not null,
+    building_id integer not null references building(id),
     profile_id integer references profile(id),
     shift_id integer references shift(id)
+--    constraint unique (building_id) 
+
 );
 
 drop table if exists subject;
