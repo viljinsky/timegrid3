@@ -11,8 +11,6 @@ create table room(
     building_id integer references building(id),
     profile_id integer references profile(id),
     shift_id integer references shift(id)
---    constraint fk_room_profile foreign key (profile_id) references profile(id)
-    
 );
 
 drop table if exists subject;
@@ -27,15 +25,14 @@ create table subject(
 
 drop table if exists profile_type;
 create table profile_type (
-    id integer primary_key,
+    id integer primary key,
     caption varchar(45)
 );
 
 drop table if exists profile;
 create table profile(
     id integer primary key autoincrement,
-    profile_type_id integer,
--- references profile_type(id),
+    profile_type_id integer references profile_type(id),
     name varchar(18)
 );
 
@@ -64,7 +61,7 @@ create table shift_detail(
     shift_id integer references shift(id) on delete cascade,
     day_id integer references day_list(day_no),
     bell_id integer references bell_list(bell_id),
-    enable boolean dafult 'true',
+    enable integer default 1,
     primary key (shift_id,day_id,bell_id),
     unique (shift_id,day_id,bell_id)
 );

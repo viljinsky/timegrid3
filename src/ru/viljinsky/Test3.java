@@ -17,33 +17,50 @@ import java.util.Map;
 public class Test3 {
     public static void main(String[] args) throws Exception{
         DataModule dataModule = DataModule.getInstance();
+        Dataset dataset;
         dataModule.open();
-        Dataset dataset = dataModule.getDataset("curriculum");
-        dataset.open();
-        for (Column column:dataset.getColumns()){
-            System.out.println(column);
-        }
-        Map<String,Object> values;
-        for (int i=0;i<dataset.size();i++){
-            values = dataset.getValues(i);
-            System.out.println(values);
-            
-        }
+//        for (DatasetInfo info: dataModule.infoList ){
+//            info.print();
+//        }
         
-        DatabaseMetaData meta = dataModule.getConnection().getMetaData();
-        ResultSet rs = meta.getColumns(null, null, "curriculum", null);
-        while (rs.next()){
-            System.out.print("->"+rs.getObject("COLUMN_NAME"));
-            System.out.print("->"+rs.getObject("DATA_TYPE"));
-            System.out.print("->"+rs.getObject("TYPE_NAME"));
-            System.out.print("->"+rs.getObject("COLUMN_SIZE"));
-            System.out.print("->"+rs.getObject("IS_NULLABLE"));
-            System.out.print("->"+rs.getObject("REMARKS"));
-            
-            
-            System.out.println();
-            
+        
+//        dataset=dataModule.getDataset("teacher");
+//        dataset.info.print();
+//        System.out.println(dataset.info.columns);
+//        
+//        dataset =dataModule.getSQLDataset("select * from teacher");
+//        dataset.info.print();
+//        System.out.println(dataset.info.columns);
+//        
+//        dataset =dataModule.getDataset("v_teacher");
+//        dataset.info.print();
+//        System.out.println(dataset.info.columns);
+//        
+//        dataset = dataModule.getSQLDataset("select * from shift_detail");
+//        dataset.info.print();
+        
+//        dataset = dataModule.getSQLDataset("SELECT typeof(t), typeof(nu), typeof(i), typeof(r), typeof(no) FROM t1");
+        
+//        dataset = dataModule.getSQLDataset("select * from t1");
+//        dataset.info.print();
+                
+//        dataset = dataModule.getDataset("t1");
+//        dataset.info.print();
+        
+        String s = "12.3";
+        Integer n ;
+        Float f;
+        
+        
+        
+        try{
+            n =  Integer.parseInt(s);
+            System.out.println(n+" "+n.getClass().getName());
+        } catch (Exception e){
+            e.printStackTrace();
         }
+            
+        
     }
     
 }

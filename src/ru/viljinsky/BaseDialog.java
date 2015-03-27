@@ -301,8 +301,24 @@ class EntryPanel extends JPanel{
     
     public Map<String,Object> getValues(){
         Map<String,Object> map= new HashMap<>();
+        String columnName;
+        Column column;
+        Object value;
+        Object v;
+        
         for (IEntryControl control:controls){
-            map.put(control.getColumnName(), control.getValue());
+            columnName=control.getColumnName();
+            column = dataset.getColumn(columnName);
+            value = control.getValue();
+            System.out.println(column.toString()+" "+(value==null?"null":value.getClass().getName()));
+//            switch (column.columnTypeName){
+//                case "INTEGER":
+//                    v=Integer.parseInt((String)value);
+//                    break;
+//                default:
+//                    v=value;
+//            }
+            map.put(columnName, value);
         }
         return map;
     }

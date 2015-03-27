@@ -24,7 +24,7 @@ import java.util.Map;
 public class Dataset extends ArrayList<Object[]> implements IDataset {
     DataModule dataModule = DataModule.getInstance();
     DatasetInfo info;
-    Map<Integer, Column> columns = new HashMap<>();
+//    Map<Integer, Column> columns = new HashMap<>();
     Boolean active = false;
     Boolean editable = false;
 
@@ -43,7 +43,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     
     @Override
     public Column getColumn(Integer columnIndex){
-        return columns.get(columnIndex);
+        return info.columns.get(columnIndex);
     }
     
     @Override
@@ -54,7 +54,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     @Override
     public Map<String,Object> getNewValues(){
         Map<String,Object> result = new HashMap<>();
-        for (int i : columns.keySet()){
+        for (int i : info.columns.keySet()){
             result.put(getColumnName(i), null);
         }
         return result;
@@ -66,8 +66,8 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         Object[] rowset;
         rowset = get(rowIndex);
         Column column;
-        for (int col:columns.keySet()){
-            column=columns.get(col);
+        for (int col:info.columns.keySet()){
+            column=info.columns.get(col);
             result.put(column.columnName,rowset[col]);
         }
         return result;
@@ -84,13 +84,13 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     
     @Override
     public Integer getColumnCount() {
-        return columns.size();
+        return info.columns.size();
     }
 
     @Override
     public Integer getColumnIndex(String columnName) throws Exception{
-        for (Integer col:columns.keySet()){
-            if (columns.get(col).columnName.equals(columnName))
+        for (Integer col:info.columns.keySet()){
+            if (info.columns.get(col).columnName.equals(columnName))
                 return col;
         }
         throw new Exception ("Поле '"+columnName+"' не найдено");
@@ -98,7 +98,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     
 
     public String getColumnName(Integer columnIndex) {
-        return columns.get(columnIndex).columnName;
+        return info.columns.get(columnIndex).columnName;
     }
 
     @Override
@@ -130,16 +130,10 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         this.active = false;
     }
 
-    public Column getColumnByName(String columnName) {
-        Column column;
-        for (int col : columns.keySet()) {
-            column = columns.get(col);
-            if (column.columnName.equals(columnName)) {
-                return column;
-            }
-        }
-        return null;
-    }
+//    @Deprecated
+//    public Column getColumnByName(String columnName) {
+//        return getColumn(columnName);
+//    }
 
     public boolean test() throws Exception {
         Statement stmt = null;
@@ -153,22 +147,20 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             }
             ResultSetMetaData rsmeta = rs.getMetaData();
             for (int i = 0; i < rsmeta.getColumnCount(); i++) {
-                columns.put(i, new Column(rsmeta, i));
+                info.columns.get(i).autoIncrement=rsmeta.isAutoIncrement(i+1);
             }
             
             editable = !info.primaryKey.isEmpty();
             if (editable){
                 for (String p:info.primaryKey.split(";"))
-                    getColumnByName(p).primary=true;
-                
-            
+                    getColumn(p).primary=true;
             
                 // create appendSQL
                 String s1 = "";
                 String s2 = "";
-                for (int col:columns.keySet()){
+                for (int col:info.columns.keySet()){
                     if (!s1.isEmpty()) s1+=",";
-                    s1+=columns.get(col).columnName;
+                    s1+=info.columns.get(col).columnName;
                     if (!s2.isEmpty()) s2+=",";
                     s2+="?";
                 }
@@ -183,13 +175,13 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
 
                 // create updateSQL
                 String strSet="",strWhere="";
-                for (Integer col:columns.keySet()){
+                for (Integer col:info.columns.keySet()){
                     if (!strSet.isEmpty()) strSet+=",";
-                    strSet += columns.get(col).columnName+"= ?";
+                    strSet += info.columns.get(col).columnName+"= ?";
                 }
 
-                for (Integer col:columns.keySet()){
-                    Column column = columns.get(col);
+                for (Integer col:info.columns.keySet()){
+                    Column column = info.columns.get(col);
                     if (column.isPrimary()){
                         if (!strWhere.isEmpty()) strWhere+=" and ";
                         strWhere += column.columnName +"=?";
@@ -266,8 +258,8 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         Column column ;
         PreparedStatement pstmt = null;
         try{
-            for (int col:columns.keySet()){
-                column=columns.get(col);
+            for (int col:info.columns.keySet()){
+                column=info.columns.get(col);
                 if (column.autoIncrement){
                     if (values.get(column.columnName)==null){
                         values.put(column.columnName, getNextValue());
@@ -329,11 +321,11 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         Object[] oldValues = get(rowIndex);
         Map<Integer,Object> keyMap = new HashMap<>();
         int n=1;
-        for (int col:columns.keySet()){
-            keyMap.put(n++, values.get(columns.get(col).columnName));
+        for (int col:info.columns.keySet()){
+            keyMap.put(n++, values.get(info.columns.get(col).columnName));
         }
-        for (int col:columns.keySet()){
-            if (columns.get(col).isPrimary()){
+        for (int col:info.columns.keySet()){
+            if (info.columns.get(col).isPrimary()){
                 keyMap.put(n++, oldValues[col]);
             }
         }
@@ -411,9 +403,9 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
 
     @Override
     public Column[] getColumns() {
-        Column[] result = new Column[columns.size()];
+        Column[] result = new Column[info.columns.size()];
         for (int i=0;i<result.length;i++){
-            result[i]=columns.get(i);
+            result[i]=info.columns.get(i);
         }
         return result;
     }
@@ -498,5 +490,17 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
                 return false;
         }
         return true;
+    }
+
+    @Override
+    public Column getColumn(String columnName) {
+        Column column;
+        for (int col : info.columns.keySet()) {
+            column = info.columns.get(col);
+            if (column.columnName.equals(columnName)) {
+                return column;
+            }
+        }
+        return null;
     }
 }

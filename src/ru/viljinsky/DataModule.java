@@ -12,6 +12,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -64,28 +65,24 @@ public class DataModule implements IDataModule,IDataModuleConsts {
     }
     
     public void reopen() throws Exception{
-        if (active){
-            for (Dataset dataset:datasetList)
-                dataset.close();
-            datasetList.clear();
-            infoList.clear();
-            //    duplicate
-            DatabaseMetaData meta = con.getMetaData();
-            ResultSet rs = meta.getTables(null,null,null, new String[]{"TABLE","VIEW"});
-            String tableName;
-            DatasetInfo info;
-            while (rs.next()){
-                tableName = rs.getString("TABLE_NAME");
-                info = new DatasetInfo(tableName,meta);
-                info.tableType = rs.getString("TABLE_TYPE");
-                infoList.add(info);
-            }
-            //
-            
-            
-        } else {
+        if (!active)
             throw new Exception(DATABASE_NOT_ACTIVE);
+        for (Dataset dataset:datasetList)
+            dataset.close();
+        datasetList.clear();
+        infoList.clear();
+        //    duplicate
+        DatabaseMetaData meta = con.getMetaData();
+        ResultSet rs = meta.getTables(null,null,null, new String[]{"TABLE","VIEW"});
+        String tableName;
+        DatasetInfo info;
+        while (rs.next()){
+            tableName = rs.getString("TABLE_NAME");
+            info = new DatasetInfo(tableName,meta);
+            info.tableType = rs.getString("TABLE_TYPE");
+            infoList.add(info);
         }
+            
     }
     
     public void open(String fileName) throws Exception{
@@ -168,6 +165,52 @@ public class DataModule implements IDataModule,IDataModuleConsts {
     @Override
     public Dataset getSQLDataset(String sql){
         DatasetInfo info = new DatasetInfo();
+        info.tableType="SQL";
+        
+        Statement stmt = null;
+        ResultSet rs = null;
+        Column column;
+        try{
+            stmt = con.createStatement();
+            rs= stmt.executeQuery(sql+" limit 1");
+            ResultSetMetaData rsmeta = rs.getMetaData();
+            for (int i=0;i<rsmeta.getColumnCount();i++){
+                column = new Column();
+                rsmeta.getColumnName(i+1);
+                column.columnIndex= i+1;
+                column.tableName=rsmeta.getTableName(i+1);
+                column.columnName=rsmeta.getColumnName(i+1);
+                column.columnLabel=rsmeta.getColumnLabel(i+1);
+                column.columnTypeName=rsmeta.getColumnTypeName(i+1);
+                column.columnType = rsmeta.getColumnType(i+1);
+                
+                switch(column.columnType){
+                    
+                    case  java.sql.Types.INTEGER:
+                        column.columnClassName=Integer.class.getName();
+                        break;
+                        
+                    case java.sql.Types.FLOAT:
+                        column.columnClassName=Float.class.getName();
+                        break;
+                        
+                    case java.sql.Types.NUMERIC:
+                        column.columnClassName=Double.class.getName();
+                        
+                    case java.sql.Types.VARCHAR:
+                        column.columnClassName=String.class.getName();
+                        break;
+                }
+                info.columns.put(i, column);
+            }
+            
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            if (stmt!=null) try{ stmt.close(); } catch (Exception e){};
+        }
+        
+        
         info.selectSQL = sql;
         Dataset dataset = new Dataset(info);
         

@@ -431,7 +431,7 @@ public class Main4 extends JPanel{
                 form.open();
             }
             
-            DataModule.getInstance().execute("PRAGMA foreign_keys = ON;");
+//            DataModule.getInstance().execute("PRAGMA foreign_keys = ON;");
         
             
         } catch (Exception e){

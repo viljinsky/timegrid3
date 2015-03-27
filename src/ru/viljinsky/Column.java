@@ -28,6 +28,7 @@ public class Column {
     boolean autoIncrement;
     boolean primary = false;
     Integer columnType;
+    Integer columnIndex;
 
     public Column() {
     }
@@ -90,18 +91,26 @@ public class Column {
     
     @Override
     public String toString() {
-        return columnName+" "+columnType;
-//        return tableName + "." + columnName + " (" + columnTypeName + ")\n"
-//                +"columnLanel     = "+columnLabel+"\n"
-//                +"columnTypeName  = "+columnTypeName+"\n"
-//                +"columnType      = "+columnType+"\n"
-//                +"columnWidth     ="+columnWidth+"\n"
-//                +"cloumnClassName = "+columnClassName+"\n"
-//                +"displaySize     = "+ displaySize+"\n"
-//                +"scale           = "+scale+"\n"
-//                +"precision       = "+precision+"\n"
-//                +"autoIncrement   = "+autoIncrement+"\n"
-//                +"\n";
+        return columnName+"  ("
+                +  columnTypeName+(primary?"  PK":"")
+                + (autoIncrement==true?" AU":"")+")";
+    }
+    
+    public void print(){    
+        System.out.println(
+                 "columnIndex     = "+columnIndex+"\n"
+                +"tableName       = "+tableName + "\n"
+                +"columnName      = "+ columnName + "\n"
+                +"columnLanel     = "+columnLabel+"\n"
+                +"columnTypeName  = "+columnTypeName+"\n"
+                +"columnType      = "+columnType+"\n"
+                +"columnWidth     ="+columnWidth+"\n"
+                +"cloumnClassName = "+columnClassName+"\n"
+                +"displaySize     = "+ displaySize+"\n"
+                +"scale           = "+scale+"\n"
+                +"precision       = "+precision+"\n"
+                +"autoIncrement   = "+autoIncrement+"\n"
+                +"\n");
     }
 
     public String getColumnName() {

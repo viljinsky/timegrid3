@@ -622,7 +622,9 @@ public class SQLMonitor extends JFrame implements MenuConstants{
         frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-//        frame.open();
+        
+        DataModule.getInstance().open();
+        frame.open();
     }
 }
 
