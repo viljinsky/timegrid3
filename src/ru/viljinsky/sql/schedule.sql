@@ -126,9 +126,7 @@ create table curriculum_detail(
     hour_per_day integer not null,
     hour_per_week integer not null,
     group_type_id integer not null default 0 references group_type(id),
-    constraint pk_cur_det primary key (curriculum_id,subject_id)
-    
-
+    constraint pk_cur_det primary key (curriculum_id,subject_id)    
 );
 
 
@@ -151,7 +149,8 @@ create table schedule (
     subject_id integer,
     group_id integer,
     teacher_id integer references teacher(id),
-    room_id integer integer references room(id) 
+    room_id integer integer references room(id),
+    primary key (day_id,bell_id,depart_id,subject_id,group_id) 
 );
 
 

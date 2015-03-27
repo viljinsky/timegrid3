@@ -11,13 +11,14 @@ package ru.viljinsky;
  * @author вадик
  */
 public interface IDataModule{
+    
     public void open() throws Exception;
     public void close() throws Exception;
     public boolean isActive();
     // Получение датасетов
     
     // Список имён базовых таблиц
-    public String[] getTableNames();
+    public String[] getTableNames() throws Exception;
     // Получение набора записей базовой таблицы
     public Dataset getDataset(String tableName) throws Exception;
     // Получение набора записей из запроса

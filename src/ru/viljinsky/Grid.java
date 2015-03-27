@@ -33,6 +33,7 @@ interface IGridConstants{
     public static String GRID_EDIT = "edit";
     public static String GRID_DELETE = "delete";
     public static String GRID_REFRESH = "refresh";
+    public static String GRID_REQUERY = "requery";
 }
 
 class GridCommand implements ICommand,IGridConstants{
@@ -40,7 +41,8 @@ class GridCommand implements ICommand,IGridConstants{
         new Act(GRID_APPEND),
         new Act(GRID_EDIT),
         new Act(GRID_DELETE),
-        new Act(GRID_REFRESH)
+        new Act(GRID_REFRESH),
+        new Act(GRID_REQUERY)
     };
     Grid grid = null;
     
@@ -79,6 +81,8 @@ class GridCommand implements ICommand,IGridConstants{
             case GRID_REFRESH:
                 grid.refresh();
                 break;
+            case GRID_REQUERY:
+                grid.requery();
         }
         } catch (Exception e){
             JOptionPane.showMessageDialog(grid, e.getMessage());

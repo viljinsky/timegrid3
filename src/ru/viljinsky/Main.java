@@ -18,7 +18,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
@@ -138,10 +137,11 @@ public class Main extends JFrame {
     }
     
     public void open(){
-        Grid grid;
-        Dataset dataset ;
+//        Grid grid;
+//        Dataset dataset ;
         try{
             dataModule.open();
+            dataModule.execute("pragma foreign_keys=ON;");
             onDataOpen();
 
         } catch (Exception e){

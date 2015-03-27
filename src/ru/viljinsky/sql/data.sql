@@ -1,5 +1,8 @@
 insert into building (id,caption) values (1,'Главное здание');
 
+
+
+
 insert into group_type (id,group_type_caption) values (0,'весь класс');
 insert into group_type (id,group_type_caption) values (1,'м.-д.');
 insert into group_type (id,group_type_caption) values (2,'группы');
@@ -35,7 +38,7 @@ insert into profile(id,profile_type_id,name) values (4,1,'Преподавате
 
 --    Графики помещений
 
-insert into profile(id,profile_type_id,name) values (5,2,'Кабинет 1');
+insert into profile(id,profile_type_id,name) values ('5',2,'Кабинет 1');
 insert into profile(id,profile_type_id,name) values (6,2,'Кабинет 2');
 insert into profile(id,profile_type_id,name) values (7,2,'Кабинет 3');
 insert into profile(id,profile_type_id,name) values (8,2,'Кабинет 4');
@@ -49,7 +52,16 @@ insert into shift(id,shift_type_id,name) values(1,1,'Первая смена');
 insert into shift(id,shift_type_id,name) values(2,1,'Вторая смена');  
 insert into shift(id,shift_type_id,name) values(3,2,'График преподавателя 1');  
 insert into shift(id,shift_type_id,name) values(4,3,'График преподавателя 2');  
-insert into shift(id,shift_type_id,name) values(5,3,'Обычный кабинет');  
+insert into shift(id,shift_type_id,name) values('5',3,'Обычный кабинет');  
+
+
+insert into room(id,building_id,name,shift_id,profile_id) values (1,1,'каб 31',5,5);
+insert into room(id,building_id,name,shift_id,profile_id) values (2,1,'каб 32',5,5);
+insert into room(id,building_id,name,shift_id,profile_id) values (3,1,'каб 33',5,5);
+insert into room(id,building_id,name,shift_id,profile_id) values (4,1,'каб 34',5,5);
+insert into room(id,building_id,name,shift_id,profile_id) values (5,1,'каб 35',5,5);
+insert into room(id,building_id,name,shift_id,profile_id) values (6,1,'каб 36',5,5);
+
 
 --
 --                Предметы
@@ -70,29 +82,33 @@ insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,d
 insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
      values (7,'Физ.культура',1,1,2);
         
-insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) values (1,'Иванова','Ирина','',1,1);
-insert into teacher (id,last_name,first_name,patronymic,profile_id) values (2,'Петрова','Людмила','',2);
-insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) values (3,'Сидорова','Лариса','',3,1);
-insert into teacher (id,last_name,first_name,patronymic) values (4,'Романова','Татьяна','');
-insert into teacher (id,last_name,first_name,patronymic,profile_id) values (5,'Галкина','Клавдия','',4);
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) 
+    values (1,'Иванова','Ирина','Ивановна',1,1);
+insert into teacher (id,last_name,first_name,patronymic,profile_id) 
+    values (2,'Петрова','Людмила','Олеговна',2);
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
+    values (3,'Сидорова','Лариса','Петровна',3,1);
+insert into teacher (id,last_name,first_name,patronymic)
+    values (4,'Романова','Татьяна','Игоревна');
+insert into teacher (id,last_name,first_name,patronymic,profile_id)
+    values (5,'Галкина','Клавдия','Николоаевна',4);
 
-insert into room(id,name,shift_id,profile_id) values (1,'каб 31',5,5);
 
 
 insert into skill(id,caption) values(1,'8-класс');
 insert into skill(id,caption) values(2,'9-класс');
 insert into skill(id,caption) values(3,'10-класс');
 
-insert into depart(id,label,skill_id,shift_id) values (1,'1-a',1,1);
-insert into depart(id,label,skill_id,shift_id) values (2,'1-б',1,1);
-insert into depart(id,label,skill_id,shift_id) values (3,'1-в',1,1);
-insert into depart(id,label,skill_id,shift_id) values (4,'2-a',1,1);
-insert into depart(id,label,skill_id,shift_id) values (5,'2-б',1,1);
-insert into depart(id,label,skill_id,shift_id) values (6,'2-в',1,1);
+insert into depart(id,label,skill_id,shift_id) values (1,'8-a',1,1);
+insert into depart(id,label,skill_id,shift_id) values (2,'8-б',1,1);
+insert into depart(id,label,skill_id,shift_id) values (3,'9-а',2,1);
+insert into depart(id,label,skill_id,shift_id) values (4,'9-б',2,1);
+insert into depart(id,label,skill_id,shift_id) values (5,'10-а',3,1);
+insert into depart(id,label,skill_id,shift_id) values (6,'10-б',3,1);
 
-insert into curriculum (id,caption) values (1,'Учебный план 1');
-insert into curriculum (id,caption) values (2,'Учебный план 2');
-insert into curriculum (id,caption) values (3,'Учебный план 3');
+insert into curriculum (id,skill_id,caption) values (1,1,'Уч. план 8-го класса');
+insert into curriculum (id,skill_id,caption) values (2,2,'Уч. план 9-го класса');
+insert into curriculum (id,skill_id,caption) values (3,3,'Уч. план 10-го класса');
 
 insert into curriculum_detail(curriculum_id,subject_id,hour_per_day,hour_per_week)
   values(1,1,2,2);

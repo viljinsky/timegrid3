@@ -126,7 +126,7 @@ public class CreateData {
     
     public static void main(String[] args){
         String fileName = "example.db";
-        String[] script = {"sql/createData.sql","sql/fillData.sql"};
+        String[] script = {"sql/schedule.sql","sql/data.sql"};
         CreateData cd = new CreateData();
         System.out.println("Создаётся новая база данных...");
         try{

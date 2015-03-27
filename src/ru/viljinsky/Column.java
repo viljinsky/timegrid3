@@ -33,49 +33,49 @@ public class Column {
     public Column() {
     }
 
-    public Column(ResultSetMetaData rsmeta, Integer columnIndex) throws Exception {
-        try {
-            tableName       = rsmeta.getTableName(columnIndex + 1);
-            columnName      = rsmeta.getColumnName(columnIndex + 1);
-            displayLabel    = columnName;
-            
-            columnClassName = rsmeta.getColumnClassName(columnIndex + 1);
-            precision       = rsmeta.getPrecision(columnIndex+1);
-            scale           = rsmeta.getScale(columnIndex+1);
-            columnLabel     = rsmeta.getColumnLabel(columnIndex+1);
-            displaySize     = rsmeta.getColumnDisplaySize(columnIndex+1);
-            autoIncrement   = rsmeta.isAutoIncrement(columnIndex+1);
-            columnType      = rsmeta.getColumnType(columnIndex+1);
-            columnTypeName  = rsmeta.getColumnTypeName(columnIndex+1);
-            switch (columnType){
-                case java.sql.Types.INTEGER:
-                    columnClassName = Integer.class.getName();
-                    break;
-                case java.sql.Types.VARCHAR:
-                    columnClassName = String.class.getName();
-                    break;
-                case java.sql.Types.REAL:
-                    columnClassName = Float.class.getName();
-                    break;
-                case java.sql.Types.FLOAT:
-                    columnClassName = Float.class.getName();
-                    break;
-                case java.sql.Types.DATE:
-                    columnClassName = Date.class.getName();
-                    break;
-//                case java.sql.Types.TIME:
-//                    columnClassName = Time.class.getName();
+//    public Column(ResultSetMetaData rsmeta, Integer columnIndex) throws Exception {
+//        try {
+//            tableName       = rsmeta.getTableName(columnIndex + 1);
+//            columnName      = rsmeta.getColumnName(columnIndex + 1);
+//            displayLabel    = columnName;
+//            
+//            columnClassName = rsmeta.getColumnClassName(columnIndex + 1);
+//            precision       = rsmeta.getPrecision(columnIndex+1);
+//            scale           = rsmeta.getScale(columnIndex+1);
+//            columnLabel     = rsmeta.getColumnLabel(columnIndex+1);
+//            displaySize     = rsmeta.getColumnDisplaySize(columnIndex+1);
+//            autoIncrement   = rsmeta.isAutoIncrement(columnIndex+1);
+//            columnType      = rsmeta.getColumnType(columnIndex+1);
+//            columnTypeName  = rsmeta.getColumnTypeName(columnIndex+1);
+//            switch (columnType){
+//                case java.sql.Types.INTEGER:
+//                    columnClassName = Integer.class.getName();
 //                    break;
-                case java.sql.Types.BOOLEAN:
-                    columnClassName = Boolean.class.getName();
-                    break;
-                    
-            };
-//            System.out.println(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//                case java.sql.Types.VARCHAR:
+//                    columnClassName = String.class.getName();
+//                    break;
+//                case java.sql.Types.REAL:
+//                    columnClassName = Float.class.getName();
+//                    break;
+//                case java.sql.Types.FLOAT:
+//                    columnClassName = Float.class.getName();
+//                    break;
+//                case java.sql.Types.DATE:
+//                    columnClassName = Date.class.getName();
+//                    break;
+////                case java.sql.Types.TIME:
+////                    columnClassName = Time.class.getName();
+////                    break;
+//                case java.sql.Types.BOOLEAN:
+//                    columnClassName = Boolean.class.getName();
+//                    break;
+//                    
+//            };
+////            System.out.println(this);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
     
     public boolean isPrimary(){
         return primary;

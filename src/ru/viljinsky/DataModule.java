@@ -47,6 +47,7 @@ public class DataModule implements IDataModule,IDataModuleConsts {
     public List<DatasetInfo> getInfoList(){
         return infoList;
     }
+    
     public static DataModule getInstance(){
         if (instance==null){
             instance = new DataModule();
@@ -128,6 +129,10 @@ public class DataModule implements IDataModule,IDataModuleConsts {
             System.out.println(dataset.getTableName());
             dataset.close();
         }
+        for (Dataset dataset:datasetList){
+            dataset.close();
+        }
+        
         datasetList.clear();
         infoList.clear();
         con.close();
@@ -138,7 +143,9 @@ public class DataModule implements IDataModule,IDataModuleConsts {
     
     
     @Override
-    public String[] getTableNames(){
+    public String[] getTableNames() throws Exception{
+        if (!active)
+            throw new Exception(DATABASE_NOT_ACTIVE);
         String[] result = new String[infoList.size()];
         int i=0;
         for (DatasetInfo info:infoList){

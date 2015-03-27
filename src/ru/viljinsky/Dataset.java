@@ -128,13 +128,10 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     public void close() throws Exception {
         this.clear();
         this.active = false;
+        System.out.println("Dataset \""+info.tableName+"\" closed");
     }
-
-//    @Deprecated
-//    public Column getColumnByName(String columnName) {
-//        return getColumn(columnName);
-//    }
-
+    
+    @Override
     public boolean test() throws Exception {
         Statement stmt = null;
         ResultSet rs;
@@ -272,6 +269,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
 
             int n=1;
             for (String k:values.keySet()){
+                column = getColumn(k);
                 pstmt.setObject(n++, values.get(k));
             }
 
@@ -354,7 +352,10 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         "shift_type=caption",
         "profile_type=caption",
         "day_list=day_caption",
-        "bell_list=time_start"
+        "bell_list=time_start",
+        "room=name",
+        "teacher=last_name",
+        "building=caption"
     } ;
     
     public Map<String,String> getLookupMap(){
