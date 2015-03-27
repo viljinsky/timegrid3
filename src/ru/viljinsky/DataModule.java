@@ -25,6 +25,7 @@ class DataMap extends HashMap<String,Object>{
 interface IDataModuleConsts {
     public static final String  DATABASE_NOT_ACTIVE = "База данных не открыта";
     public static final String  DATABASE_IS_ACTIVE  = "База открыта";
+    public static final String  FILE_NOT_FOUND = "Файл \"%s\" не найден";
 }
 
 public class DataModule implements IDataModule,IDataModuleConsts {
@@ -92,7 +93,7 @@ public class DataModule implements IDataModule,IDataModuleConsts {
             throw new Exception(DATABASE_IS_ACTIVE);
         File file = new File(fileName);
         if (!file.exists()){
-            throw new Exception("file "+fileName+" not found");
+            throw new Exception(String.format(FILE_NOT_FOUND, fileName));
         }
         
         try{

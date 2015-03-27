@@ -46,7 +46,7 @@ class DictPanel extends JPanel{
 
 public class Dictonary extends JFrame{
     JTabbedPane tabbedPane = new JTabbedPane();
-    String[] tableNames = {"subject","day_list","bell_list","building"};
+    String[] tableNames = {"skill","subject","day_list","bell_list","building"};
     Controls controls=new Controls();
 
     class Controls extends JPanel implements ActionListener{

@@ -147,7 +147,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         try {
             stmt = dataModule.con.createStatement();
             try{
-                rs = stmt.executeQuery(info.selectSQL+" where null");
+                rs = stmt.executeQuery(info.selectSQL+" limit 1;");
             } catch (Exception e){
                 throw new Exception("TestError:\n"+e.getMessage());
             }
@@ -264,32 +264,43 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     public Integer appned(Map<String, Object> values) throws Exception {
         // проверка автоинкремента
         Column column ;
-        for (int col:columns.keySet()){
-            column=columns.get(col);
-            if (column.autoIncrement){
-                if (values.get(column.columnName)==null){
-                    values.put(column.columnName, getNextValue());
+        PreparedStatement pstmt = null;
+        try{
+            for (int col:columns.keySet()){
+                column=columns.get(col);
+                if (column.autoIncrement){
+                    if (values.get(column.columnName)==null){
+                        values.put(column.columnName, getNextValue());
+                    }
                 }
             }
+
+            String sql = info.insertSQL;
+            pstmt = dataModule.con.prepareStatement(sql);
+
+            int n=1;
+            for (String k:values.keySet()){
+                pstmt.setObject(n++, values.get(k));
+            }
+
+            try{
+                pstmt.execute();
+            } catch (Exception e){
+                System.err.println(sql);
+                System.err.println(values);
+                throw new Exception("SQL ERROR\n:"+e.getMessage());
+            }
+
+
+            Object[] rowset = new Object[getColumnCount()];
+            for (String columnName:values.keySet()){
+                rowset[getColumnIndex(columnName)]= values.get(columnName);
+            }
+            add(rowset);
+            return indexOf(rowset);
+        }finally {
+            if (pstmt!=null);pstmt.close();
         }
-        
-        String sql = info.insertSQL;
-        PreparedStatement pstmt = dataModule.con.prepareStatement(sql);
-        
-        int n=1;
-        for (String k:values.keySet()){
-            pstmt.setObject(n++, values.get(k));
-        }
-        
-        pstmt.execute();
-        
-        
-        Object[] rowset = new Object[getColumnCount()];
-        for (String columnName:values.keySet()){
-            rowset[getColumnIndex(columnName)]= values.get(columnName);
-        }
-        add(rowset);
-        return indexOf(rowset);
     }
 
     @Override

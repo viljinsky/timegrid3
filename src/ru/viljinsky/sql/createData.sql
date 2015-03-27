@@ -8,9 +8,11 @@ drop table if exists room;
 create table room(
     id integer primary key autoincrement,
     name varchar(18),
-    building_id integer references building(id) on delete cascade,
-    profile_id integer references profile(id) on delete set null,
-    shift_id integer references shift(id) on delete set null
+    building_id integer references building(id),
+    profile_id integer references profile(id),
+    shift_id integer references shift(id)
+--    constraint fk_room_profile foreign key (profile_id) references profile(id)
+    
 );
 
 drop table if exists subject;
@@ -32,7 +34,8 @@ create table profile_type (
 drop table if exists profile;
 create table profile(
     id integer primary key autoincrement,
-    profile_type_id integer references profile_type(id),
+    profile_type_id integer,
+-- references profile_type(id),
     name varchar(18)
 );
 
@@ -80,7 +83,8 @@ create table teacher(
 
 drop table if exists skill;
 create table skill(
-    id integer primary key autoincrement,caption varchar(18)
+    id integer primary key autoincrement,
+    caption varchar(18) unique
 );
 
 drop table if exists depart;

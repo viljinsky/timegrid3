@@ -255,6 +255,7 @@ class EntryPanel extends JPanel{
         
         for (int i=0;i<controls.length;i++){
             column = dataset.getColumn(i);
+//            System.out.println("-->"+column.columnClassName);
             try{
                 lookupValues = dataset.getLookup(column.columnName);
             } catch (Exception e){

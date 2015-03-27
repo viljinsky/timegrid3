@@ -83,6 +83,8 @@ public class CreateData {
             con = DriverManager.getConnection(String.format("jdbc:sqlite:%s",fileName));
             stmt = con.createStatement();
             
+            stmt.execute("pragma foreign_keys = ON;");
+            
             reader = new SQLReader() {
 
                 @Override

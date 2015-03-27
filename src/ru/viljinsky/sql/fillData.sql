@@ -1,3 +1,4 @@
+insert into building (id,caption) values (1,'Главное здание');
 
 insert into group_type (id,group_type_caption) values (0,'весь класс');
 insert into group_type (id,group_type_caption) values (1,'м.-д.');
@@ -69,9 +70,9 @@ insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,d
 insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
      values (7,'Физ.культура',1,1,2);
         
-insert into teacher (id,last_name,first_name,patronymic,profile_id) values (1,'Иванова','Ирина','',1);
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) values (1,'Иванова','Ирина','',1,1);
 insert into teacher (id,last_name,first_name,patronymic,profile_id) values (2,'Петрова','Людмила','',2);
-insert into teacher (id,last_name,first_name,patronymic,profile_id) values (3,'Сидорова','Лариса','',3);
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) values (3,'Сидорова','Лариса','',3,1);
 insert into teacher (id,last_name,first_name,patronymic) values (4,'Романова','Татьяна','');
 insert into teacher (id,last_name,first_name,patronymic,profile_id) values (5,'Галкина','Клавдия','',4);
 
