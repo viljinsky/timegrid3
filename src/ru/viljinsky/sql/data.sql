@@ -1,3 +1,9 @@
+insert into week(id,caption) values (0,'Каждую неделю');
+insert into week(id,caption) values (1,'Нечётная нед.');
+insert into week(id,caption) values (2,'Чётная нед.');
+
+
+
 insert into building (id,caption) values (1,'Главное здание');
 
 

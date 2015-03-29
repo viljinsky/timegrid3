@@ -53,6 +53,7 @@ public class DatasetInfo {
             addPrimaryKey(rs.getString("COLUMN_NAME"));
         
         Column column;
+        String columnTypeName;
         rs = meta.getColumns(null, null, tableName, null);
         while (rs.next()){
             column = new Column();
@@ -60,27 +61,29 @@ public class DatasetInfo {
             column.tableName=tableName;
             column.columnName=rs.getString("COLUMN_NAME");
             column.columnTypeName=rs.getString("TYPE_NAME");
+            columnTypeName=rs.getString("TYPE_NAME");
             column.columnType=rs.getInt("DATA_TYPE");
 
-            switch (column.columnType){
-                    case  java.sql.Types.INTEGER:
-                        column.columnClassName=Integer.class.getName();
+            switch (columnTypeName){
+                    case  "INTEGER":
+                        column.columnClass= Integer.class;
                         break;
                         
-                    case java.sql.Types.FLOAT:
-                        column.columnClassName=Float.class.getName();
+                    case "FLOAT":
+                        column.columnClass= Float.class;
                         break;
                         
-                    case java.sql.Types.NUMERIC:
-                        column.columnClassName=Double.class.getName();
-                        
-                    case java.sql.Types.VARCHAR:
-                        column.columnClassName=String.class.getName();
+                    case "NUMERIC":
+                        column.columnClass=Double.class;
                         break;
+                        
+                    case "BOOLEAN":
+                        column.columnClass=Boolean.class;
+                        break;
+                     default:
+                        column.columnClass=Object.class;
                 
             }
-            
-//            column.precision=rs.getInt("DECIMAL_DIGITS");
             columns.put(column.columnIndex, column);
         }
         

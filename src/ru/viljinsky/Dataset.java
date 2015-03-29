@@ -32,6 +32,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     public boolean isEditable(){
         return editable;
     }
+    
     public Dataset(DatasetInfo info) {
         this.info=info;
     }
@@ -349,12 +350,6 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             if (stmt!=null) stmt.close();
         }
         
-//        PreparedStatement pstmt = dataModule.con.prepareStatement(info.updateSQL);
-//        for (int m:keyMap.keySet()){
-//            pstmt.setObject(m, keyMap.get(m));
-//        }
-//        pstmt.execute();
-        
         setVlaues(rowIndex, values);
     }
 
@@ -373,10 +368,12 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         "shift_type=caption",
         "profile_type=caption",
         "day_list=day_caption",
-        "bell_list=time_start",
+        "bell_list=time_start;time_end",
         "room=name",
-        "teacher=last_name",
-        "building=caption"
+        "teacher=last_name;first_name;patronymic",
+        "building=caption",
+        "week=caption",
+        "depart=label"
     } ;
     
     public Map<String,String> getLookupMap(){
@@ -405,6 +402,8 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         if (rName == null)
             rName = cName;
         
+        String[] luColumns = rName.split(";");
+        
                 
         Dataset lookupDataset = dataModule.getDataset(tName);
         lookupDataset.open();
@@ -413,7 +412,13 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             values = lookupDataset.getValues(i);
             if (values!=null){
                 try{
-                    map.put(values.get(cName),values.get(rName).toString());
+                    String value = "";
+                    for (String luColumn:luColumns){
+                        if (!value.isEmpty()) value +=" ";
+                        value += (String)values.get(luColumn);
+                    }
+//                    System.out.println(value);
+                    map.put(values.get(cName),value);//values.get(rName).toString());
                 } catch (Exception e){
                     System.err.println(tName+" "+cName );
                 }
@@ -441,7 +446,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             for (String columnName:map.keySet()){
                 rf=map.get(columnName).split("\\.")[0];
                 if (rf.equals(this.info.tableName)){
-                    System.out.println(info.tableName+" "+columnName);
+//                    System.out.println(info.tableName+" "+columnName);
                     result.put(info.tableName, columnName);
                 }
             }

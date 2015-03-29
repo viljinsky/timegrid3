@@ -6,10 +6,6 @@
 
 package ru.viljinsky;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.util.Map;
-
 /**
  *
  * @author вадик
@@ -24,9 +20,11 @@ public class Test3 {
 //        }
         
         
-//        dataset=dataModule.getDataset("teacher");
-//        dataset.info.print();
-//        System.out.println(dataset.info.columns);
+        dataset=dataModule.getSQLDataset("select * from schedule");
+        dataset.info.print();
+        System.out.println(dataset.info.columns);
+        dataset.open();
+        dataset.print();
 //        
 //        dataset =dataModule.getSQLDataset("select * from teacher");
 //        dataset.info.print();
@@ -47,18 +45,6 @@ public class Test3 {
 //        dataset = dataModule.getDataset("t1");
 //        dataset.info.print();
         
-        String s = "12.3";
-        Integer n ;
-        Float f;
-        
-        
-        
-        try{
-            n =  Integer.parseInt(s);
-            System.out.println(n+" "+n.getClass().getName());
-        } catch (Exception e){
-            e.printStackTrace();
-        }
             
         
     }

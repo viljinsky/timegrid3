@@ -21,12 +21,15 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListDataListener;
@@ -179,8 +182,6 @@ class ComboControl extends JComboBox implements IEntryControl{
         this.map=lookup;
         Model model = new Model();
         setModel(model);
-        
-       
     }
 
     @Override
@@ -202,6 +203,73 @@ class ComboControl extends JComboBox implements IEntryControl{
     @Override
     public Object getValue() {
         return value;
+    }
+}
+
+class BoolControl extends JCheckBox implements IEntryControl{
+    Column column;
+    
+    public BoolControl(Column column){
+        this.column=column;
+    }
+
+    @Override
+    public String getColumnName() {
+        return column.columnName;
+    }
+
+    @Override
+    public JComponent getComponent() {
+        return this;
+    }
+
+    @Override
+    public void setValue(Object value) {
+        if (value!=null){
+            setSelected(value.toString().equals("true"));
+        }
+    }
+
+    @Override
+    public Object getValue() {
+        if (isSelected())
+            return "true";
+        else
+            return "false";
+    }
+}
+class TextControl extends JTextArea implements IEntryControl{
+    String columnName;
+    public TextControl(String columnName){
+        super(7, 25);
+        this.columnName=columnName;
+    }
+
+    @Override
+    public String getColumnName() {
+        return columnName;
+    }
+
+    @Override
+    public JComponent getComponent() {
+        return new JScrollPane(this);
+    }
+
+    @Override
+    public void setValue(Object value) {
+        if (value== null)
+            setText("");
+        else
+            setText(value.toString());
+    }
+
+    @Override
+    public Object getValue() {
+        if (getText().isEmpty())
+            return null;
+        else
+            return getText();
+                    
     }
 }
 
@@ -252,7 +320,7 @@ class EntryPanel extends JPanel{
         Column column;
         IEntryControl cntr;
         Map<Object,String> lookupValues = null;
-        
+        Box box;
         for (int i=0;i<controls.length;i++){
             column = dataset.getColumn(i);
 //            System.out.println("-->"+column.columnClassName);
@@ -266,15 +334,34 @@ class EntryPanel extends JPanel{
             if (lookupValues!=null)
                 cntr = new ComboControl(column,lookupValues);
             else
-                cntr = new EditControl(column.columnName);
+                switch (column.columnTypeName){
+                    case "BOOLEAN":
+                        cntr=new BoolControl(column);
+                        break;
+                    case "BLOB":
+                        cntr = new TextControl(column.columnName);
+                        break;
+                    default:
+                        cntr = new EditControl(column.columnName);
+                }
             controls[i]=cntr;
             
-            Box box = Box.createHorizontalBox();
-            box.add(new JLabel(dataset.getColumn(i).columnName));
-            box.add(Box.createHorizontalStrut(6));
-            box.add(cntr.getComponent());
-            box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
-            add(box);
+            if (!column.columnTypeName.equals("BLOB")){
+                box = Box.createHorizontalBox();
+                box.add(new JLabel(dataset.getColumn(i).columnName));
+                box.add(Box.createHorizontalStrut(6));
+                box.add(cntr.getComponent());
+                box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+                add(box);
+            } else {
+                box=Box.createHorizontalBox();
+                box.add(new JLabel(cntr.getColumnName()));
+                box.add(Box.createHorizontalGlue());
+                add(box);
+                box=Box.createHorizontalBox();
+                box.add(cntr.getComponent());
+                add(box);
+            }
             add(Box.createVerticalStrut(12));
             
         }
@@ -302,22 +389,11 @@ class EntryPanel extends JPanel{
     public Map<String,Object> getValues(){
         Map<String,Object> map= new HashMap<>();
         String columnName;
-        Column column;
         Object value;
-        Object v;
         
         for (IEntryControl control:controls){
             columnName=control.getColumnName();
-            column = dataset.getColumn(columnName);
             value = control.getValue();
-            System.out.println(column.toString()+" "+(value==null?"null":value.getClass().getName()));
-//            switch (column.columnTypeName){
-//                case "INTEGER":
-//                    v=Integer.parseInt((String)value);
-//                    break;
-//                default:
-//                    v=value;
-//            }
             map.put(columnName, value);
         }
         return map;

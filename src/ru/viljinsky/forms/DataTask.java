@@ -134,8 +134,8 @@ public class DataTask implements IDataTaskConstants{
         
         String inserSql = 
                 "insert into schedule \n"
-                + "(day_id,bell_id,depart_id,group_id,subject_id,teacher_id,room_id) \n"
-                + "values (?,?,?,?,?,?,?);";
+                + "(day_id,bell_id,depart_id,group_id,subject_id,teacher_id,room_id,week_id) \n"
+                + "values (?,?,?,?,?,?,?,0);";
         Dataset dataset = dataModule.getSQLDataset(sql);
         dataset.open();
         

@@ -171,7 +171,18 @@ class GridModel extends AbstractTableModel{
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Map<String,Object> values = dataset.getValues(rowIndex);
-        return values.get(dataset.getColumn(columnIndex).columnName);
+        Column column = dataset.getColumn(columnIndex);
+        Object value = values.get(column.columnName);
+        
+        switch (column.columnTypeName){
+            case "BLOB":
+                return (value==null?null:"TEXT");
+            case "BINARY":
+                return (value==null?null:"IMAGE");
+            default:
+                return value;
+                    
+        }
     }
 
     @Override
@@ -179,7 +190,7 @@ class GridModel extends AbstractTableModel{
         Map<String,Object> values = dataset.getValues(rowIndex);
         values.put(dataset.getColumn(columnIndex).columnName, aValue);
         try{
-        dataset.setVlaues(rowIndex, values);
+            dataset.setVlaues(rowIndex, values);
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -192,12 +203,15 @@ class GridModel extends AbstractTableModel{
 
     @Override
     public String getColumnName(int column) {
-        return dataset.getColumn(column).columnName;// getColumnName(column);
+        return dataset.getColumn(column).columnName;
     }
 
         @Override
         public Class<?> getColumnClass(int columnIndex) {
             Column column = dataset.getColumn(columnIndex);
+            //  !!!!????
+            if (column.columnTypeName.equals("BOOLEAN"))
+                return String.class;
             return column.getColumnClass();
         }
     

@@ -8,13 +8,12 @@ package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -44,9 +43,9 @@ class DictPanel extends JPanel{
     }
 }
 
-public class Dictonary extends JFrame{
+public class Dictonary extends JDialog{
     JTabbedPane tabbedPane = new JTabbedPane();
-    String[] tableNames = {"skill","subject","day_list","bell_list","building"};
+    String[] tableNames = {"day_list","bell_list","week","skill","subject","building"};
     Controls controls=new Controls();
 
     class Controls extends JPanel implements ActionListener{
@@ -95,6 +94,9 @@ public class Dictonary extends JFrame{
     }
     
     public Dictonary() {
+//        super("Справочники");
+        setTitle("Справочники");
+        setModal(true);
         JPanel content = new JPanel(new BorderLayout());
         
         content.setPreferredSize(new Dimension(500,400));
@@ -113,6 +115,7 @@ public class Dictonary extends JFrame{
             dataset = dataModule.getDataset(tableName);
             dataset.open();
             panel = new DictPanel();
+           
             panel.setDataset(dataset);
             tabbedPane.addTab(tableName,panel);
         }

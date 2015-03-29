@@ -115,6 +115,8 @@ public class DataModule implements IDataModule,IDataModuleConsts {
             }
             // 
             active = true;
+//            execute("PRAGMA foreign_keys = ON;");
+            
         } catch (SQLException e){
             throw new Exception ("Ошбка приокрытии бд:\n"+e.getMessage());
         }
@@ -181,6 +183,8 @@ public class DataModule implements IDataModule,IDataModuleConsts {
             stmt = con.createStatement();
             rs= stmt.executeQuery(sql+" limit 1");
             ResultSetMetaData rsmeta = rs.getMetaData();
+            DatabaseMetaData dbm = con.getMetaData();
+            
             for (int i=0;i<rsmeta.getColumnCount();i++){
                 column = new Column();
                 rsmeta.getColumnName(i+1);
@@ -191,22 +195,32 @@ public class DataModule implements IDataModule,IDataModuleConsts {
                 column.columnTypeName=rsmeta.getColumnTypeName(i+1);
                 column.columnType = rsmeta.getColumnType(i+1);
                 
-                switch(column.columnType){
+                ResultSet sr1 = dbm.getColumns(null, null, column.tableName, column.columnName);
+                while (sr1.next()){
+                    column.columnTypeName=sr1.getString("TYPE_NAME");
+                    break;
+                }
+                
+                switch(column.columnTypeName){
                     
-                    case  java.sql.Types.INTEGER:
-                        column.columnClassName=Integer.class.getName();
+                    case  "INTEGER":
+                        column.columnClass=Integer.class;
                         break;
                         
-                    case java.sql.Types.FLOAT:
-                        column.columnClassName=Float.class.getName();
+                    case "FLOAT":
+                        column.columnClass=Float.class;
                         break;
                         
-                    case java.sql.Types.NUMERIC:
-                        column.columnClassName=Double.class.getName();
-                        
-                    case java.sql.Types.VARCHAR:
-                        column.columnClassName=String.class.getName();
+                    case "NUMERIC":
+                        column.columnClass=Double.class;
                         break;
+                        
+                    case "BOOLEAN":
+                        column.columnClass=Boolean.class;
+                        break;
+                        
+                    default:
+                        column.columnClass=Object.class;
                 }
                 info.columns.put(i, column);
             }

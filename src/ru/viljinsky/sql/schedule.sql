@@ -1,3 +1,9 @@
+drop table if exists week;
+create table week(
+    id integer primary key ,             -- 0 каждую неделю; 1,2,.. 1-ая.2-я .. неделя
+    caption varchar(10)
+);
+
 drop table if exists building;
 create table building(
     id integer primary key autoincrement,
@@ -63,7 +69,7 @@ create table shift_detail(
     shift_id integer references shift(id) on delete cascade,
     day_id integer references day_list(day_no),
     bell_id integer references bell_list(bell_id),
-    enable integer default 1,
+    enable boolean default 1,
     primary key (shift_id,day_id,bell_id),
     unique (shift_id,day_id,bell_id)
 );
@@ -74,6 +80,8 @@ create table teacher(
     last_name varchar(18),
     first_name varchar(18),
     patronymic varchar(18),
+    photo binary,
+    comments blob,
     profile_id integer references profile(id),
     shift_id integer references shift(id)
     
@@ -145,14 +153,16 @@ create table bell_list (
 
 drop table if exists schedule;
 create table schedule (
-    day_id integer,
-    bell_id integer,
+    day_id integer references day_list(day_no),
+    bell_id integer references bell_list(bell_id),
+    week_id integer  default 0 references week(id),
     depart_id integer references depart(id),
-    subject_id integer,
+    subject_id integer references subject(id),
     group_id integer,
     teacher_id integer references teacher(id),
     room_id integer integer references room(id),
-    primary key (day_id,bell_id,depart_id,subject_id,group_id) 
+    ready boolean,
+    primary key (day_id,bell_id,week_id,depart_id,subject_id,group_id) 
 );
 
 

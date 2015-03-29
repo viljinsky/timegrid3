@@ -7,6 +7,8 @@
 package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -21,6 +23,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import ru.viljinsky.DBComboBox;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
@@ -112,6 +116,16 @@ class DepartPanel extends MasterDetailPanel implements ActionListener,IOpenedFor
         button = new JButton("Clear");
         button.addActionListener(this);
         addMasterControl(button);
+//        grid1.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+//
+//            @Override
+//            public void valueChanged(ListSelectionEvent e) {
+//                try{
+//                int nn = grid1.getInegerValue("id");
+//                System.out.println("-->"+nn);
+//                } catch (Exception ee){}
+//            }
+//        });
         
     }
     
@@ -234,7 +248,23 @@ class SchedulePanel extends JPanel implements ActionListener,IOpenedForm{
     Grid grid = new Grid();
     DataModule dataModule = DataModule.getInstance();
     GridPanel panel;
-    DBComboBox combo = new DBComboBox();
+    Combo combo = new Combo();
+    
+    class Combo extends DBComboBox{
+
+        @Override
+        public void onValueChange() {
+            System.out.println("->>"+getValue());
+            Map<String,Object> filter = new HashMap<>();
+            filter.put("depart_id",getValue());
+            try{
+                grid.setFilter(filter);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        
+    }
     
     public SchedulePanel(){
         super(new BorderLayout());
@@ -282,7 +312,7 @@ class SchedulePanel extends JPanel implements ActionListener,IOpenedForm{
             combo.setDataset(dataset,"id","label");
             
             dataset = dataModule.getDataset("schedule");
-            dataset.open();
+//            dataset.open();
             grid.setDataset(dataset);
             
             
@@ -309,27 +339,20 @@ class SchedulePanel extends JPanel implements ActionListener,IOpenedForm{
 ////////////////////////    MAIN 4 ////////////////////////////////////////////
 
 public class Main4 extends JPanel{
-    SQLMonitor monitor;
-    TestShift2 testShift;
-    Dictonary dictionary;
+    SQLMonitor monitor = null;
+    TestShift2 testShift =null ;
+    Dictonary dictionary = null;
     
     public Main4(){
         super();
         
-        monitor = new SQLMonitor();
-        monitor.pack();
-        monitor.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        
-        testShift = new TestShift2();
-        testShift.pack();
-        testShift.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        
-        dictionary = new Dictonary();
-        dictionary.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        dictionary.pack();
+//        monitor = new SQLMonitor();
+//        monitor.pack();
+//        monitor.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         
         
     }
+    
     class Act extends AbstractAction{
 
         public Act(String name) {
@@ -347,17 +370,33 @@ public class Main4 extends JPanel{
         try{
             switch(command){
                 case "DICTIONARY":
-//                    dictionary.open();
+                    if (dictionary==null){
+                        dictionary = new Dictonary();
+                        dictionary.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+                        dictionary.pack();
+                        dictionary.open();
+                    }
                     dictionary.setVisible(true);
                     break;
+                    
                 case "sqlMonitor":
-                    if (!monitor.isVisible()){
-//                        monitor.open();
-                        monitor.setVisible(true);
+                    if (monitor==null){
+                        monitor = new SQLMonitor();
+                        monitor.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+                        monitor.pack();
+                        monitor.open();
                     };
+                    monitor.setVisible(true);
+                    
                     break;
                 case "testShift":
                     
+                    if (testShift==null){
+                        testShift = new TestShift2();
+                        testShift.pack();
+                        testShift.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+                        testShift.open();
+                    }
                     testShift.setVisible(true);
                     break;
                 case "exit":
@@ -416,22 +455,23 @@ public class Main4 extends JPanel{
         frame.setContentPane(panel);
         frame.setJMenuBar(panel.createMenuBar());
         frame.pack();
+        
+        // позичионирование главного окна
+        int x,y;
+        Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+        x=(d.width-frame.getWidth())/2;
+        y=(d.height-frame.getHeight())/2;         
+        frame.setLocation(x,y);
+        
         frame.setVisible(true);
 
       
         try{
             DataModule.getInstance().open(); 
-            
-            panel.monitor.open();
-            panel.testShift.open();
-            panel.dictionary.open();
 
             for (IOpenedForm form:forms){
                 form.open();
             }
-            
-            DataModule.getInstance().execute("PRAGMA foreign_keys = ON;");
-        
             
         } catch (Exception e){
             JOptionPane.showMessageDialog(frame, e.getMessage());
