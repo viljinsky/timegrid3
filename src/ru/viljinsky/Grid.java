@@ -366,6 +366,24 @@ class GridModel extends AbstractTableModel{
         model.fireTableDataChanged();
     }
     
+    public boolean locate(Map<String,Object> options) throws Exception{
+        Map<String,Object> values;
+        boolean b;
+        for (int i=0;i<model.dataset.getRowCount();i++){
+            values = model.dataset.getValues(i);
+            b=true;
+            for (String columName:options.keySet()){
+                b = (values.get(columName).equals(options.get(columName)));
+                if (!b) break;
+            }
+            if (b){
+                
+                return true;
+            }
+        }
+        return false;
+    }
+    
     ///////////////////////////// Получение значение грида //////////////////
     /**
      * Получение значений из выделенной строки

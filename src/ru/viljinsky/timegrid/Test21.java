@@ -49,6 +49,13 @@ public class Test21 extends JFrame{
             
         }
 
+        @Override
+        public void cellElementClick(CellElement ce) {
+            System.out.println("->"+ce.col);
+        }
+        
+        
+
     }
     
     public Test21(){

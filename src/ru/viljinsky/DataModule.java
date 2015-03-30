@@ -128,12 +128,12 @@ public class DataModule implements IDataModule,IDataModuleConsts {
         if (!active)
             throw new Exception(DATABASE_NOT_ACTIVE);
         for (Dataset dataset:datasetList){
-            System.out.println(dataset.getTableName());
+//            System.out.println(dataset.getTableName());
             dataset.close();
         }
-        for (Dataset dataset:datasetList){
-            dataset.close();
-        }
+//        for (Dataset dataset:datasetList){
+//            dataset.close();
+//        }
         
         datasetList.clear();
         infoList.clear();

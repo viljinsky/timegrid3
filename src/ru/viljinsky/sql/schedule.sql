@@ -184,11 +184,14 @@ left join teacher e on e.id=a.teacher_id;
 ---------------------------------------------------------------------------------
 drop view if exists v_subject_group;
 create view v_subject_group as
-select a.depart_id,a.group_id,a.subject_id,c.hour_per_day,c.hour_per_week
- from subject_group a inner join depart b on a.depart_id=b.id 
+select a.depart_id,a.group_id,c.group_type_id,
+  a.subject_id,c.hour_per_day,c.hour_per_week,
+  a.default_teacher_id,a.default_room_id
+from subject_group a inner join depart b on a.depart_id=b.id 
 	inner join curriculum_detail c on c.curriculum_id=b.curriculum_id
 	and c.subject_id=a.subject_id;
---  where a.depart_id=1;
+select * from v_subject_group;
+
 
 drop view if exists v_subject_group_on_schedule;
 create view v_subject_group_on_schedule as

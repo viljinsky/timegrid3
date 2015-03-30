@@ -8,7 +8,9 @@ package ru.viljinsky;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,6 +27,13 @@ public class DatasetInfo {
         return tableType;
     }
 
+    public String[] getColumnNames(){
+        List<String> result = new ArrayList<>();
+        for (int k:columns.keySet()){
+            result.add(columns.get(k).columnName);
+        }
+        return result.toArray(new String[result.size()]);
+    }
     public String getTableName() {
         return tableName;
     }

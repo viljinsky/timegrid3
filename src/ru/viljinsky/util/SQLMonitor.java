@@ -75,14 +75,41 @@ class GridPanel extends JPanel{
         });
     }
     private void recordChange(){
+        updateStatus();
+    }
+    
+    public void updateStatus(){
         int row = grid.getSelectedRow();
         int rows = grid.getRowCount();
-        setStatusText(String.format("%d из %d", row,rows));
+        setStatusText(String.format("%d из %d", row,rows));        
     }
+    
     public void setStatusText(String text){
         status.setText(text);
     }
 }
+
+interface MenuConstants{
+    
+    final String dataConnect    ="connect";
+    final String dataDisconnect ="disconnect";
+    
+    final String scriptOpen     = "open";
+    final String scriptSave     = "save";
+    final String scriptNew      = "new";
+    final String scriptClose    = "close";
+    
+    final String exit           = "Exit";
+    
+    final String scriptRun      = "run";
+    final String scriptRunAll   = "run all";
+    final String scriptClear    = "clear";
+    
+    final String treeCreateSQL  = "create sql";
+    final String treeRefresh    = "refresh";
+    final String treeRunSQL     = "run sql";
+}
+
 public class SQLMonitor extends JFrame implements MenuConstants{
 
     DataModule dataModule = DataModule.getInstance();
@@ -124,13 +151,12 @@ public class SQLMonitor extends JFrame implements MenuConstants{
             }
         });
         
-        panels.addTab("new",sqlPanel);
-        
         JSplitPane splitPane1 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane1.setLeftComponent(new JScrollPane(tree));
         splitPane1.setRightComponent(panels);
         splitPane1.setDividerLocation(200);
         setContentPane(splitPane1);
+        splitPane1.setPreferredSize(new Dimension(800,600));
         
         JMenuBar menuBar = new JMenuBar();
         menuBar.add(createFileMenu());
@@ -145,23 +171,99 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                 sqlPanel = (SQLPanel)panels.getSelectedComponent();
             }
         });
-        
+        updateActionList();
     }
+    Action[] actions = {new Act(dataConnect),new Act(dataDisconnect),null,new Act(exit)};
     
     public JMenu createFileMenu(){
         JMenu menu = new JMenu("File");
-        menu.add(new Act(dataConnect));
-        menu.add(new Act(dataDisconnect));
-        menu.addSeparator();
-        menu.add(new Act(scriptNew));
-        menu.add(new Act(scriptOpen));
-        menu.add(new Act(scriptSave));
-        menu.add(new Act(scriptClose));
-        menu.addSeparator();
-        menu.add(new Act(exit));
+        for (Action a:actions){
+            if (a==null)
+                menu.addSeparator();
+            else
+                menu.add(a);
+        }
         return menu;
     }
+    
+    public void updateActionList(){
+        sqlPanel.updateActionList();
+        for (Action a:actions)
+            if (a!=null)
+                updateAction(a);
+    }
 
+    public void updateAction(Action a){
+        switch ((String)a.getValue(Action.ACTION_COMMAND_KEY)){
+            case dataConnect:
+                a.setEnabled(!dataModule.isActive());
+                break;
+            case dataDisconnect:
+                a.setEnabled(dataModule.isActive());
+                break;
+        }
+        
+    }
+    
+        public void doCommand(String command){
+        String sql;    
+        try{
+            switch(command){
+                case dataConnect:
+                    fileOpen();
+                    break;
+                case dataDisconnect:
+                    fileClose();
+                    break;
+                case scriptNew:
+                    scriptNew();
+                    break;
+                case scriptOpen:
+                    scriptOpen();
+                    break;
+                case scriptSave:
+                    scriptSave();
+                    break;
+                case scriptClose:
+                    scriptClose();
+                    break;
+                    
+                case exit:
+                    System.exit(0);
+                    break;
+                case  scriptClear :
+                    sqlPanel.clear();
+                    break;
+                case scriptRun:
+                    sqlPanel.execute();
+                    break;
+                case scriptRunAll:
+                    sqlPanel.executeAll();
+                    break;
+                    
+                case treeCreateSQL:
+                    sql = tree.createSQL();
+                    sqlPanel.textEditor.append(sql);
+                    break;
+                case treeRefresh:
+                    dataModule.reopen();
+                    tree.fill();
+                    break;
+                    
+                // Получаем sql из дерева и выполняем    
+                case treeRunSQL:
+                    sql = tree.createSQL();
+                    sqlPanel.textEditor.append(sql);
+                    sqlPanel.executeSql(sql);
+                    break;
+            }
+            updateActionList();
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(rootPane, e.getMessage());
+        }
+    }
+
+    
     class Act extends AbstractAction{
 
         public Act(String name) {
@@ -180,6 +282,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
 
     class SQLTree extends JTree{
         Action[] actions = {
+            new Act(treeRunSQL),    
             new Act(treeCreateSQL),
             new Act(treeRefresh)
         };
@@ -297,6 +400,24 @@ public class SQLMonitor extends JFrame implements MenuConstants{
             
         }
 
+        private String createSQL() {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)getLastSelectedPathComponent();
+            if (node!=null){
+                Object obj = node.getUserObject();
+                if (obj instanceof DatasetInfo){
+                    DatasetInfo info = (DatasetInfo)obj;
+                    String sql = "";
+                    for (String columName:info.getColumnNames()){
+                        if (!sql.isEmpty()) sql+=",";
+                            sql+=columName;
+                    }
+                            
+                    return "select "+sql+" from "+info.getTableName()+";\n";
+                }
+            }
+            return null;
+        }
+
 
     }
 
@@ -309,7 +430,31 @@ public class SQLMonitor extends JFrame implements MenuConstants{
             new Act(scriptRun),
             new Act(scriptRunAll),
             new Act(scriptClear),
+            null,
+            new Act(scriptNew),
+            new Act(scriptOpen),
+            new Act(scriptSave),
+            null,
+            new Act(scriptClose)
         };
+        
+        public void updateActionList(){
+            for (Action a:actions){
+                if (a!=null)
+                    updateAction(a);
+            }
+        }
+        
+        public void updateAction(Action a){
+            String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
+            switch(command){
+                case scriptRun:case scriptRunAll:
+                    break;
+                case scriptNew:case scriptOpen:case scriptSave:case scriptClose:
+                    break;
+                    
+            }
+        }
         
         public JMenu createMenu(){
             JMenu result = new JMenu("Script");
@@ -393,8 +538,10 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                     dataset.open();
                     Grid grid = new Grid();
                     grid.setDataset(dataset);
-                    tabs.addTab("sql", new GridPanel(grid));
+                    GridPanel gridPanel = new GridPanel(grid);
+                    tabs.addTab("sql", gridPanel);
                     tabs.setSelectedIndex(tabs.getTabCount()-1);
+                    gridPanel.updateStatus();
             } else {
                     dataModule.execute(sql);
             }
@@ -462,13 +609,14 @@ public class SQLMonitor extends JFrame implements MenuConstants{
         public void clear(){
         }
 
-        public void addSQL(){
-            DatasetInfo info = tree.getSelectedDataset();
-            if (info!=null){
-                sqlPanel.textEditor.append("select * from "+info.getTableName()+";\n");
-                
-            }
-        }
+//        public void addSQL(){
+//            
+//            DatasetInfo info = tree.getSelectedDataset();
+//            if (info!=null){
+//                sqlPanel.textEditor.append("select * from "+info.getTableName()+";\n");
+//                
+//            }
+//        }
     
     }
     
@@ -548,53 +696,10 @@ public class SQLMonitor extends JFrame implements MenuConstants{
     }
     //--------------------------------------------------------------------------
     
-    public void doCommand(String command){
-        try{
-            switch(command){
-                case dataConnect:
-                    fileOpen();
-                    break;
-                case dataDisconnect:
-                    fileClose();
-                    break;
-                case scriptNew:
-                    scriptNew();
-                    break;
-                case scriptOpen:
-                    scriptOpen();
-                    break;
-                case scriptSave:
-                    scriptSave();
-                    break;
-                case scriptClose:
-                    scriptClose();
-                    break;
-                    
-                case exit:
-                    System.exit(0);
-                    break;
-                case  scriptClear :
-                    sqlPanel.clear();
-                    break;
-                case scriptRun:
-                    sqlPanel.execute();
-                    break;
-                case scriptRunAll:
-                    sqlPanel.executeAll();
-                    break;
-                    
-                case treeCreateSQL:
-                    sqlPanel.addSQL();
-                    break;
-                case treeRefresh:
-                    dataModule.reopen();
-                    tree.fill();
-                    break;
-            }
-        } catch (Exception e){
-            JOptionPane.showMessageDialog(rootPane, e.getMessage());
-        }
-    }
+//    public void updateActionList(){
+//    }
+    
+    
     
     public void open() throws Exception{
 //        dataModule.open();
@@ -623,27 +728,8 @@ public class SQLMonitor extends JFrame implements MenuConstants{
         frame.pack();
         frame.setVisible(true);
         
-        DataModule.getInstance().open();
-        frame.open();
+//        DataModule.getInstance().open();
+//        frame.open();
     }
 }
 
-interface MenuConstants{
-    
-    final String dataConnect    ="connect";
-    final String dataDisconnect ="disconnect";
-    
-    final String scriptOpen     = "open";
-    final String scriptSave     = "save";
-    final String scriptNew      = "new";
-    final String scriptClose    = "close";
-    
-    final String exit           = "Exit";
-    
-    final String scriptRun      = "run";
-    final String scriptRunAll   = "run all";
-    final String scriptClear    = "clear";
-    
-    final String treeCreateSQL  = "create sql";
-    final String treeRefresh    = "refresh";
-}
