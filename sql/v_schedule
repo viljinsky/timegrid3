@@ -1,0 +1,11 @@
+create view v_schedule as
+select a.day_id,a.bell_id,b.subject_name,
+c.label as depart_name,a.group_id,d.name as room_no,e.last_name as teacher_name,
+a.week_id,a.subject_id,a.depart_id
+ from schedule a inner join subject b
+on a.subject_id=b.id
+inner join depart c on c.id=a.depart_id
+left join room d on d.id=a.room_id
+left join teacher e on e.id=a.teacher_id;
+
+select * from v_schedule;

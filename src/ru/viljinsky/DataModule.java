@@ -115,7 +115,7 @@ public class DataModule implements IDataModule,IDataModuleConsts {
             }
             // 
             active = true;
-//            execute("PRAGMA foreign_keys = ON;");
+            execute("PRAGMA foreign_keys = ON;");
             
         } catch (SQLException e){
             throw new Exception ("Ошбка приокрытии бд:\n"+e.getMessage());

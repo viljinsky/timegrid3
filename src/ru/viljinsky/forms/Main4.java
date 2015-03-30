@@ -399,6 +399,9 @@ public class Main4 extends JPanel{
                     }
                     testShift.setVisible(true);
                     break;
+                case "timegrid":
+                    JOptionPane.showMessageDialog(null, "TimeGrid");
+                    break;
                 case "exit":
                     System.exit(0);
                     break;
@@ -428,6 +431,7 @@ public class Main4 extends JPanel{
         result.add(new Act("sqlMonitor"));
         result.add(new Act("testShift"));
         result.add(new Act("DICTIONARY"));
+        result.add(new Act("timegrid"));
         return result;
     }
     

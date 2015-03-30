@@ -114,7 +114,7 @@ create table subject_group (
     subject_id integer references subject(id) on delete restrict,
     default_teacher_id integer references teacher(id),
     default_room_id integer references room(id),
-    primary key (depart_id,subject_id,group_id) on conflict fail
+    primary key (depart_id,subject_id,group_id)
 );
 
 drop table if exists curriculum; 
@@ -164,5 +164,39 @@ create table schedule (
     ready boolean,
     primary key (day_id,bell_id,week_id,depart_id,subject_id,group_id) 
 );
+
+---                 view schedule
+drop view if exists v_schedule;
+create view v_schedule as
+select a.day_id,a.bell_id,b.subject_name,
+c.label as depart_name,a.group_id,d.name as room_no,e.last_name as teacher_name,
+a.week_id,a.subject_id,a.depart_id,a.room_id,a.teacher_id
+ from schedule a inner join subject b
+on a.subject_id=b.id
+inner join depart c on c.id=a.depart_id
+left join room d on d.id=a.room_id
+left join teacher e on e.id=a.teacher_id;
+
+-- select * from v_schedule;
+
+
+
+---------------------------------------------------------------------------------
+drop view if exists v_subject_group;
+create view v_subject_group as
+select a.depart_id,a.group_id,a.subject_id,c.hour_per_day,c.hour_per_week
+ from subject_group a inner join depart b on a.depart_id=b.id 
+	inner join curriculum_detail c on c.curriculum_id=b.curriculum_id
+	and c.subject_id=a.subject_id;
+--  where a.depart_id=1;
+
+drop view if exists v_subject_group_on_schedule;
+create view v_subject_group_on_schedule as
+    select a.depart_id,a.subject_id,a.group_id,a.hour_per_week,count(*) as  placed
+    from v_subject_group a 
+    left join schedule b on a.depart_id=b.depart_id 
+           and a.group_id=b.group_id and a.subject_id=b.subject_id
+    group by a.depart_id,a.subject_id,a.group_id,a.hour_per_week;
+-- having a.depart_id=1;
 
 

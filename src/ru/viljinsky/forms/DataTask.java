@@ -164,11 +164,13 @@ public class DataTask implements IDataTaskConstants{
                 while (hour_per_week>0){
                     stmt.setObject(1, day_no);
                     stmt.setObject(2, bell_id);
-                    stmt.execute();
+                    
+                    
+                    stmt.executeUpdate();
                     hour_per_week-=1;
                     day_no+=1;
                     if (day_no>5){
-                        day_no=0;
+                        day_no=1;
                         bell_id+=1;
                     }
                 }
