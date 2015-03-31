@@ -41,200 +41,50 @@ interface IOpenedForm{
     public JComponent getPanel();
 }
 
-class TeacherPanel extends JPanel implements IOpenedForm{
-    DataModule dataModule = DataModule.getInstance();
-    G grid = new G();
-    SelectPanel selctPanel = new SelectPanel();
-    
-    JTabbedPane tabs=new JTabbedPane();
-    
-    class G extends Grid{
-
-        @Override
-        public void gridSelectionChange() {
-            int row = getSelectedRow();
-            if (row>=0){
-                try{
-                    Integer teacher_id = getInegerValue("id");
-                    selctPanel.setTeacherId(teacher_id);
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-           
-        }
-        
-    }
-    
-    class SelectPanel extends JPanel implements ActionListener{
-        Grid grid2 = new Grid();
-        Grid grid3 = new Grid();
-        int teacher_id;
-        public void setTeacherId(Integer teacher_id){
-            this.teacher_id=teacher_id;
-            try{
-                requery();
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-            
-        }
-        
-        public void requery() throws Exception{
-            Dataset dataset ;
-            dataset = dataModule.getSQLDataset("select * from v_subject_group\n" +
-                                            "where default_teacher_id is null;");
-            dataset.open();
-            grid2.setDataset(dataset);
-
-            dataset = dataModule.getSQLDataset("select * from v_subject_group where default_teacher_id="+teacher_id);
-            dataset.open();
-            grid3.setDataset(dataset);
-            
-        }
-        
-        public void include() throws Exception{
-            int depart_id = grid2.getInegerValue("depart_id");
-            int subject_id = grid2.getInegerValue("subject_id");
-            int group_id = grid2.getInegerValue("group_id");
-            String sql = "update subject_group set default_teacher_id=? where depart_id=? and subject_id=? and group_id=?";
-            KeyMap map = new KeyMap();
-            map.put(1, teacher_id);
-            map.put(2, depart_id);
-            map.put(3, subject_id);
-            map.put(4, group_id);
-
-            dataModule.execute(sql, map);
-            requery();
-        }
-        
-        public void exclude() throws Exception{
-            int depart_id = grid3.getInegerValue("depart_id");
-            int subject_id = grid3.getInegerValue("subject_id");
-            int group_id = grid3.getInegerValue("group_id");
-            String sql = "update subject_group set default_teacher_id=null where depart_id=? and subject_id=? and group_id=?";
-            KeyMap map = new KeyMap();
-            map.put(1, depart_id);
-            map.put(2, subject_id);
-            map.put(3, group_id);
-
-            dataModule.execute(sql, map);
-            requery();
-        }
-        
-        public void include_all(){
-        }
-        
-        public void exclude_all(){
-        }
-        
-        public SelectPanel(){
-            Map<String,String> btns = new HashMap<>();
-            btns.put("INCLUDE",">");
-            btns.put("EXCLUDE","<");
-            btns.put("INCLUDE_ALL",">>");
-            btns.put("EXCLUDE_ALL","<<");
-            
-            JButton btn ;
-            Box box;
-            setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
-            box = Box.createHorizontalBox();
-            box.add(new JScrollPane(grid2));
-            add(box);
-
-            add(Box.createHorizontalStrut(6));
-            box = Box.createVerticalBox();
-            for (String btnName:btns.keySet()){
-                btn=new JButton(btns.get(btnName));
-                btn.setActionCommand(btnName);
-//                btn.setMinimumSize(new Dimension(60,25));
-                btn.addActionListener(this);
-                Box box1 = Box.createVerticalBox();
-                box1.setAlignmentX(CENTER_ALIGNMENT);
-                box1.add(btn);
-                box.add(box1);
-                box.add(Box.createVerticalStrut(12));
-            }
-            add(box);
-            
-            
-            add(Box.createHorizontalStrut(6));
-
-            box = Box.createHorizontalBox();
-            box.add(new JScrollPane(grid3));
-            add(box);
-        }
-        
-        public void open() throws Exception{
-            setTeacherId(1);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            doCommand(e.getActionCommand());
-        }
-        
-        public void doCommand(String command){
-            try{
-                switch(command){
-                    case "INCLUDE":
-                        include();
-                        break;
-                    case "EXCLUDE":
-                        exclude();
-                        break;
-                    case "INCLUDE_ALL":
-                        break;
-                    case "EXCLUDE_ALL":
-                        break;
-                        
-                    default:
-                        System.err.println(command);
-                }
-            } catch (Exception e){
-                JOptionPane.showMessageDialog(selctPanel, e.getMessage());
-            }
-        }
-    }
-    
-    public TeacherPanel(){
-        setLayout(new BorderLayout());
-        tabs.addTab("Subhect group", selctPanel);
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        splitPane.setTopComponent(new JScrollPane(grid));
-        splitPane.setBottomComponent(tabs);
-        splitPane.setResizeWeight(0.5);
-        add(splitPane);
-        
-    }
-    
-    @Override
-    public void open() throws Exception {
-        Dataset dataset = dataModule.getDataset("teacher");
-        dataset.open();
-        grid.setDataset(dataset);
-        selctPanel.open();
-        
-    }
-
-    @Override
-    public String getCaption() {
-        return "TEACHER";
-    }
-
-    @Override
-    public JComponent getPanel() {
-        return this;
-    }
-};
+;
 
 class RoomPanel extends JPanel implements IOpenedForm{
     Grid grid = new Grid();
     DataModule dataModule = DataModule.getInstance();
+    SelectRoomPanel selectPanel = new SelectRoomPanel();
+    
+    
+    class SelectRoomPanel extends SelectPanel{
+
+        @Override
+        public void include() throws Exception {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void exclude() throws Exception {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void includeAll() throws Exception {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void excludeAll() throws Exception {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void requery() throws Exception {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+    }
 
     public RoomPanel(){
         super(new BorderLayout());
-        add(new JScrollPane(grid));
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        splitPane.setTopComponent(new JScrollPane(grid));
+        splitPane.setBottomComponent(selectPanel);
+        splitPane.setResizeWeight(0.5);
+                
+        add(splitPane);
     }
     
     @Override
