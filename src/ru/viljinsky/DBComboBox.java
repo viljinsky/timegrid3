@@ -20,15 +20,19 @@ import javax.swing.event.ListDataListener;
  */
 public class DBComboBox extends JComboBox<String> {
     Model model;
+    String label = "combobox";
 
     class Model implements ComboBoxModel {
 
         Object value;
         Map<Object, String> values;
 
-        public Model(Dataset dataset, String columnName, String lookupColumn) {
+        public Model(Dataset dataset, String columnName, String lookupColumn) throws Exception {
             values = new HashMap<>();
             Map<String, Object> v;
+            if (!dataset.isActive())
+                dataset.open();
+            values.put(columnName,"");  // NULL value
             for (int i = 0; i < dataset.getRowCount(); i++) {
                 v = dataset.getValues(i);
                 values.put(v.get(columnName), v.get(lookupColumn).toString());
@@ -37,6 +41,9 @@ public class DBComboBox extends JComboBox<String> {
 
         @Override
         public void setSelectedItem(Object anItem) {
+            if (anItem.equals("")){
+                value = null;
+            } else 
             for (Object s : values.keySet()) 
                 if (values.get(s).equals(anItem)) 
                     value = s;
@@ -83,10 +90,19 @@ public class DBComboBox extends JComboBox<String> {
             }
         });
     }
+    
+    public String getLabel(){
+        return label;
+    }
 
-    public void setDataset(Dataset dataset, String columnName, String lookupColumnName) {
-        model = new Model(dataset, columnName, lookupColumnName);
-        setModel(model);
+    public void setDataset(Dataset dataset, String columnName, String lookupColumnName) throws Exception{
+        try{
+            model = new Model(dataset, columnName, lookupColumnName);
+            setModel(model);
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new Exception("Ошбка при открытии DBComboBox");
+        }
     }
 
     public void setValue(Object value) {

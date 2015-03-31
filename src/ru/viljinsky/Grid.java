@@ -368,16 +368,20 @@ class GridModel extends AbstractTableModel{
     
     public boolean locate(Map<String,Object> options) throws Exception{
         Map<String,Object> values;
+        Object v1,v2;
         boolean b;
         for (int i=0;i<model.dataset.getRowCount();i++){
             values = model.dataset.getValues(i);
             b=true;
             for (String columName:options.keySet()){
-                b = (values.get(columName).equals(options.get(columName)));
+                v1 = values.get(columName);
+                v2 = options.get(columName);
+                b = v1.equals(v2);
                 if (!b) break;
             }
             if (b){
-                
+                getSelectionModel().setSelectionInterval(i, i);
+                scrollRectToVisible(getCellRect(i, getSelectedRowCount(), true));
                 return true;
             }
         }

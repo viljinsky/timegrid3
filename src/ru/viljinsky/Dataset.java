@@ -530,4 +530,8 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         }
         return null;
     }
+
+    public boolean isActive() {
+        return active;
+    }
 }

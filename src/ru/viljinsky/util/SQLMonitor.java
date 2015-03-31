@@ -9,6 +9,7 @@ package ru.viljinsky.util;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -22,6 +23,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -91,15 +93,15 @@ class GridPanel extends JPanel{
 
 interface MenuConstants{
     
-    final String dataConnect    ="connect";
-    final String dataDisconnect ="disconnect";
+    final String dataConnect    = "connect";
+    final String dataDisconnect = "disconnect";
+    final String exit           = "Exit";
     
     final String scriptOpen     = "open";
     final String scriptSave     = "save";
     final String scriptNew      = "new";
     final String scriptClose    = "close";
     
-    final String exit           = "Exit";
     
     final String scriptRun      = "run";
     final String scriptRunAll   = "run all";
@@ -719,6 +721,22 @@ public class SQLMonitor extends JFrame implements MenuConstants{
         dataModule.close();
         panels.removeAll();
         tree.clear();
+    }
+    
+    private static SQLMonitor monitor = null;
+    
+    public static void showMonitor(JComponent owner) throws Exception{
+        if (monitor==null){
+            monitor = new SQLMonitor();
+            monitor.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+            monitor.pack();
+            if (owner !=null){
+                Point p=owner.getLocationOnScreen();
+                monitor.setLocation(p.x+10, p.y+10);
+            }
+            monitor.open();
+        }
+        monitor.setVisible(true);
     }
     
     //-------------------------------------------------------------------------

@@ -10,6 +10,9 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -150,6 +153,20 @@ abstract class AbstractTimeGrid extends Container {
         setColCount(6);
 
         setRowCount(3);
+
+        addFocusListener(new FocusAdapter() {
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                repaint();
+            }
+
+            @Override
+            public void focusGained(FocusEvent e) {
+                repaint();
+            }
+
+        });
         
         addMouseListener(new MouseAdapter() {
             
@@ -417,7 +434,7 @@ abstract class AbstractTimeGrid extends Container {
         r = getBound(col, row);
         g.setColor(Color.red);
         g.drawRect(r.x, r.y, r.width, r.height);
-        if (col == selectedCol && row == selectedRow) {
+        if (col == selectedCol && row == selectedRow && isFocusOwner()) {
             color = Color.white;
         }
         if (overCell != null) {
