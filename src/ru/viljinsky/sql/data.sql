@@ -64,12 +64,16 @@ insert into shift(id,shift_type_id,name) values(4,3,'График препода
 insert into shift(id,shift_type_id,name) values('5',3,'Обычный кабинет');  
 
 
-insert into room(id,building_id,name,shift_id,profile_id) values (1,1,'каб 31',5,5);
-insert into room(id,building_id,name,shift_id,profile_id) values (2,1,'каб 32',5,5);
-insert into room(id,building_id,name,shift_id,profile_id) values (3,1,'каб 33',5,5);
-insert into room(id,building_id,name,shift_id,profile_id) values (4,1,'каб 34',5,5);
-insert into room(id,building_id,name,shift_id,profile_id) values (5,1,'каб 35',5,5);
-insert into room(id,building_id,name,shift_id,profile_id) values (6,1,'каб 36',5,5);
+insert into room(id,building_id,name,shift_id,profile_id,capacity) values (1,1,'каб 31',5,8,30);
+insert into room(id,building_id,name,shift_id,profile_id,capacity) values (2,1,'каб 32',5,8,30);
+insert into room(id,building_id,name,shift_id,profile_id,capacity) values (3,1,'каб 33',5,8,30);
+insert into room(id,building_id,name,shift_id,profile_id,capacity) values (4,1,'каб 34',5,8,30);
+insert into room(id,building_id,name,shift_id,profile_id,capacity) values (5,1,'каб 35',5,8,30);
+insert into room(id,building_id,name,shift_id,profile_id,capacity) values (6,1,'каб 36',5,8,30);
+insert into room(id,building_id,name,shift_id,profile_id,capacity) values (7,1,'каб 37',5,8,30);
+insert into room(id,building_id,name,shift_id,profile_id,capacity) values (8,1,'каб 38',5,8,30);
+insert into room(id,building_id,name,shift_id,profile_id) values (9,1,'каб 35',5,8);
+insert into room(id,building_id,name,shift_id,profile_id) values (10,1,'спорт.зал',5,8);
 
 
 --
@@ -97,26 +101,41 @@ insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,d
      values (9,'Информатика',1,1,2);
 
 
-        
+-- русский и лит.        
 insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) 
     values (1,'Ежёва','Ирина','Ивановна',1,1);
 insert into teacher (id,last_name,first_name,patronymic,profile_id) 
-    values (2,'Белкина','Людмила','Олеговна',2);
+    values (2,'Белкина','Людмила','Олеговна',1);
+
+-- алг и геометрия
 insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
-    values (3,'Сорокина','Лариса','Петровна',3,1);
-insert into teacher (id,last_name,first_name,patronymic)
-    values (4,'Орлова','Татьяна','Игоревна');
+    values (3,'Сорокина','Лариса','Петровна',2,1);
 insert into teacher (id,last_name,first_name,patronymic,profile_id)
-    values (5,'Медведева','Клавдия','Николоаевна',4);
+    values (4,'Орлова','Татьяна','Игоревна',2);
+
+-- физика
+insert into teacher (id,last_name,first_name,patronymic,profile_id)
+    values (5,'Медведева','Клавдия','Николоаевна',3);
+
+-- химия
 insert into teacher (id,last_name,first_name,patronymic,profile_id)
     values (6,'Волкова','Марфа','Сидоровна',4);
-insert into teacher (id,last_name,first_name,patronymic,profile_id)
-    values (7,'Птичкина','Раиса','Григорьевна',4);
-insert into teacher (id,last_name,first_name,patronymic,profile_id)
-    values (8,'Рыбкина','Софья','Петровна',4);
-insert into teacher (id,last_name,first_name,patronymic,profile_id)
-    values (9,'Ужёва','Тамра','Сидоровна',4);
 
+-- иностранный
+insert into teacher (id,last_name,first_name,patronymic,profile_id)
+    values (7,'Птичкина','Раиса','Григорьевна',5);
+insert into teacher (id,last_name,first_name,patronymic,profile_id)
+    values (8,'Рыбкина','Софья','Петровна',5);
+
+-- физкультура
+insert into teacher (id,last_name,first_name,patronymic,profile_id)
+    values (9,'Ужёва','Тамра','Сидоровна',6);
+insert into teacher (id,last_name,first_name,patronymic,profile_id)
+    values (10,'Синицина','Ирина','Олеговна',6);
+
+-- информатика
+insert into teacher (id,last_name,first_name,patronymic,profile_id)
+    values (11,'Карпова','Вероника','Маврикиевна',7);
 
 
 
@@ -124,12 +143,6 @@ insert into skill(id,caption) values(1,'8-класс');
 insert into skill(id,caption) values(2,'9-класс');
 insert into skill(id,caption) values(3,'10-класс');
 
-insert into depart(id,label,skill_id,shift_id) values (1,'8-a',1,1);
-insert into depart(id,label,skill_id,shift_id) values (2,'8-б',1,1);
-insert into depart(id,label,skill_id,shift_id) values (3,'9-а',2,1);
-insert into depart(id,label,skill_id,shift_id) values (4,'9-б',2,1);
-insert into depart(id,label,skill_id,shift_id) values (5,'10-а',3,1);
-insert into depart(id,label,skill_id,shift_id) values (6,'10-б',3,1);
 
 insert into curriculum (id,skill_id,caption) values (1,1,'Уч. план 8-го класса');
 insert into curriculum (id,skill_id,caption) values (2,2,'Уч. план 9-го класса');
@@ -144,6 +157,12 @@ insert into curriculum_detail(curriculum_id,subject_id,hour_per_day,hour_per_wee
 insert into curriculum_detail(curriculum_id,subject_id,hour_per_day,hour_per_week)
   values(1,3,2,2);
 
+insert into depart(id,label,skill_id,shift_id,curriculum_id) values (1,'8-a',1,1,1);
+insert into depart(id,label,skill_id,shift_id,curriculum_id) values (2,'8-б',1,1,1);
+insert into depart(id,label,skill_id,shift_id,curriculum_id) values (3,'9-а',2,1,2);
+insert into depart(id,label,skill_id,shift_id,curriculum_id) values (4,'9-б',2,1,2);
+insert into depart(id,label,skill_id,shift_id,curriculum_id) values (5,'10-а',3,1,3);
+insert into depart(id,label,skill_id,shift_id,curriculum_id) values (6,'10-б',3,1,3);
 
 --  *************************  ЗАПОЛНЕНИЕ ГРАФИКОВ  ****************************
 delete from shift_detail;
@@ -171,15 +190,22 @@ where shift.id in (3,4) ;
 -- русский и литература
 insert into profile_item (profile_id,subject_id) values(1,1);
 insert into profile_item (profile_id,subject_id) values(1,2);
-
+-- алгебра и геомерия
 insert into profile_item (profile_id,subject_id) values(2,3);
 insert into profile_item (profile_id,subject_id) values(2,4);
-
+-- физика
 insert into profile_item (profile_id,subject_id) values(3,5);
+-- химия
 insert into profile_item (profile_id,subject_id) values(4,6);
+-- иностранный
 insert into profile_item (profile_id,subject_id) values(5,7);
+-- физкультура
 insert into profile_item (profile_id,subject_id) values(6,8);
+-- информатика
 insert into profile_item (profile_id,subject_id) values(7,9);
+
+insert into profile_item (profile_id,subject_id) select a.id,b.id
+from profile a ,subject b where a.id in (8,9,10,11);
 
 
 

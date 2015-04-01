@@ -439,7 +439,11 @@ class TeacherPanel extends JPanel implements IOpenedForm {
         "inner join depart e on e.id=c.depart_id\n" +
         "where c.default_teacher_id is null and  a.id=";
         
-        String destanationSQL = "select * from v_subject_group where default_teacher_id=";
+        String destanationSQL = "select b.subject_name,d.label,a.subject_id,\n"
+                + "a.group_id,a.group_type_id,a.default_room_id,a.depart_id from v_subject_group a\n"+
+                " inner join subject b on a.subject_id=b.id\n"+
+                " inner join depart d on d.id=a.depart_id\n"+
+                " where a.default_teacher_id=";
 
         public void setTeacherId(Integer teacher_id) {
             this.teacher_id = teacher_id;
@@ -464,15 +468,18 @@ class TeacherPanel extends JPanel implements IOpenedForm {
 
         @Override
         public void include() throws Exception {
+            Integer room_id = grid.getInegerValue("teacher_room_id");
             int depart_id = sourceGrid.getInegerValue("depart_id");
             int subject_id = sourceGrid.getInegerValue("subject_id");
             int group_id = sourceGrid.getInegerValue("group_id");
-            String sql = "update subject_group set default_teacher_id=? where depart_id=? and subject_id=? and group_id=?";
+            
+            String sql = "update subject_group set default_teacher_id=?,default_room_id=? where depart_id=? and subject_id=? and group_id=?";
             KeyMap map = new KeyMap();
             map.put(1, teacher_id);
-            map.put(2, depart_id);
-            map.put(3, subject_id);
-            map.put(4, group_id);
+            map.put(2, room_id);
+            map.put(3, depart_id);
+            map.put(4, subject_id);
+            map.put(5, group_id);
             dataModule.execute(sql, map);
             requery();
         }
