@@ -34,6 +34,7 @@ public interface IOpenedForm {
     public void open() throws Exception;
     public String getCaption();
     public JComponent getPanel();
+    public void close() throws Exception;
 }
 
 abstract class  AbstractOpenedForm implements IOpenedForm{
@@ -44,6 +45,7 @@ class RoomPanel extends JPanel implements IOpenedForm{
     MasterGrid grid = new MasterGrid();
     DataModule dataModule = DataModule.getInstance();
     SelectRoomPanel selectPanel = new SelectRoomPanel();
+
     
     
     class MasterGrid extends Grid{
@@ -159,6 +161,13 @@ class RoomPanel extends JPanel implements IOpenedForm{
         grid.setDataset(dataset);
         selectPanel.requery();
     }
+    
+    @Override
+    public void close() throws Exception {
+        selectPanel.close();
+        grid.setDataset(null);
+    }
+    
 
     @Override
     public String getCaption() {
@@ -240,6 +249,11 @@ class DepartPanel extends MasterDetailPanel implements ActionListener,IOpenedFor
         return this;
     }
 
+//    @Override
+//    public void close() throws Exception {
+////        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
+
 
 }
 
@@ -306,6 +320,11 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
     public JComponent getPanel() {
         return this;
     }
+
+//    @Override
+//    public void close() throws Exception {
+////        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
     
 }
 
@@ -316,6 +335,11 @@ class SchedulePanel extends JPanel implements ActionListener,IOpenedForm{
     DataModule dataModule = DataModule.getInstance();
     GridPanel panel;
     Combo combo = new Combo();
+
+    @Override
+    public void close() throws Exception {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     class Combo extends DBComboBox{
 
@@ -409,6 +433,12 @@ class TeacherPanel extends JPanel implements IOpenedForm {
     MasterGrid grid = new MasterGrid();
     TeacherSelectPanel selctPanel = new TeacherSelectPanel();
     JTabbedPane tabs = new JTabbedPane();
+
+    @Override
+    public void close() throws Exception {
+        grid.setDataset(null);
+        selctPanel.close();
+    }
 
     class MasterGrid extends Grid {
 

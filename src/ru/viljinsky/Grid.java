@@ -22,6 +22,7 @@ import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -277,12 +278,21 @@ class GridModel extends AbstractTableModel{
     }
 
     public void setDataset(Dataset dataset) {
+        if (dataset==null){
+            model = null;
+            
+            setModel(new DefaultTableModel());
+            return;
+        }
         model = new GridModel(dataset);
         setModel(model);
     }
 
     public IDataset getDataset(){
-        return model.dataset;
+        if (model!=null)
+            return model.dataset;
+        else 
+            return null;
     }
             
     public void append(Map<String,Object> values){

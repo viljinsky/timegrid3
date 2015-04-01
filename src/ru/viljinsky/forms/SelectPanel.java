@@ -91,6 +91,11 @@ abstract class SelectPanel extends JPanel implements ActionListener {
         }
     }
 
+    public void close(){
+        sourceGrid.setDataset(null);
+        destanationGrid.setDataset(null);
+    }
+    
     public abstract void include() throws Exception;
 
     public abstract void exclude() throws Exception;

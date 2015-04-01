@@ -10,13 +10,16 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import javax.swing.AbstractAction;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import ru.viljinsky.CreateData;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.util.SQLMonitor;
 
@@ -24,6 +27,18 @@ import ru.viljinsky.util.SQLMonitor;
 ////////////////////////    MAIN 4 ////////////////////////////////////////////
 
 public class Main4 extends JPanel{
+    private static DataModule dataModule = DataModule.getInstance(); 
+    
+    JFileChooser fileChooser = new JFileChooser(new File("."));
+    IOpenedForm[] forms = {
+        new CurriculumPanel(),
+        new DepartPanel(),
+        new TeacherPanel(),
+        new RoomPanel(),
+        new SchedulePanel()
+    };
+    
+    
 
     class Act extends AbstractAction{
 
@@ -37,10 +52,64 @@ public class Main4 extends JPanel{
             doCommand(e.getActionCommand());
         }
     }
+    protected void fileNew() throws Exception{
+        File file;
+        String path;
+        int retVal =  fileChooser.showOpenDialog(this);
+        if (retVal==JFileChooser.APPROVE_OPTION){
+            file = fileChooser.getSelectedFile();
+            path = file.getPath();
+            if (dataModule.isActive()){
+                close();
+                dataModule.close();
+               
+            }
+            CreateData.execute(path);
+            dataModule.open(path);
+            open();
+            JOptionPane.showMessageDialog(this, "База \""+path+"\" - успешно создана");
+        }
+    }
+    protected void fileOpen() throws Exception{
+        int retVal=fileChooser.showOpenDialog(this);
+        if (retVal==JFileChooser.APPROVE_OPTION){
+            if (dataModule.isActive()){
+                close();
+                dataModule.close();
+            }
+            dataModule.open(fileChooser.getSelectedFile().getPath());
+            open();
+        }
+    }
+    
+    protected void fileClose() throws Exception{
+        if (dataModule.isActive()){
+            close();
+            dataModule.close();
+        }
+    }
+    
+    protected void fileName(){
+        int retVal = fileChooser.showOpenDialog(this);
+        if (retVal==JFileChooser.APPROVE_OPTION){
+        }
+    
+    }
     
     private void doCommand(String command){
         try{
             switch(command){
+                
+                case "fileNew":
+                    fileNew();
+                    break;
+                case "fileOpen":
+                    fileOpen();
+                    break;
+                case "fileClose":
+                    fileClose();
+                    break;
+                            
                 
                 case "DICTIONARY":
                     Dictonary.showDialog(this);
@@ -76,6 +145,7 @@ public class Main4 extends JPanel{
     
     public JMenu createFileMenu(){
         JMenu result = new JMenu("File");
+        result.add(new Act("fileNew"));
         result.add(new Act("fileOpen"));
         result.add(new Act("fileClose"));
         result.addSeparator();
@@ -90,26 +160,37 @@ public class Main4 extends JPanel{
         result.add(new Act("timegrid"));
         return result;
     }
+
+    public void close() throws Exception{
+        for (IOpenedForm form:forms)
+            form.close();
+        
+    }
     
-    public static void main(String[] args) throws Exception{
-        IOpenedForm[] forms = {
-            new CurriculumPanel(),
-            new DepartPanel(),
-            new TeacherPanel(),
-            new RoomPanel(),
-            new SchedulePanel()
-        };
-        
-        
+    public void open() throws Exception{
+        for (IOpenedForm form:forms)
+            form.open();        
+    }
+    
+    public void intComponents(){
+        setLayout(new BorderLayout());        
         JTabbedPane tabbedPane = new JTabbedPane();
+        add(tabbedPane);
         for (IOpenedForm form:forms){
             tabbedPane.addTab(form.getCaption(), form.getPanel());
         }
+    }
+    
+   
+    
+    public static void main(String[] args) throws Exception{
+        
+        
                 
         JFrame frame = new JFrame("Main4");
         Main4 panel = new Main4();
-        panel.setLayout(new BorderLayout());
-        panel.add(tabbedPane);
+        panel.intComponents();
+//        panel.add(tabbedPane);
         
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(panel);
@@ -127,12 +208,8 @@ public class Main4 extends JPanel{
 
       
         try{
-            DataModule.getInstance().open(); 
-
-            for (IOpenedForm form:forms){
-                form.open();
-            }
-            
+            dataModule.open();
+            panel.open();
         } catch (Exception e){
             JOptionPane.showMessageDialog(frame, e.getMessage());
         }

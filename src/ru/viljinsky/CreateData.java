@@ -124,6 +124,19 @@ public class CreateData {
         }
     }
     
+    public static void execute(String fileName) throws Exception{
+        String[] script = {"sql/schedule.sql","sql/data.sql"};
+        CreateData cd = new CreateData();
+        System.out.println("Создаётся новая база данных...");
+        try{
+            cd.run(fileName,false,script);
+            System.out.println("База данных создана '"+fileName+"'");
+        } catch (Exception e){
+//            System.err.println("Ошибка при создании базы данных:\n"+e.getMessage());
+            throw new Exception("Ошибка при создании базы данных:\n"+e.getMessage());
+        }
+    }
+    
     public static void main(String[] args){
         String fileName = "example.db";
         String[] script = {"sql/schedule.sql","sql/data.sql"};

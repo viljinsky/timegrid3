@@ -66,6 +66,8 @@ abstract class MasterDetailPanel extends JPanel implements IMasterDetailConsts {
             String keys = ss[0];
             String vv = ss[1];
             IDataset dataset = grid1.getDataset();
+            if (dataset==null)
+                return;
             int row = getSelectedRow();
             if (row >= 0) {
                 Map<String, Object> values = dataset.getValues(row);
@@ -114,6 +116,12 @@ abstract class MasterDetailPanel extends JPanel implements IMasterDetailConsts {
         }
     }
 
+    public void close(){
+//        updateUI();
+        grid2.setDataset(null);
+        grid1.setDataset(null);
+    }
+    
     public abstract Map<String, String> getParams();
     
 }
