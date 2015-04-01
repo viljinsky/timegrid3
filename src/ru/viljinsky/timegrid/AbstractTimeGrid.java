@@ -10,7 +10,6 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.awt.event.ComponentAdapter;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
@@ -145,6 +144,7 @@ abstract class AbstractTimeGrid extends Container {
     int startY;
     boolean dragged = false;
     Cell overCell = null;
+    
     
     public AbstractTimeGrid() {
 //        setPreferredSize(new Dimension(800, 600));
@@ -359,6 +359,13 @@ abstract class AbstractTimeGrid extends Container {
         }
         return result;
     }
+    
+    public void realign(){
+        calcColWidth();
+        calcRowHeight();
+        repaint();
+    }
+    
     /**
      * Установка строки и колонки ячейки на которой находится мышь
      * @param cell 

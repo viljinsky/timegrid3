@@ -7,7 +7,9 @@
 package ru.viljinsky.forms;
 
 import java.sql.PreparedStatement;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.KeyMap;
@@ -110,6 +112,33 @@ public class DataTask implements IDataTaskConstants{
     
     
     
+    public static EmptyCell findEmptyCell(Integer depart_id,Integer teacher_id,Integer room_id) throws Exception{
+        CellsList list1,list2;
+        list1 = TimeCell.getEmptyDepartCell(depart_id);
+        if (list1.isEmpty()){
+            throw new Exception ("DEPART_HAS_NOT_EMPTY_CELL");
+        }
+        
+        if (teacher_id!=null){
+            list2 = TimeCell.getEmptyTeacherCell(teacher_id);
+            if (list2.isEmpty()){
+                throw new Exception ("TEACHER_HAS_NOT_EMPTY_CELL");
+            }
+            list1.intersect(list2);
+        }
+        if (room_id!=null){
+            list2 = TimeCell.getEmptyRoomCell(room_id);
+            if (list2.isEmpty()){
+                throw new Exception("ROOM_HAS_NOT_EMPTY_CELL");
+            }
+            list1.intersect(list2);
+        }
+        if (list1.isEmpty()){
+            throw new Exception("AFTER_INTERSECT_HAS_NOT_EMPTY_CELL");
+        }
+        return list1.getPrefferedValue();
+    }
+    
     /**
      * Заполнение расписания класса
      * @param depart_id
@@ -140,9 +169,11 @@ public class DataTask implements IDataTaskConstants{
         dataset.open();
         
         stmt = dataModule.getConnection().prepareStatement(inserSql);
-        dataModule.startTrans();
-        int day_no=1,bell_id=1,hour_per_day,hour_per_week;
+        int hour_per_day,hour_per_week;
         Integer group_id,subject_id,teacher_id,room_id;
+        EmptyCell emptyCell;
+        
+        dataModule.startTrans();
         try{
         
             for (int i=0;i<dataset.size();i++){
@@ -161,18 +192,16 @@ public class DataTask implements IDataTaskConstants{
                 stmt.setObject(6, teacher_id);
                 stmt.setObject(7, room_id);
                 
-                while (hour_per_week>0){
-                    stmt.setObject(1, day_no);
-                    stmt.setObject(2, bell_id);
+                for (int count=0;count<hour_per_week;count++){
+
+                    System.out.println(String.format("d: %d s:%d t:%d :r%d", depart_id,subject_id,teacher_id,room_id));
+                    emptyCell = findEmptyCell(depart_id, teacher_id, room_id);
+                        
+                    stmt.setObject(1, emptyCell.day_id);
+                    stmt.setObject(2, emptyCell.bell_id);
                     
                     
                     stmt.executeUpdate();
-                    hour_per_week-=1;
-                    day_no+=1;
-                    if (day_no>5){
-                        day_no=1;
-                        bell_id+=1;
-                    }
                 }
             }
         

@@ -20,7 +20,7 @@ public class CellElement {
     boolean moveble = false;
     protected boolean selected = false;
     Rectangle bound = null;
-    public static Integer WIDTH = 60;
+    public static Integer WIDTH = 100;
     public static Integer HEIGHT = 80;
     Color color = Color.MAGENTA;// ; new Color(255, 255, 200);
 

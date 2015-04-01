@@ -107,6 +107,7 @@ public class DBComboBox extends JComboBox<String> {
 
     public void setValue(Object value) {
         model.value = value;
+        onValueChange();
     }
 
     public Object getValue() {

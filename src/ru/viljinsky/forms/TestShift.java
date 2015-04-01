@@ -161,7 +161,7 @@ public class TestShift extends Panel{
 
             @Override
             public void onValueChange() {
-                System.out.println("****ValueChange");
+//                System.out.println("****ValueChange");
                 Map<String,Object> filter = new HashMap<>();
                 filter.put(comboLookupKey, getValue());
                 IDataset dataset = grid1.getDataset();
@@ -236,7 +236,7 @@ public class TestShift extends Panel{
             dataset2.test();
             grid2.setDataset(dataset2);
             
-            dataset1.open();
+//            dataset1.open();
             
             Dataset dataset3 = dataModule.getDataset(comboDataset);
             dataset3.open();

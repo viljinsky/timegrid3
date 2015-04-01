@@ -31,6 +31,7 @@ insert into bell_list(bell_id,time_start,time_end) values (6,'15:00','15:45');
 insert into bell_list(bell_id,time_start,time_end) values (7,'16:00','16:45');
 insert into bell_list(bell_id,time_start,time_end) values (8,'17:00','17:45');
 insert into bell_list(bell_id,time_start,time_end) values (9,'18:00','18:45');
+insert into bell_list(bell_id,time_start,time_end) values (10,'19:00','19:45');
 
 insert into profile_type(id,caption) values (1,'Профиль преподавателя');
 insert into profile_type(id,caption) values (2,'Профиль помещения');
@@ -72,8 +73,8 @@ insert into room(id,building_id,name,shift_id,profile_id,capacity) values (5,1,'
 insert into room(id,building_id,name,shift_id,profile_id,capacity) values (6,1,'каб 36',5,8,30);
 insert into room(id,building_id,name,shift_id,profile_id,capacity) values (7,1,'каб 37',5,8,30);
 insert into room(id,building_id,name,shift_id,profile_id,capacity) values (8,1,'каб 38',5,8,30);
-insert into room(id,building_id,name,shift_id,profile_id) values (9,1,'каб 35',5,8);
-insert into room(id,building_id,name,shift_id,profile_id) values (10,1,'спорт.зал',5,8);
+insert into room(id,building_id,name,shift_id,profile_id)          values (9,1,'каб 39',5,8);
+insert into room(id,building_id,name,shift_id,profile_id)          values (10,1,'спорт.зал',5,8);
 
 
 --
@@ -177,7 +178,7 @@ where shift.id=1 and bell_id between 1 and 5;
 insert into shift_detail (day_id,bell_id,shift_id)
 select day_no,bell_id,id
 from day_list,bell_list,shift
-where shift.id=2 and bell_id between 6 and 8;
+where shift.id=2 and bell_id between 6 and 10;
 
 -- преподаватели и помещения
 insert into shift_detail (day_id,bell_id,shift_id)

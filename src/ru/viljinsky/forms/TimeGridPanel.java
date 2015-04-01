@@ -27,6 +27,7 @@ import ru.viljinsky.DBComboBox;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
+import ru.viljinsky.IDataset;
 import ru.viljinsky.timegrid.*;
 
 /**
@@ -138,6 +139,7 @@ public class TimeGridPanel extends JPanel{
             try{
                 grSubjectGroup.setFilter(filter);
                 grSchedule.setFilter(filter);
+                fillSchedulePanel();
             } catch (Exception ee){
                 System.out.println(filter);
                 ee.printStackTrace();
@@ -210,10 +212,8 @@ public class TimeGridPanel extends JPanel{
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(800,600));
         add(filterPanel,BorderLayout.PAGE_START);
-//        timeGrid = new TimeGrid();
         timeGrid.setColCount(7);
         timeGrid.setRowCount(14);
-//        timeGrid.calcRowHeight();
         
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setLeftComponent(new JScrollPane(grSubjectGroup));
@@ -227,33 +227,40 @@ public class TimeGridPanel extends JPanel{
         add(splitPane1);
     }
     
-    public void open() throws Exception{
+    
+    private void fillSchedulePanel() throws Exception{
+        IDataset dataset;
         
-        filterPanel.open();
-        
-        Dataset dataset;
         SubjectGroup sg;
         Map<String,Object> values;
         
-        dataset = dataModule.getSQLDataset("select * from v_schedule "
-                + "  where depart_id=1;");
-        dataset.open();
-        for (int i=0;i<dataset.size();i++){
+
+        dataset = grSchedule.getDataset();
+        
+        timeGrid.clear();
+        
+        for (int i=0;i<dataset.getRowCount();i++){
             values=dataset.getValues(i);
             sg=new SubjectGroup(values);
             timeGrid.addElement(sg);
         }
+        timeGrid.realign();
         
+//        repaint();
+    }
+    
+    public void open() throws Exception{
+        Dataset dataset;
+        filterPanel.open();
+
         dataset = dataModule.getDataset("v_subject_group_on_schedule");
-        dataset.open();
+//        dataset.open();
         grSubjectGroup.setDataset(dataset);
         
         dataset = dataModule.getSQLDataset("select * from v_schedule order by day_id,bell_id,group_id");
-        dataset.open();
+//        dataset.open();
         grSchedule.setDataset(dataset);
-        
-        repaint();
-        
+      
     }
     
     private static JFrame frame = null;

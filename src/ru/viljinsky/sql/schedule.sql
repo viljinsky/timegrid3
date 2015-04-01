@@ -21,7 +21,7 @@ create table building(
 drop table if exists room;
 create table room(
     id integer primary key autoincrement,
-    name varchar(18) not null,
+    name varchar(18) not null unique,
     capacity integer,
     building_id integer not null references building(id),
     profile_id integer references profile(id),
@@ -147,6 +147,7 @@ create table curriculum_detail(
     hour_per_day integer not null,
     hour_per_week integer not null,
     group_type_id integer not null default 0 references group_type(id),
+    group_sequence integer default 0,
     constraint pk_cur_det primary key (curriculum_id,subject_id)    
 );
 
