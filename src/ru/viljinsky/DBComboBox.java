@@ -20,7 +20,7 @@ import javax.swing.event.ListDataListener;
  */
 public class DBComboBox extends JComboBox<String> {
     Model model;
-    String label = "combobox";
+    protected String label = "combobox";
 
     class Model implements ComboBoxModel {
 

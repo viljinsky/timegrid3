@@ -37,17 +37,20 @@ insert into profile_type(id,caption) values (2,'Профиль помещени�
 
 --    Графики преподавателей
 
-insert into profile(id,profile_type_id,name) values (1,1,'Преподаватель 1');
-insert into profile(id,profile_type_id,name) values (2,1,'Преподаватель 2');
-insert into profile(id,profile_type_id,name) values (3,1,'Преподаватель 3');
-insert into profile(id,profile_type_id,name) values (4,1,'Преподаватель 4');
+insert into profile(id,profile_type_id,name) values (1,1,'Руск.яз и литература');
+insert into profile(id,profile_type_id,name) values (2,1,'Алгебра и геометрия');
+insert into profile(id,profile_type_id,name) values (3,1,'Физика');
+insert into profile(id,profile_type_id,name) values (4,1,'Химия');
+insert into profile(id,profile_type_id,name) values (5,1,'Иностранный яз');
+insert into profile(id,profile_type_id,name) values (6,1,'Физкультура');
+insert into profile(id,profile_type_id,name) values (7,1,'Информатика');
 
 --    Графики помещений
 
-insert into profile(id,profile_type_id,name) values ('5',2,'Кабинет 1');
-insert into profile(id,profile_type_id,name) values (6,2,'Кабинет 2');
-insert into profile(id,profile_type_id,name) values (7,2,'Кабинет 3');
-insert into profile(id,profile_type_id,name) values (8,2,'Кабинет 4');
+insert into profile(id,profile_type_id,name) values (8,2,'Общ назн.');
+insert into profile(id,profile_type_id,name) values (9,2,'Спортзал');
+insert into profile(id,profile_type_id,name) values (10,2,'Ком.кабинет');
+insert into profile(id,profile_type_id,name) values (11,2,'Лингофонный каб.');
 
 
 insert into shift_type(id,caption) values (1,'График класса');
@@ -80,24 +83,40 @@ insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,d
 insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
     values (3,'Алгебра',1,0,2);
 insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
-    values (4,'Физика',1,0,2);
+    values (4,'Геометрия',1,0,2);
 insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
-    values (5,'Химия',1,0,2);
+
+    values (5,'Физика',1,0,2);
 insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
-    values (6,'Иностранный яз.',1,2,2);
+    values (6,'Химия',1,0,2);
 insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
-     values (7,'Физ.культура',1,1,2);
+    values (7,'Иностранный яз.',1,2,2);
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
+     values (8,'Физ.культура',1,1,2);
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
+     values (9,'Информатика',1,1,2);
+
+
         
 insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) 
-    values (1,'Иванова','Ирина','Ивановна',1,1);
+    values (1,'Ежёва','Ирина','Ивановна',1,1);
 insert into teacher (id,last_name,first_name,patronymic,profile_id) 
-    values (2,'Петрова','Людмила','Олеговна',2);
+    values (2,'Белкина','Людмила','Олеговна',2);
 insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
-    values (3,'Сидорова','Лариса','Петровна',3,1);
+    values (3,'Сорокина','Лариса','Петровна',3,1);
 insert into teacher (id,last_name,first_name,patronymic)
-    values (4,'Романова','Татьяна','Игоревна');
+    values (4,'Орлова','Татьяна','Игоревна');
 insert into teacher (id,last_name,first_name,patronymic,profile_id)
-    values (5,'Галкина','Клавдия','Николоаевна',4);
+    values (5,'Медведева','Клавдия','Николоаевна',4);
+insert into teacher (id,last_name,first_name,patronymic,profile_id)
+    values (6,'Волкова','Марфа','Сидоровна',4);
+insert into teacher (id,last_name,first_name,patronymic,profile_id)
+    values (7,'Птичкина','Раиса','Григорьевна',4);
+insert into teacher (id,last_name,first_name,patronymic,profile_id)
+    values (8,'Рыбкина','Софья','Петровна',4);
+insert into teacher (id,last_name,first_name,patronymic,profile_id)
+    values (9,'Ужёва','Тамра','Сидоровна',4);
+
 
 
 
@@ -124,6 +143,43 @@ insert into curriculum_detail(curriculum_id,subject_id,hour_per_day,hour_per_wee
 
 insert into curriculum_detail(curriculum_id,subject_id,hour_per_day,hour_per_week)
   values(1,3,2,2);
+
+
+--  *************************  ЗАПОЛНЕНИЕ ГРАФИКОВ  ****************************
+delete from shift_detail;
+-- первая смена
+insert into shift_detail (day_id,bell_id,shift_id)
+select day_no,bell_id,id
+from day_list,bell_list,shift
+where shift.id=1 and bell_id between 1 and 5;
+
+-- вторая смена
+
+insert into shift_detail (day_id,bell_id,shift_id)
+select day_no,bell_id,id
+from day_list,bell_list,shift
+where shift.id=2 and bell_id between 6 and 8;
+
+-- преподаватели и помещения
+insert into shift_detail (day_id,bell_id,shift_id)
+select day_no,bell_id,id
+from day_list,bell_list,shift
+where shift.id in (3,4) ;
+
+-- *************************** ЗАПОЛНЕНИЕ ПРОФИЛЕЙ *****************************
+--          Профили преподавателей
+-- русский и литература
+insert into profile_item (profile_id,subject_id) values(1,1);
+insert into profile_item (profile_id,subject_id) values(1,2);
+
+insert into profile_item (profile_id,subject_id) values(2,3);
+insert into profile_item (profile_id,subject_id) values(2,4);
+
+insert into profile_item (profile_id,subject_id) values(3,5);
+insert into profile_item (profile_id,subject_id) values(4,6);
+insert into profile_item (profile_id,subject_id) values(5,7);
+insert into profile_item (profile_id,subject_id) values(6,8);
+insert into profile_item (profile_id,subject_id) values(7,9);
 
 
 

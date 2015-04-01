@@ -8,11 +8,13 @@ package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -120,6 +122,25 @@ public class Dictonary extends JDialog{
             tabbedPane.addTab(tableName,panel);
         }
        
+    }
+    
+    private static Dictonary frame = null;
+    public static Integer showDialog(JComponent owner) throws Exception{
+        if (frame ==null){
+            frame = new Dictonary();
+            frame.setDefaultCloseOperation(HIDE_ON_CLOSE);
+            frame.setModal(true);
+            frame.pack();
+            if (owner!=null){
+                Dimension d = owner.getSize();
+                Point p = owner.getLocationOnScreen();
+                frame.setLocation(p.x+(d.width-frame.getWidth())/2, p.y+(d.height-frame.getHeight())/2);
+            }
+            frame.open();
+        }
+        frame.setVisible(true);
+        System.out.println("OK");
+        return 0;
     }
     
     public static void main(String[] args) throws Exception{

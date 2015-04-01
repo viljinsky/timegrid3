@@ -1,3 +1,11 @@
+drop table if exists stream;
+create table stream (
+    id integer primary key autoincrement,
+    stream_caption varchar(40)
+);
+
+
+
 drop table if exists week;
 create table week(
     id integer primary key ,             -- 0 каждую неделю; 1,2,.. 1-ая.2-я .. неделя
@@ -14,6 +22,7 @@ drop table if exists room;
 create table room(
     id integer primary key autoincrement,
     name varchar(18) not null,
+    capacity integer,
     building_id integer not null references building(id),
     profile_id integer references profile(id),
     shift_id integer references shift(id)
@@ -81,9 +90,10 @@ create table teacher(
     first_name varchar(18),
     patronymic varchar(18),
     photo binary,
-    comments blob,
     profile_id integer references profile(id),
-    shift_id integer references shift(id)
+    shift_id integer references shift(id),
+    teacher_room_id integer references room(id) on delete set null,
+    comments blob
     
 );
 
@@ -114,6 +124,7 @@ create table subject_group (
     subject_id integer references subject(id) on delete restrict,
     default_teacher_id integer references teacher(id),
     default_room_id integer references room(id),
+    stream_id integer references stream(id) on delete set null,
     primary key (depart_id,subject_id,group_id)
 );
 
@@ -169,24 +180,15 @@ create table schedule (
 ---------------------------------------------------------------------------------
 drop view if exists v_subject_group;
 create view v_subject_group as
-select a.depart_id,a.group_id,c.group_type_id,
+select a.depart_id,a.group_id,a.stream_id,c.group_type_id,
   a.subject_id,c.hour_per_day,c.hour_per_week,
   a.default_teacher_id,a.default_room_id
 from subject_group a inner join depart b on a.depart_id=b.id 
 	inner join curriculum_detail c on c.curriculum_id=b.curriculum_id
 	and c.subject_id=a.subject_id;
-select * from v_subject_group;
+-- select * from v_subject_group;
 
 
--- drop view if exists v_subject_group_on_schedule;
--- create view v_subject_group_on_schedule as
---     select a.depart_id,a.subject_id,a.group_id,a.hour_per_week,count(*) as  placed
---     from v_subject_group a 
---     left join schedule b on a.depart_id=b.depart_id 
---            and a.group_id=b.group_id and a.subject_id=b.subject_id
---     group by a.depart_id,a.subject_id,a.group_id,a.hour_per_week;
-
---   v_subject_group_on schedule
 drop view if exists v_subject_group_on_schedule;
 create view v_subject_group_on_schedule as
 select a.depart_id,a.subject_id,a.group_id,a.group_type_id, 
@@ -199,19 +201,6 @@ select a.depart_id,a.subject_id,a.group_id,a.group_type_id,
 
 -- select * from v_subject_group_on_schedule;
 
----                 view schedule
--- drop view if exists v_schedule;
--- create view v_schedule as
--- select a.day_id,a.bell_id,b.subject_name,
--- c.label as depart_name,a.group_id,d.name as room_no,e.last_name as teacher_name,
--- a.week_id,a.subject_id,a.depart_id,a.room_id,a.teacher_id
---  from schedule a inner join subject b
--- on a.subject_id=b.id
--- inner join depart c on c.id=a.depart_id
--- left join room d on d.id=a.room_id
--- left join teacher e on e.id=a.teacher_id;
--- 
--- -- select * from v_schedule;
 
 
 drop view if exists v_schedule;

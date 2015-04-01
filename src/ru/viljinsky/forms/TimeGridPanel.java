@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package ru.viljinsky;
+package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -23,6 +23,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import ru.viljinsky.DBComboBox;
+import ru.viljinsky.DataModule;
+import ru.viljinsky.Dataset;
+import ru.viljinsky.Grid;
 import ru.viljinsky.timegrid.*;
 
 /**
@@ -252,13 +256,9 @@ public class TimeGridPanel extends JPanel{
         
     }
     
-//    public void createGUI(){
-//        
-//    }
-    
     private static JFrame frame = null;
     
-    public static void showTimeGrid(JComponent owner) throws Exception{
+    public static void showFrame(JComponent owner) throws Exception{
         if (frame ==null){
         
             TimeGridPanel panel = new TimeGridPanel();

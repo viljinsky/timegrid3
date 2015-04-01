@@ -117,4 +117,4 @@ abstract class MasterDetailPanel extends JPanel implements IMasterDetailConsts {
     public abstract Map<String, String> getParams();
     
 }
-////////////////////////////  DEPART PANEL ////////////////////////////////////
+

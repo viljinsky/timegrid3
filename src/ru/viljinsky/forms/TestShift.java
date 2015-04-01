@@ -140,9 +140,6 @@ public class TestShift extends Panel{
      */
     class ControlDetails extends JPanel{
         Action[] deatilsAction = {new Act("FILL"),new Act("INCLUDE"),new Act("EXCLUDE")};
-//        JButton btnFill;
-//        JButton btnInclude;
-//        JButton btnExclude;
         
         public ControlDetails(){
             super(new FlowLayout(FlowLayout.LEFT));
@@ -151,13 +148,6 @@ public class TestShift extends Panel{
                 btn=new JButton(a);
                 add(btn);
             }
-            
-//            btnFill = new JButton("fill");
-//            btnInclude = new JButton("include");
-//            btnExclude = new JButton("exclude");
-//            add(btnFill);
-//            add(btnInclude);
-//            add(btnExclude);
         }
     }
     
@@ -237,7 +227,12 @@ public class TestShift extends Panel{
             dataset1.test();
             grid1.setDataset(dataset1);
             
-            Dataset dataset2 = dataModule.getDataset(slaveDataset);
+            Dataset dataset2;
+            if (dataModule.isTableExists(slaveDataset))
+                dataset2 = dataModule.getDataset(slaveDataset);
+            else 
+                dataset2 = dataModule.getSQLDataset(slaveDataset);
+                
             dataset2.test();
             grid2.setDataset(dataset2);
             

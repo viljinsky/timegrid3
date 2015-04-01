@@ -725,7 +725,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
     
     private static SQLMonitor monitor = null;
     
-    public static void showMonitor(JComponent owner) throws Exception{
+    public static void showFrame(JComponent owner) throws Exception{
         if (monitor==null){
             monitor = new SQLMonitor();
             monitor.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);

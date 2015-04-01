@@ -55,6 +55,13 @@ public class DataModule implements IDataModule,IDataModuleConsts {
         return instance;
     }
     
+    public boolean isTableExists(String tableName){
+        for (DatasetInfo info:infoList)
+            if (info.isTable() && info.tableName.equals(tableName))
+                return true;
+        return false;
+    }
+    
     @Override
     public boolean isActive(){
         return active;
@@ -191,6 +198,10 @@ public class DataModule implements IDataModule,IDataModuleConsts {
                 column.columnIndex= i+1;
                 column.tableName=rsmeta.getTableName(i+1);
                 column.columnName=rsmeta.getColumnName(i+1);
+                if (column.columnName.contains(".")){
+                    column.columnName=column.columnName.split("\\.")[1];
+                }
+//                column.columnLabel = rsmeta.get
                 column.columnLabel=rsmeta.getColumnLabel(i+1);
                 column.columnTypeName=rsmeta.getColumnTypeName(i+1);
                 column.columnType = rsmeta.getColumnType(i+1);
