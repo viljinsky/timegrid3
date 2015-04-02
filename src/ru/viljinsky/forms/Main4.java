@@ -17,7 +17,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import ru.viljinsky.CreateData;
 import ru.viljinsky.DataModule;
@@ -25,8 +24,20 @@ import ru.viljinsky.util.SQLMonitor;
 
 
 ////////////////////////    MAIN 4 ////////////////////////////////////////////
+interface IMenu{
+    public static final int FILE_OPEN   = 1;
+    public static final int FILE_NEW    = 2;
+    public static final int FILE_CLOSE  = 3;
+    public static final int FILE_EXIT   = 4;
+    
+    public static final int DICTIONARY  = 5;
+    public static final int SHIFT       = 6;
+    public static final int TIMEGRID    = 7;
+    public static final int MONITOR     = 8;
+}
 
-public class Main4 extends JPanel{
+public class Main4 extends JFrame{
+    public static String appName = "TimeTable2015";
     private static DataModule dataModule = DataModule.getInstance(); 
     
     JFileChooser fileChooser = new JFileChooser(new File("."));
@@ -37,6 +48,10 @@ public class Main4 extends JPanel{
         new RoomPanel(),
         new SchedulePanel()
     };
+
+    public Main4(String title){
+        super(title);
+    }
     
     
 
@@ -67,17 +82,21 @@ public class Main4 extends JPanel{
             CreateData.execute(path);
             dataModule.open(path);
             open();
+            setTitle(appName+" ["+path+"]");
             JOptionPane.showMessageDialog(this, "База \""+path+"\" - успешно создана");
         }
     }
     protected void fileOpen() throws Exception{
+        String path;
         int retVal=fileChooser.showOpenDialog(this);
         if (retVal==JFileChooser.APPROVE_OPTION){
+            path = fileChooser.getSelectedFile().getAbsolutePath();
             if (dataModule.isActive()){
                 close();
                 dataModule.close();
             }
-            dataModule.open(fileChooser.getSelectedFile().getPath());
+            dataModule.open(path);
+            setTitle(appName+"["+path+"]");
             open();
         }
     }
@@ -86,6 +105,7 @@ public class Main4 extends JPanel{
         if (dataModule.isActive()){
             close();
             dataModule.close();
+            setTitle(appName);
         }
     }
     
@@ -112,19 +132,19 @@ public class Main4 extends JPanel{
                             
                 
                 case "DICTIONARY":
-                    Dictonary.showDialog(this);
+                    Dictonary.showDialog(rootPane);
                     break;
                     
                 case "sqlMonitor":
-                    SQLMonitor.showFrame(Main4.this);
+                    SQLMonitor.showFrame(rootPane);
                     break;
                     
                 case "testShift":
-                    TestShift2.showShiftDialog(this);
+                    TestShift2.showShiftDialog(rootPane);
                     
                     break;
                 case "timegrid":
-                    TimeGridPanel.showFrame(Main4.this);
+                    TimeGridPanel.showFrame(rootPane);
                     break;
                     
                 case "exit":
@@ -179,22 +199,18 @@ public class Main4 extends JPanel{
         for (IOpenedForm form:forms){
             tabbedPane.addTab(form.getCaption(), form.getPanel());
         }
+        setJMenuBar(createMenuBar());
     }
     
    
     
     public static void main(String[] args) throws Exception{
         
-        
-                
-        JFrame frame = new JFrame("Main4");
-        Main4 panel = new Main4();
-        panel.intComponents();
-//        panel.add(tabbedPane);
-        
+        Main4 frame = new Main4(appName);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setContentPane(panel);
-        frame.setJMenuBar(panel.createMenuBar());
+
+        frame.intComponents();
+        
         frame.pack();
         
         // позичионирование главного окна
@@ -205,11 +221,10 @@ public class Main4 extends JPanel{
         frame.setLocation(x,y);
         
         frame.setVisible(true);
-
       
         try{
             dataModule.open();
-            panel.open();
+            frame.open();
         } catch (Exception e){
             JOptionPane.showMessageDialog(frame, e.getMessage());
         }

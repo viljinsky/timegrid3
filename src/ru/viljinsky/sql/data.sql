@@ -61,7 +61,7 @@ insert into shift_type(id,caption) values (3,'График помещения');
 insert into shift(id,shift_type_id,name) values(1,1,'Первая смена');  
 insert into shift(id,shift_type_id,name) values(2,1,'Вторая смена');  
 insert into shift(id,shift_type_id,name) values(3,2,'График преподавателя 1');  
-insert into shift(id,shift_type_id,name) values(4,3,'График преподавателя 2');  
+insert into shift(id,shift_type_id,name) values(4,2,'График преподавателя 2');  
 insert into shift(id,shift_type_id,name) values('5',3,'Обычный кабинет');  
 
 
@@ -103,14 +103,14 @@ insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,d
 
 
 -- русский и лит.        
-insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) 
-    values (1,'Ежёва','Ирина','Ивановна',1,1);
+insert into teacher (id,last_name,first_name,patronymic,profile_id) 
+    values (1,'Ежёва','Ирина','Ивановна',1);
 insert into teacher (id,last_name,first_name,patronymic,profile_id) 
     values (2,'Белкина','Людмила','Олеговна',1);
 
 -- алг и геометрия
-insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
-    values (3,'Сорокина','Лариса','Петровна',2,1);
+insert into teacher (id,last_name,first_name,patronymic,profile_id)
+    values (3,'Сорокина','Лариса','Петровна',2);
 insert into teacher (id,last_name,first_name,patronymic,profile_id)
     values (4,'Орлова','Татьяна','Игоревна',2);
 
@@ -185,6 +185,8 @@ insert into shift_detail (day_id,bell_id,shift_id)
 select day_no,bell_id,id
 from day_list,bell_list,shift
 where shift.id in (3,4) ;
+
+update teacher set shift_id=3;
 
 -- *************************** ЗАПОЛНЕНИЕ ПРОФИЛЕЙ *****************************
 --          Профили преподавателей

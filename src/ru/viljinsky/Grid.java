@@ -344,8 +344,8 @@ class GridModel extends AbstractTableModel{
         if (row >= 0 && JOptionPane.showConfirmDialog(owner, "Удалить","Внимание",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION) {
             dataset.delete(row);
             model.fireTableRowsDeleted(row, row);
-            if (row>=dataset.getRowCount())
-                row=dataset.getColumnCount()-1;
+            if (row>=dataset.getRowCount()-1)
+                row=dataset.getRowCount()-1;
             if (row>=0){
                 getSelectionModel().setSelectionInterval(row, row);
             }

@@ -586,7 +586,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
             String sql="";
             tabs.removeAll();
 
-            dataModule.startTrans();
+//            dataModule.setAutoConmmit(false);
             try{
 
                 lines = textEditor.getText().split("\n");
@@ -603,9 +603,14 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                         sql="";
                     }
                 }
-            } finally {
-                dataModule.stopTrans();
+                dataModule.commit();
+            } catch (Exception e){
+                dataModule.rollback();
+                throw new Exception("EXECUTE_ALL_ERROR\n"+e.getMessage());
             }
+//            } finally {
+//                dataModule.setAutoConmmit(true);
+//            }
         }
 
         public void clear(){

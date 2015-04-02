@@ -22,6 +22,7 @@ import ru.viljinsky.DBComboBox;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
+import ru.viljinsky.IDataset;
 import ru.viljinsky.KeyMap;
 import static ru.viljinsky.forms.IMasterDetailConsts.MASTER_DATASET;
 
@@ -75,7 +76,7 @@ class RoomPanel extends JPanel implements IOpenedForm{
                             "inner join depart d on d.id=a.depart_id\n"+
 //                            "order by a.depart_id,a.subject_id,a.group_id\n"+
                             "where a.default_room_id is null and c.id=";
-        String sqlDest ="select s.subject_name,d.label,a.group_id,a.hour_per_week,a.subject_id\n"
+        String sqlDest ="select s.subject_name,d.label,a.group_id,a.hour_per_week,a.subject_id,a.depart_id\n"
                 + " from v_subject_group a\n"+
                  "inner join subject s on s.id=a.subject_id\n"+
                 " inner join depart d on d.id=a.depart_id\n"+
@@ -90,44 +91,85 @@ class RoomPanel extends JPanel implements IOpenedForm{
         @Override
         public void include() throws Exception {
             Integer depart_id,subject_id,group_id;
-            depart_id=sourceGrid.getInegerValue("depart_id");
-            subject_id=sourceGrid.getInegerValue("subject_id");
-            group_id=sourceGrid.getInegerValue("group_id");
-            
-            String sql = "update subject_group set default_room_id=? where depart_id=? and subject_id=? and group_id=?;";
-            KeyMap map = new KeyMap();
-            map.put(1, room_id);
-            map.put(2, depart_id);
-            map.put(3, subject_id);
-            map.put(4, group_id);
-            dataModule.execute(sql, map);
+            Map<String,Object> values;
+            IDataset dataset = sourceGrid.getDataset();
+            try{
+                for (int row:sourceGrid.getSelectedRows()){
+                    values=dataset.getValues(row);
+                    depart_id=(Integer)values.get("depart_id");
+                    subject_id=(Integer)values.get("subject_id");
+                    group_id=(Integer)values.get("group_id");
+                    DataTask.includeGroupToRoom(depart_id, subject_id, group_id, room_id);
+                }
+                dataModule.commit();
+            } catch (Exception e){
+                dataModule.rollback();
+                throw new Exception("INCLUDE_ERROR\n"+e.getMessage());
+            }
             requery();
         }
 
         @Override
         public void exclude() throws Exception {
             Integer depart_id,subject_id,group_id;
-            String sql ="update subject_group set default_room_id=null where depart_id=? and subject_id=? and group_id=?;";
-            depart_id = destanationGrid.getInegerValue("depart_id");
-            subject_id=destanationGrid.getInegerValue("subject_id");
-            group_id=destanationGrid.getInegerValue("group_id");
-            KeyMap map = new KeyMap();
-            map.put(1, depart_id);
-            map.put(2,subject_id);
-            map.put(3,group_id);
-            dataModule.execute(sql,map);
+            Map<String,Object> values;
+            IDataset dataset = destanationGrid.getDataset();
+            try{
+                for (int row: destanationGrid.getSelectedRows()){
+                    values=dataset.getValues(row);
+                    depart_id=(Integer)values.get("depart_id");
+                    subject_id=(Integer)values.get("subject_id");
+                    group_id=(Integer)values.get("group_id");
+                    DataTask.excluderGroupFromRoom(depart_id, subject_id, group_id);
+                }
+                dataModule.commit();
+            } catch (Exception e){
+                dataModule.rollback();
+                throw new Exception("EXCLUDE_ERROR\n"+e.getMessage());
+            }
             requery();
-            
         }
 
         @Override
         public void includeAll() throws Exception {
-            throw new UnsupportedOperationException("Not supported yet."); 
+            Integer depart_id,subject_id,group_id;
+            Map<String,Object> values;
+            IDataset dataset = sourceGrid.getDataset();
+            try{
+                for (int row=0;row<dataset.getRowCount();row++){
+                    values=dataset.getValues(row);
+                    depart_id=(Integer)values.get("depart_id");
+                    subject_id=(Integer)values.get("subject_id");
+                    group_id=(Integer)values.get("group_id");
+                    DataTask.includeGroupToRoom(depart_id, subject_id, group_id, room_id);
+                }
+                dataModule.commit();
+            } catch (Exception e){
+                dataModule.rollback();
+                throw new Exception("INCLUDE_ERROR\n"+e.getMessage());
+            }
+            requery();
         }
 
         @Override
         public void excludeAll() throws Exception {
-            throw new UnsupportedOperationException("Not supported yet."); 
+            Integer depart_id,subject_id,group_id;
+            Map<String,Object> values;
+            IDataset dataset = destanationGrid.getDataset();
+            try{
+                for (int row=0;row<dataset.getRowCount();row++){
+                    values=dataset.getValues(row);
+                    depart_id=(Integer)values.get("depart_id");
+                    subject_id=(Integer)values.get("subject_id");
+                    group_id=(Integer)values.get("group_id");
+                    DataTask.excluderGroupFromRoom(depart_id, subject_id, group_id);
+                }
+                dataModule.commit();
+            } catch (Exception e){
+                dataModule.rollback();
+                throw new Exception("EXCLUDE_ERROR\n"+e.getMessage());
+            }
+            requery();
         }
 
         @Override
@@ -487,53 +529,118 @@ class TeacherPanel extends JPanel implements IOpenedForm {
         @Override
         public void requery() throws Exception {
             Dataset dataset;
-            dataset = dataModule.getSQLDataset(sourceSQL+teacher_id);
-            dataset.open();
             
+            dataset = dataModule.getSQLDataset(sourceSQL+teacher_id);
+            dataset.open();            
             sourceGrid.setDataset(dataset);
+            
             dataset = dataModule.getSQLDataset(destanationSQL+teacher_id);
             dataset.open();
             destanationGrid.setDataset(dataset);
         }
 
+
+        
         @Override
         public void include() throws Exception {
-            Integer room_id = grid.getInegerValue("teacher_room_id");
-            int depart_id = sourceGrid.getInegerValue("depart_id");
-            int subject_id = sourceGrid.getInegerValue("subject_id");
-            int group_id = sourceGrid.getInegerValue("group_id");
-            
-            String sql = "update subject_group set default_teacher_id=?,default_room_id=? where depart_id=? and subject_id=? and group_id=?";
-            KeyMap map = new KeyMap();
-            map.put(1, teacher_id);
-            map.put(2, room_id);
-            map.put(3, depart_id);
-            map.put(4, subject_id);
-            map.put(5, group_id);
-            dataModule.execute(sql, map);
+            Map<String,Object> values;
+            IDataset dataset = sourceGrid.getDataset();
+            int depart_id,subject_id,group_id;
+            try{
+                for (int row : sourceGrid.getSelectedRows()){
+                    values=dataset.getValues(row);
+                    depart_id=(Integer)values.get("depart_id");
+                    subject_id=(Integer)values.get("subject_id");
+                    group_id=(Integer)values.get("group_id");
+                    DataTask.inclideGroupToTeacher(depart_id, subject_id, group_id, teacher_id);
+                }
+                dataModule.commit();
+            } catch (Exception e){
+                dataModule.rollback();
+                throw new Exception("INCLUDE_ERROR\n"+e.getMessage());
+            }
             requery();
         }
 
         @Override
         public void exclude() throws Exception {
-            int depart_id = destanationGrid.getInegerValue("depart_id");
-            int subject_id = destanationGrid.getInegerValue("subject_id");
-            int group_id = destanationGrid.getInegerValue("group_id");
-            String sql = "update subject_group set default_teacher_id=null where depart_id=? and subject_id=? and group_id=?";
-            KeyMap map = new KeyMap();
-            map.put(1, depart_id);
-            map.put(2, subject_id);
-            map.put(3, group_id);
-            dataModule.execute(sql, map);
+            Map<String,Object> values;
+            IDataset dataset = destanationGrid.getDataset();
+            int depart_id,subject_id,group_id;
+//            dataModule.setAutoConmmit(false);
+            try{
+                for (int row : destanationGrid.getSelectedRows()){
+                    values=dataset.getValues(row);
+                    depart_id=(Integer)values.get("depart_id");
+                    subject_id=(Integer)values.get("subject_id");
+                    group_id=(Integer)values.get("group_id");
+                    DataTask.excludeGroupFromTeacher(depart_id, subject_id, group_id);
+                }
+                dataModule.commit();
+            } catch (Exception e){
+                dataModule.rollback();
+                throw new Exception("EXCLUDE_ERROR\n"+e.getMessage());
+            }
+//            } finally {
+////                dataModule.setAutoConmmit(true);
+//            }
+            
             requery();
         }
 
         @Override
-        public void includeAll() {
+        public void includeAll() throws Exception{
+            IDataset dataset = sourceGrid.getDataset();
+            Integer depart_id;
+            Integer subject_id;
+            Integer group_id;
+            Map<String,Object> values;
+//            dataModule.startTrans();
+//            dataModule.setAutoConmmit(false);// getConnection().setAutoCommit(false);
+            try{
+                for (int row=0;row<dataset.getRowCount();row++){
+                    values=dataset.getValues(row);
+                    depart_id= (Integer)values.get("depart_id");
+                    subject_id=(Integer)values.get("subject_id");
+                    group_id=(Integer)values.get("group_id");
+                    DataTask.inclideGroupToTeacher(depart_id, subject_id, group_id, teacher_id);
+                }
+                dataModule.commit();
+            } catch (Exception e){
+                dataModule.rollback();
+                throw new Exception("INCLUDE_ALL\n"+e.getMessage());
+            }
+//            } finally{
+//                dataModule.setAutoConmmit(true);
+//            }
+            requery();
         }
 
         @Override
-        public void excludeAll() {
+        public void excludeAll() throws Exception{
+            IDataset dataset = destanationGrid.getDataset();
+            Integer depart_id;
+            Integer subject_id;
+            Integer group_id;
+            Map<String,Object> values;
+//            dataModule.setAutoConmmit(false);
+            try{
+                for (int row=0;row<dataset.getRowCount();row++){
+                    values=dataset.getValues(row);
+                    depart_id= (Integer)values.get("depart_id");
+                    subject_id=(Integer)values.get("subject_id");
+                    group_id=(Integer)values.get("group_id");
+                    DataTask.excludeGroupFromTeacher(depart_id, subject_id, group_id);
+                }
+                dataModule.commit();
+            } catch (Exception e){
+                dataModule.rollback();
+                throw new Exception("EXCLUDE_ALL_ERROR\n"+e.getMessage());
+            }
+//            } finally{
+//                dataModule.setAutoConmmit(true);
+//            }
+            requery();
         }
 
 

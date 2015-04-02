@@ -7,9 +7,7 @@
 package ru.viljinsky.forms;
 
 import java.sql.PreparedStatement;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.KeyMap;
@@ -21,7 +19,11 @@ import ru.viljinsky.KeyMap;
 interface IDataTaskConstants{
 }
 
-public class DataTask implements IDataTaskConstants{
+interface IDataTask{
+    
+}
+
+public class DataTask implements IDataTask, IDataTaskConstants{
     protected static DataModule dataModule = DataModule.getInstance();
     
     /**
@@ -173,7 +175,6 @@ public class DataTask implements IDataTaskConstants{
         Integer group_id,subject_id,teacher_id,room_id;
         EmptyCell emptyCell;
         
-        dataModule.startTrans();
         try{
         
             for (int i=0;i<dataset.size();i++){
@@ -204,9 +205,11 @@ public class DataTask implements IDataTaskConstants{
                     stmt.executeUpdate();
                 }
             }
-        
-        } finally {
-            dataModule.stopTrans();
+            dataModule.commit();
+        } catch (Exception e){
+            
+            dataModule.rollback();
+            throw new Exception("FILL_SCHEDULE_ERROR\n"+e.getMessage());
         }
                 
     }
@@ -237,4 +240,55 @@ public class DataTask implements IDataTaskConstants{
                 + "where shift.id="+shift_id;
         dataModule.execute(sql);
     }
+    
+    ///////////////////////////// ROOM PANEL ///////////////////////////////////
+    public static void includeGroupToRoom(int depart_id,int subject_id,int group_id,int room_id)
+            throws Exception{
+        String sql = "update subject_group set default_room_id=? where depart_id=? and subject_id=? and group_id=?;";
+        KeyMap map = new KeyMap();
+        map.put(1, room_id);
+        map.put(2, depart_id);
+        map.put(3, subject_id);
+        map.put(4, group_id);
+        dataModule.execute(sql, map);
+        
+    }
+    
+    public static void excluderGroupFromRoom(int depart_id,int subject_id,int group_id) 
+            throws Exception{
+        String sql ="update subject_group set default_room_id=null where depart_id=? and subject_id=? and group_id=?;";
+        KeyMap map = new KeyMap();
+        map.put(1, depart_id);
+        map.put(2,subject_id);
+        map.put(3,group_id);
+        dataModule.execute(sql,map);
+    }
+    
+    ///////////////////////////// TEACHER PANEL ////////////////////////////////
+        // перенести в DataTask
+    public static void inclideGroupToTeacher(int depart_id,int subject_id,int group_id,int teacher_id)
+            throws Exception{
+        String sql = "update subject_group set default_teacher_id=?\n"
+                   + " where depart_id=? and subject_id=? and group_id=?;";
+        KeyMap map = new KeyMap();
+        map.put(1, teacher_id);
+//            map.put(2, room_id);
+        map.put(2, depart_id);
+        map.put(3, subject_id);
+        map.put(4, group_id);
+        dataModule.execute(sql, map);
+    }
+
+    public static void excludeGroupFromTeacher(int depart_id,int subject_id,int group_id) 
+            throws Exception{
+        String sql = "update subject_group set default_teacher_id=?\n"
+                   + "where depart_id=? and subject_id=? and group_id=?;";
+        KeyMap map = new KeyMap();
+        map.put(1, null);
+        map.put(2, depart_id);
+        map.put(3, subject_id);
+        map.put(4, group_id);
+        dataModule.execute(sql, map);
+    }
+    
 }

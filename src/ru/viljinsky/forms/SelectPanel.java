@@ -80,8 +80,10 @@ abstract class SelectPanel extends JPanel implements ActionListener {
                     exclude();
                     break;
                 case "INCLUDE_ALL":
+                    includeAll();
                     break;
                 case "EXCLUDE_ALL":
+                    excludeAll();
                     break;
                 default:
                     System.err.println(command);

@@ -24,7 +24,6 @@ import java.util.Map;
 public class Dataset extends ArrayList<Object[]> implements IDataset {
     DataModule dataModule = DataModule.getInstance();
     DatasetInfo info;
-//    Map<Integer, Column> columns = new HashMap<>();
     Boolean active = false;
     Boolean editable = false;
 
@@ -121,6 +120,9 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
                 }
                 this.active = true;
             } finally {
+                if (stmt!=null){
+                    stmt.close();
+                }
             }
         }
     }
@@ -194,17 +196,12 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             info.deleteSQL="delete from "+info.tableName +" where "+s3+";";
             info.updateSQL="update "+info.tableName+" set "+strSet+" where "+strWhere;
 
-//                System.out.println(info.insertSQL);
-//                System.out.println(info.deleteSQL);
-//                System.out.println(info.updateSQL);
-//                System.out.println();
             }
             
             
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
-//            throw new Exception(e.getMessage());
         } finally {
             if (stmt!=null)
                 stmt.close();
@@ -279,10 +276,12 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         try{
             stmt = dataModule.con.createStatement();
             stmt.execute(newSql);
+            dataModule.commit();
         } catch (SQLException e){
+            dataModule.rollback();
             System.err.println(sql);
             System.err.println(newSql);
-            throw new Exception(e.getMessage());
+            throw new Exception("DATASET_APPEND_ERROR\n"+e.getMessage());
         } finally {
             if (stmt!=null) stmt.close();
         }
@@ -310,7 +309,9 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             }
             pstmt.execute();
         
+            dataModule.commit();
         } catch (Exception e){
+            dataModule.rollback();
             e.printStackTrace();
             throw new Exception("DATASET_DELETE_ERROR:\n"+e.getMessage());
         }
@@ -343,9 +344,11 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         try{
             stmt= dataModule.con.createStatement();
             stmt.execute(sql);
+            dataModule.commit();
         } catch (SQLException e){
+            dataModule.rollback();
             System.err.println(sql);
-            throw  new Exception (e.getMessage());
+            throw  new Exception ("DATASET_EDIT_ERROR\n"+e.getMessage());
         } finally{
             if (stmt!=null) stmt.close();
         }

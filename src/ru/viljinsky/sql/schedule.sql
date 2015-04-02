@@ -107,7 +107,7 @@ create table skill(
 drop table if exists depart;
 create table depart(
     id integer primary key autoincrement,
-    label varchar(10),
+    label varchar(10) unique,
     skill_id integer references skill(id),
     shift_id integer references shift(id),
     curriculum_id integer references curriculum(id),

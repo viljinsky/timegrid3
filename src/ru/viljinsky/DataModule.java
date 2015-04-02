@@ -123,7 +123,7 @@ public class DataModule implements IDataModule,IDataModuleConsts {
             // 
             active = true;
             execute("PRAGMA foreign_keys = ON;");
-            
+            con.setAutoCommit(false);
         } catch (SQLException e){
             throw new Exception ("Ошбка приокрытии бд:\n"+e.getMessage());
         }
@@ -185,12 +185,15 @@ public class DataModule implements IDataModule,IDataModuleConsts {
         
         Statement stmt = null;
         ResultSet rs = null;
+        ResultSet sr1;
+        ResultSetMetaData rsmeta;
+        DatabaseMetaData dbm;
         Column column;
         try{
             stmt = con.createStatement();
             rs= stmt.executeQuery(sql+" limit 1");
-            ResultSetMetaData rsmeta = rs.getMetaData();
-            DatabaseMetaData dbm = con.getMetaData();
+            rsmeta = rs.getMetaData();
+            dbm = con.getMetaData();
             
             for (int i=0;i<rsmeta.getColumnCount();i++){
                 column = new Column();
@@ -206,11 +209,12 @@ public class DataModule implements IDataModule,IDataModuleConsts {
                 column.columnTypeName=rsmeta.getColumnTypeName(i+1);
                 column.columnType = rsmeta.getColumnType(i+1);
                 
-                ResultSet sr1 = dbm.getColumns(null, null, column.tableName, column.columnName);
+                sr1 = dbm.getColumns(null, null, column.tableName, column.columnName);
                 while (sr1.next()){
                     column.columnTypeName=sr1.getString("TYPE_NAME");
                     break;
                 }
+                sr1.close();
                 
                 switch(column.columnTypeName){
                     
@@ -237,9 +241,12 @@ public class DataModule implements IDataModule,IDataModuleConsts {
             }
             
         } catch (Exception e){
+            
             e.printStackTrace();
+            
         } finally {
-            if (stmt!=null) try{ stmt.close(); } catch (Exception e){};
+            if (rs!=null) try{rs.close();} catch (Exception e){}
+            if (stmt!=null) try{ stmt.close();} catch (Exception e){};
         }
         
         
@@ -258,22 +265,34 @@ public class DataModule implements IDataModule,IDataModuleConsts {
     
     
     //--------------------------------------------------------------------------
-    public void startTrans() throws Exception{
-        con.setAutoCommit(false);
+//    public void setAutoConmmit(boolean value) throws SQLException{
+//        con.setAutoCommit(value);
+//    };
+    
+    public void commit() throws SQLException{
+        con.commit();
     }
     
-    public void stopTrans() throws Exception{
-        try{
-            try{
-                con.commit();                
-            } catch (SQLException e){
-                con.rollback();
-                throw new Exception("Ошибка сохранения\n"+e.getMessage());
-            }
-        } finally {
-            con.setAutoCommit(true);
-        }
+    public void rollback() throws SQLException{
+        con.rollback();
     }
+    
+//    public void startTrans() throws Exception{
+//        con.setAutoCommit(false);
+//    }
+//    
+//    public void stopTrans() throws Exception{
+//        try{
+//            try{
+//                con.commit();                
+//            } catch (SQLException e){
+//                con.rollback();
+//                throw new Exception("Ошибка сохранения\n"+e.getMessage());
+//            }
+//        } finally {
+//            con.setAutoCommit(true);
+//        }
+//    }
     
     
     @Override
@@ -282,10 +301,13 @@ public class DataModule implements IDataModule,IDataModuleConsts {
         try{
             stmt=con.createStatement();
             stmt.execute(sql);
-        } catch (Exception e){
-            throw new Exception(e.getMessage());
         } finally {
-            if (stmt!=null) try {stmt.close();} catch (Exception e){}
+            if (stmt!=null)
+                try {
+                    stmt.close();
+                } catch (Exception e){
+                    System.out.println("OOPS"+e.getMessage());
+                }
         }
     }
     
@@ -298,10 +320,13 @@ public class DataModule implements IDataModule,IDataModuleConsts {
                 pstmt.setObject(key, params.get(key));
             }
             pstmt.execute();
-        } catch (Exception e){
-            throw new Exception(e.getMessage());
         } finally {
-            if (pstmt!=null) try {pstmt.close();} catch (Exception e){}
+            if (pstmt!=null)
+                try {
+                    pstmt.close();
+                } catch (Exception e){
+                    System.err.println("OOOOPS!!!\n"+e.getMessage());
+                }
         }
         
     }
