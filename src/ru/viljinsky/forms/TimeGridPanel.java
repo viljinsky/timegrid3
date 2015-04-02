@@ -105,9 +105,7 @@ public class TimeGridPanel extends JPanel{
             
             dataset = dataModule.getDataset("depart");
             comboDepart.setDataset(dataset, "id", "label");
-            if (!dataset.isEmpty()){
-                filter.put(comboDepart.keyFieldName, dataset.getValues(0).get("id"));
-            }
+            filter.put("depart_id", null);
             
             dataset = dataModule.getDataset("teacher");
             comboTeacher.setDataset(dataset, "id","last_name");
@@ -129,19 +127,20 @@ public class TimeGridPanel extends JPanel{
             }
         }
         
-        @Override
-        public void actionPerformed(ActionEvent e) {
+        public Map<String,Object> getFilter(){
             Map<String,Object> filter = new HashMap<>();
             for (FDBComboBox combo:combos){
                 if (combo.getValue()!=null)
                     filter.put(combo.keyFieldName, combo.getValue());
             }
+            return filter;
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
             try{
-                grSubjectGroup.setFilter(filter);
-                grSchedule.setFilter(filter);
                 fillSchedulePanel();
             } catch (Exception ee){
-                System.out.println(filter);
                 ee.printStackTrace();
             }
         }
@@ -184,6 +183,8 @@ public class TimeGridPanel extends JPanel{
             g.drawString(teacher_name, x, y);
             y+=h;
             g.drawString(room_no, x, y);
+            y+=h;
+            g.drawString("Гр."+(group_id==null?"?":group_id.toString()),x,y);
         }
         
         
@@ -229,6 +230,10 @@ public class TimeGridPanel extends JPanel{
     
     
     private void fillSchedulePanel() throws Exception{
+        Map<String,Object> filter = filterPanel.getFilter();
+        grSubjectGroup.setFilter(filter);
+        grSchedule.setFilter(filter);
+        
         IDataset dataset;
         
         SubjectGroup sg;
@@ -254,12 +259,15 @@ public class TimeGridPanel extends JPanel{
         filterPanel.open();
 
         dataset = dataModule.getDataset("v_subject_group_on_schedule");
-//        dataset.open();
         grSubjectGroup.setDataset(dataset);
         
         dataset = dataModule.getSQLDataset("select * from v_schedule order by day_id,bell_id,group_id");
-//        dataset.open();
         grSchedule.setDataset(dataset);
+        
+        Map<String,Object> filter = new HashMap<>();
+        filter.put("depart_id",new Integer(1));
+        filterPanel.setFilter(filter);
+        fillSchedulePanel();
       
     }
     

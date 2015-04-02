@@ -7,6 +7,7 @@
 package ru.viljinsky.forms;
 
 import java.sql.PreparedStatement;
+import java.util.HashMap;
 import java.util.Map;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
@@ -23,6 +24,18 @@ interface IDataTask{
     
 }
 
+class Values extends HashMap<String,Object>{
+    public Integer getInteger(String columnName) throws Exception{
+        if (containsKey(columnName)){
+            Object result = get(columnName);
+            if (result==null)
+                return null;
+            return (Integer)result;
+        }
+        throw new Exception("COLUMN_NOT_FOUND '"+columnName+"'");
+    }
+}
+
 public class DataTask implements IDataTask, IDataTaskConstants{
     protected static DataModule dataModule = DataModule.getInstance();
     
@@ -37,7 +50,13 @@ public class DataTask implements IDataTask, IDataTaskConstants{
                      "from curriculum ,subject where curriculum.id=?;";
         KeyMap map = new KeyMap();
         map.put(1, curriculum_id);
-        dataModule.execute(sql, map);
+        try{
+            dataModule.execute(sql, map);
+            dataModule.commit();
+        } catch (Exception e){
+            dataModule.rollback();
+            throw new Exception("FILL_CRURRICULUM_ERROR"+e.getMessage());
+        }
         
     }
     
@@ -50,19 +69,13 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         String sql = "delete from curriculum_detail where curriculum_id=?;";
         KeyMap map = new KeyMap();
         map.put(1, curriculumn_id);
-        dataModule.execute(sql, map);
-    }
-    
-    public static void fillSubjectGroup(Integer depart_id) throws Exception{
-        String sql ="insert into subject_group (group_id,depart_id,subject_id)\n" +
-                    "select 1 as group_id,a.id as depart_id,b.subject_id\n"+
-                    "from depart a\n" +
-                    " inner join curriculum_detail b \n" +
-                    " on a.curriculum_id=b.curriculum_id\n" +
-                    " where a.id=?;";
-        KeyMap map = new KeyMap();
-        map.put(1, depart_id);
-        dataModule.execute(sql, map);
+        try{
+            dataModule.execute(sql, map);
+            dataModule.commit();
+        } catch (Exception e){
+            dataModule.rollback();
+            throw new Exception("REMOVE_CURRICULUM_ERROR\n"+e.getMessage());
+        }
     }
     
     
@@ -100,6 +113,10 @@ public class DataTask implements IDataTask, IDataTaskConstants{
                     }
                 }
             }
+            dataModule.commit();
+        } catch (Exception e){
+            dataModule.reopen();
+            throw new Exception("FILL_SUBJECT_GROUP_ERROR\n"+e.getMessage());
         } finally {
             if (stmt!=null) stmt.close();
         }
@@ -109,7 +126,13 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         String sql = "delete from subject_group where depart_id=?;";
         KeyMap map = new KeyMap();
         map.put(1, depart_id);
-        dataModule.execute(sql, map);
+        try{
+            dataModule.execute(sql, map);
+            dataModule.commit();
+        } catch (Exception e){
+            dataModule.rollback();
+            throw new Exception("CLEAR_SUBJECT_GROUP_ERROR\n"+e.getMessage());
+        }
     }
     
     
@@ -207,7 +230,6 @@ public class DataTask implements IDataTask, IDataTaskConstants{
             }
             dataModule.commit();
         } catch (Exception e){
-            
             dataModule.rollback();
             throw new Exception("FILL_SCHEDULE_ERROR\n"+e.getMessage());
         }

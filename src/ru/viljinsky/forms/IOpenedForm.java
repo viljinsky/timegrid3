@@ -291,11 +291,6 @@ class DepartPanel extends MasterDetailPanel implements ActionListener,IOpenedFor
         return this;
     }
 
-//    @Override
-//    public void close() throws Exception {
-////        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    }
-
 
 }
 
@@ -363,11 +358,6 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
         return this;
     }
 
-//    @Override
-//    public void close() throws Exception {
-////        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    }
-    
 }
 
 ///////////////////////////  SCHEDULE PANEL ///////////////////////////////////
@@ -498,7 +488,6 @@ class TeacherPanel extends JPanel implements IOpenedForm {
         }
     }
 
-//    class TeacherSelectPanel extends JPanel implements ActionListener {
     class TeacherSelectPanel extends SelectPanel{
         int teacher_id = -1;
         String sourceSQL =  //"select * from v_subject_group where default_teacher_id is null;";

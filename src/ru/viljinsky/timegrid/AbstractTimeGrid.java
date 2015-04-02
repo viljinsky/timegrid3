@@ -147,7 +147,6 @@ abstract class AbstractTimeGrid extends Container {
     
     
     public AbstractTimeGrid() {
-//        setPreferredSize(new Dimension(800, 600));
         cells = new Cells();
         
         setColCount(6);
