@@ -50,6 +50,18 @@ public class Test21 extends JFrame{
         }
 
         @Override
+        public void rowHeaderClick(int row) {
+            JOptionPane.showMessageDialog(rootPane, "rowClick "+row);
+        }
+
+        @Override
+        public void columnHeaderClick(int col) {
+            JOptionPane.showMessageDialog(rootPane, "columClick "+col);
+        }
+        
+        
+
+        @Override
         public void cellElementClick(CellElement ce) {
             System.out.println("->"+ce.col);
         }
@@ -62,9 +74,13 @@ public class Test21 extends JFrame{
         timeGrid.setRowCount(5);
         timeGrid.setColCount(8);
         timeGrid.setFocusable(true);
+        
         list.setPreferredSize(new Dimension(120,120));
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setRightComponent(new JScrollPane(timeGrid));
+        JScrollPane scrollPane = new JScrollPane(timeGrid);
+        scrollPane.setColumnHeaderView(timeGrid.getColumnHeader());
+        scrollPane.setRowHeaderView(timeGrid.getRowHeader());
+        splitPane.setRightComponent(scrollPane);
         splitPane.setLeftComponent(list);
         splitPane.setPreferredSize(new Dimension(600,400));
         setContentPane(splitPane);

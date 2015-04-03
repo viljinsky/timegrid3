@@ -21,6 +21,7 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import ru.viljinsky.Column;
 import ru.viljinsky.DataModule;
@@ -99,6 +100,9 @@ class TableProp {
     Rectangle bounds = new Rectangle(0,0,150,200);
     protected boolean selected = false;
     
+    public Dimension getSize(){
+        return new Dimension(bounds.width,bounds.width);
+    }
     public TableProp(Dataset dataset){
         this.dataset = dataset;
     }
@@ -165,9 +169,11 @@ class Desktop extends JPanel{
     public List<TableProp> list = new ArrayList<>();
     public List<Link> links = new ArrayList<>();
     private int startX,startY;
+    Dimension area = new Dimension(2000,2000);
     public Desktop(){
         setBackground(Color.white);
         setLayout(null);
+        setPreferredSize(area);
         addMouseListener(new MouseAdapter() {
 
             @Override
@@ -281,6 +287,27 @@ class Desktop extends JPanel{
         }
     }
     
+    public Dimension calcArrea(){
+        int x=Integer.MIN_VALUE,y=Integer.MIN_VALUE;
+        Point p;
+        Dimension d;
+        for (TableProp prop:list){
+            p = prop.getLocation();
+            d = prop.getSize();
+            
+            if (x<p.x+d.width){
+                x=p.x+d.width;
+            }
+            if (y<p.y+d.height){
+                y=p.y+d.height;
+            }
+        }
+        return new Dimension(x+10,y+10);
+    }
+    
+    public  void open(){
+    }
+    
 }
 
 public class ERRModel extends JFrame {
@@ -292,7 +319,9 @@ public class ERRModel extends JFrame {
         Container content = getContentPane();
         content.setPreferredSize(new Dimension(800, 600));
         content.setLayout(new BorderLayout());
-        content.add(desctop);
+        JScrollPane scrollPane = new JScrollPane(desctop);
+        
+        content.add(scrollPane);
         pack();
     }
     
@@ -302,7 +331,7 @@ public class ERRModel extends JFrame {
         try{
             for (String datasetName:dataModule.getTableNames()){
                 Dataset dataset = dataModule.getDataset(datasetName);
-                dataset.test();
+//                dataset.test();
                 tableProp= new TableProp(dataset);
                 tableProp.setLocation(x, y);
                 x+=tableProp.getWidth()+20;
@@ -318,6 +347,9 @@ public class ERRModel extends JFrame {
                 }
                 
             desctop.makeLink();
+            Dimension d=desctop.calcArrea();
+            desctop.setPreferredSize(d);
+            desctop.revalidate();
             desctop.repaint();
         } catch (Exception e){
             JOptionPane.showMessageDialog(rootPane, "Ошибка при выполнении firstOperation"+e.getMessage());

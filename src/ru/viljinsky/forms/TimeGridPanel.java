@@ -41,6 +41,7 @@ public class TimeGridPanel extends JPanel{
     Grid grSubjectGroup = new Grid();
     FilterPanel filterPanel = new FilterPanel();
    
+    
     class TG extends TimeGrid{
 
         @Override
@@ -68,6 +69,7 @@ public class TimeGridPanel extends JPanel{
         public void cellClick(int col, int row) {
             
         }
+        
         
         
     }
@@ -218,7 +220,10 @@ public class TimeGridPanel extends JPanel{
         
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setLeftComponent(new JScrollPane(grSubjectGroup));
-        splitPane.setRightComponent(new JScrollPane(timeGrid));
+        JScrollPane scrollPane = new JScrollPane(timeGrid);
+        scrollPane.setColumnHeaderView(timeGrid.getColumnHeader());
+        scrollPane.setRowHeaderView(timeGrid.getRowHeader());
+        splitPane.setRightComponent(scrollPane);
         splitPane.setDividerLocation(200);
         
         JSplitPane splitPane1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);

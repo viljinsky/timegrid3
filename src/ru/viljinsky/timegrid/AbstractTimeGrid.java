@@ -8,6 +8,7 @@ package ru.viljinsky.timegrid;
 
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.FocusAdapter;
@@ -20,6 +21,7 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import javax.swing.JPanel;
 
 /**
  *
@@ -129,7 +131,7 @@ class DragObject{
 }
 
 
-abstract class AbstractTimeGrid extends Container {
+abstract class AbstractTimeGrid extends JPanel {
     Set<DragObject> dragObjects = null;
     protected Cells cells;
     int colCount = 7;
@@ -210,7 +212,8 @@ abstract class AbstractTimeGrid extends Container {
                     dragged = false;
                     dragObjects = null;
                 }
-                calcRowHeight();
+//                calcRowHeight();
+//                realign();
                 repaint();
             }
 
@@ -344,10 +347,13 @@ abstract class AbstractTimeGrid extends Container {
         calcColWidth();
     }
     
-    public void calcRowHeight() {
+    public Integer calcRowHeight() {
+        Integer result = 0;
         for (int row = 0; row < rowCount; row++) {
             rowHeights[row] = getMaxRowCount(row) * CellElement.HEIGHT;
+            result += rowHeights[row];
         }
+        return result;
     }
 
     public Integer calcColWidth(){
@@ -360,8 +366,11 @@ abstract class AbstractTimeGrid extends Container {
     }
     
     public void realign(){
-        calcColWidth();
-        calcRowHeight();
+        int width = calcColWidth();
+        int height =calcRowHeight();
+        setPreferredSize(new Dimension(width, height));
+        revalidate();
+        System.out.println("revalidate");
         repaint();
     }
     
@@ -469,6 +478,7 @@ abstract class AbstractTimeGrid extends Container {
         }
     }
 
+    
     @Override
     public void paint(Graphics g) {
         super.paint(g);
@@ -489,6 +499,20 @@ abstract class AbstractTimeGrid extends Container {
         return cells.getSelected();
     }
     
+    public int getColumnCount(){
+        return colCount;
+    }
+    public int getColumnWidth(int columnIndex){
+        return colWidths[columnIndex];
+    }
+    
+    public int getRowCount(){
+        return rowCount;
+    }
+    public int getRowHeight(int rowIndex){
+        return rowHeights[rowIndex];
+    }
+    
     public abstract void cellClick(int col, int row);
 
     public abstract void addElement(CellElement ce);
@@ -502,5 +526,9 @@ abstract class AbstractTimeGrid extends Container {
     public abstract void stopDrag(int col, int row);
 
     public abstract void drag(int dx, int dy);
+    
+    public abstract void columnHeaderClick(int col);
+    
+    public abstract void rowHeaderClick(int row);
     
 }
