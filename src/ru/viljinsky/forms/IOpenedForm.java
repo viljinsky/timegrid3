@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
@@ -23,8 +17,6 @@ import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
 import ru.viljinsky.IDataset;
-import ru.viljinsky.KeyMap;
-import static ru.viljinsky.forms.IMasterDetailConsts.MASTER_DATASET;
 
 /**
  *
@@ -41,11 +33,49 @@ public interface IOpenedForm {
 abstract class  AbstractOpenedForm implements IOpenedForm{
 }
 
+abstract class DetailPanel extends JPanel{
+    Grid grid;
+    Dataset dataset;
+    public DetailPanel(){
+        super(new BorderLayout());
+        grid = new Grid();
+        add(new JScrollPane(grid));
+    }
+    
+    public abstract void reopen(Integer keyValue) throws Exception;
+}
 
+
+
+////////////////////////////    ROOM PANEL /////////////////////////////////////
 class RoomPanel extends JPanel implements IOpenedForm{
     MasterGrid grid = new MasterGrid();
     DataModule dataModule = DataModule.getInstance();
     SelectRoomPanel selectPanel = new SelectRoomPanel();
+    
+    DetailPanel shiftPanel = new ShiftRoomPanel();
+    DetailPanel profilePanel = new ProfileRoomPanel();
+    
+    class ShiftRoomPanel extends DetailPanel{
+        String sqlShift="select * from shift_detail a inner join room b on a.shift_id=b.shift_id where b.id=%room_id;";
+        @Override
+        public void reopen(Integer keyValue) throws Exception{
+            dataset = dataModule.getSQLDataset(sqlShift.replace("%room_id",keyValue.toString()));
+            dataset.open();
+            grid.setDataset(dataset);
+        }
+    }
+    
+    class ProfileRoomPanel extends DetailPanel{
+        String sqlProfile = "select * from profile_item a inner join room b on a.profile_id=b.profile_id where b.id=%room_id;";
+        @Override
+        public void reopen(Integer keyValue) throws Exception{
+            dataset = dataModule.getSQLDataset(sqlProfile.replace("%room_id", keyValue.toString()));
+            dataset.open();
+            grid.setDataset(dataset);
+        }
+        
+    }
 
     
     
@@ -58,6 +88,8 @@ class RoomPanel extends JPanel implements IOpenedForm{
                 try{
                     int room_id= grid.getInegerValue("id");
                     selectPanel.setRoomId(room_id);
+                    shiftPanel.reopen(room_id);
+                    profilePanel.reopen(room_id);
                 } catch (Exception e){
                     e.printStackTrace();
                 }
@@ -188,6 +220,8 @@ class RoomPanel extends JPanel implements IOpenedForm{
         super(new BorderLayout());
         JTabbedPane tabs =new JTabbedPane();
         tabs.addTab("Subject group", selectPanel);
+        tabs.addTab("Profile",profilePanel);
+        tabs.addTab("Shift",shiftPanel);
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         splitPane.setTopComponent(new JScrollPane(grid));
         splitPane.setBottomComponent(tabs);
@@ -435,7 +469,6 @@ class SchedulePanel extends JPanel implements ActionListener,IOpenedForm{
             combo.setDataset(dataset,"id","label");
             
             dataset = dataModule.getDataset("schedule");
-//            dataset.open();
             grid.setDataset(dataset);
             
             
@@ -463,8 +496,36 @@ class SchedulePanel extends JPanel implements ActionListener,IOpenedForm{
 class TeacherPanel extends JPanel implements IOpenedForm {
     DataModule dataModule = DataModule.getInstance();
     MasterGrid grid = new MasterGrid();
-    TeacherSelectPanel selctPanel = new TeacherSelectPanel();
     JTabbedPane tabs = new JTabbedPane();
+    
+    TeacherSelectPanel selctPanel = new TeacherSelectPanel();
+    DetailPanel profilePanel = new ProfileTeacherPanel();
+    DetailPanel shiftPanel = new ShiftTeacherPanel();
+
+    class ProfileTeacherPanel extends DetailPanel{
+        String sqlTeacherProfilee = "select c.* \n"
+                + "from profile_item a inner join teacher b on a.profile_id=b.profile_id \n"
+                + " inner join subject c on c.id = a.subject_id\n"
+                + "where b.id=%teacher_id";
+        @Override
+        public void reopen(Integer keyValue) throws Exception{
+            dataset = dataModule.getSQLDataset(sqlTeacherProfilee.replace("%teacher_id",keyValue.toString()));
+            dataset.open();
+            grid.setDataset(dataset);
+        }
+    }
+    
+    class ShiftTeacherPanel extends DetailPanel{
+        String sqlTeacherShift = "select * from shift_detail a inner join teacher b on a.shift_id=b.shift_id where b.id=%teacher_id;";
+        
+        @Override
+        public void reopen(Integer keyValue) throws Exception{
+            dataset = dataModule.getSQLDataset(sqlTeacherShift.replace("%teacher_id", keyValue.toString()));
+            dataset.open();
+            grid.setDataset(dataset);
+        }
+    }
+    
 
     @Override
     public void close() throws Exception {
@@ -481,6 +542,8 @@ class TeacherPanel extends JPanel implements IOpenedForm {
                 try {
                     Integer teacher_id = getInegerValue("id");
                     selctPanel.setTeacherId(teacher_id);
+                    shiftPanel.reopen(teacher_id);
+                    profilePanel.reopen(teacher_id);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -556,7 +619,6 @@ class TeacherPanel extends JPanel implements IOpenedForm {
             Map<String,Object> values;
             IDataset dataset = destanationGrid.getDataset();
             int depart_id,subject_id,group_id;
-//            dataModule.setAutoConmmit(false);
             try{
                 for (int row : destanationGrid.getSelectedRows()){
                     values=dataset.getValues(row);
@@ -570,10 +632,6 @@ class TeacherPanel extends JPanel implements IOpenedForm {
                 dataModule.rollback();
                 throw new Exception("EXCLUDE_ERROR\n"+e.getMessage());
             }
-//            } finally {
-////                dataModule.setAutoConmmit(true);
-//            }
-            
             requery();
         }
 
@@ -584,8 +642,6 @@ class TeacherPanel extends JPanel implements IOpenedForm {
             Integer subject_id;
             Integer group_id;
             Map<String,Object> values;
-//            dataModule.startTrans();
-//            dataModule.setAutoConmmit(false);// getConnection().setAutoCommit(false);
             try{
                 for (int row=0;row<dataset.getRowCount();row++){
                     values=dataset.getValues(row);
@@ -599,9 +655,6 @@ class TeacherPanel extends JPanel implements IOpenedForm {
                 dataModule.rollback();
                 throw new Exception("INCLUDE_ALL\n"+e.getMessage());
             }
-//            } finally{
-//                dataModule.setAutoConmmit(true);
-//            }
             requery();
         }
 
@@ -612,7 +665,6 @@ class TeacherPanel extends JPanel implements IOpenedForm {
             Integer subject_id;
             Integer group_id;
             Map<String,Object> values;
-//            dataModule.setAutoConmmit(false);
             try{
                 for (int row=0;row<dataset.getRowCount();row++){
                     values=dataset.getValues(row);
@@ -626,9 +678,6 @@ class TeacherPanel extends JPanel implements IOpenedForm {
                 dataModule.rollback();
                 throw new Exception("EXCLUDE_ALL_ERROR\n"+e.getMessage());
             }
-//            } finally{
-//                dataModule.setAutoConmmit(true);
-//            }
             requery();
         }
 
@@ -639,11 +688,14 @@ class TeacherPanel extends JPanel implements IOpenedForm {
 
     }
 
+    
+    
     public TeacherPanel() {
         setLayout(new BorderLayout());
+        
         tabs.addTab("Subject group", selctPanel);
-        tabs.addTab("Profile", new JPanel());
-        tabs.addTab("Shift",new JPanel());
+        tabs.addTab("Profile", profilePanel);
+        tabs.addTab("Shift",shiftPanel);
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         splitPane.setTopComponent(new JScrollPane(grid));
         splitPane.setBottomComponent(tabs);
@@ -670,5 +722,3 @@ class TeacherPanel extends JPanel implements IOpenedForm {
     }
     
 }
-
-

@@ -125,6 +125,7 @@ create table subject_group (
     default_teacher_id integer references teacher(id),
     default_room_id integer references room(id),
     stream_id integer references stream(id) on delete set null,
+    pupil_count integer,
     primary key (depart_id,subject_id,group_id)
 );
 
