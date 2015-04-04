@@ -312,5 +312,38 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         map.put(4, group_id);
         dataModule.execute(sql, map);
     }
+
+    public static void includeSubjectFromCurriculumn(Integer curriculum_id, Integer subject_id) throws Exception{
+       String sql = "insert into curriculum_detail (curriculum_id,subject_id,hour_per_week,hour_per_day,group_type_id )\n"+
+                 "select ?,id,default_hour_per_week,default_hour_per_day,default_group_type_id from subject where id=?;";
+       KeyMap map= new KeyMap();
+       map.put(1, curriculum_id);
+       map.put(2, subject_id);
+       dataModule.execute(sql, map);
+    }
+
+    public static void excludeSubjectFromCurriculumn(Integer curriculum_id, Integer subject_id) throws Exception {
+       String sql = "delete from curriculum_detail where curriculum_id=? and subject_id=?;";
+       KeyMap map= new KeyMap();
+       map.put(1, curriculum_id);
+       map.put(2, subject_id);
+       dataModule.execute(sql, map);
+    }
+
+    static void excludeSubjectFromProfile(Integer profile_id, Integer subject_id) throws Exception{
+        String sql = "delete from profile_item where profile_id=? and subject_id=?";
+        KeyMap map = new KeyMap();
+        map.put(1, profile_id);
+        map.put(2, subject_id);
+        dataModule.execute(sql, map);
+    }
+
+    static void includeSubjectToProfile(Integer profile_id, Integer subject_id) throws Exception{
+        String sql = "insert into profile_item(profile_id,subject_id) values(?,?)";
+        KeyMap map = new KeyMap();
+        map.put(1, profile_id);
+        map.put(2, subject_id);
+        dataModule.execute(sql, map);
+    }
     
 }

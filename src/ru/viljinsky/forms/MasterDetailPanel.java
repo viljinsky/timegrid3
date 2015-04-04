@@ -10,6 +10,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -56,6 +58,15 @@ abstract class MasterDetailPanel extends JPanel implements IMasterDetailConsts {
 
     public void addMasterControl(JComponent component) {
         masterPanel.titlePanel.add(component);
+    }
+    
+    public void addMasterAction(Action action){
+        JButton button = new JButton(action);
+        masterPanel.titlePanel.add(button);
+    }
+    
+    public void addDetailAction(Action action){
+        detailPanel.titlePanel.add(new JButton(action));
     }
 
     class MasterGrid extends Grid {

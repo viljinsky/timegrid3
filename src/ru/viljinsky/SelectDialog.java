@@ -125,7 +125,10 @@ public abstract class SelectDialog extends BaseDialog {
         add(panel);
     }
 
-    public void setDataset(IDataset dataset, String keyField, String columnName) {
+    public void setDataset(IDataset dataset, String keyField, String columnName) throws Exception{
+        if (!dataset.isActive()){
+            dataset.open();
+        }
         model = new Model(dataset);
         model.columnName = columnName;
         model.keyField = keyField;

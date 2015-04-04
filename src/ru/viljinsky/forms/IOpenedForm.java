@@ -355,6 +355,19 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
         return map;
     }
 
+    class Act extends AbstractAction{
+
+        public Act(String name) {
+            super(name);
+            putValue(ACTION_COMMAND_KEY, name);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            doCommand(e.getActionCommand());
+        }
+    }
+    
     public CurriculumPanel() {
         super();
         JButton button = new JButton("Fill");
@@ -363,6 +376,8 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
         button = new JButton("Clear");
         button.addActionListener(this);
         addMasterControl(button);
+        addDetailAction(new Act("EDIT"));
+        
     }
     
     public void doCommand(String command){
@@ -373,6 +388,9 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
                     break;
                 case "Clear":
                     clearCurriculumDetail();
+                    break;
+                case "EDIT":
+                    editDetails();
                     break;
             }
         } catch (Exception e){
@@ -395,6 +413,39 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
         Integer curriculum_id = grid1.getInegerValue("id");
         DataTask.removeCurriculum(curriculum_id);
         grid2.requery();
+    }
+    
+    protected void editDetails() throws Exception{
+        SelectDialog dlg = new SelectDialog() {
+
+            @Override
+            public void doOnEntry() throws Exception {
+                Integer curriculum_id=grid1.getInegerValue("id");
+                try{
+                    for (Object k:getRemoved()){
+                        DataTask.excludeSubjectFromCurriculumn(curriculum_id,(Integer)k);
+                    }
+                    for (Object k:getAdded()){
+                        DataTask.includeSubjectFromCurriculumn(curriculum_id,(Integer)k);
+                    }
+                    dataModule.commit();
+                }catch(Exception e){
+                    dataModule.rollback();
+                    throw new Exception("INCLUDE_EXCLUDE_ERROR\n"+e.getMessage());
+                    
+                }
+            }
+        };
+        IDataset dataset;
+
+        Set<Object> set = grid2.getDataset().getColumnSet("subject_id");
+        
+        dataset = dataModule.getDataset("subject");
+        dlg.setDataset(dataset, "id", "subject_name");
+        dlg.setSelected(set);
+        if (dlg.showModal(null)==SelectDialog.RESULT_OK){
+             grid2.requery();
+        };
     }
 
     @Override
@@ -537,25 +588,30 @@ class TeacherPanel extends JPanel implements IOpenedForm {
 
                 @Override
                 public void doOnEntry() throws Exception {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    Integer profile_id = TeacherPanel.this.grid.getInegerValue("profile_id");
+                    try{
+                        for (Object k:getRemoved()){
+                            DataTask.excludeSubjectFromProfile(profile_id,(Integer)k);
+                        }
+                        for (Object k:getAdded()){
+                            DataTask.includeSubjectToProfile(profile_id,(Integer)k);
+                        }
+                        dataModule.commit();
+                    } catch (Exception e){
+                        dataModule.rollback();
+                        throw new Exception("INCLUDE_EXCLUDE_PROFILE_ERROR\n"+e.getMessage());
+                    }
                 }
             };
             try{
-                IDataset dataset;
-                Set<Object> s = new HashSet<>();
-                Map<String,Object> values;
-                dataset = grid.getDataset();
-                for (int i=0;i<dataset.getRowCount();i++){
-                    values=dataset.getValues(i);
-                    s.add(values.get("subject_id"));
-                }
                 
-                
-                dataset = dataModule.getDataset("subject");
-                dataset.open();
+                Set<Object> s = grid.getDataset().getColumnSet("subject_id");
+                IDataset dataset = dataModule.getDataset("subject");
                 dlg.setDataset(dataset, "id", "subject_name");
                 dlg.setSelected(s);
-                dlg.showModal(null);
+                if (dlg.showModal(null)==SelectDialog.RESULT_OK)
+                    grid.requery();
+            
             } catch (Exception ee){
                 ee.printStackTrace();
             }

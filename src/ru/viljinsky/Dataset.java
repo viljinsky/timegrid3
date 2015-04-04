@@ -13,8 +13,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -27,6 +29,11 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     Boolean active = false;
     Boolean editable = false;
 
+    @Override
+    public boolean isActive(){
+        return active;
+    }
+    
     @Override
     public boolean isEditable(){
         return editable;
@@ -534,7 +541,18 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         return null;
     }
 
-    public boolean isActive() {
-        return active;
+//    public boolean isActive() {
+//        return active;
+//    }
+
+    @Override
+    public Set<Object> getColumnSet(String columnName) {
+        Set<Object> result = new HashSet<>();
+        Map<String,Object> values;
+        for (Integer row=0;row<size();row++){
+            values=getValues(row);
+            result.add(values.get(columnName));
+        }
+        return result;
     }
 }

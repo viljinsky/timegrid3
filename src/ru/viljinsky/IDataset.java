@@ -7,6 +7,7 @@
 package ru.viljinsky;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -14,6 +15,7 @@ import java.util.Map;
  */
 
 public interface IDataset{
+    public boolean isActive();
     public void open() throws Exception;
     public boolean test() throws Exception;
     public void close() throws Exception;
@@ -46,6 +48,13 @@ public interface IDataset{
     public void setFilter(Map<String,Object> filterMap) throws Exception;
     public void setFiltered(boolean aFiltered);
     public boolean isFiltered();
+    
+    /**
+     * Получение сета данных поля из всего датасета
+     * @param columnName имя поля
+     * @return 
+     */
+    public Set<Object> getColumnSet(String columnName);
     
 }
     

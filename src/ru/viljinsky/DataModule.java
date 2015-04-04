@@ -320,6 +320,11 @@ public class DataModule implements IDataModule,IDataModuleConsts {
                 pstmt.setObject(key, params.get(key));
             }
             pstmt.execute();
+        } catch (SQLException e){
+            System.err.println(sql);
+            System.err.println(params);
+            throw new Exception(e);
+        
         } finally {
             if (pstmt!=null)
                 try {
@@ -327,7 +332,7 @@ public class DataModule implements IDataModule,IDataModuleConsts {
                 } catch (Exception e){
                     System.err.println("OOOOPS!!!\n"+e.getMessage());
                 }
-        }
+        } 
         
     }
     
