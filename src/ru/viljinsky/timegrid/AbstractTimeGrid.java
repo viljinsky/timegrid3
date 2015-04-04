@@ -443,9 +443,13 @@ abstract class AbstractTimeGrid extends JPanel {
         return false;
     }
 
+    public  Color getCellBackground(int col,int row){
+        return Color.ORANGE;
+    }
+    
     public void drawCell(Graphics g, int col, int row) {
         Rectangle r;
-        Color color = Color.pink;
+        Color color = getCellBackground(col, row);
         r = getBound(col, row);
         g.setColor(Color.red);
         g.drawRect(r.x, r.y, r.width, r.height);

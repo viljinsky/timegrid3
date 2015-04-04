@@ -7,6 +7,7 @@
 package ru.viljinsky.util;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
@@ -23,6 +24,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -36,6 +38,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -153,12 +156,20 @@ public class SQLMonitor extends JFrame implements MenuConstants{
             }
         });
         
+        Container content = getContentPane();
+        JToolBar toolBar = new JToolBar("main");
+        
         JSplitPane splitPane1 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane1.setLeftComponent(new JScrollPane(tree));
         splitPane1.setRightComponent(panels);
         splitPane1.setDividerLocation(200);
-        setContentPane(splitPane1);
-        splitPane1.setPreferredSize(new Dimension(800,600));
+        content.add(splitPane1);
+        
+        toolBar.add(new Act("commit"));
+        toolBar.add(new Act("rollback"));
+        
+        content.add(toolBar,BorderLayout.PAGE_START);
+        content.setPreferredSize(new Dimension(800,600));
         
         JMenuBar menuBar = new JMenuBar();
         menuBar.add(createFileMenu());
@@ -258,6 +269,14 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                     sqlPanel.textEditor.append(sql);
                     sqlPanel.executeSql(sql);
                     break;
+                case "commit":
+                    dataModule.commit();
+                    break;
+                case "rollback":
+                    dataModule.rollback();
+                    break;
+                default:
+                    System.err.println(command);
             }
             updateActionList();
         } catch (Exception e){

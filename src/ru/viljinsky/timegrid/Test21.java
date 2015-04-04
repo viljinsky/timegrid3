@@ -27,6 +27,9 @@ public class Test21 extends JFrame{
     JList list = new JList(new String[]{"One","Two","Three"});
     
     class TG extends TimeGrid{
+        public TG(){
+            super(5,8);
+        }
         int col0,row0;
 
 
@@ -71,8 +74,8 @@ public class Test21 extends JFrame{
     }
     
     public Test21(){
-        timeGrid.setRowCount(5);
-        timeGrid.setColCount(8);
+//        timeGrid.setRowCount(5);
+//        timeGrid.setColCount(8);
         timeGrid.setFocusable(true);
         
         list.setPreferredSize(new Dimension(120,120));

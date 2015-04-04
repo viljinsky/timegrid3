@@ -36,7 +36,7 @@ import ru.viljinsky.timegrid.*;
  */
 public class TimeGridPanel extends JPanel{
     DataModule dataModule = DataModule.getInstance();
-    TG timeGrid = new TG();
+    TG timeGrid = new TG(7,10);
     Grid grSchedule = new Grid();
     Grid grSubjectGroup = new Grid();
     FilterPanel filterPanel = new FilterPanel();
@@ -44,6 +44,10 @@ public class TimeGridPanel extends JPanel{
     
     class TG extends TimeGrid{
 
+        public TG(int col,int row){
+            super(col,row);
+        }
+        
         @Override
         public void cellElementClick(CellElement ce) {
             if (ce instanceof SubjectGroup){

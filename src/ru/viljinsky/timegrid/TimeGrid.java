@@ -14,8 +14,6 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -38,6 +36,8 @@ interface ITimeGrid{
     public void elementStopMove(CellElement element);
     
     public void cellClick(int col,int row);
+    public void columnHeaderClick(int col);
+    public void rowHeaderClick(int row);
     public void mouseOverCell(Cell cell);
 }
 
@@ -54,6 +54,13 @@ public class TimeGrid extends AbstractTimeGrid{
     ColumnHeader columnHeader = new ColumnHeader();
     RowHeader rowHeader = new RowHeader();
     
+    public TimeGrid(int col,int row){
+        super();
+        setColCount(col);
+        setRowCount(row);
+        realign();
+    }
+    
     public JComponent getColumnHeader(){
         return columnHeader;
     }
@@ -61,10 +68,19 @@ public class TimeGrid extends AbstractTimeGrid{
     public JComponent getRowHeader(){
         return rowHeader;
     }
+
+//    @Override
+//    public Color getCellBackground(int col, int row) {
+//        if (col%2==0)
+//            return Color.LIGHT_GRAY;
+//        else
+//            return Color.WHITE;
+//    }
     
     
     class ColumnHeader extends TimeGridHeader{
         public ColumnHeader(){
+            setOpaque(true);
             setPreferredSize(new Dimension(800,HOR_HEIGHT));
             addMouseListener(new MouseAdapter() {
 
@@ -79,20 +95,25 @@ public class TimeGrid extends AbstractTimeGrid{
             });
         }
         
+        public void setPrefferedWidth(int width){
+            setPreferredSize(new Dimension(width,HOR_HEIGHT));
+        }
+        
         @Override
         public void paintComponent(Graphics g){
-            Rectangle r = getBounds();//  g.getClipBounds();
+            Rectangle r =  new Rectangle(0,0,getWidth(),getHeight()) ;g.getClipBounds();
             g.setColor(getBackground());
             g.fillRect(r.x, r.y, r.width, r.height);
             g.setColor(Color.gray);
-            g.drawRect(r.x, r.y, r.width, r.height);
+            g.drawLine(r.x, r.y+r.height-1, r.x+r.width,r.y+r.height-1);
             Rectangle r1 = new Rectangle(r);
             r1.height-=1;
             for (int i=0;i<getColumnCount();i++){
                 r1.width=getColumnWidth(i);
-                g.drawRect(r1.x, r1.y, r1.width,r1.height);
+                g.drawLine(r1.x, r1.y, r1.x, r1.y+r1.height);
                 r1.x+=r1.width;
             }
+            g.drawLine(r1.x, r1.y, r1.x, r1.y+r1.height);
         }
         
         @Override
@@ -112,6 +133,7 @@ public class TimeGrid extends AbstractTimeGrid{
     class RowHeader extends TimeGridHeader{
         public RowHeader(){
             setPreferredSize(new Dimension(VER_WEDTH,1000));
+            setOpaque(true);
             addMouseListener(new MouseAdapter() {
 
                 @Override
@@ -123,21 +145,29 @@ public class TimeGrid extends AbstractTimeGrid{
             });
         }
         
+        public void setPrefferedHeight(int height){
+            setPreferredSize(new Dimension(VER_WEDTH,height));
+        }
+        
         @Override
         public void paintComponent(Graphics g){
-//            super.paint(g);
-            Rectangle r = g.getClipBounds();
+            Rectangle r = new Rectangle(0,0,getWidth(),getHeight());//g.getClipBounds();
             g.setColor(getBackground());
             g.fillRect(r.x, r.y, r.width, r.height);
-           
+            g.setColor(Color.gray);
+            g.drawLine(r.x+r.width-1, r.y, r.x+r.width-1, r.y+r.height);
+            
+            
             Rectangle r1 = new Rectangle(r);
             r1.width-=1;
             g.setColor(Color.gray);
             for (int i=0;i<getRowCount();i++){
                 r1.height=getRowHeight(i);
-                g.drawRect(r1.x, r1.y, r1.width, r1.height);
+                g.drawLine(r1.x, r1.y, r1.x+r1.width,  r1.y);
                 r1.y+=r1.height;
             }
+            g.drawLine(r1.x, r1.y, r1.x+r1.width,  r1.y);
+            
         }
 
         @Override
@@ -187,13 +217,13 @@ public class TimeGrid extends AbstractTimeGrid{
     @Override
     public void addElement(CellElement ce) {
         cells.add(ce);
-        realign();
+//        realign();
     }
 
     @Override
     public void removeElement(CellElement ce) {
         cells.remove(ce);
-        realign();
+//        realign();
     }
     
     @Override
@@ -246,30 +276,13 @@ public class TimeGrid extends AbstractTimeGrid{
     
 
     public void delete(){
-        
         for (CellElement ce:cells.getSelected())
             cells.remove(ce);
-//        List<CellElement> deleted = new ArrayList<>();
-//        for (CellElement ce:cells){
-//            if (ce.selected){
-//                deleted.add(ce);
-//            }
-//        }
-//        for (CellElement ce:deleted){
-//            cells.remove(ce);
-//        }
-        
     }
     
     public void clear(){
         cells.clear();
     }
-    
-    
-//    public void addElement(CellElement element){
-//        cells.add(element);
-//    }
-    
     
     public void load(){
     }
@@ -314,8 +327,8 @@ public class TimeGrid extends AbstractTimeGrid{
     }
     
     public static void main(String[] args){
-        TimeGrid timeGrid = new TimeGrid();
-        timeGrid.setPreferredSize(new Dimension(timeGrid.colCount*CellElement.WIDTH,timeGrid.rowCount*CellElement.HEIGHT));
+        
+        TimeGrid timeGrid = new TimeGrid(6,4);
         
         JFrame frame = new JFrame("Test 'TimeGrid'");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

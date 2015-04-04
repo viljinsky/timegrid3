@@ -1,6 +1,7 @@
 package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ class RoomPanel extends JPanel implements IOpenedForm{
     }
     
     class ProfileRoomPanel extends DetailPanel{
-        String sqlProfile = "select * from profile_item a inner join room b on a.profile_id=b.profile_id where b.id=%room_id;";
+        String sqlProfile = "select * from v_room_profile where room_id=%room_id;";
         @Override
         public void reopen(Integer keyValue) throws Exception{
             dataset = dataModule.getSQLDataset(sqlProfile.replace("%room_id", keyValue.toString()));
@@ -228,6 +229,7 @@ class RoomPanel extends JPanel implements IOpenedForm{
         splitPane.setResizeWeight(0.5);
                 
         add(splitPane);
+        setPreferredSize(new Dimension(800,600));
     }
     
     @Override
@@ -468,7 +470,7 @@ class SchedulePanel extends JPanel implements ActionListener,IOpenedForm{
             dataset.open();
             combo.setDataset(dataset,"id","label");
             
-            dataset = dataModule.getDataset("schedule");
+            dataset = dataModule.getDataset("v_schedule");
             grid.setDataset(dataset);
             
             
@@ -503,10 +505,7 @@ class TeacherPanel extends JPanel implements IOpenedForm {
     DetailPanel shiftPanel = new ShiftTeacherPanel();
 
     class ProfileTeacherPanel extends DetailPanel{
-        String sqlTeacherProfilee = "select c.* \n"
-                + "from profile_item a inner join teacher b on a.profile_id=b.profile_id \n"
-                + " inner join subject c on c.id = a.subject_id\n"
-                + "where b.id=%teacher_id";
+        String sqlTeacherProfilee = "select * from v_teacher_profile where teacher_id=%teacher_id";
         @Override
         public void reopen(Integer keyValue) throws Exception{
             dataset = dataModule.getSQLDataset(sqlTeacherProfilee.replace("%teacher_id",keyValue.toString()));
@@ -701,6 +700,7 @@ class TeacherPanel extends JPanel implements IOpenedForm {
         splitPane.setBottomComponent(tabs);
         splitPane.setResizeWeight(0.5);
         add(splitPane);
+        setPreferredSize(new Dimension(800,600));
     }
 
     @Override
