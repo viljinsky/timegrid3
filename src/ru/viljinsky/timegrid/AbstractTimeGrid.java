@@ -451,7 +451,7 @@ abstract class AbstractTimeGrid extends JPanel {
         Rectangle r;
         Color color = getCellBackground(col, row);
         r = getBound(col, row);
-        g.setColor(Color.red);
+        g.setColor(Color.gray);
         g.drawRect(r.x, r.y, r.width, r.height);
         if (col == selectedCol && row == selectedRow && isFocusOwner()) {
             color = Color.white;

@@ -5,7 +5,11 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
@@ -18,6 +22,7 @@ import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
 import ru.viljinsky.IDataset;
+import ru.viljinsky.SelectDialog;
 
 /**
  *
@@ -37,10 +42,18 @@ abstract class  AbstractOpenedForm implements IOpenedForm{
 abstract class DetailPanel extends JPanel{
     Grid grid;
     Dataset dataset;
+    GridPanel gridPanel;
     public DetailPanel(){
         super(new BorderLayout());
         grid = new Grid();
-        add(new JScrollPane(grid));
+        gridPanel = new GridPanel("title", grid);
+//        add(new JScrollPane(grid));
+        add(gridPanel);
+    }
+    
+    public void addAction(Action action){
+        JButton button = new JButton(action);
+        gridPanel.titlePanel.add(button);
     }
     
     public abstract void reopen(Integer keyValue) throws Exception;
@@ -506,6 +519,48 @@ class TeacherPanel extends JPanel implements IOpenedForm {
 
     class ProfileTeacherPanel extends DetailPanel{
         String sqlTeacherProfilee = "select * from v_teacher_profile where teacher_id=%teacher_id";
+        
+        public ProfileTeacherPanel(){
+            super();
+            Action a= new AbstractAction("ДобавитьУдалить") {
+                
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    editProfile();
+                }
+            };
+            addAction(a);
+        }
+        
+        public void editProfile(){
+            SelectDialog dlg = new SelectDialog() {
+
+                @Override
+                public void doOnEntry() throws Exception {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+            };
+            try{
+                IDataset dataset;
+                Set<Object> s = new HashSet<>();
+                Map<String,Object> values;
+                dataset = grid.getDataset();
+                for (int i=0;i<dataset.getRowCount();i++){
+                    values=dataset.getValues(i);
+                    s.add(values.get("subject_id"));
+                }
+                
+                
+                dataset = dataModule.getDataset("subject");
+                dataset.open();
+                dlg.setDataset(dataset, "id", "subject_name");
+                dlg.setSelected(s);
+                dlg.showModal(null);
+            } catch (Exception ee){
+                ee.printStackTrace();
+            }
+        }
+        
         @Override
         public void reopen(Integer keyValue) throws Exception{
             dataset = dataModule.getSQLDataset(sqlTeacherProfilee.replace("%teacher_id",keyValue.toString()));

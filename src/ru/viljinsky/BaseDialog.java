@@ -44,7 +44,7 @@ public abstract class BaseDialog extends JDialog implements ActionListener{
     public static int RESULT_CANCEL = 2;
     public static int RESULT_IGNORE = 3;
     
-    int modalResult = RESULT_NONE;
+    public int modalResult = RESULT_NONE;
     
     public Integer getResult(){
         return modalResult;
