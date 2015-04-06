@@ -1,7 +1,11 @@
 drop table if exists stream;
 create table stream (
     id integer primary key autoincrement,
-    stream_caption varchar(40)
+    stream_caption varchar(40),
+    subject_id integer references subject(id),
+    skill_id integer references skill(id),
+    room_id integer references room(id),
+    teacher_id integer references teacher(id)
 );
 
 

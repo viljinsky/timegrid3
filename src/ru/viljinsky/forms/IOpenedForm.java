@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import ru.viljinsky.CommandMngr;
 import ru.viljinsky.DBComboBox;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
@@ -69,6 +70,17 @@ class RoomPanel extends JPanel implements IOpenedForm{
     
     DetailPanel shiftPanel = new ShiftRoomPanel();
     DetailPanel profilePanel = new ProfileRoomPanel();
+    CommandMngr commands = new CommandMngr() {
+
+        @Override
+        public void updateAction(Action a) {
+        }
+
+        @Override
+        public void doCommand(String command) {
+            RoomPanel.this.doCommand(command);
+        }
+    };
     
     class ShiftRoomPanel extends DetailPanel{
         String sqlShift="select * from shift_detail a inner join room b on a.shift_id=b.shift_id where b.id=%room_id;";
@@ -243,6 +255,21 @@ class RoomPanel extends JPanel implements IOpenedForm{
                 
         add(splitPane);
         setPreferredSize(new Dimension(800,600));
+        commands.setCommandList(new String[]{"EDIT_SHIFT"});
+        shiftPanel.addAction(commands.getAction("EDIT_SHIFT"));
+    }
+    
+    public void doCommand(String command){
+        try{
+            switch(command){
+                case "EDIT_SHIFT":
+                    ShiftDialog dlg = new ShiftDialog();
+                    dlg.showModal(RoomPanel.this);
+                    break;
+            }
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
     }
     
     @Override
@@ -270,9 +297,25 @@ class RoomPanel extends JPanel implements IOpenedForm{
         return this;
     }
     
+    
 };
 
-class DepartPanel extends MasterDetailPanel implements ActionListener,IOpenedForm{
+
+class DepartPanel extends MasterDetailPanel implements IOpenedForm{
+
+    CommandMngr commands = new CommandMngr() {
+
+        @Override
+        public void updateAction(Action a) {
+        }
+
+        @Override
+        public void doCommand(String command) {
+            DepartPanel.this.doCommand(command);
+        }
+            
+    };
+
 
     @Override
     public Map<String, String> getParams() {
@@ -286,30 +329,59 @@ class DepartPanel extends MasterDetailPanel implements ActionListener,IOpenedFor
 
     public DepartPanel() {
         super();
-        JButton button;
-        button = new JButton("Fill");
-        button.addActionListener(this);
-        addMasterControl(button);
+        commands.setCommandList(new String[]{
+            "FILL","CLEAR","ADD_GROUP","DELETE_GROUP","ADD_STREAM","EDIT_STREAM","REMOVE_STREAM"
+        });
+        addMasterAction(commands.getAction("FILL"));
+        addMasterAction(commands.getAction("CLEAR"));
         
-        button = new JButton("Clear");
-        button.addActionListener(this);
-        addMasterControl(button);
-    }
-    
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        doCommand(e.getActionCommand());
-    }
+        addDetailAction(commands.getAction("ADD_GROUP"));
+        addDetailAction(commands.getAction("DELETE_GROUP"));
+        
+        addDetailAction(commands.getAction("ADD_STREAM"));
+        addDetailAction(commands.getAction("EDIT_STREAM"));
+        addDetailAction(commands.getAction("REMOVE_STREAM"));
+}
     
     public void doCommand(String commad){
+        Integer stream_id=-1,depart_id=-1,subject_id=-1,group_id=-1;
         try{
             switch(commad){
-                case "Fill":
+                case "FILL":
                     fillSubjectGroup();
                     break;
-                case "Clear":
+                case "CLEAR":
                     clearSubjectGroup();
                     break;
+                case "ADD_GROUP":
+                    depart_id= grid2.getInegerValue("depart_id");
+                    subject_id = grid2.getInegerValue("subject_id");
+                    DataTask.addSubjectGroup(depart_id,subject_id);
+                    grid2.requery();
+                    break;
+                case "DELETE_GROUP":
+                    depart_id=grid2.getInegerValue("depart_id");
+                    subject_id=grid2.getInegerValue("subject_id");
+                    group_id = grid2.getInegerValue("group_id");
+                    DataTask.deleteSubjectGroup(depart_id,subject_id,group_id);
+                    grid2.requery();
+                    break;
+                case "ADD_STREAM":
+                    depart_id=grid2.getInegerValue("depart_id");
+                    subject_id=grid2.getInegerValue("subject_id");
+                    DataTask.createStream(depart_id,subject_id);
+                    grid2.requery();
+                    break;
+                case "REMOVE_STREAM":
+                    depart_id=grid2.getInegerValue("depart_id");
+                    subject_id=grid2.getInegerValue("subject_id");
+                    DataTask.deleteStream(depart_id,subject_id);
+                    grid2.requery();
+                    break;
+                case "EDIT_STREAM":
+                    break;
+                default:
+                    throw new Exception("UNKNOW_COMMAND\n\""+commad+"\"");
             }
         } catch (Exception e){
             JOptionPane.showMessageDialog(this, e.getMessage());
@@ -346,6 +418,21 @@ class DepartPanel extends MasterDetailPanel implements ActionListener,IOpenedFor
 /////////////////////   CURRICULUM PANEL //////////////////////////////////////
 
 class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpenedForm{
+
+    CommandMngr commands = new CommandMngr() {
+
+        @Override
+        public void updateAction(Action a) {
+//            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void doCommand(String command) {
+            CurriculumPanel.this.doCommand(command);
+        }
+
+    };
+    
     @Override
     public Map<String, String> getParams() {
         Map<String,String> map = new HashMap<>();
@@ -355,38 +442,23 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
         return map;
     }
 
-    class Act extends AbstractAction{
-
-        public Act(String name) {
-            super(name);
-            putValue(ACTION_COMMAND_KEY, name);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            doCommand(e.getActionCommand());
-        }
-    }
     
     public CurriculumPanel() {
         super();
-        JButton button = new JButton("Fill");
-        button.addActionListener(this);
-        addMasterControl(button);
-        button = new JButton("Clear");
-        button.addActionListener(this);
-        addMasterControl(button);
-        addDetailAction(new Act("EDIT"));
+        commands.setCommandList(new String[]{"FILL","CLEAR","EDIT"});
+        addMasterAction(commands.getAction("CLEAR"));
+        addMasterAction(commands.getAction("FILL"));
+        addDetailAction(commands.getAction("EDIT"));
         
     }
     
     public void doCommand(String command){
         try{
             switch (command){
-                case "Fill":
+                case "FILL":
                     fillCurriculumnDetail();
                     break;
-                case "Clear":
+                case "CLEAR":
                     clearCurriculumDetail();
                     break;
                 case "EDIT":
@@ -567,21 +639,37 @@ class TeacherPanel extends JPanel implements IOpenedForm {
     TeacherSelectPanel selctPanel = new TeacherSelectPanel();
     DetailPanel profilePanel = new ProfileTeacherPanel();
     DetailPanel shiftPanel = new ShiftTeacherPanel();
+    CommandMngr commands = new CommandMngr() {
 
+        @Override
+        public void updateAction(Action a) {
+        }
+
+        @Override
+        public void doCommand(String command) {
+            TeacherPanel.this.doCommand(command);
+        }
+    };
+    
+   
+    public void doCommand(String command){
+        try{
+            switch (command){
+                case "EDIT_PROFILE":
+                    ((ProfileTeacherPanel)profilePanel).editProfile();
+                    break;
+                case "EDIT_SHIFT":
+                    ((ShiftTeacherPanel)shiftPanel).editProfile();
+                    break;
+            }
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(TeacherPanel.this, e.getMessage());
+        }
+    }
+
+    
     class ProfileTeacherPanel extends DetailPanel{
         String sqlTeacherProfilee = "select * from v_teacher_profile where teacher_id=%teacher_id";
-        
-        public ProfileTeacherPanel(){
-            super();
-            Action a= new AbstractAction("ДобавитьУдалить") {
-                
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    editProfile();
-                }
-            };
-            addAction(a);
-        }
         
         public void editProfile(){
             SelectDialog dlg = new SelectDialog() {
@@ -633,6 +721,17 @@ class TeacherPanel extends JPanel implements IOpenedForm {
             dataset = dataModule.getSQLDataset(sqlTeacherShift.replace("%teacher_id", keyValue.toString()));
             dataset.open();
             grid.setDataset(dataset);
+        }
+        
+        public void editProfile(){
+            ShiftDialog dlg = new ShiftDialog(){
+
+                @Override
+                public void doOnEntry() throws Exception {
+                }
+
+            };
+            dlg.showModal(TeacherPanel.this);
         }
     }
     
@@ -812,6 +911,9 @@ class TeacherPanel extends JPanel implements IOpenedForm {
         splitPane.setResizeWeight(0.5);
         add(splitPane);
         setPreferredSize(new Dimension(800,600));
+        commands.setCommandList(new String[]{"EDIT_PROFILE","EDIT_SHIFT"});
+        profilePanel.addAction(commands.getAction("EDIT_PROFILE"));
+        shiftPanel.addAction(commands.getAction("EDIT_SHIFT"));
     }
 
     @Override

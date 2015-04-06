@@ -12,6 +12,7 @@ import java.util.Map;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.KeyMap;
+import ru.viljinsky.Recordset;
 
 /**
  *
@@ -287,14 +288,12 @@ public class DataTask implements IDataTask, IDataTaskConstants{
     }
     
     ///////////////////////////// TEACHER PANEL ////////////////////////////////
-        // перенести в DataTask
     public static void inclideGroupToTeacher(int depart_id,int subject_id,int group_id,int teacher_id)
             throws Exception{
         String sql = "update subject_group set default_teacher_id=?\n"
                    + " where depart_id=? and subject_id=? and group_id=?;";
         KeyMap map = new KeyMap();
         map.put(1, teacher_id);
-//            map.put(2, room_id);
         map.put(2, depart_id);
         map.put(3, subject_id);
         map.put(4, group_id);
@@ -344,6 +343,110 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         map.put(1, profile_id);
         map.put(2, subject_id);
         dataModule.execute(sql, map);
+    }
+    
+    /**
+     * Добавление/разбиение группы в класс
+     * @param depart_id
+     * @param subject_id
+     * @throws Exception 
+     */
+    static void addSubjectGroup(Integer depart_id,Integer subject_id) throws Exception{
+        String sql = "insert into subject_group (group_id,subject_id,depart_id)\n"+
+                "select max(group_id)+1,subject_id,depart_id from subject_group where depart_id=? and subject_id=?";
+        KeyMap map = new KeyMap();
+        map.put(1, depart_id);
+        map.put(2, subject_id);
+        try{
+            dataModule.execute(sql, map);
+            dataModule.commit();
+        } catch (Exception e){
+            dataModule.rollback();
+            throw new Exception("ADD_SUBJECT_GROUP_ERROR\n"+e.getMessage());
+        }
+    }
+    
+    /**
+     * Удаление группы
+     * @param depart_id
+     * @param subject_id
+     * @param group_id
+     * @throws Exception 
+     */
+    static void deleteSubjectGroup(Integer depart_id,Integer subject_id,Integer group_id) throws Exception{
+        String sql ;
+        KeyMap map = new KeyMap();
+        map.put(1, depart_id);
+        map.put(2,subject_id);
+        map.put(3, group_id);
+        sql = "select group_id from subject_group where depart_id="+depart_id+" and subject_id="+subject_id+";";
+        Dataset dataset = dataModule.getSQLDataset(sql);
+        dataset.open();
+        if (dataset.size()==1){
+            throw new Exception("DELETE_SUBJECT_GROUP_ERROR\n"+"Всего одна группа");
+        }
+        
+        
+        sql ="delete from subject_group where depart_id=? and subject_id=? and group_id=?";
+        try{
+            dataModule.execute(sql, map);
+            dataModule.commit();
+        } catch (Exception e){
+            dataModule.rollback();
+            throw new Exception("DELETE_SUBJECT_GROUP_ERROR\n"+e.getMessage());
+        }
+        
+    }
+    
+    public static Integer createStream(Integer depart_id,Integer subject_id) throws Exception{
+        try{
+            dataModule.execute("insert into stream (stream_caption) values ('новый поток')");
+            Recordset recordset = dataModule.getRecordet("select max(id) from stream;");
+            Integer stream_id= recordset.getInteger(0);
+            String sql = "update subject_group set stream_id=? where subject_id=? and depart_id=?;";
+            KeyMap map = new KeyMap();
+            map.put(1,stream_id);
+            map.put(2, subject_id);
+            map.put(3, depart_id);
+            dataModule.execute(sql, map);
+            dataModule.commit();
+            return stream_id;
+        } catch (Exception e){
+            dataModule.rollback();
+            throw new Exception("CREATE_STREAM_ERROR:\n"+e.getMessage());
+        }
+        
+        
+    }
+    
+    public static void removeFromStream(Integer stream_id,Integer depart_id,Integer group_id){
+        throw new UnsupportedOperationException("Не готово ещё");
+    }
+    
+    public static void includeToStream(Integer stream_id,Integer depart_id,Integer group_id){
+        throw new UnsupportedOperationException("Не готово ещё");
+    }
+    
+    public static void deleteStream(Integer depart_id,Integer subject_id) throws Exception{
+        try{
+            Recordset recordset= dataModule.getRecordet("select distinct a.id from stream a inner join subject_group b on a.id=b.stream_id where b.depart_id="+depart_id+" and b.subject_id="+subject_id+";");
+            Integer stream_id= recordset.getInteger(0);
+            String sql = "update subject_group set stream_id=null where depart_id=? and subject_id=?;";
+            KeyMap map = new KeyMap();
+            map.put(1,depart_id);
+            map.put(2, subject_id);
+            dataModule.execute(sql, map);
+            
+            sql = "delete from stream where (select count(*) from subject_group where stream_id=stream.id)=0;";
+            dataModule.execute(sql);
+            dataModule.commit();
+            
+           
+        } catch (Exception e){
+            dataModule.rollback();
+            throw new Exception("DELETE_STREAM_ERROR\n"+e.getMessage());
+        }
+        
     }
     
 }

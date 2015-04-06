@@ -23,6 +23,7 @@ import java.util.Map;
 class DataMap extends HashMap<String,Object>{
 }
 
+
 interface IDataModuleConsts {
     public static final String  DATABASE_NOT_ACTIVE = "База данных не открыта";
     public static final String  DATABASE_IS_ACTIVE  = "База открыта";
@@ -334,6 +335,34 @@ public class DataModule implements IDataModule,IDataModuleConsts {
                 }
         } 
         
+    }
+    
+    public Recordset getRecordet(String sql) throws Exception{
+        Statement stmt= null;
+        ResultSet rs = null;
+        Recordset result = new Recordset();
+        Object[] rowset;
+        Integer columnCount;
+        try{
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(sql);
+            ResultSetMetaData meta = rs.getMetaData();
+            columnCount=meta.getColumnCount();
+            while (rs.next()){
+                rowset = new Object[columnCount];
+                for (int col=0;col<columnCount;col++)
+                    rowset[col]=rs.getObject(col+1);
+                result.add(rowset);
+            }
+        } finally{
+            if (rs!=null){
+                rs.close();
+            }
+            if (stmt!=null){
+                stmt.close();
+            }
+        }
+        return result;
     }
     
     public static void main(String[] args){
