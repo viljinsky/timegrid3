@@ -40,18 +40,33 @@ public class ShiftDialog extends BaseDialog{
         panel.add(drawPanel);
     }
     
+    public void setSelected(List<Integer[]> list){
+        drawPanel.setSelected(list);
+    }
+    
+    public List<Integer[]> getSelected(){
+        return drawPanel.getSelected();
+    }
+    
+    public List<Integer[]> getAdded(){
+        return drawPanel.getAdded();
+    }
+    
+    public List<Integer[]> getRemoved(){
+        return drawPanel.getRemoved();
+    }
     
     @Override
     public void doOnEntry() throws Exception {
-        for (Integer[] n:drawPanel.getSelected()){
+        for (Integer[] n:getSelected()){
             System.out.println(n[0]+" "+n[1]);
         }
         
-        for (Integer[] n:drawPanel.getAdded()){
+        for (Integer[] n:getAdded()){
             System.out.println("ADDED"+n[0]+" "+n[1]);
         }
         
-        for (Integer[] n:drawPanel.getRemoved()){
+        for (Integer[] n:getRemoved()){
             System.out.println("REMOVED"+n[0]+" "+n[1]);
         }
     }

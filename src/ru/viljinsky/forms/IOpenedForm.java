@@ -4,11 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -23,6 +23,7 @@ import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
 import ru.viljinsky.IDataset;
+import ru.viljinsky.Recordset;
 import ru.viljinsky.SelectDialog;
 
 /**
@@ -63,6 +64,7 @@ abstract class DetailPanel extends JPanel{
 
 
 ////////////////////////////    ROOM PANEL /////////////////////////////////////
+
 class RoomPanel extends JPanel implements IOpenedForm{
     MasterGrid grid = new MasterGrid();
     DataModule dataModule = DataModule.getInstance();
@@ -81,6 +83,67 @@ class RoomPanel extends JPanel implements IOpenedForm{
             RoomPanel.this.doCommand(command);
         }
     };
+    
+    
+    public void doCommand(String command){
+        try{
+            switch(command){
+                case "CREATE_SHIFT":
+                    break;
+                case "EDIT_SHIFT":
+                    editShift();
+                    break;
+                case "DELETE_SHIFT":
+                    break;
+            }
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
+    }
+    
+    public void editShift() throws Exception{
+        ShiftDialog dlg = new ShiftDialog(){
+
+            @Override
+            public void doOnEntry() throws Exception {
+                Integer shift_id,bell_id,day_id;
+                shift_id=RoomPanel.this.grid.getInegerValue("shift_id");
+                try{
+                    for (Integer[] n:getRemoved()){
+                        day_id=n[0]+1;bell_id=n[1]+1;
+                        dataModule.execute(String.format("delete from shift_detail where shift_id=%d and day_id=%d and bell_id=%d;",shift_id,day_id,bell_id));
+                    }
+                    for (Integer[] n:getAdded()){
+                        day_id=n[0]+1;bell_id=n[1]+1;
+                        dataModule.execute(String.format("insert into shift_detail (shift_id,day_id,bell_id)values (%d,%d,%d);",shift_id,day_id,bell_id));
+                    }
+                    dataModule.commit();
+                } catch(Exception e){
+                    dataModule.rollback();
+                    throw new Exception("EDIT_ROOM_SIFT_ERROR\n"+e.getMessage());
+                }
+            }
+
+        };
+        Integer shift_id = grid.getInegerValue("shift_id");
+        Recordset rs = dataModule.getRecordet(String.format("select day_id,bell_id from shift_detail where shift_id=%d;",shift_id));
+        Object[] values;
+        int day_id,bell_id;
+        List<Integer[]> list = new ArrayList<>();
+        for (int i=0;i<rs.size();i++){
+            values = rs.get(i);
+            day_id=(Integer)values[0]-1;
+            bell_id=(Integer)values[1]-1;
+            list.add(new Integer[]{day_id,bell_id});
+                    
+        }
+        dlg.setSelected(list);
+        dlg.showModal(RoomPanel.this);
+        if (dlg.modalResult==SelectDialog.RESULT_OK)
+            shiftPanel.grid.requery();
+    }
+    
+    //--------------------------------------------------------------------------
     
     class ShiftRoomPanel extends DetailPanel{
         String sqlShift="select * from shift_detail a inner join room b on a.shift_id=b.shift_id where b.id=%room_id;";
@@ -259,18 +322,6 @@ class RoomPanel extends JPanel implements IOpenedForm{
         shiftPanel.addAction(commands.getAction("EDIT_SHIFT"));
     }
     
-    public void doCommand(String command){
-        try{
-            switch(command){
-                case "EDIT_SHIFT":
-                    ShiftDialog dlg = new ShiftDialog();
-                    dlg.showModal(RoomPanel.this);
-                    break;
-            }
-        } catch (Exception e){
-            JOptionPane.showMessageDialog(null, e.getMessage());
-        }
-    }
     
     @Override
     public void open() throws Exception {
@@ -296,7 +347,6 @@ class RoomPanel extends JPanel implements IOpenedForm{
     public JComponent getPanel() {
         return this;
     }
-    
     
 };
 
@@ -723,15 +773,47 @@ class TeacherPanel extends JPanel implements IOpenedForm {
             grid.setDataset(dataset);
         }
         
-        public void editProfile(){
+        public void editProfile() throws Exception{
             ShiftDialog dlg = new ShiftDialog(){
 
                 @Override
                 public void doOnEntry() throws Exception {
+                    Integer shift_id,day_id,bell_id;
+                    shift_id=TeacherPanel.this.grid.getInegerValue("shift_id");
+                    try{
+                        for (Integer[] n:getRemoved()){
+                            day_id=n[0]+1;bell_id=n[1]+1;
+                            dataModule.execute(String.format("delete from shift_detail where shift_id=%d and day_id=%d and bell_id=%d;",shift_id,day_id,bell_id));
+                        }
+                        for (Integer[] n:getAdded()){
+                            day_id=n[0]+1;bell_id=n[1]+1;
+                            dataModule.execute(String.format("insert into  shift_detail (shift_id,day_id,bell_id) values(%d,%d,%d);",shift_id,day_id,bell_id));
+                        }
+                        
+                        
+                        dataModule.commit();
+                    } catch (Exception e){
+                        dataModule.rollback();
+                        throw new Exception("TEACHER_EDIT_PROFILE_ERROR\n"+e.getMessage());
+                    }
                 }
 
             };
+            Integer shift_id= TeacherPanel.this.grid.getInegerValue("shift_id");
+            Recordset rs = dataModule.getRecordet("select day_id,bell_id from shift_detail where shift_id="+shift_id);
+            List<Integer[]> list = new ArrayList<>();
+            Object[] values;
+            Integer day,bell;
+            for (int i=0;i<rs.size();i++){
+                values = rs.get(i);
+                day=(Integer)values[0]-1;
+                bell=(Integer)values[1]-1;
+                list.add(new Integer[]{day,bell});
+            }
+            dlg.setSelected(list);
             dlg.showModal(TeacherPanel.this);
+            if (dlg.modalResult==SelectDialog.RESULT_OK)
+                grid.requery();
         }
     }
     
