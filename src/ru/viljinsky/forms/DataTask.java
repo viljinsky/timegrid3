@@ -8,6 +8,7 @@ package ru.viljinsky.forms;
 
 import java.sql.PreparedStatement;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
@@ -288,6 +289,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
     }
     
     ///////////////////////////// TEACHER PANEL ////////////////////////////////
+    
     public static void inclideGroupToTeacher(int depart_id,int subject_id,int group_id,int teacher_id)
             throws Exception{
         String sql = "update subject_group set default_teacher_id=?\n"
@@ -298,6 +300,19 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         map.put(3, subject_id);
         map.put(4, group_id);
         dataModule.execute(sql, map);
+        sql = "update subject_group set default_room_id =(\n" +
+              "select teacher_room_id from teacher where id=?)\n" +
+              "where depart_id=? and subject_id=? and group_id=?;";
+        map.clear();;
+        map.put(1,teacher_id);
+        map.put(2,depart_id);
+        map.put(3,subject_id);
+        map.put(4, group_id);
+        dataModule.execute(sql, map);
+                
+//        dataModule.execute("update subject_group set default_room_id=");
+        
+        
     }
 
     public static void excludeGroupFromTeacher(int depart_id,int subject_id,int group_id) 
@@ -312,6 +327,8 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         dataModule.execute(sql, map);
     }
 
+    ///////////////////////////  CURRICULUM PANEL //////////////////////////////
+    
     public static void includeSubjectFromCurriculumn(Integer curriculum_id, Integer subject_id) throws Exception{
        String sql = "insert into curriculum_detail (curriculum_id,subject_id,hour_per_week,hour_per_day,group_type_id )\n"+
                  "select ?,id,default_hour_per_week,default_hour_per_day,default_group_type_id from subject where id=?;";
@@ -345,6 +362,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         dataModule.execute(sql, map);
     }
     
+    ////////////////////////  DEPART PANEL /////////////////////////////////////
     /**
      * Добавление/разбиение группы в класс
      * @param depart_id
@@ -447,6 +465,25 @@ public class DataTask implements IDataTask, IDataTaskConstants{
             throw new Exception("DELETE_STREAM_ERROR\n"+e.getMessage());
         }
         
+    }
+    
+    /////////////////////////////  SHIFT ///////////////////////////////////////
+    /**
+     * Изменение дней и часов в графиках 
+     * @param shift_id изменяемы график
+     * @param included Список пар Integer[] day_id,bell_id
+     * @param excluded Список пар Integer[] day_id,bell_id
+     */
+    public static void editShift(Integer shift_id,List<Integer[]> included,List<Integer[]> excluded) throws Exception{
+        Integer day_id,bell_id;
+        for (Integer[] n:excluded){
+            day_id=n[0]+1;bell_id=n[1]+1;
+            dataModule.execute(String.format("delete from shift_detail where shift_id=%d and day_id=%d and bell_id=%d;",shift_id,day_id,bell_id));
+        }
+        for (Integer[] n:included){
+            day_id=n[0]+1;bell_id=n[1]+1;
+            dataModule.execute(String.format("insert into shift_detail (shift_id,day_id,bell_id)values (%d,%d,%d);",shift_id,day_id,bell_id));
+        }
     }
     
 }

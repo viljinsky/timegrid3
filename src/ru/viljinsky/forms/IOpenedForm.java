@@ -49,7 +49,6 @@ abstract class DetailPanel extends JPanel{
         super(new BorderLayout());
         grid = new Grid();
         gridPanel = new GridPanel("title", grid);
-//        add(new JScrollPane(grid));
         add(gridPanel);
     }
     
@@ -106,17 +105,10 @@ class RoomPanel extends JPanel implements IOpenedForm{
 
             @Override
             public void doOnEntry() throws Exception {
-                Integer shift_id,bell_id,day_id;
+                Integer shift_id;
                 shift_id=RoomPanel.this.grid.getInegerValue("shift_id");
                 try{
-                    for (Integer[] n:getRemoved()){
-                        day_id=n[0]+1;bell_id=n[1]+1;
-                        dataModule.execute(String.format("delete from shift_detail where shift_id=%d and day_id=%d and bell_id=%d;",shift_id,day_id,bell_id));
-                    }
-                    for (Integer[] n:getAdded()){
-                        day_id=n[0]+1;bell_id=n[1]+1;
-                        dataModule.execute(String.format("insert into shift_detail (shift_id,day_id,bell_id)values (%d,%d,%d);",shift_id,day_id,bell_id));
-                    }
+                    DataTask.editShift(shift_id, getAdded(),getRemoved());
                     dataModule.commit();
                 } catch(Exception e){
                     dataModule.rollback();
@@ -721,6 +713,7 @@ class TeacherPanel extends JPanel implements IOpenedForm {
     class ProfileTeacherPanel extends DetailPanel{
         String sqlTeacherProfilee = "select * from v_teacher_profile where teacher_id=%teacher_id";
         
+        
         public void editProfile(){
             SelectDialog dlg = new SelectDialog() {
 
@@ -778,19 +771,10 @@ class TeacherPanel extends JPanel implements IOpenedForm {
 
                 @Override
                 public void doOnEntry() throws Exception {
-                    Integer shift_id,day_id,bell_id;
+                    Integer shift_id;
                     shift_id=TeacherPanel.this.grid.getInegerValue("shift_id");
                     try{
-                        for (Integer[] n:getRemoved()){
-                            day_id=n[0]+1;bell_id=n[1]+1;
-                            dataModule.execute(String.format("delete from shift_detail where shift_id=%d and day_id=%d and bell_id=%d;",shift_id,day_id,bell_id));
-                        }
-                        for (Integer[] n:getAdded()){
-                            day_id=n[0]+1;bell_id=n[1]+1;
-                            dataModule.execute(String.format("insert into  shift_detail (shift_id,day_id,bell_id) values(%d,%d,%d);",shift_id,day_id,bell_id));
-                        }
-                        
-                        
+                        DataTask.editShift(shift_id, getAdded(), getRemoved());
                         dataModule.commit();
                     } catch (Exception e){
                         dataModule.rollback();
