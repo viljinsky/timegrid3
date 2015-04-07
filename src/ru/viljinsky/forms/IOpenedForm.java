@@ -4,9 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.Action;
@@ -23,7 +21,6 @@ import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
 import ru.viljinsky.IDataset;
-import ru.viljinsky.Recordset;
 import ru.viljinsky.SelectDialog;
 
 /**
@@ -85,12 +82,26 @@ class RoomPanel extends JPanel implements IOpenedForm{
     
     
     public void doCommand(String command){
+        Integer shift_id,profile_id;
         try{
             switch(command){
+                case "CREATE_ROOM_PROFILE":
+                    break;
+                case "EDIT_ROOM_PROFILE":
+                    profile_id=grid.getIntegerValue("profile_id");
+                    if (Dialogs.editProfile(this, profile_id)){
+                        profilePanel.grid.requery();
+                    }
+                    break;
+                case "DELETE_ROOM_PROFILE":
+                    break;
                 case "CREATE_SHIFT":
                     break;
                 case "EDIT_SHIFT":
-                    editShift();
+                    shift_id= grid.getIntegerValue("shift_id");
+                    if (Dialogs.editShift(this, shift_id)){
+                        shiftPanel.grid.requery();
+                    }
                     break;
                 case "DELETE_SHIFT":
                     break;
@@ -100,40 +111,6 @@ class RoomPanel extends JPanel implements IOpenedForm{
         }
     }
     
-    public void editShift() throws Exception{
-        ShiftDialog dlg = new ShiftDialog(){
-
-            @Override
-            public void doOnEntry() throws Exception {
-                Integer shift_id;
-                shift_id=RoomPanel.this.grid.getIntegerValue("shift_id");
-                try{
-                    DataTask.editShift(shift_id, getAdded(),getRemoved());
-                    dataModule.commit();
-                } catch(Exception e){
-                    dataModule.rollback();
-                    throw new Exception("EDIT_ROOM_SIFT_ERROR\n"+e.getMessage());
-                }
-            }
-
-        };
-        Integer shift_id = grid.getIntegerValue("shift_id");
-        Recordset rs = dataModule.getRecordet(String.format("select day_id,bell_id from shift_detail where shift_id=%d;",shift_id));
-        Object[] values;
-        int day_id,bell_id;
-        List<Integer[]> list = new ArrayList<>();
-        for (int i=0;i<rs.size();i++){
-            values = rs.get(i);
-            day_id=(Integer)values[0]-1;
-            bell_id=(Integer)values[1]-1;
-            list.add(new Integer[]{day_id,bell_id});
-                    
-        }
-        dlg.setSelected(list);
-        dlg.showModal(RoomPanel.this);
-        if (dlg.modalResult==SelectDialog.RESULT_OK)
-            shiftPanel.grid.requery();
-    }
     
     //--------------------------------------------------------------------------
     
@@ -157,8 +134,6 @@ class RoomPanel extends JPanel implements IOpenedForm{
         }
         
     }
-
-    
     
     class MasterGrid extends Grid{
 
@@ -310,8 +285,9 @@ class RoomPanel extends JPanel implements IOpenedForm{
                 
         add(splitPane);
         setPreferredSize(new Dimension(800,600));
-        commands.setCommandList(new String[]{"EDIT_SHIFT"});
+        commands.setCommandList(new String[]{"EDIT_SHIFT","EDIT_ROOM_PROFILE"});
         shiftPanel.addAction(commands.getAction("EDIT_SHIFT"));
+        profilePanel.addAction(commands.getAction("EDIT_ROOM_PROFILE"));
     }
     
     
@@ -411,8 +387,10 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm{
                 case "ADD_STREAM":
                     depart_id=grid2.getIntegerValue("depart_id");
                     subject_id=grid2.getIntegerValue("subject_id");
-                    DataTask.createStream(depart_id,subject_id);
-                    grid2.requery();
+                    group_id=grid2.getIntegerValue("group_id");
+                    if (SubjectStream.createStream(this, depart_id, subject_id, group_id))
+//                    DataTask.createStream(depart_id,subject_id);
+                      grid2.requery();
                     break;
                 case "REMOVE_STREAM":
                     depart_id=grid2.getIntegerValue("depart_id");
@@ -421,6 +399,9 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm{
                     grid2.requery();
                     break;
                 case "EDIT_STREAM":
+                    stream_id= grid2.getIntegerValue("stream_id");
+                    if (SubjectStream.editStream(this, stream_id))
+                        grid2.requery();
                     break;
                 default:
                     throw new Exception("UNKNOW_COMMAND\n\""+commad+"\"");
@@ -695,58 +676,26 @@ class TeacherPanel extends JPanel implements IOpenedForm {
     
    
     public void doCommand(String command){
+        Integer shift_id,profile_id;
         try{
             switch (command){
                 case "EDIT_PROFILE":
-                    ((ProfileTeacherPanel)profilePanel).editProfile();
+                    profile_id=grid.getIntegerValue("profile_id");
+                    Dialogs.editProfile(this,profile_id);
                     break;
                 case "EDIT_SHIFT":
-                    ((ShiftTeacherPanel)shiftPanel).editProfile();
+                    shift_id=grid.getIntegerValue("shift_id");
+                    Dialogs.editShift(this, shift_id);
                     break;
             }
         } catch (Exception e){
-            JOptionPane.showMessageDialog(TeacherPanel.this, e.getMessage());
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
 
     
     class ProfileTeacherPanel extends DetailPanel{
         String sqlTeacherProfilee = "select * from v_teacher_profile where teacher_id=%teacher_id";
-        
-        
-        public void editProfile(){
-            SelectDialog dlg = new SelectDialog() {
-
-                @Override
-                public void doOnEntry() throws Exception {
-                    Integer profile_id = TeacherPanel.this.grid.getIntegerValue("profile_id");
-                    try{
-                        for (Object k:getRemoved()){
-                            DataTask.excludeSubjectFromProfile(profile_id,(Integer)k);
-                        }
-                        for (Object k:getAdded()){
-                            DataTask.includeSubjectToProfile(profile_id,(Integer)k);
-                        }
-                        dataModule.commit();
-                    } catch (Exception e){
-                        dataModule.rollback();
-                        throw new Exception("INCLUDE_EXCLUDE_PROFILE_ERROR\n"+e.getMessage());
-                    }
-                }
-            };
-            try{
-                
-                Set<Object> s = grid.getDataset().getColumnSet("subject_id");
-                IDataset dataset = dataModule.getDataset("subject");
-                dlg.setDataset(dataset, "id", "subject_name");
-                dlg.setSelected(s);
-                if (dlg.showModal(null)==SelectDialog.RESULT_OK)
-                    grid.requery();
-            
-            } catch (Exception ee){
-                ee.printStackTrace();
-            }
-        }
         
         @Override
         public void reopen(Integer keyValue) throws Exception{
@@ -766,41 +715,7 @@ class TeacherPanel extends JPanel implements IOpenedForm {
             grid.setDataset(dataset);
         }
         
-        public void editProfile() throws Exception{
-            ShiftDialog dlg = new ShiftDialog(){
-
-                @Override
-                public void doOnEntry() throws Exception {
-                    Integer shift_id;
-                    shift_id=TeacherPanel.this.grid.getIntegerValue("shift_id");
-                    try{
-                        DataTask.editShift(shift_id, getAdded(), getRemoved());
-                        dataModule.commit();
-                    } catch (Exception e){
-                        dataModule.rollback();
-                        throw new Exception("TEACHER_EDIT_PROFILE_ERROR\n"+e.getMessage());
-                    }
-                }
-
-            };
-            Integer shift_id= TeacherPanel.this.grid.getIntegerValue("shift_id");
-            Recordset rs = dataModule.getRecordet("select day_id,bell_id from shift_detail where shift_id="+shift_id);
-            List<Integer[]> list = new ArrayList<>();
-            Object[] values;
-            Integer day,bell;
-            for (int i=0;i<rs.size();i++){
-                values = rs.get(i);
-                day=(Integer)values[0]-1;
-                bell=(Integer)values[1]-1;
-                list.add(new Integer[]{day,bell});
-            }
-            dlg.setSelected(list);
-            dlg.showModal(TeacherPanel.this);
-            if (dlg.modalResult==SelectDialog.RESULT_OK)
-                grid.requery();
-        }
     }
-    
 
     @Override
     public void close() throws Exception {
@@ -865,8 +780,6 @@ class TeacherPanel extends JPanel implements IOpenedForm {
             dataset.open();
             destanationGrid.setDataset(dataset);
         }
-
-
         
         @Override
         public void include() throws Exception {
@@ -962,8 +875,6 @@ class TeacherPanel extends JPanel implements IOpenedForm {
         }
 
     }
-
-    
     
     public TeacherPanel() {
         setLayout(new BorderLayout());

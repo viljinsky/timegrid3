@@ -20,7 +20,6 @@ import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Recordset;
 import ru.viljinsky.SelectDialog;
-import ru.viljinsky.forms.DataTask;
 
 /**
  *
