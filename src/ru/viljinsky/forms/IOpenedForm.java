@@ -38,9 +38,6 @@ public interface IOpenedForm {
     public void close() throws Exception;
 }
 
-abstract class  AbstractOpenedForm implements IOpenedForm{
-}
-
 abstract class DetailPanel extends JPanel{
     Grid grid;
     Dataset dataset;
@@ -49,7 +46,6 @@ abstract class DetailPanel extends JPanel{
         super(new BorderLayout());
         grid = new Grid();
         gridPanel = new GridPanel("title", grid);
-//        add(new JScrollPane(grid));
         add(gridPanel);
     }
     
