@@ -277,12 +277,15 @@ class GridModel extends AbstractTableModel{
         });
     }
 
-    public void setDataset(Dataset dataset) {
+    public void setDataset(Dataset dataset) throws Exception{
         if (dataset==null){
             model = null;
             
             setModel(new DefaultTableModel());
             return;
+        }
+        if (!dataset.isActive()){
+            dataset.open();
         }
         model = new GridModel(dataset);
         setModel(model);
@@ -428,4 +431,12 @@ class GridModel extends AbstractTableModel{
             throw new Exception("COLUMN_NOT_FOUND");
         return (String)values.get(columnName);
     }
+    
+    public Object getObjectValue(String columnName) throws Exception{
+        Map<String,Object> values = getSelectedValues();
+        if (!values.containsKey(columnName))
+            throw new Exception("COLUMN_NOT_FOUND");
+        return values.get(columnName);
+    }
+    
 }

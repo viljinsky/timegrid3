@@ -41,7 +41,11 @@ class DictPanel extends JPanel{
     }
     
     public void setDataset(Dataset dataset){
-        grid.setDataset(dataset);
+        try{
+            grid.setDataset(dataset);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }
 

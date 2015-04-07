@@ -9,6 +9,8 @@ package ru.viljinsky;
 
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.HashSet;
 import java.util.Map;
@@ -112,6 +114,7 @@ public abstract class SelectDialog extends BaseDialog {
         super();
         selected = new HashSet<>();
         table = new JTable();
+//        table.setBackground(Color.CYAN);//getBackground());
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JScrollPane(table));
         panel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -123,19 +126,24 @@ public abstract class SelectDialog extends BaseDialog {
         bottons.add(btn);
         panel.add(bottons, BorderLayout.PAGE_END);
         add(panel);
+        panel.setPreferredSize(new Dimension(400,300));
     }
 
     public void setDataset(IDataset dataset, String keyField, String columnName) throws Exception{
         if (!dataset.isActive()){
             dataset.open();
         }
+        if (dataset.getColumn(keyField)==null)
+            throw new Exception("COLUMN_NOT_FOUND\n\""+keyField+"\"");
+        if (dataset.getColumn(columnName)==null)
+            throw new Exception("COLUMN_NOT_FOUND\n\""+columnName+"\"");
+        
         model = new Model(dataset);
         model.columnName = columnName;
         model.keyField = keyField;
         table.setModel(model);
         table.getColumnModel().getColumn(0).setMaxWidth(20);
         table.setShowGrid(false);
-        table.setBackground(getBackground());
     }
 
     public void setSelected(Set<Object> values) {

@@ -176,7 +176,7 @@ public class DataModule implements IDataModule,IDataModuleConsts {
                 return dataset;
             }
         }
-        return null;
+        throw new Exception("TABLE_NOT_FOUND \""+tableName+"\"");
     }
     
     @Override

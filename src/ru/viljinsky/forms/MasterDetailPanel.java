@@ -127,8 +127,7 @@ abstract class MasterDetailPanel extends JPanel implements IMasterDetailConsts {
         }
     }
 
-    public void close(){
-//        updateUI();
+    public void close() throws Exception{
         grid2.setDataset(null);
         grid1.setDataset(null);
     }

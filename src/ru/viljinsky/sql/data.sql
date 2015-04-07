@@ -99,7 +99,7 @@ insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,d
 insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
      values (8,'Физ.культура',1,1,2);
 insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
-     values (9,'Информатика',1,1,2);
+     values (9,'Информатика',1,2,2);
 
 
 -- русский и лит.        

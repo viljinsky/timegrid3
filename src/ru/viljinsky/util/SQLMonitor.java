@@ -558,6 +558,8 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                     Dataset dataset = dataModule.getSQLDataset(sql);
                     dataset.open();
                     Grid grid = new Grid();
+                    grid.setAutoCreateRowSorter(true);
+                   
                     grid.setDataset(dataset);
                     GridPanel gridPanel = new GridPanel(grid);
                     tabs.addTab("sql", gridPanel);

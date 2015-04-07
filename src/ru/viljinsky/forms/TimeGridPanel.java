@@ -264,10 +264,21 @@ public class TimeGridPanel extends JPanel{
     }
     
     public void open() throws Exception{
+        String sql = 
+                "select b.subject_name,"
+                + "case a.group_type_id  when 0 then '' when 1 then a.group_id when 1 then group_id end as group_label,"
+                + "a.hour_per_week,"
+                + "a.placed, "
+                + "a.depart_id,"
+                + "a.group_id,"
+                + "a.subject_id,"
+                + "a.group_id,"
+                + "a.hour_per_day "
+                + " from v_subject_group_on_schedule a inner join subject b on a.subject_id=b.id";
         Dataset dataset;
         filterPanel.open();
 
-        dataset = dataModule.getDataset("v_subject_group_on_schedule");
+        dataset = dataModule.getSQLDataset(sql);
         grSubjectGroup.setDataset(dataset);
         
         dataset = dataModule.getSQLDataset("select * from v_schedule order by day_id,bell_id,group_id");

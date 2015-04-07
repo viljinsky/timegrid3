@@ -416,6 +416,29 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         
     }
     
+    public static Integer createStream(String streamCaption,List<Integer[]> list) throws Exception{
+        Integer stream_id;//,depart_id,subject_id,group_id;
+        try{
+            dataModule.execute("insert into stream (stream_caption) values ('"+streamCaption+"')");
+            Recordset recordset = dataModule.getRecordet("select max(id) from stream;");
+            stream_id= recordset.getInteger(0);
+            String sql = "update subject_group set stream_id=? where depart_id=? and subject_id=? ;";
+            KeyMap map = new KeyMap();
+            map.put(1,stream_id);
+                for (Integer[] data:list){
+
+                map.put(2, data[0]);
+                map.put(3, data[1]);
+                dataModule.execute(sql, map);
+            }
+            dataModule.commit();
+            return stream_id;
+        } catch (Exception e){
+            dataModule.rollback();
+            throw new Exception("CREATE_STREAM_ERROR:\n"+e.getMessage());
+        }
+    }
+    
     public static Integer createStream(Integer depart_id,Integer subject_id) throws Exception{
         try{
             dataModule.execute("insert into stream (stream_caption) values ('новый поток')");
@@ -437,12 +460,12 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         
     }
     
-    public static void removeFromStream(Integer stream_id,Integer depart_id,Integer group_id){
-        throw new UnsupportedOperationException("Не готово ещё");
+    public static void excludeFromStream(Integer stream_id,Integer depart_id,Integer subject_id) throws Exception{
+        dataModule.execute(String.format("update subject_group set stream_id=null where depart_id=%d and subject_id=%d", depart_id,subject_id));
     }
     
-    public static void includeToStream(Integer stream_id,Integer depart_id,Integer group_id){
-        throw new UnsupportedOperationException("Не готово ещё");
+    public static void includeToStream(Integer stream_id,Integer depart_id,Integer subect_id) throws Exception{
+        dataModule.execute(String.format("update subject_group set stream_id=%d where depart_id=%d and subject_id=%d", stream_id,depart_id,subect_id));
     }
     
     public static void deleteStream(Integer depart_id,Integer subject_id) throws Exception{

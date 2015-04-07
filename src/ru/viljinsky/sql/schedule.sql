@@ -184,43 +184,29 @@ create table schedule (
 
 
 ---------------------------------------------------------------------------------
-drop view if exists v_subject_group;
-create view v_subject_group as
-select a.depart_id,a.group_id,a.stream_id,c.group_type_id,
-  a.subject_id,c.hour_per_day,c.hour_per_week,
-  a.default_teacher_id,a.default_room_id
-from subject_group a inner join depart b on a.depart_id=b.id 
-	inner join curriculum_detail c on c.curriculum_id=b.curriculum_id
-	and c.subject_id=a.subject_id;
+-- drop view if exists v_subject_group;
+-- create view v_subject_group as
+-- select a.depart_id,a.group_id,a.stream_id,c.group_type_id,
+--   a.subject_id,c.hour_per_day,c.hour_per_week,
+--   a.default_teacher_id,a.default_room_id
+-- from subject_group a inner join depart b on a.depart_id=b.id 
+-- 	inner join curriculum_detail c on c.curriculum_id=b.curriculum_id
+-- 	and c.subject_id=a.subject_id;
 -- select * from v_subject_group;
 
 
-drop view if exists v_subject_group_on_schedule;
-create view v_subject_group_on_schedule as
-select a.depart_id,a.subject_id,a.group_id,a.group_type_id, 
-       a.default_teacher_id as teacher_id,a.default_room_id as room_id,a.hour_per_week,a.hour_per_day,
-       count(*) as placed
- from v_subject_group a left join schedule b on
-     a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
- group by a.group_type_id,a.depart_id,a.subject_id,a.group_id,
-       a.default_teacher_id ,a.default_room_id,a.hour_per_week,a.hour_per_day;
-
--- select * from v_subject_group_on_schedule;
+-- drop view if exists v_subject_group_on_schedule;
+-- create view v_subject_group_on_schedule as
+-- select a.depart_id,a.subject_id,a.group_id,a.group_type_id, 
+--        a.default_teacher_id as teacher_id,a.default_room_id as room_id,a.hour_per_week,a.hour_per_day,
+--        count(*) as placed
+--  from v_subject_group a left join schedule b on
+--      a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
+--  group by a.group_type_id,a.depart_id,a.subject_id,a.group_id,
+--        a.default_teacher_id ,a.default_room_id,a.hour_per_week,a.hour_per_day;
 
 
 
-drop view if exists v_schedule;
-create view v_schedule as
-select dl.day_caption,bl.time_start ||'-'||time_end as lesson_time, s.subject_name,a.group_id,b.week_id,
-c.last_name || ' ' || substr(c.first_name,1,1) || '. ' || substr(c.patronymic,1,1) || '.' as teacher,d.name as room,
-b.day_id,b.bell_id,a.depart_id,a.subject_id,a.group_type_id,b.teacher_id,b.room_id
- from v_subject_group a inner join schedule b
-on a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
-left join teacher c on c.id=b.teacher_id
-left join room d on d.id=b.room_id
-inner join subject s on s.id =a.subject_id
-inner join day_list dl on dl.day_no=b.day_id
-inner join bell_list bl on bl.bell_id=b.bell_id;
 
 -- select * from v_schedule;
 
@@ -239,6 +225,42 @@ select s.subject_name,a.subject_id,b.id as room_id,a.profile_id
 inner join subject s on s.id=a.subject_id;
 
 select * from v_room_profile;
+
+
+-- v_subject_group
+drop view if exists v_subject_group;
+create view v_subject_group as
+select a.group_id,a.depart_id,a.subject_id,c.group_type_id,a.stream_id,c.hour_per_week,c.hour_per_day,c.group_sequence,
+a.default_teacher_id,a.default_room_id,a.pupil_count
+ from subject_group a inner join depart b on a.depart_id=b.id inner join curriculum_detail c
+on c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id;
+select * from v_subject_group;
+
+--  subject_group_on_schedule
+drop view if exists v_subject_group_on_schedule;
+create view  v_subject_group_on_schedule as
+select a.depart_id,a.subject_id,a.group_id,a.hour_per_week,a.hour_per_day,a.group_type_id,a.default_teacher_id,a.default_room_id,count(b.bell_id) as placed,
+a.stream_id,a.group_sequence,a.pupil_count
+ from v_subject_group a
+left join schedule b on a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
+group by a.depart_id,a.subject_id,a.group_id,a.hour_per_week,a.hour_per_day,a.group_id,a.group_type_id,a.pupil_count;
+
+select * from v_subject_group_on_schedule;
+
+-- v_schedule
+drop view if exists v_schedule;
+create view v_schedule as
+select dl.day_caption,bl.time_start ||'-'||time_end as lesson_time, s.subject_name,a.group_id,b.week_id,
+c.last_name || ' ' || substr(c.first_name,1,1) || '. ' || substr(c.patronymic,1,1) || '.' as teacher,d.name as room,
+b.day_id,b.bell_id,a.depart_id,a.subject_id,a.group_type_id,b.teacher_id,b.room_id
+ from v_subject_group a inner join schedule b
+on a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
+left join teacher c on c.id=b.teacher_id
+left join room d on d.id=b.room_id
+inner join subject s on s.id =a.subject_id
+inner join day_list dl on dl.day_no=b.day_id
+inner join bell_list bl on bl.bell_id=b.bell_id;
+
 
 
 

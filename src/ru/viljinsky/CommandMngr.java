@@ -20,6 +20,9 @@ public abstract class CommandMngr {
     public CommandMngr(){
     }
     
+    public Action[] getActionList(){
+    return actions;
+    }
     public CommandMngr(String[] commands){
         setCommandList(commands);
     }
