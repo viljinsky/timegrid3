@@ -415,7 +415,7 @@ class GridModel extends AbstractTableModel{
         return map;
     }
     
-    public Integer getInegerValue(String columnName) throws Exception{
+    public Integer getIntegerValue(String columnName) throws Exception{
         Map<String,Object> values = getSelectedValues();
         if (!values.containsKey(columnName))
             throw new Exception("COLUMN_NOT_FOUND");

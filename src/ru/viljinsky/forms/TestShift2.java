@@ -43,7 +43,7 @@ public class TestShift2 extends JFrame{
                     switch(command){
                         case "FILL":
                             System.out.println(masterDataset+" FILL command");
-                            Integer profile_id= grid1.getInegerValue("id");
+                            Integer profile_id= grid1.getIntegerValue("id");
                             DataTask.fillProfile(profile_id);
                             grid2.requery();
                             break;
@@ -79,7 +79,7 @@ public class TestShift2 extends JFrame{
                 try{
                     switch(command){
                         case "FILL":
-                            Integer shift_id=grid1.getInegerValue("id");
+                            Integer shift_id=grid1.getIntegerValue("id");
                             DataTask.fillShift(shift_id);
                             grid2.requery();
                     default:

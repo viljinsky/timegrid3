@@ -106,7 +106,7 @@ class RoomPanel extends JPanel implements IOpenedForm{
             @Override
             public void doOnEntry() throws Exception {
                 Integer shift_id;
-                shift_id=RoomPanel.this.grid.getInegerValue("shift_id");
+                shift_id=RoomPanel.this.grid.getIntegerValue("shift_id");
                 try{
                     DataTask.editShift(shift_id, getAdded(),getRemoved());
                     dataModule.commit();
@@ -117,7 +117,7 @@ class RoomPanel extends JPanel implements IOpenedForm{
             }
 
         };
-        Integer shift_id = grid.getInegerValue("shift_id");
+        Integer shift_id = grid.getIntegerValue("shift_id");
         Recordset rs = dataModule.getRecordet(String.format("select day_id,bell_id from shift_detail where shift_id=%d;",shift_id));
         Object[] values;
         int day_id,bell_id;
@@ -167,7 +167,7 @@ class RoomPanel extends JPanel implements IOpenedForm{
             int row = getSelectedRow();
             if (row>=0){
                 try{
-                    int room_id= grid.getInegerValue("id");
+                    int room_id= grid.getIntegerValue("id");
                     selectPanel.setRoomId(room_id);
                     shiftPanel.reopen(room_id);
                     profilePanel.reopen(room_id);
@@ -396,27 +396,27 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm{
                     clearSubjectGroup();
                     break;
                 case "ADD_GROUP":
-                    depart_id= grid2.getInegerValue("depart_id");
-                    subject_id = grid2.getInegerValue("subject_id");
+                    depart_id= grid2.getIntegerValue("depart_id");
+                    subject_id = grid2.getIntegerValue("subject_id");
                     DataTask.addSubjectGroup(depart_id,subject_id);
                     grid2.requery();
                     break;
                 case "DELETE_GROUP":
-                    depart_id=grid2.getInegerValue("depart_id");
-                    subject_id=grid2.getInegerValue("subject_id");
-                    group_id = grid2.getInegerValue("group_id");
+                    depart_id=grid2.getIntegerValue("depart_id");
+                    subject_id=grid2.getIntegerValue("subject_id");
+                    group_id = grid2.getIntegerValue("group_id");
                     DataTask.deleteSubjectGroup(depart_id,subject_id,group_id);
                     grid2.requery();
                     break;
                 case "ADD_STREAM":
-                    depart_id=grid2.getInegerValue("depart_id");
-                    subject_id=grid2.getInegerValue("subject_id");
+                    depart_id=grid2.getIntegerValue("depart_id");
+                    subject_id=grid2.getIntegerValue("subject_id");
                     DataTask.createStream(depart_id,subject_id);
                     grid2.requery();
                     break;
                 case "REMOVE_STREAM":
-                    depart_id=grid2.getInegerValue("depart_id");
-                    subject_id=grid2.getInegerValue("subject_id");
+                    depart_id=grid2.getIntegerValue("depart_id");
+                    subject_id=grid2.getIntegerValue("subject_id");
                     DataTask.deleteStream(depart_id,subject_id);
                     grid2.requery();
                     break;
@@ -431,15 +431,15 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm{
     }
     
     public void fillSubjectGroup() throws Exception{
-        if (grid1.getInegerValue("curriculum_id")==null)
+        if (grid1.getIntegerValue("curriculum_id")==null)
             throw new Exception("DEPART_HAS_NOT_CURRICULUM");
-        Integer depart_id=grid1.getInegerValue("id");
+        Integer depart_id=grid1.getIntegerValue("id");
         DataTask.fillSubjectGroup2(depart_id);
         grid2.requery();
     }
     
     public void clearSubjectGroup() throws Exception{
-        Integer depart_id=grid1.getInegerValue("id");
+        Integer depart_id=grid1.getIntegerValue("id");
         DataTask.clearSubjectGroup(depart_id);
         grid2.requery();
     }
@@ -518,13 +518,13 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
     }
     
     protected void fillCurriculumnDetail() throws Exception {
-        Integer curriculum_id = grid1.getInegerValue("id");
+        Integer curriculum_id = grid1.getIntegerValue("id");
         DataTask.fillCurriculumn(curriculum_id);
         grid2.requery();
     }
     
     protected void clearCurriculumDetail() throws Exception{
-        Integer curriculum_id = grid1.getInegerValue("id");
+        Integer curriculum_id = grid1.getIntegerValue("id");
         DataTask.removeCurriculum(curriculum_id);
         grid2.requery();
     }
@@ -534,7 +534,7 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
 
             @Override
             public void doOnEntry() throws Exception {
-                Integer curriculum_id=grid1.getInegerValue("id");
+                Integer curriculum_id=grid1.getIntegerValue("id");
                 try{
                     for (Object k:getRemoved()){
                         DataTask.excludeSubjectFromCurriculumn(curriculum_id,(Integer)k);
@@ -719,7 +719,7 @@ class TeacherPanel extends JPanel implements IOpenedForm {
 
                 @Override
                 public void doOnEntry() throws Exception {
-                    Integer profile_id = TeacherPanel.this.grid.getInegerValue("profile_id");
+                    Integer profile_id = TeacherPanel.this.grid.getIntegerValue("profile_id");
                     try{
                         for (Object k:getRemoved()){
                             DataTask.excludeSubjectFromProfile(profile_id,(Integer)k);
@@ -772,7 +772,7 @@ class TeacherPanel extends JPanel implements IOpenedForm {
                 @Override
                 public void doOnEntry() throws Exception {
                     Integer shift_id;
-                    shift_id=TeacherPanel.this.grid.getInegerValue("shift_id");
+                    shift_id=TeacherPanel.this.grid.getIntegerValue("shift_id");
                     try{
                         DataTask.editShift(shift_id, getAdded(), getRemoved());
                         dataModule.commit();
@@ -783,7 +783,7 @@ class TeacherPanel extends JPanel implements IOpenedForm {
                 }
 
             };
-            Integer shift_id= TeacherPanel.this.grid.getInegerValue("shift_id");
+            Integer shift_id= TeacherPanel.this.grid.getIntegerValue("shift_id");
             Recordset rs = dataModule.getRecordet("select day_id,bell_id from shift_detail where shift_id="+shift_id);
             List<Integer[]> list = new ArrayList<>();
             Object[] values;
@@ -815,7 +815,7 @@ class TeacherPanel extends JPanel implements IOpenedForm {
             int row = getSelectedRow();
             if (row >= 0) {
                 try {
-                    Integer teacher_id = getInegerValue("id");
+                    Integer teacher_id = getIntegerValue("id");
                     selctPanel.setTeacherId(teacher_id);
                     shiftPanel.reopen(teacher_id);
                     profilePanel.reopen(teacher_id);

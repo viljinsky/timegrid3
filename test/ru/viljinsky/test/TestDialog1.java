@@ -33,10 +33,10 @@ import ru.viljinsky.forms.ShiftDialog;
 
 
 
-public class TestSelectDialog  extends JFrame implements ActionListener{
+public class TestDialog1  extends JFrame implements ActionListener{
     DataModule dataModule = DataModule.getInstance();
     
-    public TestSelectDialog(){
+    public TestDialog1(){
         Container content = getContentPane();
         content.setPreferredSize(new Dimension(500,400));
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -148,7 +148,7 @@ public class TestSelectDialog  extends JFrame implements ActionListener{
     
     public static void main(String[] args) throws Exception{
         DataModule.getInstance().open();
-        TestSelectDialog frame = new TestSelectDialog();
+        TestDialog1 frame = new TestDialog1();
         frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
         frame.pack();
         Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
