@@ -388,7 +388,7 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm{
                     depart_id=grid2.getIntegerValue("depart_id");
                     subject_id=grid2.getIntegerValue("subject_id");
                     group_id=grid2.getIntegerValue("group_id");
-                    if (SubjectStream.createStream(this, depart_id, subject_id, group_id))
+                    if (Dialogs.createStream(this, depart_id, subject_id, group_id))
 //                    DataTask.createStream(depart_id,subject_id);
                       grid2.requery();
                     break;
@@ -400,7 +400,7 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm{
                     break;
                 case "EDIT_STREAM":
                     stream_id= grid2.getIntegerValue("stream_id");
-                    if (SubjectStream.editStream(this, stream_id))
+                    if (Dialogs.editStream(this, stream_id))
                         grid2.requery();
                     break;
                 default:

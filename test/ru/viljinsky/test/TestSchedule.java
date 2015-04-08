@@ -6,7 +6,6 @@
 
 package ru.viljinsky.test;
 
-import ru.viljinsky.forms.SubjectStream;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.FlowLayout;
@@ -22,6 +21,7 @@ import ru.viljinsky.CommandMngr;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
+import ru.viljinsky.forms.Dialogs;
 
 /**
  *
@@ -119,18 +119,18 @@ public class TestSchedule extends JFrame implements ITestSchedule{
                     depart_id=grid.getIntegerValue("depart_id");
                     subject_id=grid.getIntegerValue("subject_id");
                     group_id=grid.getIntegerValue("group_id");
-                    if (SubjectStream.createStream(rootPane, depart_id, subject_id, group_id))
+                    if (Dialogs.createStream(rootPane, depart_id, subject_id, group_id))
                             grid.requery();
                     break;
                 case EDIT_STREAM:
                     stream_id = grid.getIntegerValue("stream_id");
-                    if (SubjectStream.editStream(rootPane, stream_id))
+                    if (Dialogs.editStream(rootPane, stream_id))
                             grid.requery();
                     break;
                 case REMOVE_STREAM:
                     depart_id=grid.getIntegerValue("depart_id");
                     subject_id=grid.getIntegerValue("subject_id");
-                    if (SubjectStream.removeStream(rootPane, depart_id,subject_id))
+                    if (Dialogs.removeStream(rootPane, depart_id,subject_id))
                         grid.requery();
                     break;
             }
