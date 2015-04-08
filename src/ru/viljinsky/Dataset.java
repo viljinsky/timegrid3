@@ -114,7 +114,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             clear();
             Statement stmt = null;
             try {
-                stmt = dataModule.con.createStatement();
+                stmt = dataModule.createStatement();
                 ResultSet rs = stmt.executeQuery(info.selectSQL);
                 Object[] rowset;
                 while (rs.next()) {
@@ -146,7 +146,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         Statement stmt = null;
         ResultSet rs;
         try {
-            stmt = dataModule.con.createStatement();
+            stmt = dataModule.createStatement();
             try{
                 rs = stmt.executeQuery(info.selectSQL+" limit 1;");
             } catch (Exception e){
@@ -243,12 +243,12 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         Statement stmt=null;
         ResultSet rs =null;
         try{
-            stmt = dataModule.con.createStatement();
+            stmt = dataModule.createStatement();
             rs = stmt.executeQuery("select seq from sqlite_sequence where name ='"+getTableName()+"';");
             while (rs.next()){
                 return rs.getInt("seq")+1;
             }
-        } catch (SQLException e){
+        } catch (Exception e){
             e.printStackTrace();
         } finally {
             if (rs!=null) try {rs.close();} catch (SQLException e){};
@@ -281,7 +281,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         
         Statement stmt = null;
         try{
-            stmt = dataModule.con.createStatement();
+            stmt = dataModule.createStatement();
             stmt.execute(newSql);
             dataModule.commit();
         } catch (SQLException e){
@@ -308,7 +308,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         Object[] rowset = get(rowIndex);
         
         try{
-            PreparedStatement pstmt = dataModule.con.prepareStatement(info.deleteSQL);
+            PreparedStatement pstmt = dataModule.getConnection().prepareStatement(info.deleteSQL);
             String[] keys = info.primaryKey.split(";");
             int n=1;
             for (String k:keys){
@@ -349,7 +349,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         }
         Statement stmt =null;
         try{
-            stmt= dataModule.con.createStatement();
+            stmt= dataModule.createStatement();
             stmt.execute(sql);
             dataModule.commit();
         } catch (SQLException e){
@@ -369,12 +369,12 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     }
 
     private static final String[] strLookupMap={
-        "shift=name",
+        "shift=shift_name",
         "subject=subject_name",
         "group_type=group_type_caption",
         "skill=caption",
         "curriculum=caption",
-        "profile=name",
+        "profile=profile_name",
         "shift_type=caption",
         "profile_type=caption",
         "day_list=day_caption",

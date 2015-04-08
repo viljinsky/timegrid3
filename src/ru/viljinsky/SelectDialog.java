@@ -11,6 +11,8 @@ package ru.viljinsky;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +30,9 @@ import javax.swing.table.AbstractTableModel;
  * 
  */
 public abstract class SelectDialog extends BaseDialog {
+    public static final String COLUMN_NOT_FOUND = "COLUMN_NOT_FOUND\n";
+    public static final String SELECT_ALL = "SELECT_ALL";
+    public static final String DESELECT_ALL = "DESELECT_ALL";
     
     JTable table;
     Model model;
@@ -117,9 +122,23 @@ public abstract class SelectDialog extends BaseDialog {
         panel.setBorder(new EmptyBorder(10, 10, 10, 10));
         JPanel bottons = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btn;
-        btn = new JButton("SELECT_ALL");
+        btn = new JButton(SELECT_ALL);
+        btn.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectAll();
+            }
+        });
         bottons.add(btn);
-        btn = new JButton("DESELECT_ALL");
+        btn = new JButton(DESELECT_ALL);
+        btn.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                unSelectedAll();
+            }
+        });
         bottons.add(btn);
         panel.add(bottons, BorderLayout.PAGE_END);
         add(panel);
@@ -131,9 +150,9 @@ public abstract class SelectDialog extends BaseDialog {
             dataset.open();
         }
         if (dataset.getColumn(keyField)==null)
-            throw new Exception("COLUMN_NOT_FOUND\n\""+keyField+"\"");
+            throw new Exception(COLUMN_NOT_FOUND+"\""+keyField+"\"");
         if (dataset.getColumn(columnName)==null)
-            throw new Exception("COLUMN_NOT_FOUND\n\""+columnName+"\"");
+            throw new Exception(COLUMN_NOT_FOUND+"\""+columnName+"\"");
         
         model = new Model(dataset);
         model.columnName = columnName;
@@ -166,6 +185,20 @@ public abstract class SelectDialog extends BaseDialog {
             if (!selected.contains(a)) 
                 result.add(a);
         return result;
+    }
+    
+    protected void selectAll(){
+        Map<String,Object> values;
+        for (int i=0;i<model.dataset.getRowCount();i++){
+            values=model.dataset.getValues(i);
+            selected.add(values.get(model.keyField));
+        }
+        model.fireTableDataChanged();
+    }
+    
+    protected void unSelectedAll(){
+        selected.clear();
+        model.fireTableDataChanged();
     }
     
 }

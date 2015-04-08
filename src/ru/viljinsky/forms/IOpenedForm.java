@@ -94,11 +94,23 @@ class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
     
     public void doCommand(String command){
         Integer shift_id,profile_id;
+        Integer new_profile_id;
         try{
             switch(command){
                 case CREATE_PROFILE:
                     profile_id = grid.getIntegerValue("profile_id");
-                    Dialogs.createProfile(this, profile_id);
+                    new_profile_id=Dialogs.createProfile(this, profile_id);
+                    if (new_profile_id!=null){
+                        try{
+                            Integer room_id=grid.getIntegerValue("id");
+                            dataModule.execute("update room set profile_id="+new_profile_id+" where id="+room_id);
+                            dataModule.commit();
+                        } catch (Exception p){
+                            dataModule.rollback();
+                            throw new Exception("CREATE_PROFILE_ERROR\n"+p.getMessage());
+                        }    
+                        grid.requery();
+                    }
                     break;
                 case EDIT_PROFILE:
                     profile_id=grid.getIntegerValue("profile_id");
@@ -690,7 +702,7 @@ class SchedulePanel extends JPanel implements ActionListener,IOpenedForm{
 ////////////////////////////////  TEACHER PANEL ////////////////////////////////
 
 class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
-    DataModule dataModule = DataModule.getInstance();
+//    DataModule dataModule = DataModule.getInstance();
     MasterGrid grid = new MasterGrid();
     JTabbedPane tabs = new JTabbedPane();
     
@@ -712,7 +724,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
    
     public void doCommand(String command){
         Integer shift_id,profile_id;
-        Integer newProfileId;
+        Integer newProfileId,newShiftId;
         try{
             profile_id=grid.getIntegerValue("profile_id");
             shift_id=grid.getIntegerValue("shift_id");
@@ -721,10 +733,10 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
                     newProfileId = Dialogs.createProfile(this, profile_id);
                     if (newProfileId!=null){
                         try{
-                            dataModule.execute("update teacher set profile_id="+newProfileId+" where id="+grid.getIntegerValue("id"));
-                            dataModule.commit();
+                            DataModule.execute("update teacher set profile_id="+newProfileId+" where id="+grid.getIntegerValue("id"));
+                            DataModule.commit();
                         } catch (Exception p){
-                            dataModule.rollback();
+                            DataModule.rollback();
                             throw new Exception("UPDATE_ERROR\n"+p.getMessage());
                         }
                     }
@@ -739,7 +751,16 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
                     break;
                  
                 case CREATE_SHIFT:
-                    Dialogs.createShift(this, shift_id);
+                    newShiftId = Dialogs.createShift(this, shift_id);
+                    if (newShiftId!=null){
+                        try{
+                            DataModule.execute("update teacher set shift_id="+newShiftId+" where id="+grid.getIntegerValue("id"));
+                            DataModule.commit();
+                        } catch (Exception p){
+                            DataModule.rollback();
+                            throw new Exception("CREATE_SHIFT_ERROR\n"+p.getMessage());
+                        }
+                    }
                     break;
                     
                 case EDIT_SHIFT:
@@ -761,7 +782,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
         
         @Override
         public void reopen(Integer keyValue) throws Exception{
-            dataset = dataModule.getSQLDataset(sqlTeacherProfilee.replace("%teacher_id",keyValue.toString()));
+            dataset = DataModule.getSQLDataset(sqlTeacherProfilee.replace("%teacher_id",keyValue.toString()));
             dataset.open();
             grid.setDataset(dataset);
         }
@@ -772,7 +793,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
         
         @Override
         public void reopen(Integer keyValue) throws Exception{
-            dataset = dataModule.getSQLDataset(sqlTeacherShift.replace("%teacher_id", keyValue.toString()));
+            dataset = DataModule.getSQLDataset(sqlTeacherShift.replace("%teacher_id", keyValue.toString()));
             dataset.open();
             grid.setDataset(dataset);
         }
@@ -847,11 +868,11 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
         public void requery() throws Exception {
             Dataset dataset;
             
-            dataset = dataModule.getSQLDataset(sourceSQL+teacher_id);
+            dataset = DataModule.getSQLDataset(sourceSQL+teacher_id);
             dataset.open();            
             sourceGrid.setDataset(dataset);
             
-            dataset = dataModule.getSQLDataset(destanationSQL+teacher_id);
+            dataset = DataModule.getSQLDataset(destanationSQL+teacher_id);
             dataset.open();
             destanationGrid.setDataset(dataset);
         }
@@ -869,9 +890,9 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
                     group_id=(Integer)values.get("group_id");
                     DataTask.inclideGroupToTeacher(depart_id, subject_id, group_id, teacher_id);
                 }
-                dataModule.commit();
+                DataModule.commit();
             } catch (Exception e){
-                dataModule.rollback();
+                DataModule.rollback();
                 throw new Exception("INCLUDE_ERROR\n"+e.getMessage());
             }
             requery();
@@ -890,9 +911,9 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
                     group_id=(Integer)values.get("group_id");
                     DataTask.excludeGroupFromTeacher(depart_id, subject_id, group_id);
                 }
-                dataModule.commit();
+                DataModule.commit();
             } catch (Exception e){
-                dataModule.rollback();
+                DataModule.rollback();
                 throw new Exception("EXCLUDE_ERROR\n"+e.getMessage());
             }
             requery();
@@ -913,9 +934,9 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
                     group_id=(Integer)values.get("group_id");
                     DataTask.inclideGroupToTeacher(depart_id, subject_id, group_id, teacher_id);
                 }
-                dataModule.commit();
+                DataModule.commit();
             } catch (Exception e){
-                dataModule.rollback();
+                DataModule.rollback();
                 throw new Exception("INCLUDE_ALL\n"+e.getMessage());
             }
             requery();
@@ -936,9 +957,9 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
                     group_id=(Integer)values.get("group_id");
                     DataTask.excludeGroupFromTeacher(depart_id, subject_id, group_id);
                 }
-                dataModule.commit();
+                DataModule.commit();
             } catch (Exception e){
-                dataModule.rollback();
+                DataModule.rollback();
                 throw new Exception("EXCLUDE_ALL_ERROR\n"+e.getMessage());
             }
             requery();
@@ -982,7 +1003,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
 
     @Override
     public void open() throws Exception {
-        Dataset dataset = dataModule.getDataset("teacher");
+        Dataset dataset = DataModule.getDataset("teacher");
         dataset.open();
         grid.setDataset(dataset);
         selctPanel.requery();

@@ -38,31 +38,31 @@ insert into profile_type(id,caption) values (2,'Профиль помещени�
 
 --    Графики преподавателей
 
-insert into profile(id,profile_type_id,name) values (1,1,'Руск.яз и литература');
-insert into profile(id,profile_type_id,name) values (2,1,'Алгебра и геометрия');
-insert into profile(id,profile_type_id,name) values (3,1,'Физика');
-insert into profile(id,profile_type_id,name) values (4,1,'Химия');
-insert into profile(id,profile_type_id,name) values (5,1,'Иностранный яз');
-insert into profile(id,profile_type_id,name) values (6,1,'Физкультура');
-insert into profile(id,profile_type_id,name) values (7,1,'Информатика');
+insert into profile(id,profile_type_id,profile_name) values (1,1,'Руск.яз и литература');
+insert into profile(id,profile_type_id,profile_name) values (2,1,'Алгебра и геометрия');
+insert into profile(id,profile_type_id,profile_name) values (3,1,'Физика');
+insert into profile(id,profile_type_id,profile_name) values (4,1,'Химия');
+insert into profile(id,profile_type_id,profile_name) values (5,1,'Иностранный яз');
+insert into profile(id,profile_type_id,profile_name) values (6,1,'Физкультура');
+insert into profile(id,profile_type_id,profile_name) values (7,1,'Информатика');
 
 --    Графики помещений
 
-insert into profile(id,profile_type_id,name) values (8,2,'Общ назн.');
-insert into profile(id,profile_type_id,name) values (9,2,'Спортзал');
-insert into profile(id,profile_type_id,name) values (10,2,'Ком.кабинет');
-insert into profile(id,profile_type_id,name) values (11,2,'Лингофонный каб.');
+insert into profile(id,profile_type_id,profile_name) values (8,2,'Общ назн.');
+insert into profile(id,profile_type_id,profile_name) values (9,2,'Спортзал');
+insert into profile(id,profile_type_id,profile_name) values (10,2,'Ком.кабинет');
+insert into profile(id,profile_type_id,profile_name) values (11,2,'Лингофонный каб.');
 
 
 insert into shift_type(id,caption) values (1,'График класса');
 insert into shift_type(id,caption) values (2,'График преподователя');
 insert into shift_type(id,caption) values (3,'График помещения');
 
-insert into shift(id,shift_type_id,name) values(1,1,'Первая смена');  
-insert into shift(id,shift_type_id,name) values(2,1,'Вторая смена');  
-insert into shift(id,shift_type_id,name) values(3,2,'График преподавателя 1');  
-insert into shift(id,shift_type_id,name) values(4,2,'График преподавателя 2');  
-insert into shift(id,shift_type_id,name) values('5',3,'Обычный кабинет');  
+insert into shift(id,shift_type_id,shift_name) values(1,1,'Первая смена');  
+insert into shift(id,shift_type_id,shift_name) values(2,1,'Вторая смена');  
+insert into shift(id,shift_type_id,shift_name) values(3,2,'График преподавателя 1');  
+insert into shift(id,shift_type_id,shift_name) values(4,2,'График преподавателя 2');  
+insert into shift(id,shift_type_id,shift_name) values('5',3,'Обычный кабинет');  
 
 
 insert into room(id,building_id,name,shift_id,profile_id,capacity) values (1,1,'каб 31',5,8,30);

@@ -30,12 +30,13 @@ interface IDataModuleConsts {
     public static final String  FILE_NOT_FOUND = "Файл \"%s\" не найден";
 }
 
-public class DataModule implements IDataModule,IDataModuleConsts {
+public class DataModule implements IDataModuleConsts {
     private static DataModule instance = null;
-    Boolean active = false;
-    List<Dataset> datasetList;
-    List<DatasetInfo> infoList = new ArrayList<>();
-    Connection con = null;
+    static Boolean active = false;
+    static List<Dataset> datasetList;
+    static List<DatasetInfo> infoList = new ArrayList<>();
+    
+    private static Connection con = null;
 
     private DataModule(){
         datasetList = new ArrayList<>();
@@ -63,12 +64,12 @@ public class DataModule implements IDataModule,IDataModuleConsts {
         return false;
     }
     
-    @Override
+//    @Override
     public boolean isActive(){
         return active;
     }
     
-    @Override
+//    @Override
     public void open() throws Exception{
         open("example.db");
     }
@@ -131,7 +132,7 @@ public class DataModule implements IDataModule,IDataModuleConsts {
         
     }
     
-    @Override
+//    @Override
     public void close() throws Exception{
         if (!active)
             throw new Exception(DATABASE_NOT_ACTIVE);
@@ -152,7 +153,7 @@ public class DataModule implements IDataModule,IDataModuleConsts {
     
     
     
-    @Override
+//    @Override
     public String[] getTableNames() throws Exception{
         if (!active)
             throw new Exception(DATABASE_NOT_ACTIVE);
@@ -164,8 +165,8 @@ public class DataModule implements IDataModule,IDataModuleConsts {
         return result;
     }
     
-    @Override
-    public Dataset getDataset(String tableName) throws Exception{
+//    @Override
+    public static Dataset getDataset(String tableName) throws Exception{
         if (!active)
             throw new Exception(DATABASE_NOT_ACTIVE);
         Dataset dataset;
@@ -179,8 +180,8 @@ public class DataModule implements IDataModule,IDataModuleConsts {
         throw new Exception("TABLE_NOT_FOUND \""+tableName+"\"");
     }
     
-    @Override
-    public Dataset getSQLDataset(String sql){
+//    @Override
+    public static Dataset getSQLDataset(String sql){
         DatasetInfo info = new DatasetInfo();
         info.tableType="SQL";
         
@@ -259,45 +260,26 @@ public class DataModule implements IDataModule,IDataModuleConsts {
         return dataset;
     }
     
-    @Override
-    public Dataset getSQLDataset(String sql,KeyMap params){
+//    @Override
+    public static Dataset getSQLDataset(String sql,KeyMap params){
         return null;
     }
     
     
     //--------------------------------------------------------------------------
-//    public void setAutoConmmit(boolean value) throws SQLException{
-//        con.setAutoCommit(value);
-//    };
     
-    public void commit() throws SQLException{
+    public static void commit() throws SQLException{
         con.commit();
     }
     
-    public void rollback() throws SQLException{
+    public static void rollback() throws SQLException{
         con.rollback();
     }
     
-//    public void startTrans() throws Exception{
-//        con.setAutoCommit(false);
-//    }
-//    
-//    public void stopTrans() throws Exception{
-//        try{
-//            try{
-//                con.commit();                
-//            } catch (SQLException e){
-//                con.rollback();
-//                throw new Exception("Ошибка сохранения\n"+e.getMessage());
-//            }
-//        } finally {
-//            con.setAutoCommit(true);
-//        }
-//    }
     
     
-    @Override
-    public void execute(String sql) throws Exception{
+//    @Override
+    public static void execute(String sql) throws Exception{
         Statement stmt=null;
         try{
             stmt=con.createStatement();
@@ -312,8 +294,8 @@ public class DataModule implements IDataModule,IDataModuleConsts {
         }
     }
     
-    @Override
-    public void execute(String sql,KeyMap params) throws Exception{
+//    @Override
+    public static void execute(String sql,KeyMap params) throws Exception{
         PreparedStatement pstmt=null;
         try{
             pstmt=con.prepareStatement(sql);
@@ -337,7 +319,7 @@ public class DataModule implements IDataModule,IDataModuleConsts {
         
     }
     
-    public Recordset getRecordet(String sql) throws Exception{
+    public static Recordset getRecordet(String sql) throws Exception{
         Statement stmt= null;
         ResultSet rs = null;
         Recordset result = new Recordset();
@@ -381,6 +363,10 @@ public class DataModule implements IDataModule,IDataModuleConsts {
             e.printStackTrace();
         }
         
+    }
+    
+    public static Statement createStatement() throws Exception{
+        return con.createStatement();
     }
     
 }

@@ -25,8 +25,8 @@ public interface IDataModule{
     public Dataset getSQLDataset(String sql) throws Exception;
     //Получение набора записей из запроса с параметрами
     public Dataset getSQLDataset(String sql,KeyMap params) throws Exception;
-    // Выполнение запроса
-    public void execute(String sql) throws Exception; 
+//    // Выполнение запроса
+//    public void execute(String sql) throws Exception; 
      // Выполнение запроса с параметрами
     public void execute(String sql,KeyMap params) throws Exception;
 }

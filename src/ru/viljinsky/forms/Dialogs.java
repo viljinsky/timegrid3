@@ -33,22 +33,16 @@ import ru.viljinsky.SelectDialog;
  */
 abstract class AbstractShiftDialog extends ShiftDialog{
     Integer shift_id ;
-    JTextField text = new JTextField(20);
+    EntryPanel entryPanel = new EntryPanel();
     
-    public AbstractShiftDialog() {
+    public AbstractShiftDialog(Integer shift_id) {
         super();
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.add(text);
-        getContentPane().add(panel,BorderLayout.PAGE_START);
+        this.shift_id=shift_id;
+        
+        getContentPane().add(entryPanel,BorderLayout.PAGE_START);
     }
     
-    public String getShiftCaption(){
-        return text.getText();
-    }
     
-    public void setShiftCaption(String shiftCaption){
-        text.setText(shiftCaption);
-    }
     
 }
 
@@ -111,6 +105,9 @@ public class Dialogs {
             
             @Override
             public void doOnEntry() throws Exception {
+                
+                String profile_name=(String)entryPanel.getValues().get("profile_name");
+                dataModule.execute("update profile set profile_name='"+profile_name+"' where id="+profile_id);
                 KeyMap map = new KeyMap();
                 map.put(1, profile_id);
                 for (Object obj:getSelected()){
@@ -120,7 +117,7 @@ public class Dialogs {
             }
         };
         
-        dataModule.execute("insert into profile (profile_type_id,name) select profile_type_id,'*new profile*' from profile where id="+profile_id);
+        dataModule.execute("insert into profile (profile_type_id,profile_name) select profile_type_id,'*new profile*' from profile where id="+profile_id);
         Dataset dataset;
         dataset = dataModule.getSQLDataset("select * from profile where id=(select max(id) from profile)");
         dataset.open();
@@ -144,6 +141,8 @@ public class Dialogs {
             @Override
             public void doOnEntry() throws Exception {
                 try{
+                    String profile_name=(String)entryPanel.getValues().get("profile_name");
+                    dataModule.execute("update profile set profile_name='"+profile_name+"' where id="+profile_id);
                     for (Object k:getRemoved()){
                         DataTask.excludeSubjectFromProfile(profile_id,(Integer)k);
                     }
@@ -158,7 +157,7 @@ public class Dialogs {
             }
         };
         
-        IDataset dataset = dataModule.getSQLDataset("select * from profile_type where id=(select profile_type_id from profile where id="+profile_id+")");
+        IDataset dataset = dataModule.getSQLDataset("select * from profile where id="+profile_id);
         dataset.open();
         dlg.entryPanel.setDataset(dataset);
         if (!dataset.isEmpty()){
@@ -184,17 +183,48 @@ public class Dialogs {
         throw new UnsupportedOperationException(NOT_READY_YET);
     }
     
-    public static boolean createShift(JComponent owner,Integer shift_type_id) throws Exception{
-        throw new UnsupportedOperationException(NOT_READY_YET);
-    }
-    
-    public static boolean editShift(JComponent owner,Integer shift_id) throws Exception{
-        
-        AbstractShiftDialog dlg = new AbstractShiftDialog(){
+    public static Integer  createShift(JComponent owner,Integer shift_id) throws Exception{
+        AbstractShiftDialog dlg = new AbstractShiftDialog(shift_id) {
 
             @Override
             public void doOnEntry() throws Exception {
                 try{
+                    String profile_name=(String)entryPanel.getValues().get("profile_name");
+                    dataModule.execute("update profile set profile_name='"+profile_name+"' where id="+shift_id);
+                    DataTask.editShift(shift_id, getAdded(),getRemoved());
+                    DataModule.commit();
+                } catch (Exception e){
+                    DataModule.rollback();
+                    throw new Exception("ON_ENTRY_ERROR\n"+e.getMessage());
+                }
+            }
+            
+        };
+
+
+        dataModule.execute("insert into shift(shift_type_id,shift_name) select shift_type_id,'new shift name' from shift where id="+shift_id);
+        Dataset dataset = dataModule.getSQLDataset("select * from shift where id=(select max(id) from shift)");
+        dataset.open();
+        Map<String,Object> map = dataset.getValues(0);
+        dlg.entryPanel.setDataset(dataset);
+        dlg.entryPanel.setValues(map);
+        dlg.shift_id = (Integer)map.get("id");
+        dlg.showModal(owner);
+        if (dlg.modalResult==SelectDialog.RESULT_OK){
+            return dlg.shift_id;
+        }
+        return null;
+    }
+    
+    public static boolean editShift(JComponent owner,Integer shift_id) throws Exception{
+        
+        AbstractShiftDialog dlg = new AbstractShiftDialog(shift_id){
+
+            @Override
+            public void doOnEntry() throws Exception {
+                try{
+                    String shift_name = (String)entryPanel.getValues().get("shift_name");
+                    dataModule.execute("update shift set shift_name='"+shift_name+"' where id="+shift_id);
                     DataTask.editShift(shift_id, getAdded(),getRemoved());
                     dataModule.commit();
                 } catch(Exception e){
@@ -204,6 +234,12 @@ public class Dialogs {
             }
 
         };
+        
+        Dataset dataset = dataModule.getSQLDataset("select * from shift where id="+shift_id);
+        dataset.open();
+        dlg.entryPanel.setDataset(dataset);
+        dlg.entryPanel.setValues(dataset.getValues(0));
+        
         Recordset rs = dataModule.getRecordet(String.format("select day_id,bell_id from shift_detail where shift_id=%d;",shift_id));
         Object[] values;
         int day_id,bell_id;
@@ -215,7 +251,7 @@ public class Dialogs {
             list.add(new Integer[]{day_id,bell_id});
                     
         }
-        dlg.shift_id=shift_id;
+        
         dlg.setSelected(list);
         dlg.showModal(owner);
         return (dlg.modalResult==SelectDialog.RESULT_OK);
