@@ -9,8 +9,10 @@ package ru.viljinsky.forms;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -19,7 +21,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
+import ru.viljinsky.EntryPanel;
 import ru.viljinsky.IDataset;
+import ru.viljinsky.KeyMap;
 import ru.viljinsky.Recordset;
 import ru.viljinsky.SelectDialog;
 
@@ -50,9 +54,12 @@ abstract class AbstractShiftDialog extends ShiftDialog{
 
 abstract class AbstractProfileDialog extends SelectDialog{
     Integer profile_id;
+    EntryPanel entryPanel = new EntryPanel();
+    
     public AbstractProfileDialog(Integer profile_id) {
         super();
         this.profile_id=profile_id;
+        add(entryPanel,BorderLayout.PAGE_START);
     }
     
 }
@@ -84,11 +91,51 @@ abstract class AbstractStreamDialog extends SelectDialog{
         
 public class Dialogs {
     public static final String NOT_READY_YET = "Не готово ещё";
+    
+    public static final String INCLUDE_EXCLUDE_PROFILE_ERROR = "INCLUDE_EXCLUDE_PROFILE_ERROR\n";
+    public static final String CREATE_PROFILE_ERROR = "CREATE_PROFILE_ERROR\n";
+    public static final String REMOVE_PROFILE_ERROR = "REMOVE_PROFILE_ERROR\n";
+    
+    public static final String CREATE_SHIFT_ERROR = "CREATE_SHIFT_ERROR\n";
+    public static final String EDIT_SHIFT_ERROR = "EDIT_SIFT_ERROR\n";
+    public static final String REMOVE_SIFT_ERROR = "REMOVE_SIFT_ERROR\n";
+    
+    public static final String WRONG_STREAM = "WRONG_STREAM";
+    public static final String EDIT_STREAM_ERROR = "EDIT_STREAM_ERROR\n";
+    public static final String CONFIRM_REMOVE_STREAM = "CONFIRM_REMOVE_STREAM";
             
     private static DataModule dataModule = DataModule.getInstance();
     
-    public static boolean createProfile(JComponent owner,Integer profile_type_id) throws Exception{
-        throw new UnsupportedOperationException(NOT_READY_YET);
+    public static Integer createProfile(JComponent owner,Integer profile_id) throws Exception{
+        AbstractProfileDialog dlg = new AbstractProfileDialog(profile_id) {
+            
+            @Override
+            public void doOnEntry() throws Exception {
+                KeyMap map = new KeyMap();
+                map.put(1, profile_id);
+                for (Object obj:getSelected()){
+                    map.put(2, obj);
+                    dataModule.execute("insert into profile_item (profile_id,subject_id) values (?,?);",map);
+                }
+            }
+        };
+        
+        dataModule.execute("insert into profile (profile_type_id,name) select profile_type_id,'*new profile*' from profile where id="+profile_id);
+        Dataset dataset;
+        dataset = dataModule.getSQLDataset("select * from profile where id=(select max(id) from profile)");
+        dataset.open();
+        Map<String,Object> map = dataset.getValues(0);
+        
+        dlg.profile_id=(Integer)map.get("id");
+        dlg.entryPanel.setDataset(dataset);
+        dlg.entryPanel.setValues(map);
+        dataset = dataModule.getDataset("subject");
+        dlg.setDataset(dataset, "id", "subject_name");
+        
+        dlg.showModal(owner);
+        if (dlg.modalResult==SelectDialog.RESULT_OK)
+            return dlg.profile_id;
+        return null;
     }
     
     public static boolean editProfile(JComponent owner,Integer profile_id) throws Exception{
@@ -106,17 +153,27 @@ public class Dialogs {
                     dataModule.commit();
                 } catch (Exception e){
                     dataModule.rollback();
-                    throw new Exception("INCLUDE_EXCLUDE_PROFILE_ERROR\n"+e.getMessage());
+                    throw new Exception(INCLUDE_EXCLUDE_PROFILE_ERROR+e.getMessage());
                 }
             }
         };
+        
+        IDataset dataset = dataModule.getSQLDataset("select * from profile_type where id=(select profile_type_id from profile where id="+profile_id+")");
+        dataset.open();
+        dlg.entryPanel.setDataset(dataset);
+        if (!dataset.isEmpty()){
+            Map<String,Object> map;
+            map = dataset.getValues(0);
+            dlg.entryPanel.setValues(map);
+        }
+
 
         Set<Object> set = new HashSet<>();
         Recordset rs = dataModule.getRecordet("select subject_id from profile_item where profile_id="+profile_id);
         for (int i=0;i<rs.size();i++){
             set.add(rs.get(i)[0]);
         }
-        IDataset dataset = dataModule.getDataset("subject");
+        dataset = dataModule.getDataset("subject");
         dlg.setDataset(dataset, "id", "subject_name");
         dlg.setSelected(set);
         return (dlg.showModal(owner)==SelectDialog.RESULT_OK);
@@ -142,7 +199,7 @@ public class Dialogs {
                     dataModule.commit();
                 } catch(Exception e){
                     dataModule.rollback();
-                    throw new Exception("EDIT_ROOM_SIFT_ERROR\n"+e.getMessage());
+                    throw new Exception(EDIT_SHIFT_ERROR+e.getMessage());
                 }
             }
 
@@ -165,7 +222,7 @@ public class Dialogs {
     }
     
     public static boolean removeShift() throws Exception{
-        throw new UnsupportedOperationException("NOT_READY_YET");
+        throw new UnsupportedOperationException(NOT_READY_YET);
     }
     
     ///////////////////////////////////////////////////////////////////////////
@@ -209,7 +266,7 @@ public class Dialogs {
                 String objString;
                 String[] v;
                 if (getSelected().size() < 2) {
-                    throw new Exception("WRONG_STREAM");
+                    throw new Exception(WRONG_STREAM);
                 }
                 try {
                     for (Object obj : getAdded()) {
@@ -233,7 +290,7 @@ public class Dialogs {
                     dataModule.commit();
                 } catch (Exception e) {
                     dataModule.rollback();
-                    throw new Exception("EDIT_STREAM_ERROR\n" + e.getMessage());
+                    throw new Exception(EDIT_STREAM_ERROR + e.getMessage());
                 }
             }
         };
@@ -251,7 +308,7 @@ public class Dialogs {
     }
 
     public static boolean removeStream(JComponent owner, Integer depart_id, Integer subject_id) throws Exception {
-        if (JOptionPane.showConfirmDialog(owner, "REMOVE?", "TITLE", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+        if (JOptionPane.showConfirmDialog(owner, CONFIRM_REMOVE_STREAM, "TITLE", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             DataTask.deleteStream(depart_id, subject_id);
             return true;
         }

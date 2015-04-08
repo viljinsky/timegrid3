@@ -6,7 +6,6 @@
 
 package ru.viljinsky.test;
 
-import ru.viljinsky.SelectDialog;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -22,12 +21,14 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
 import ru.viljinsky.BaseDialog;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.IDataset;
 import ru.viljinsky.Recordset;
 import ru.viljinsky.forms.ShiftDialog;
+import ru.viljinsky.SelectDialog;
 
 
 

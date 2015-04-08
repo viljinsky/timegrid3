@@ -60,8 +60,19 @@ abstract class DetailPanel extends JPanel{
 
 
 ////////////////////////////    ROOM PANEL /////////////////////////////////////
+interface IRoomTeacherCommands{
+    public static final String CREATE_SHIFT     = "CREATE_SHIFT";
+    public static final String REMOVE_SHIFT     = "REMOVE_SHIFT";
+    public static final String EDIT_SHIFT       = "EDIT_SHIFT";
+    
+    public static final String CREATE_PROFILE   = "CREATE_PROFILE";
+    public static final String EDIT_PROFILE     = "EDIT_PROFILE";
+    public static final String REMOVE_PROFILE   = "REMOVE_PROFILE";
+}
 
-class RoomPanel extends JPanel implements IOpenedForm{
+class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
+    
+    
     MasterGrid grid = new MasterGrid();
     DataModule dataModule = DataModule.getInstance();
     SelectRoomPanel selectPanel = new SelectRoomPanel();
@@ -85,29 +96,39 @@ class RoomPanel extends JPanel implements IOpenedForm{
         Integer shift_id,profile_id;
         try{
             switch(command){
-                case "CREATE_ROOM_PROFILE":
+                case CREATE_PROFILE:
+                    profile_id = grid.getIntegerValue("profile_id");
+                    Dialogs.createProfile(this, profile_id);
                     break;
-                case "EDIT_ROOM_PROFILE":
+                case EDIT_PROFILE:
                     profile_id=grid.getIntegerValue("profile_id");
                     if (Dialogs.editProfile(this, profile_id)){
                         profilePanel.grid.requery();
                     }
                     break;
-                case "DELETE_ROOM_PROFILE":
+                case REMOVE_PROFILE:
+                    profile_id = grid.getIntegerValue("profile_id");
+                    Dialogs.removeProfile(this, profile_id);
                     break;
-                case "CREATE_SHIFT":
+                    
+                case CREATE_SHIFT:
+                    shift_id=grid.getIntegerValue("shift_id");
+                    Dialogs.createShift(this, shift_id);
                     break;
-                case "EDIT_SHIFT":
+                    
+                case EDIT_SHIFT:
                     shift_id= grid.getIntegerValue("shift_id");
                     if (Dialogs.editShift(this, shift_id)){
                         shiftPanel.grid.requery();
                     }
                     break;
-                case "DELETE_SHIFT":
+                    
+                case REMOVE_SHIFT:
+                    Dialogs.removeShift();
                     break;
             }
         } catch (Exception e){
-            JOptionPane.showMessageDialog(null, e.getMessage());
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
     
@@ -272,6 +293,7 @@ class RoomPanel extends JPanel implements IOpenedForm{
         }
     }
 
+    
     public RoomPanel(){
         super(new BorderLayout());
         JTabbedPane tabs =new JTabbedPane();
@@ -285,9 +307,22 @@ class RoomPanel extends JPanel implements IOpenedForm{
                 
         add(splitPane);
         setPreferredSize(new Dimension(800,600));
-        commands.setCommandList(new String[]{"EDIT_SHIFT","EDIT_ROOM_PROFILE"});
-        shiftPanel.addAction(commands.getAction("EDIT_SHIFT"));
-        profilePanel.addAction(commands.getAction("EDIT_ROOM_PROFILE"));
+        commands.setCommandList(new String[]{
+            CREATE_SHIFT,
+            EDIT_SHIFT,
+            REMOVE_SHIFT,
+            CREATE_PROFILE,
+            EDIT_PROFILE,
+            REMOVE_PROFILE
+        });
+        
+        shiftPanel.addAction(commands.getAction(CREATE_SHIFT));
+        shiftPanel.addAction(commands.getAction(EDIT_SHIFT));
+        shiftPanel.addAction(commands.getAction(REMOVE_SHIFT));
+        
+        profilePanel.addAction(commands.getAction(CREATE_PROFILE));
+        profilePanel.addAction(commands.getAction(EDIT_PROFILE));
+        profilePanel.addAction(commands.getAction(REMOVE_PROFILE));
     }
     
     
@@ -654,7 +689,7 @@ class SchedulePanel extends JPanel implements ActionListener,IOpenedForm{
 }
 ////////////////////////////////  TEACHER PANEL ////////////////////////////////
 
-class TeacherPanel extends JPanel implements IOpenedForm {
+class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
     DataModule dataModule = DataModule.getInstance();
     MasterGrid grid = new MasterGrid();
     JTabbedPane tabs = new JTabbedPane();
@@ -677,17 +712,44 @@ class TeacherPanel extends JPanel implements IOpenedForm {
    
     public void doCommand(String command){
         Integer shift_id,profile_id;
+        Integer newProfileId;
         try{
+            profile_id=grid.getIntegerValue("profile_id");
+            shift_id=grid.getIntegerValue("shift_id");
             switch (command){
-                case "EDIT_PROFILE":
-                    profile_id=grid.getIntegerValue("profile_id");
+                case CREATE_PROFILE:
+                    newProfileId = Dialogs.createProfile(this, profile_id);
+                    if (newProfileId!=null){
+                        try{
+                            dataModule.execute("update teacher set profile_id="+newProfileId+" where id="+grid.getIntegerValue("id"));
+                            dataModule.commit();
+                        } catch (Exception p){
+                            dataModule.rollback();
+                            throw new Exception("UPDATE_ERROR\n"+p.getMessage());
+                        }
+                    }
+                    break;
+                    
+                case EDIT_PROFILE:
                     Dialogs.editProfile(this,profile_id);
                     break;
-                case "EDIT_SHIFT":
-                    shift_id=grid.getIntegerValue("shift_id");
+                    
+                case REMOVE_PROFILE:
+                    Dialogs.removeProfile(this, profile_id);
+                    break;
+                 
+                case CREATE_SHIFT:
+                    Dialogs.createShift(this, shift_id);
+                    break;
+                    
+                case EDIT_SHIFT:
                     Dialogs.editShift(this, shift_id);
                     break;
+                case REMOVE_SHIFT:
+                    Dialogs.removeShift();
+                    break;
             }
+            grid.requery();
         } catch (Exception e){
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
@@ -739,6 +801,19 @@ class TeacherPanel extends JPanel implements IOpenedForm {
                 }
             }
         }
+
+        @Override
+        public void requery() throws Exception {
+            Integer row = getSelectedRow();
+            super.requery();
+            if (row!=null && row>=0){
+                getSelectionModel().setSelectionInterval(row, row);
+                scrollRectToVisible(getCellRect(row, getSelectedColumn(), true));
+            };
+            gridSelectionChange();
+        }
+        
+        
     }
 
     class TeacherSelectPanel extends SelectPanel{
@@ -888,9 +963,21 @@ class TeacherPanel extends JPanel implements IOpenedForm {
         splitPane.setResizeWeight(0.5);
         add(splitPane);
         setPreferredSize(new Dimension(800,600));
-        commands.setCommandList(new String[]{"EDIT_PROFILE","EDIT_SHIFT"});
-        profilePanel.addAction(commands.getAction("EDIT_PROFILE"));
-        shiftPanel.addAction(commands.getAction("EDIT_SHIFT"));
+        commands.setCommandList(new String[]{
+            CREATE_PROFILE,
+            EDIT_PROFILE,
+            REMOVE_PROFILE,
+            CREATE_SHIFT,
+            EDIT_SHIFT,REMOVE_SHIFT
+        });
+        
+        profilePanel.addAction(commands.getAction(CREATE_PROFILE));
+        profilePanel.addAction(commands.getAction(EDIT_PROFILE));
+        profilePanel.addAction(commands.getAction(REMOVE_PROFILE));
+        
+        shiftPanel.addAction(commands.getAction(CREATE_SHIFT));
+        shiftPanel.addAction(commands.getAction(EDIT_SHIFT));
+        shiftPanel.addAction(commands.getAction(REMOVE_SHIFT));
     }
 
     @Override

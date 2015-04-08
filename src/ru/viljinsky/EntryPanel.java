@@ -210,7 +210,7 @@ class EditControl extends JTextField implements IEntryControl{
     }
 }
 
-class EntryPanel extends JPanel {
+public class EntryPanel extends JPanel {
     IDataset dataset;
     IEntryControl[] controls;
 
