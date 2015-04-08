@@ -81,7 +81,6 @@ abstract class AbstractStreamDialog extends SelectDialog{
     }
 
 }
-
         
 public class Dialogs {
     public static final String NOT_READY_YET = "Не готово ещё";
@@ -98,8 +97,6 @@ public class Dialogs {
     public static final String EDIT_STREAM_ERROR = "EDIT_STREAM_ERROR\n";
     public static final String CONFIRM_REMOVE_STREAM = "CONFIRM_REMOVE_STREAM";
             
-    private static DataModule dataModule = DataModule.getInstance();
-    
     public static Integer createProfile(JComponent owner,Integer profile_id) throws Exception{
         AbstractProfileDialog dlg = new AbstractProfileDialog(profile_id) {
             
@@ -107,26 +104,26 @@ public class Dialogs {
             public void doOnEntry() throws Exception {
                 
                 String profile_name=(String)entryPanel.getValues().get("profile_name");
-                dataModule.execute("update profile set profile_name='"+profile_name+"' where id="+profile_id);
+                DataModule.execute("update profile set profile_name='"+profile_name+"' where id="+profile_id);
                 KeyMap map = new KeyMap();
                 map.put(1, profile_id);
                 for (Object obj:getSelected()){
                     map.put(2, obj);
-                    dataModule.execute("insert into profile_item (profile_id,subject_id) values (?,?);",map);
+                    DataModule.execute("insert into profile_item (profile_id,subject_id) values (?,?);",map);
                 }
             }
         };
         
-        dataModule.execute("insert into profile (profile_type_id,profile_name) select profile_type_id,'*new profile*' from profile where id="+profile_id);
+        DataModule.execute("insert into profile (profile_type_id,profile_name) select profile_type_id,'*new profile*' from profile where id="+profile_id);
         Dataset dataset;
-        dataset = dataModule.getSQLDataset("select * from profile where id=(select max(id) from profile)");
+        dataset = DataModule.getSQLDataset("select * from profile where id=(select max(id) from profile)");
         dataset.open();
         Map<String,Object> map = dataset.getValues(0);
         
         dlg.profile_id=(Integer)map.get("id");
         dlg.entryPanel.setDataset(dataset);
         dlg.entryPanel.setValues(map);
-        dataset = dataModule.getDataset("subject");
+        dataset = DataModule.getDataset("subject");
         dlg.setDataset(dataset, "id", "subject_name");
         
         dlg.showModal(owner);
@@ -142,22 +139,22 @@ public class Dialogs {
             public void doOnEntry() throws Exception {
                 try{
                     String profile_name=(String)entryPanel.getValues().get("profile_name");
-                    dataModule.execute("update profile set profile_name='"+profile_name+"' where id="+profile_id);
+                    DataModule.execute("update profile set profile_name='"+profile_name+"' where id="+profile_id);
                     for (Object k:getRemoved()){
                         DataTask.excludeSubjectFromProfile(profile_id,(Integer)k);
                     }
                     for (Object k:getAdded()){
                         DataTask.includeSubjectToProfile(profile_id,(Integer)k);
                     }
-                    dataModule.commit();
+                    DataModule.commit();
                 } catch (Exception e){
-                    dataModule.rollback();
+                    DataModule.rollback();
                     throw new Exception(INCLUDE_EXCLUDE_PROFILE_ERROR+e.getMessage());
                 }
             }
         };
         
-        IDataset dataset = dataModule.getSQLDataset("select * from profile where id="+profile_id);
+        IDataset dataset = DataModule.getSQLDataset("select * from profile where id="+profile_id);
         dataset.open();
         dlg.entryPanel.setDataset(dataset);
         if (!dataset.isEmpty()){
@@ -168,11 +165,11 @@ public class Dialogs {
 
 
         Set<Object> set = new HashSet<>();
-        Recordset rs = dataModule.getRecordet("select subject_id from profile_item where profile_id="+profile_id);
+        Recordset rs = DataModule.getRecordet("select subject_id from profile_item where profile_id="+profile_id);
         for (int i=0;i<rs.size();i++){
             set.add(rs.get(i)[0]);
         }
-        dataset = dataModule.getDataset("subject");
+        dataset = DataModule.getDataset("subject");
         dlg.setDataset(dataset, "id", "subject_name");
         dlg.setSelected(set);
         return (dlg.showModal(owner)==SelectDialog.RESULT_OK);
@@ -190,7 +187,7 @@ public class Dialogs {
             public void doOnEntry() throws Exception {
                 try{
                     String profile_name=(String)entryPanel.getValues().get("profile_name");
-                    dataModule.execute("update profile set profile_name='"+profile_name+"' where id="+shift_id);
+                    DataModule.execute("update profile set profile_name='"+profile_name+"' where id="+shift_id);
                     DataTask.editShift(shift_id, getAdded(),getRemoved());
                     DataModule.commit();
                 } catch (Exception e){
@@ -202,8 +199,8 @@ public class Dialogs {
         };
 
 
-        dataModule.execute("insert into shift(shift_type_id,shift_name) select shift_type_id,'new shift name' from shift where id="+shift_id);
-        Dataset dataset = dataModule.getSQLDataset("select * from shift where id=(select max(id) from shift)");
+        DataModule.execute("insert into shift(shift_type_id,shift_name) select shift_type_id,'new shift name' from shift where id="+shift_id);
+        Dataset dataset = DataModule.getSQLDataset("select * from shift where id=(select max(id) from shift)");
         dataset.open();
         Map<String,Object> map = dataset.getValues(0);
         dlg.entryPanel.setDataset(dataset);
@@ -224,23 +221,23 @@ public class Dialogs {
             public void doOnEntry() throws Exception {
                 try{
                     String shift_name = (String)entryPanel.getValues().get("shift_name");
-                    dataModule.execute("update shift set shift_name='"+shift_name+"' where id="+shift_id);
+                    DataModule.execute("update shift set shift_name='"+shift_name+"' where id="+shift_id);
                     DataTask.editShift(shift_id, getAdded(),getRemoved());
-                    dataModule.commit();
+                    DataModule.commit();
                 } catch(Exception e){
-                    dataModule.rollback();
+                    DataModule.rollback();
                     throw new Exception(EDIT_SHIFT_ERROR+e.getMessage());
                 }
             }
 
         };
         
-        Dataset dataset = dataModule.getSQLDataset("select * from shift where id="+shift_id);
+        Dataset dataset = DataModule.getSQLDataset("select * from shift where id="+shift_id);
         dataset.open();
         dlg.entryPanel.setDataset(dataset);
         dlg.entryPanel.setValues(dataset.getValues(0));
         
-        Recordset rs = dataModule.getRecordet(String.format("select day_id,bell_id from shift_detail where shift_id=%d;",shift_id));
+        Recordset rs = DataModule.getRecordet(String.format("select day_id,bell_id from shift_detail where shift_id=%d;",shift_id));
         Object[] values;
         int day_id,bell_id;
         List<Integer[]> list = new ArrayList<>();
@@ -285,7 +282,7 @@ public class Dialogs {
             }
         };
         String s = String.format("%d-%d-%d", depart_id, subject_id, group_id);
-        Dataset dataset = dataModule.getSQLDataset(sql);
+        Dataset dataset = DataModule.getSQLDataset(sql);
         dlg.setDataset(dataset, "key", "value");
         Set set = new HashSet();
         set.add(s);
@@ -323,19 +320,19 @@ public class Dialogs {
                         group_id = Integer.valueOf(v[2]);
                         DataTask.excludeFromStream(stream_id, depart_id, subject_id);
                     }
-                    dataModule.commit();
+                    DataModule.commit();
                 } catch (Exception e) {
-                    dataModule.rollback();
+                    DataModule.rollback();
                     throw new Exception(EDIT_STREAM_ERROR + e.getMessage());
                 }
             }
         };
-        Recordset rs = dataModule.getRecordet("select depart_id||'-'||subject_id ||'-'||group_id from subject_group where stream_id=" + stream_id);
+        Recordset rs = DataModule.getRecordet("select depart_id||'-'||subject_id ||'-'||group_id from subject_group where stream_id=" + stream_id);
         Set set = new HashSet();
         for (int i = 0; i < rs.size(); i++) {
             set.add(rs.get(i)[0]);
         }
-        Dataset dataset = dataModule.getSQLDataset(sqlSubjectGroupToStream);
+        Dataset dataset = DataModule.getSQLDataset(sqlSubjectGroupToStream);
         dlg.setDataset(dataset, "key", "value");
         dlg.setSelected(set);
         dlg.stream_id = stream_id;

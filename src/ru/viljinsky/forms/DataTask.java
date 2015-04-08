@@ -27,6 +27,7 @@ interface IDataTask{
 }
 
 class Values extends HashMap<String,Object>{
+    public static final String COLUMN_NOT_FOUND="COLUMN_NOT_FOUND";
     public Integer getInteger(String columnName) throws Exception{
         if (containsKey(columnName)){
             Object result = get(columnName);
@@ -34,12 +35,12 @@ class Values extends HashMap<String,Object>{
                 return null;
             return (Integer)result;
         }
-        throw new Exception("COLUMN_NOT_FOUND '"+columnName+"'");
+        throw new Exception(COLUMN_NOT_FOUND+"'"+columnName+"'");
     }
 }
 
 public class DataTask implements IDataTask, IDataTaskConstants{
-    protected static DataModule dataModule = DataModule.getInstance();
+//    protected static DataModule dataModule = DataModule.getInstance();
     
     /**
      * Доболение все предметов в учебный план
@@ -53,10 +54,10 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         KeyMap map = new KeyMap();
         map.put(1, curriculum_id);
         try{
-            dataModule.execute(sql, map);
-            dataModule.commit();
+            DataModule.execute(sql, map);
+            DataModule.commit();
         } catch (Exception e){
-            dataModule.rollback();
+            DataModule.rollback();
             throw new Exception("FILL_CRURRICULUM_ERROR"+e.getMessage());
         }
         
@@ -72,10 +73,10 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         KeyMap map = new KeyMap();
         map.put(1, curriculumn_id);
         try{
-            dataModule.execute(sql, map);
-            dataModule.commit();
+            DataModule.execute(sql, map);
+            DataModule.commit();
         } catch (Exception e){
-            dataModule.rollback();
+            DataModule.rollback();
             throw new Exception("REMOVE_CURRICULUM_ERROR\n"+e.getMessage());
         }
     }
@@ -87,7 +88,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
                 + "inner join depart b on a.curriculum_id=b.curriculum_id "
                 + "where b.id="+depart_id+";";
         
-        Dataset dataset = dataModule.getSQLDataset(sql);
+        Dataset dataset = DataModule.getSQLDataset(sql);
         dataset.open();
         Map<String,Object> values;
         
@@ -96,7 +97,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         int group_id;
         int group_type_id;
         try{
-            stmt = dataModule.getConnection().prepareStatement(sql);
+            stmt = DataModule.getConnection().prepareStatement(sql);
 
             for (int i=0;i<dataset.size();i++){
                 values=dataset.getValues(i);
@@ -115,9 +116,9 @@ public class DataTask implements IDataTask, IDataTaskConstants{
                     }
                 }
             }
-            dataModule.commit();
+            DataModule.commit();
         } catch (Exception e){
-            dataModule.reopen();
+            DataModule.reopen();
             throw new Exception("FILL_SUBJECT_GROUP_ERROR\n"+e.getMessage());
         } finally {
             if (stmt!=null) stmt.close();
@@ -129,10 +130,10 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         KeyMap map = new KeyMap();
         map.put(1, depart_id);
         try{
-            dataModule.execute(sql, map);
-            dataModule.commit();
+            DataModule.execute(sql, map);
+            DataModule.commit();
         } catch (Exception e){
-            dataModule.rollback();
+            DataModule.rollback();
             throw new Exception("CLEAR_SUBJECT_GROUP_ERROR\n"+e.getMessage());
         }
     }
@@ -192,10 +193,10 @@ public class DataTask implements IDataTask, IDataTaskConstants{
                 "insert into schedule \n"
                 + "(day_id,bell_id,depart_id,group_id,subject_id,teacher_id,room_id,week_id) \n"
                 + "values (?,?,?,?,?,?,?,0);";
-        Dataset dataset = dataModule.getSQLDataset(sql);
+        Dataset dataset = DataModule.getSQLDataset(sql);
         dataset.open();
         
-        stmt = dataModule.getConnection().prepareStatement(inserSql);
+        stmt = DataModule.getConnection().prepareStatement(inserSql);
         int hour_per_day,hour_per_week;
         Integer group_id,subject_id,teacher_id,room_id;
         EmptyCell emptyCell;
@@ -230,9 +231,9 @@ public class DataTask implements IDataTask, IDataTaskConstants{
                     stmt.executeUpdate();
                 }
             }
-            dataModule.commit();
+            DataModule.commit();
         } catch (Exception e){
-            dataModule.rollback();
+            DataModule.rollback();
             throw new Exception("FILL_SCHEDULE_ERROR\n"+e.getMessage());
         }
                 
@@ -245,7 +246,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
     public static void clearSchedule(Integer depart_id) throws Exception{
         System.out.println("clear depart_id="+depart_id);
         String sql = "delete from schedule where depart_id="+depart_id+";";
-        dataModule.execute(sql);
+        DataModule.execute(sql);
         
         
     }
@@ -254,7 +255,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
     public static void fillProfile(Integer profile_id) throws Exception{
         String sql = "insert into profile_item (profile_id,subject_id)\n"
                 + "select profile.id,subject.id from profile,subject where profile.id="+profile_id;
-        dataModule.execute(sql);
+        DataModule.execute(sql);
         
     }
     
@@ -262,7 +263,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         String sql = "insert into shift_detail(shift_id,day_id,bell_id) \n"
                 + "select shift.id,day_no,bell_id from shift,day_list,bell_list\n"
                 + "where shift.id="+shift_id;
-        dataModule.execute(sql);
+        DataModule.execute(sql);
     }
     
     ///////////////////////////// ROOM PANEL ///////////////////////////////////
@@ -274,7 +275,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         map.put(2, depart_id);
         map.put(3, subject_id);
         map.put(4, group_id);
-        dataModule.execute(sql, map);
+        DataModule.execute(sql, map);
         
     }
     
@@ -285,7 +286,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         map.put(1, depart_id);
         map.put(2,subject_id);
         map.put(3,group_id);
-        dataModule.execute(sql,map);
+        DataModule.execute(sql,map);
     }
     
     ///////////////////////////// TEACHER PANEL ////////////////////////////////
@@ -299,7 +300,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         map.put(2, depart_id);
         map.put(3, subject_id);
         map.put(4, group_id);
-        dataModule.execute(sql, map);
+        DataModule.execute(sql, map);
         sql = "update subject_group set default_room_id =(\n" +
               "select teacher_room_id from teacher where id=?)\n" +
               "where depart_id=? and subject_id=? and group_id=?;";
@@ -308,7 +309,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         map.put(2,depart_id);
         map.put(3,subject_id);
         map.put(4, group_id);
-        dataModule.execute(sql, map);
+        DataModule.execute(sql, map);
                 
 //        dataModule.execute("update subject_group set default_room_id=");
         
@@ -324,7 +325,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         map.put(2, depart_id);
         map.put(3, subject_id);
         map.put(4, group_id);
-        dataModule.execute(sql, map);
+        DataModule.execute(sql, map);
     }
 
     ///////////////////////////  CURRICULUM PANEL //////////////////////////////
@@ -335,7 +336,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
        KeyMap map= new KeyMap();
        map.put(1, curriculum_id);
        map.put(2, subject_id);
-       dataModule.execute(sql, map);
+       DataModule.execute(sql, map);
     }
 
     public static void excludeSubjectFromCurriculumn(Integer curriculum_id, Integer subject_id) throws Exception {
@@ -343,7 +344,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
        KeyMap map= new KeyMap();
        map.put(1, curriculum_id);
        map.put(2, subject_id);
-       dataModule.execute(sql, map);
+       DataModule.execute(sql, map);
     }
 
     static void excludeSubjectFromProfile(Integer profile_id, Integer subject_id) throws Exception{
@@ -351,7 +352,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         KeyMap map = new KeyMap();
         map.put(1, profile_id);
         map.put(2, subject_id);
-        dataModule.execute(sql, map);
+        DataModule.execute(sql, map);
     }
 
     static void includeSubjectToProfile(Integer profile_id, Integer subject_id) throws Exception{
@@ -359,7 +360,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         KeyMap map = new KeyMap();
         map.put(1, profile_id);
         map.put(2, subject_id);
-        dataModule.execute(sql, map);
+        DataModule.execute(sql, map);
     }
     
     ////////////////////////  DEPART PANEL /////////////////////////////////////
@@ -376,10 +377,10 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         map.put(1, depart_id);
         map.put(2, subject_id);
         try{
-            dataModule.execute(sql, map);
-            dataModule.commit();
+            DataModule.execute(sql, map);
+            DataModule.commit();
         } catch (Exception e){
-            dataModule.rollback();
+            DataModule.rollback();
             throw new Exception("ADD_SUBJECT_GROUP_ERROR\n"+e.getMessage());
         }
     }
@@ -398,7 +399,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         map.put(2,subject_id);
         map.put(3, group_id);
         sql = "select group_id from subject_group where depart_id="+depart_id+" and subject_id="+subject_id+";";
-        Dataset dataset = dataModule.getSQLDataset(sql);
+        Dataset dataset = DataModule.getSQLDataset(sql);
         dataset.open();
         if (dataset.size()==1){
             throw new Exception("DELETE_SUBJECT_GROUP_ERROR\n"+"Всего одна группа");
@@ -407,10 +408,10 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         
         sql ="delete from subject_group where depart_id=? and subject_id=? and group_id=?";
         try{
-            dataModule.execute(sql, map);
-            dataModule.commit();
+            DataModule.execute(sql, map);
+            DataModule.commit();
         } catch (Exception e){
-            dataModule.rollback();
+            DataModule.rollback();
             throw new Exception("DELETE_SUBJECT_GROUP_ERROR\n"+e.getMessage());
         }
         
@@ -419,8 +420,8 @@ public class DataTask implements IDataTask, IDataTaskConstants{
     public static Integer createStream(String streamCaption,List<Integer[]> list) throws Exception{
         Integer stream_id;//,depart_id,subject_id,group_id;
         try{
-            dataModule.execute("insert into stream (stream_caption) values ('"+streamCaption+"')");
-            Recordset recordset = dataModule.getRecordet("select max(id) from stream;");
+            DataModule.execute("insert into stream (stream_caption) values ('"+streamCaption+"')");
+            Recordset recordset = DataModule.getRecordet("select max(id) from stream;");
             stream_id= recordset.getInteger(0);
             String sql = "update subject_group set stream_id=? where depart_id=? and subject_id=? ;";
             KeyMap map = new KeyMap();
@@ -429,31 +430,31 @@ public class DataTask implements IDataTask, IDataTaskConstants{
 
                 map.put(2, data[0]);
                 map.put(3, data[1]);
-                dataModule.execute(sql, map);
+                DataModule.execute(sql, map);
             }
-            dataModule.commit();
+            DataModule.commit();
             return stream_id;
         } catch (Exception e){
-            dataModule.rollback();
+            DataModule.rollback();
             throw new Exception("CREATE_STREAM_ERROR:\n"+e.getMessage());
         }
     }
     
     public static Integer createStream(Integer depart_id,Integer subject_id) throws Exception{
         try{
-            dataModule.execute("insert into stream (stream_caption) values ('новый поток')");
-            Recordset recordset = dataModule.getRecordet("select max(id) from stream;");
+            DataModule.execute("insert into stream (stream_caption) values ('новый поток')");
+            Recordset recordset = DataModule.getRecordet("select max(id) from stream;");
             Integer stream_id= recordset.getInteger(0);
             String sql = "update subject_group set stream_id=? where subject_id=? and depart_id=?;";
             KeyMap map = new KeyMap();
             map.put(1,stream_id);
             map.put(2, subject_id);
             map.put(3, depart_id);
-            dataModule.execute(sql, map);
-            dataModule.commit();
+            DataModule.execute(sql, map);
+            DataModule.commit();
             return stream_id;
         } catch (Exception e){
-            dataModule.rollback();
+            DataModule.rollback();
             throw new Exception("CREATE_STREAM_ERROR:\n"+e.getMessage());
         }
         
@@ -461,30 +462,30 @@ public class DataTask implements IDataTask, IDataTaskConstants{
     }
     
     public static void excludeFromStream(Integer stream_id,Integer depart_id,Integer subject_id) throws Exception{
-        dataModule.execute(String.format("update subject_group set stream_id=null where depart_id=%d and subject_id=%d", depart_id,subject_id));
+        DataModule.execute(String.format("update subject_group set stream_id=null where depart_id=%d and subject_id=%d", depart_id,subject_id));
     }
     
     public static void includeToStream(Integer stream_id,Integer depart_id,Integer subect_id) throws Exception{
-        dataModule.execute(String.format("update subject_group set stream_id=%d where depart_id=%d and subject_id=%d", stream_id,depart_id,subect_id));
+        DataModule.execute(String.format("update subject_group set stream_id=%d where depart_id=%d and subject_id=%d", stream_id,depart_id,subect_id));
     }
     
     public static void deleteStream(Integer depart_id,Integer subject_id) throws Exception{
         try{
-            Recordset recordset= dataModule.getRecordet("select distinct a.id from stream a inner join subject_group b on a.id=b.stream_id where b.depart_id="+depart_id+" and b.subject_id="+subject_id+";");
+            Recordset recordset= DataModule.getRecordet("select distinct a.id from stream a inner join subject_group b on a.id=b.stream_id where b.depart_id="+depart_id+" and b.subject_id="+subject_id+";");
             Integer stream_id= recordset.getInteger(0);
             String sql = "update subject_group set stream_id=null where depart_id=? and subject_id=?;";
             KeyMap map = new KeyMap();
             map.put(1,depart_id);
             map.put(2, subject_id);
-            dataModule.execute(sql, map);
+            DataModule.execute(sql, map);
             
             sql = "delete from stream where (select count(*) from subject_group where stream_id=stream.id)=0;";
-            dataModule.execute(sql);
-            dataModule.commit();
+            DataModule.execute(sql);
+            DataModule.commit();
             
            
         } catch (Exception e){
-            dataModule.rollback();
+            DataModule.rollback();
             throw new Exception("DELETE_STREAM_ERROR\n"+e.getMessage());
         }
         
@@ -501,11 +502,11 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         Integer day_id,bell_id;
         for (Integer[] n:excluded){
             day_id=n[0]+1;bell_id=n[1]+1;
-            dataModule.execute(String.format("delete from shift_detail where shift_id=%d and day_id=%d and bell_id=%d;",shift_id,day_id,bell_id));
+            DataModule.execute(String.format("delete from shift_detail where shift_id=%d and day_id=%d and bell_id=%d;",shift_id,day_id,bell_id));
         }
         for (Integer[] n:included){
             day_id=n[0]+1;bell_id=n[1]+1;
-            dataModule.execute(String.format("insert into shift_detail (shift_id,day_id,bell_id)values (%d,%d,%d);",shift_id,day_id,bell_id));
+            DataModule.execute(String.format("insert into shift_detail (shift_id,day_id,bell_id)values (%d,%d,%d);",shift_id,day_id,bell_id));
         }
     }
     

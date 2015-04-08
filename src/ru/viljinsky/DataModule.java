@@ -42,7 +42,7 @@ public class DataModule implements IDataModuleConsts {
         datasetList = new ArrayList<>();
     }
     
-    public Connection getConnection(){
+    public static Connection getConnection(){
         return con;
     }
     
@@ -74,7 +74,7 @@ public class DataModule implements IDataModuleConsts {
         open("example.db");
     }
     
-    public void reopen() throws Exception{
+    public static void reopen() throws Exception{
         if (!active)
             throw new Exception(DATABASE_NOT_ACTIVE);
         for (Dataset dataset:datasetList)

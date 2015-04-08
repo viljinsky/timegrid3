@@ -54,7 +54,7 @@ drop table if exists profile;
 create table profile(
     id integer primary key autoincrement,
     profile_type_id integer references profile_type(id),
-    profile_name varchar(18)
+    profile_name varchar(18) not null
 );
 
 drop table if exists profile_item;
@@ -74,7 +74,7 @@ drop table if exists shift;
 create table shift(
     id integer primary key autoincrement,
     shift_type_id integer references shift_type(id),
-    shift_name varchar(18)
+    shift_name varchar(18) not null
 );
 
 drop table if exists shift_detail;
