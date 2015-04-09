@@ -61,15 +61,24 @@ abstract class AbstractProfileDialog extends SelectDialog{
 abstract class AbstractStreamDialog extends SelectDialog{
     JTextField field = new JTextField(20);
     Integer stream_id;
+    EntryPanel entryPanel = new EntryPanel();
 
     public AbstractStreamDialog() {
         super();
-        JPanel panel = new JPanel();
-        JLabel label = new JLabel("Stream");
-        field.setText("Новый поток");
-        panel.add(label);
-        panel.add(field);
-        add(panel,BorderLayout.PAGE_START);
+        add(entryPanel,BorderLayout.PAGE_START);
+        try{
+            Dataset dataset = DataModule.getDataset("stream");
+            entryPanel.setDataset(dataset);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        
+//        JPanel panel = new JPanel();
+//        JLabel label = new JLabel("Stream");
+//        field.setText("Новый поток");
+//        panel.add(label);
+//        panel.add(field);
+//        add(panel,BorderLayout.PAGE_START);
     }
 
     public void setStreamCaption(String caption){

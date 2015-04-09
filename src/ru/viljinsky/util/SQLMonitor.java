@@ -7,6 +7,7 @@
 package ru.viljinsky.util;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -21,10 +22,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -42,6 +41,8 @@ import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -113,11 +114,12 @@ interface MenuConstants{
     final String treeCreateSQL  = "create sql";
     final String treeRefresh    = "refresh";
     final String treeRunSQL     = "run sql";
+    
+    public static final String  BACK_SLASH = "BACK_SLASH";
 }
 
 public class SQLMonitor extends JFrame implements MenuConstants{
 
-    DataModule dataModule = DataModule.getInstance();
     SQLTree tree = new SQLTree();
     SQLPanel sqlPanel = new SQLPanel();
     JTabbedPane panels = new JTabbedPane();
@@ -209,10 +211,10 @@ public class SQLMonitor extends JFrame implements MenuConstants{
     public void updateAction(Action a){
         switch ((String)a.getValue(Action.ACTION_COMMAND_KEY)){
             case dataConnect:
-                a.setEnabled(!dataModule.isActive());
+                a.setEnabled(!DataModule.isActive());
                 break;
             case dataDisconnect:
-                a.setEnabled(dataModule.isActive());
+                a.setEnabled(DataModule.isActive());
                 break;
         }
         
@@ -259,7 +261,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                     sqlPanel.textEditor.append(sql);
                     break;
                 case treeRefresh:
-                    dataModule.reopen();
+                    DataModule.reopen();
                     tree.fill();
                     break;
                     
@@ -270,10 +272,13 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                     sqlPanel.executeSql(sql);
                     break;
                 case "commit":
-                    dataModule.commit();
+                    DataModule.commit();
                     break;
                 case "rollback":
-                    dataModule.rollback();
+                    DataModule.rollback();
+                    break;
+                case BACK_SLASH:
+                    backSlash();
                     break;
                 default:
                     System.err.println(command);
@@ -284,6 +289,32 @@ public class SQLMonitor extends JFrame implements MenuConstants{
         }
     }
 
+    public void backSlash(){
+        Component component = panels.getSelectedComponent();
+        if (component==null)
+            return;
+        SQLPanel  panel = (SQLPanel)component;
+        int start = panel.textEditor.getSelectionStart();
+        int end = panel.textEditor.getSelectionEnd();
+        if (start!=end){
+            try{
+                String text = panel.textEditor.getText(start, end-start);
+                String[] lines = text.split("\n");
+                String res = "";
+                for (String s:lines){
+                    if (s.startsWith("--"))
+                        res += s.substring(2)+"\n";
+                    else
+                        res += "--"+s+"\n";
+                }
+                panel.textEditor.replaceSelection(res);
+            } catch (Exception e){
+                
+            }
+            
+        }
+        
+    }    
     
     class Act extends AbstractAction{
 
@@ -391,11 +422,11 @@ public class SQLMonitor extends JFrame implements MenuConstants{
             DefaultMutableTreeNode node,columnNode;
             IDataset dataset ;
 
-            for (DatasetInfo info:dataModule.getInfoList()){
+            for (DatasetInfo info:DataModule.getInfoList()){
                 node= new DefaultMutableTreeNode(info);
                 root.add(node);
                 try{
-                    dataset = dataModule.getDataset(info.getTableName());
+                    dataset = DataModule.getDataset(info.getTableName());
                     dataset.test();
                     for (Column column:dataset.getColumns()){
                         columnNode = new DefaultMutableTreeNode(column);
@@ -445,6 +476,10 @@ public class SQLMonitor extends JFrame implements MenuConstants{
     //************************************************************************//
 
     class SQLPanel extends JSplitPane{
+        String title = "new";
+        String fileName = null;
+        Boolean hasChange = false;
+        
         JTextArea textEditor = new JTextArea();
         JTabbedPane tabs = new JTabbedPane();
         Action[] actions = {
@@ -458,6 +493,37 @@ public class SQLMonitor extends JFrame implements MenuConstants{
             null,
             new Act(scriptClose)
         };
+        
+        public void loadText(String fileName) throws Exception{
+            File file = new File(fileName);
+            BufferedReader reader = null;
+            textEditor.setText("");
+            try{
+                reader= new BufferedReader(new FileReader(file));
+                String line;
+                while ((line=reader.readLine())!=null){
+                    textEditor.append(line+"\n");
+                }
+                this.fileName=fileName;
+                this.hasChange=false;
+            } finally {
+                reader.close();
+            }
+            textEditor.setCaretPosition(0);
+        }
+        
+        public void saveText(String fileName) throws Exception{
+            File file = new File(fileName);
+            BufferedWriter writer = null;
+            try{
+                writer = new BufferedWriter(new FileWriter(file));
+                writer.write(textEditor.getText());
+                this.fileName=fileName;
+                this.hasChange=false;
+            } finally {
+                writer.close();
+            }
+        }
         
         public void updateActionList(){
             for (Action a:actions){
@@ -521,6 +587,13 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                             case KeyEvent.VK_ENTER:
                                 doCommand(scriptRunAll);
                                 break;
+                            case KeyEvent.VK_S:
+                                doCommand(scriptSave);
+                                break;
+                            case KeyEvent.VK_BACK_SLASH:
+                                doCommand(BACK_SLASH);
+                                break;
+                                
                         }
                     }
                 }
@@ -547,15 +620,38 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                 
             });
             
+            textEditor.getDocument().addDocumentListener(new DocumentListener() {
+
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    setIsChanges(true);
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    setIsChanges(true);
+                }
+
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                    setIsChanges(true);
+                }
+            });
+            
         }
 
+        public void setIsChanges(boolean value){
+            int index = panels.getSelectedIndex();
+            panels.setTitleAt(index, title+"*");
+//            System.out.println("*Changes*");
+        }
  ///////////////////////////////////////////////////////////////////////////////
 
         synchronized  public void executeSql(String sql) throws Exception{
             System.out.print("EXECUTE:\n'"+sql+"'....");
             try{
             if (sql.startsWith("select")){
-                    Dataset dataset = dataModule.getSQLDataset(sql);
+                    Dataset dataset = DataModule.getSQLDataset(sql);
                     dataset.open();
                     Grid grid = new Grid();
                     grid.setAutoCreateRowSorter(true);
@@ -566,7 +662,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                     tabs.setSelectedIndex(tabs.getTabCount()-1);
                     gridPanel.updateStatus();
             } else {
-                    dataModule.execute(sql);
+                    DataModule.execute(sql);
             }
                 System.out.println("OK");
             } catch (Exception e){
@@ -624,9 +720,9 @@ public class SQLMonitor extends JFrame implements MenuConstants{
                         sql="";
                     }
                 }
-                dataModule.commit();
+                DataModule.commit();
             } catch (Exception e){
-                dataModule.rollback();
+                DataModule.rollback();
                 throw new Exception("EXECUTE_ALL_ERROR\n"+e.getMessage());
             }
 //            } finally {
@@ -637,14 +733,6 @@ public class SQLMonitor extends JFrame implements MenuConstants{
         public void clear(){
         }
 
-//        public void addSQL(){
-//            
-//            DatasetInfo info = tree.getSelectedDataset();
-//            if (info!=null){
-//                sqlPanel.textEditor.append("select * from "+info.getTableName()+";\n");
-//                
-//            }
-//        }
     
     }
     
@@ -659,58 +747,59 @@ public class SQLMonitor extends JFrame implements MenuConstants{
         close();
     }
     
-    
+//////////////////////////   SCRIPT  ///////////////////////////////////////////    
     public void scriptOpen() throws Exception{
         SQLPanel newPanel = new SQLPanel();
-        
+        String path;
+        File file;
         int retVal = fileChooser.showOpenDialog(rootPane);
         if (retVal==JFileChooser.APPROVE_OPTION){
-            BufferedReader br = null;
+            file = fileChooser.getSelectedFile();
+            path = file.getPath();
             try{
-                newPanel.textEditor.setText("");
-                File f = fileChooser.getSelectedFile();
-                br = new BufferedReader(new FileReader(f));
-                String line;
-                    while ((line=br.readLine())!=null){
-                        newPanel.textEditor.append(line+"\n");
-                    }
-                 newPanel.textEditor.setCaretPosition(0);
-                 
-                 panels.addTab(f.getName(), newPanel);
+                newPanel.loadText(path);
+                 panels.addTab(file.getName(), newPanel);
                  panels.setSelectedIndex(panels.getTabCount()-1);
-//                 sqlPanel=newPanel;
                  
             } catch (Exception e){
                 throw new Exception("Ошибка сохранения \n"+e.getMessage());
-            } finally {
-                if (br!=null) br.close();
+            }
+        }
+    }
+    
+    public void scriptSaveAs() throws Exception{
+        Component comp = panels.getSelectedComponent();
+        if (comp!=null){
+            SQLPanel panel = (SQLPanel)comp;
+            int retVal = fileChooser.showSaveDialog(rootPane);
+            if (retVal==JFileChooser.APPROVE_OPTION){
+                File file = fileChooser.getSelectedFile();
+                String path = file.getPath();
+                panel.saveText(path);
+
+                int index = panels.getSelectedIndex();
+                panels.setTitleAt(index, file.getName());
                 
             }
         }
     }
     
     public void scriptSave() throws Exception{
-        int retVal = fileChooser.showSaveDialog(rootPane);
-        if (retVal==JFileChooser.APPROVE_OPTION){
-            File file = fileChooser.getSelectedFile();
-            if (!file.exists()){
-                BufferedWriter br = null;
-                try{
-                    br = new BufferedWriter(new FileWriter(file));
-                    String text = sqlPanel.textEditor.getText();
-                    br.write(text);
-                    
-                } catch (IOException ioe){
-                    ioe.printStackTrace();
-                    throw new Exception("Ошибка при сохранени");
-                } finally {
-                    if (br!=null) br.close();
-                } 
+
+        Component component = panels.getSelectedComponent();
+        if (component!=null){
+        
+            SQLPanel panel = (SQLPanel)component;
+
+            if (panel.fileName!=null){
+                panel.saveText(sqlPanel.fileName);
             } else {
-                throw new Exception("file exists");
+                scriptSaveAs();
             }
+            System.out.println("save OK");
         }
     }
+    
     public void scriptClose() throws Exception{
        Integer index = panels.getSelectedIndex();
        if (index>=0){
@@ -722,10 +811,9 @@ public class SQLMonitor extends JFrame implements MenuConstants{
         panels.addTab("new", new SQLPanel());
         panels.setSelectedIndex(panels.getTabCount()-1);
     }
-    //--------------------------------------------------------------------------
     
-//    public void updateActionList(){
-//    }
+    
+    //--------------------------------------------------------------------------
     
     
     
@@ -736,7 +824,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
     }
     
     public void open(String path) throws Exception{
-        dataModule.open(path);
+        DataModule.open(path);
         tree.fill();
         scriptNew();
         setTitle("SQLMonitot "+path);
@@ -744,7 +832,7 @@ public class SQLMonitor extends JFrame implements MenuConstants{
     
 
     public void close() throws Exception{
-        dataModule.close();
+        DataModule.close();
         panels.removeAll();
         tree.clear();
     }

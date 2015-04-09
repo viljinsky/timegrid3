@@ -96,15 +96,9 @@ public class TestSchedule extends JFrame implements ITestSchedule{
     }
     
     public void open() throws Exception{
-        String sql = "select b.subject_name,\n"
-                + "case when group_type_id=0 then '' \n"
-                + "   when group_type_id=1 and group_id=1 then 'M' \n"
-                + "   when group_type_id=1 and group_id=2 then 'Д' \n"
-                + "   when group_type_id=2 then 'ГР.' || group_id \n"
-                + "end as label3,\n"
-                + "a.*\n"
-                + " from v_subject_group_on_schedule a inner join subject b on a.subject_id=b.id";
-        
+
+        String sql = "select a.depart_id,b.subject_name,a.group_label,a.placed,a.unplaced,a.default_teacher_id,a.default_room_id,\n"
+                + "a.subject_id,a.group_id,a.group_type_id,a.stream_id from v_subject_group_on_schedule a inner join subject b on a.subject_id=b.id" ;
         
         Dataset dataset = dataModule.getSQLDataset(sql);
         dataset.open();

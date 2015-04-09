@@ -37,8 +37,8 @@ interface IMenu{
 }
 
 public class Main4 extends JFrame{
-    public static String appName = "TimeTable2015";
-    private static DataModule dataModule = DataModule.getInstance(); 
+    public static String APP_NAME = "TimeTable2015";
+//    private static DataModule dataModule = DataModule.getInstance(); 
     
     JFileChooser fileChooser = new JFileChooser(new File("."));
     IOpenedForm[] forms = {
@@ -74,15 +74,15 @@ public class Main4 extends JFrame{
         if (retVal==JFileChooser.APPROVE_OPTION){
             file = fileChooser.getSelectedFile();
             path = file.getPath();
-            if (dataModule.isActive()){
+            if (DataModule.isActive()){
                 close();
-                dataModule.close();
+                DataModule.close();
                
             }
             CreateData.execute(path);
-            dataModule.open(path);
+            DataModule.open(path);
             open();
-            setTitle(appName+" ["+path+"]");
+            setTitle(APP_NAME+" ["+path+"]");
             JOptionPane.showMessageDialog(this, "База \""+path+"\" - успешно создана");
         }
     }
@@ -91,21 +91,21 @@ public class Main4 extends JFrame{
         int retVal=fileChooser.showOpenDialog(this);
         if (retVal==JFileChooser.APPROVE_OPTION){
             path = fileChooser.getSelectedFile().getAbsolutePath();
-            if (dataModule.isActive()){
+            if (DataModule.isActive()){
                 close();
-                dataModule.close();
+                DataModule.close();
             }
-            dataModule.open(path);
-            setTitle(appName+"["+path+"]");
+            DataModule.open(path);
+            setTitle(APP_NAME+"["+path+"]");
             open();
         }
     }
     
     protected void fileClose() throws Exception{
-        if (dataModule.isActive()){
+        if (DataModule.isActive()){
             close();
-            dataModule.close();
-            setTitle(appName);
+            DataModule.close();
+            setTitle(APP_NAME);
         }
     }
     
@@ -206,7 +206,7 @@ public class Main4 extends JFrame{
     
     public static void main(String[] args) throws Exception{
         
-        Main4 frame = new Main4(appName);
+        Main4 frame = new Main4(APP_NAME);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.intComponents();
@@ -223,7 +223,7 @@ public class Main4 extends JFrame{
         frame.setVisible(true);
       
         try{
-            dataModule.open();
+            DataModule.open();
             frame.open();
         } catch (Exception e){
             JOptionPane.showMessageDialog(frame, e.getMessage());

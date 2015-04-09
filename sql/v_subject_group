@@ -1,9 +1,14 @@
 drop view if exists v_subject_group;
 create view v_subject_group as
-select a.depart_id,a.group_id,c.group_type_id,
-  a.subject_id,c.hour_per_day,c.hour_per_week,
-  a.default_teacher_id,a.default_room_id
-from subject_group a inner join depart b on a.depart_id=b.id 
-	inner join curriculum_detail c on c.curriculum_id=b.curriculum_id
-	and c.subject_id=a.subject_id;
+select 
+case 
+	when c.group_type_id = 0 then ''
+	when c.group_type_id = 1  and a.group_id=1 then 'М'
+	when c.group_type_id = 1  and a.group_id=2 then 'Д'
+	when c.group_type_id = 2 then 'ГР.' || a.group_id
+end as group_label,
+a.group_id,a.depart_id,a.subject_id,c.group_type_id,a.stream_id,c.hour_per_week,c.hour_per_day,c.group_sequence,
+a.default_teacher_id,a.default_room_id,a.pupil_count
+ from subject_group a inner join depart b on a.depart_id=b.id inner join curriculum_detail c
+on c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id;
 select * from v_subject_group;

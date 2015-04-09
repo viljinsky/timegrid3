@@ -18,35 +18,37 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-class DataMap extends HashMap<String,Object>{
-}
+//class DataMap extends HashMap<String,Object>{
+//}
 
 
 interface IDataModuleConsts {
     public static final String  DATABASE_NOT_ACTIVE = "База данных не открыта";
     public static final String  DATABASE_IS_ACTIVE  = "База открыта";
     public static final String  FILE_NOT_FOUND = "Файл \"%s\" не найден";
+    public static final String TABLE_NOT_FOUND = "TABLE_NOT_FOUND";
+    public static final String DEFAULT_DATA = "example1.db";
 }
 
 public class DataModule implements IDataModuleConsts {
     private static DataModule instance = null;
     static Boolean active = false;
-    static List<Dataset> datasetList;
+    static List<Dataset> datasetList = new ArrayList<>();
     static List<DatasetInfo> infoList = new ArrayList<>();
     
     private static Connection con = null;
-
-    private DataModule(){
-        datasetList = new ArrayList<>();
-    }
     
     public static Connection getConnection(){
         return con;
     }
     
-    public List<DatasetInfo> getInfoList(){
+    public static Statement createStatement() throws Exception{
+        return con.createStatement();
+    }
+    
+    
+    public static List<DatasetInfo> getInfoList(){
         return infoList;
     }
     
@@ -64,14 +66,12 @@ public class DataModule implements IDataModuleConsts {
         return false;
     }
     
-//    @Override
-    public boolean isActive(){
+    public static boolean isActive(){
         return active;
     }
     
-//    @Override
-    public void open() throws Exception{
-        open("example.db");
+    public static void open() throws Exception{
+        open(DEFAULT_DATA);
     }
     
     public static void reopen() throws Exception{
@@ -95,7 +95,7 @@ public class DataModule implements IDataModuleConsts {
             
     }
     
-    public void open(String fileName) throws Exception{
+    public static void open(String fileName) throws Exception{
         if (active)
             throw new Exception(DATABASE_IS_ACTIVE);
         File file = new File(fileName);
@@ -132,17 +132,12 @@ public class DataModule implements IDataModuleConsts {
         
     }
     
-//    @Override
-    public void close() throws Exception{
+    public static void close() throws Exception{
         if (!active)
             throw new Exception(DATABASE_NOT_ACTIVE);
         for (Dataset dataset:datasetList){
-//            System.out.println(dataset.getTableName());
             dataset.close();
         }
-//        for (Dataset dataset:datasetList){
-//            dataset.close();
-//        }
         
         datasetList.clear();
         infoList.clear();
@@ -150,11 +145,8 @@ public class DataModule implements IDataModuleConsts {
         con=null;
         active = false;
     }
-    
-    
-    
-//    @Override
-    public String[] getTableNames() throws Exception{
+
+    public static String[] getTableNames() throws Exception{
         if (!active)
             throw new Exception(DATABASE_NOT_ACTIVE);
         String[] result = new String[infoList.size()];
@@ -165,7 +157,6 @@ public class DataModule implements IDataModuleConsts {
         return result;
     }
     
-//    @Override
     public static Dataset getDataset(String tableName) throws Exception{
         if (!active)
             throw new Exception(DATABASE_NOT_ACTIVE);
@@ -177,10 +168,9 @@ public class DataModule implements IDataModuleConsts {
                 return dataset;
             }
         }
-        throw new Exception("TABLE_NOT_FOUND \""+tableName+"\"");
+        throw new Exception(TABLE_NOT_FOUND+"\n\""+tableName+"\"");
     }
     
-//    @Override
     public static Dataset getSQLDataset(String sql){
         DatasetInfo info = new DatasetInfo();
         info.tableType="SQL";
@@ -256,11 +246,9 @@ public class DataModule implements IDataModuleConsts {
         Dataset dataset = new Dataset(info);
         
         datasetList.add(dataset);
-//        dataset.dataModule = this;
         return dataset;
     }
     
-//    @Override
     public static Dataset getSQLDataset(String sql,KeyMap params){
         return null;
     }
@@ -276,9 +264,6 @@ public class DataModule implements IDataModuleConsts {
         con.rollback();
     }
     
-    
-    
-//    @Override
     public static void execute(String sql) throws Exception{
         Statement stmt=null;
         try{
@@ -294,7 +279,6 @@ public class DataModule implements IDataModuleConsts {
         }
     }
     
-//    @Override
     public static void execute(String sql,KeyMap params) throws Exception{
         PreparedStatement pstmt=null;
         try{
@@ -348,12 +332,11 @@ public class DataModule implements IDataModuleConsts {
     }
     
     public static void main(String[] args){
-        DataModule dm = DataModule.getInstance();
         Dataset dataset;
         try{
-            dm.open();
-            for (String tableName:dm.getTableNames()){
-                dataset = dm.getDataset(tableName);
+            open();
+            for (String tableName:getTableNames()){
+                dataset = getDataset(tableName);
                 dataset.test();
                 dataset.open();
                 dataset.print();
@@ -365,8 +348,5 @@ public class DataModule implements IDataModuleConsts {
         
     }
     
-    public static Statement createStatement() throws Exception{
-        return con.createStatement();
-    }
     
 }

@@ -383,7 +383,8 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         "teacher=last_name;first_name;patronymic",
         "building=caption",
         "week=caption",
-        "depart=label"
+        "depart=label",
+        "stream=stream_caption"
     } ;
     
     public Map<String,String> getLookupMap(){

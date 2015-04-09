@@ -840,20 +840,21 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
     class TeacherSelectPanel extends SelectPanel{
         int teacher_id = -1;
         String sourceSQL =  //"select * from v_subject_group where default_teacher_id is null;";
-          "select d.subject_name,e.label, c.default_teacher_id,\n" +
-        "   c.subject_id as teacher_id,c.group_id as group_id,c.depart_id as depart_id,c.subject_id as subject_id,c.hour_per_week\n" +
-        "  from teacher a inner join profile_item b\n" +
-        "on a.profile_id=b.profile_id\n" +
-        "inner join v_subject_group c on c.subject_id=b.subject_id\n" +
-        "inner join subject d on d.id=c.subject_id\n" +
-        "inner join depart e on e.id=c.depart_id\n" +
-        "where c.default_teacher_id is null and  a.id=";
+          "select d.subject_name,e.label,c.group_label,c.hour_per_week, c.default_teacher_id,\n" +
+          "c.subject_id as teacher_id,c.group_id as group_id,c.depart_id as depart_id,c.subject_id as subject_id\n" +
+          "from teacher a inner join profile_item b\n" +
+          "on a.profile_id=b.profile_id\n" +
+          "inner join v_subject_group c on c.subject_id=b.subject_id\n" +
+          "inner join subject d on d.id=c.subject_id\n" +
+          "inner join depart e on e.id=c.depart_id\n" +
+          "where c.default_teacher_id is null and  a.id=";
         
-        String destanationSQL = "select b.subject_name,d.label,a.subject_id,\n"
-                + "a.group_id,a.group_type_id,a.default_room_id,a.depart_id from v_subject_group a\n"+
-                " inner join subject b on a.subject_id=b.id\n"+
-                " inner join depart d on d.id=a.depart_id\n"+
-                " where a.default_teacher_id=";
+        String destanationSQL = "select b.subject_name,d.label,a.group_label,a.hour_per_week,\n"
+                + "a.subject_id,a.group_id,a.group_type_id,a.default_room_id,a.depart_id \n"
+                + "from v_subject_group a\n"
+                + " inner join subject b on a.subject_id=b.id\n"
+                + " inner join depart d on d.id=a.depart_id\n"
+                + " where a.default_teacher_id=";
 
         public void setTeacherId(Integer teacher_id) {
             this.teacher_id = teacher_id;
@@ -1003,7 +1004,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
 
     @Override
     public void open() throws Exception {
-        Dataset dataset = DataModule.getDataset("teacher");
+        Dataset dataset = DataModule.getDataset("v_teacher");
         dataset.open();
         grid.setDataset(dataset);
         selctPanel.requery();

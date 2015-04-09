@@ -4,7 +4,7 @@ insert into week(id,caption) values (2,'Чётная нед.');
 
 
 
-insert into building (id,caption) values (1,'Главное здание');
+insert into building (id,building_name) values (1,'Главное здание');
 
 
 
@@ -65,16 +65,16 @@ insert into shift(id,shift_type_id,shift_name) values(4,2,'График преп
 insert into shift(id,shift_type_id,shift_name) values('5',3,'Обычный кабинет');  
 
 
-insert into room(id,building_id,name,shift_id,profile_id,capacity) values (1,1,'каб 31',5,8,30);
-insert into room(id,building_id,name,shift_id,profile_id,capacity) values (2,1,'каб 32',5,8,30);
-insert into room(id,building_id,name,shift_id,profile_id,capacity) values (3,1,'каб 33',5,8,30);
-insert into room(id,building_id,name,shift_id,profile_id,capacity) values (4,1,'каб 34',5,8,30);
-insert into room(id,building_id,name,shift_id,profile_id,capacity) values (5,1,'каб 35',5,8,30);
-insert into room(id,building_id,name,shift_id,profile_id,capacity) values (6,1,'каб 36',5,8,30);
-insert into room(id,building_id,name,shift_id,profile_id,capacity) values (7,1,'каб 37',5,8,30);
-insert into room(id,building_id,name,shift_id,profile_id,capacity) values (8,1,'каб 38',5,8,30);
-insert into room(id,building_id,name,shift_id,profile_id)          values (9,1,'каб 39',5,8);
-insert into room(id,building_id,name,shift_id,profile_id)          values (10,1,'спорт.зал',5,8);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (1,1,'каб 31',5,8,30);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (2,1,'каб 32',5,8,30);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (3,1,'каб 33',5,8,30);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (4,1,'каб 34',5,8,30);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (5,1,'каб 35',5,8,30);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (6,1,'каб 36',5,8,30);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (7,1,'каб 37',5,8,30);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (8,1,'каб 38',5,8,30);
+insert into room(id,building_id,room_name,shift_id,profile_id)          values (9,1,'каб 39',5,8);
+insert into room(id,building_id,room_name,shift_id,profile_id)          values (10,1,'спорт.зал',5,8);
 
 
 --
