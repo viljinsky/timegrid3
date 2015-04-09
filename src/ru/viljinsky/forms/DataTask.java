@@ -172,72 +172,72 @@ public class DataTask implements IDataTask, IDataTaskConstants{
      * @param depart_id
      * @throws Exception 
      */
-    public static void fillSchedule(Integer depart_id) throws Exception{
-        if (depart_id==null)
-            throw new Exception("DEPART IS NULL");
-        Map<String,Object> values;
-        PreparedStatement stmt = null;
-        
-        System.out.println("fill depart_id="+depart_id);
-        String sql = 
-                "select a.depart_id,a.group_id,a.subject_id , a.default_teacher_id as teacher_id,a.default_room_id as room_id,\n" +
-                "c.hour_per_week,c.hour_per_day\n" +
-                "from subject_group a \n" +
-                "inner join depart b on b.id=a.depart_id\n" +
-                "inner join curriculum_detail c \n" +
-                "	on c.curriculum_id=b.curriculum_id\n" +
-                "        and c.subject_id=a.subject_id\n" +
-                "where a.depart_id="+depart_id+";";
-        
-        String inserSql = 
-                "insert into schedule \n"
-                + "(day_id,bell_id,depart_id,group_id,subject_id,teacher_id,room_id,week_id) \n"
-                + "values (?,?,?,?,?,?,?,0);";
-        Dataset dataset = DataModule.getSQLDataset(sql);
-        dataset.open();
-        
-        stmt = DataModule.getConnection().prepareStatement(inserSql);
-        int hour_per_day,hour_per_week;
-        Integer group_id,subject_id,teacher_id,room_id;
-        EmptyCell emptyCell;
-        
-        try{
-        
-            for (int i=0;i<dataset.size();i++){
-                
-                values=dataset.getValues(i);
-                group_id=(Integer)values.get("group_id");
-                subject_id = (Integer)values.get("subject_id");
-                teacher_id = (Integer)values.get("teacher_id");
-                room_id=(Integer)values.get("room_id");
-                hour_per_day=(Integer)values.get("hour_per_day");
-                hour_per_week =(Integer)values.get("hour_per_week");
-                
-                stmt.setObject(3, depart_id);
-                stmt.setObject(4, group_id);
-                stmt.setObject(5, subject_id);
-                stmt.setObject(6, teacher_id);
-                stmt.setObject(7, room_id);
-                
-                for (int count=0;count<hour_per_week;count++){
-
-                    System.out.println(String.format("d: %d s:%d t:%d :r%d", depart_id,subject_id,teacher_id,room_id));
-                    emptyCell = findEmptyCell(depart_id, teacher_id, room_id);
-                        
-                    stmt.setObject(1, emptyCell.day_id);
-                    stmt.setObject(2, emptyCell.bell_id);
-                    
-                    
-                    stmt.executeUpdate();
-                }
-            }
-            DataModule.commit();
-        } catch (Exception e){
-            DataModule.rollback();
-            throw new Exception("FILL_SCHEDULE_ERROR\n"+e.getMessage());
-        }
-                
-    }
+//    public static void fillSchedule(Integer depart_id) throws Exception{
+//        if (depart_id==null)
+//            throw new Exception("DEPART IS NULL");
+//        Map<String,Object> values;
+//        PreparedStatement stmt = null;
+//        
+//        System.out.println("fill depart_id="+depart_id);
+//        String sql = 
+//                "select a.depart_id,a.group_id,a.subject_id , a.default_teacher_id as teacher_id,a.default_room_id as room_id,\n" +
+//                "c.hour_per_week,c.hour_per_day\n" +
+//                "from subject_group a \n" +
+//                "inner join depart b on b.id=a.depart_id\n" +
+//                "inner join curriculum_detail c \n" +
+//                "	on c.curriculum_id=b.curriculum_id\n" +
+//                "        and c.subject_id=a.subject_id\n" +
+//                "where a.depart_id="+depart_id+";";
+//        
+//        String inserSql = 
+//                "insert into schedule \n"
+//                + "(day_id,bell_id,depart_id,group_id,subject_id,teacher_id,room_id,week_id) \n"
+//                + "values (?,?,?,?,?,?,?,0);";
+//        Dataset dataset = DataModule.getSQLDataset(sql);
+//        dataset.open();
+//        
+//        stmt = DataModule.getConnection().prepareStatement(inserSql);
+//        int hour_per_day,hour_per_week;
+//        Integer group_id,subject_id,teacher_id,room_id;
+//        EmptyCell emptyCell;
+//        
+//        try{
+//        
+//            for (int i=0;i<dataset.size();i++){
+//                
+//                values=dataset.getValues(i);
+//                group_id=(Integer)values.get("group_id");
+//                subject_id = (Integer)values.get("subject_id");
+//                teacher_id = (Integer)values.get("teacher_id");
+//                room_id=(Integer)values.get("room_id");
+//                hour_per_day=(Integer)values.get("hour_per_day");
+//                hour_per_week =(Integer)values.get("hour_per_week");
+//                
+//                stmt.setObject(3, depart_id);
+//                stmt.setObject(4, group_id);
+//                stmt.setObject(5, subject_id);
+//                stmt.setObject(6, teacher_id);
+//                stmt.setObject(7, room_id);
+//                
+//                for (int count=0;count<hour_per_week;count++){
+//
+//                    System.out.println(String.format("d: %d s:%d t:%d :r%d", depart_id,subject_id,teacher_id,room_id));
+//                    emptyCell = findEmptyCell(depart_id, teacher_id, room_id);
+//                        
+//                    stmt.setObject(1, emptyCell.day_id);
+//                    stmt.setObject(2, emptyCell.bell_id);
+//                    
+//                    
+//                    stmt.executeUpdate();
+//                }
+//            }
+//            DataModule.commit();
+//        } catch (Exception e){
+//            DataModule.rollback();
+//            throw new Exception("FILL_SCHEDULE_ERROR\n"+e.getMessage());
+//        }
+//                
+//    }
     /**
      * Очистка расписания класса
      * @param depart_id

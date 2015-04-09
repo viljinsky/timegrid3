@@ -118,7 +118,7 @@ public class TimeGridPanel extends JPanel{
             filter.put("teacher_id", null);
             
             dataset = dataModule.getDataset("room");
-            comboRoom.setDataset(dataset, "id","name");
+            comboRoom.setDataset(dataset, "id","room_name");
             filter.put("room_id",null);
             
             dataset = dataModule.getDataset("week");

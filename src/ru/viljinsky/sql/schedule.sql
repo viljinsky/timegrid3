@@ -233,7 +233,7 @@ create view v_subject_group as
 select 
 case 
 	when c.group_type_id = 0 then ''
-	when c.group_type_id = 1  and a.group_id=0 then 'М'
+	when c.group_type_id = 1  and a.group_id=1 then 'М'
 	when c.group_type_id = 1  and a.group_id=2 then 'Д'
 	when c.group_type_id = 2 then 'ГР.' || a.group_id
 end as group_label,
@@ -294,7 +294,16 @@ left join room c
 	on a.teacher_room_id=c.id
 left join building d on d.id=c.building_id;
 
+-- v_depart_on_schedule
 
-
-
+create view v_depart_on_schedule as
+select distinct a.depart_id,a.subject_id,c.group_type_id,
+ (select count() from schedule 
+                where depart_id=a.depart_id 
+                and subject_id=a.subject_id and group_id=a.group_id)  as placed,
+  c.hour_per_week
+from subject_group a 
+       inner join depart b on a.depart_id=b.id 
+       inner join curriculum_detail c on 
+       c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id;
 
