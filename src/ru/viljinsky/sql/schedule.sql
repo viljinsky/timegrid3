@@ -269,18 +269,53 @@ group by a.depart_id,a.subject_id,a.group_id,a.hour_per_week,a.hour_per_day,a.gr
 select * from v_subject_group_on_schedule;
 
 -- v_schedule
+-- drop view if exists v_schedule;
+-- create view v_schedule as
+-- select dl.day_caption,bl.time_start ||'-'||time_end as lesson_time, s.subject_name,a.group_id,b.week_id,
+-- c.last_name || ' ' || substr(c.first_name,1,1) || '. ' || substr(c.patronymic,1,1) || '.' as teacher,d.room_name as room,
+-- b.day_id,b.bell_id,a.depart_id,a.subject_id,a.group_type_id,b.teacher_id,b.room_id
+--  from v_subject_group a inner join schedule b
+-- on a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
+-- left join teacher c on c.id=b.teacher_id
+-- left join room d on d.id=b.room_id
+-- inner join subject s on s.id =a.subject_id
+-- inner join day_list dl on dl.day_no=b.day_id
+-- inner join bell_list bl on bl.bell_id=b.bell_id;
+
+--
+
 drop view if exists v_schedule;
 create view v_schedule as
-select dl.day_caption,bl.time_start ||'-'||time_end as lesson_time, s.subject_name,a.group_id,b.week_id,
-c.last_name || ' ' || substr(c.first_name,1,1) || '. ' || substr(c.patronymic,1,1) || '.' as teacher,d.room_name as room,
-b.day_id,b.bell_id,a.depart_id,a.subject_id,a.group_type_id,b.teacher_id,b.room_id
- from v_subject_group a inner join schedule b
-on a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
-left join teacher c on c.id=b.teacher_id
-left join room d on d.id=b.room_id
-inner join subject s on s.id =a.subject_id
-inner join day_list dl on dl.day_no=b.day_id
-inner join bell_list bl on bl.bell_id=b.bell_id;
+select f.label as depart_label,dl.day_caption,bl.time_start ||'-'||time_end as lesson_time, 
+  s.subject_name,
+  a.group_label,
+  c.last_name || ' ' || substr(c.first_name,1,1) || '. ' || substr(c.patronymic,1,1) || '.' as teacher,
+  d.room_name as room,
+  g.building_name as building,
+  b.day_id,
+  b.bell_id,
+  a.depart_id,
+  a.group_id,
+  b.week_id,
+  a.subject_id,
+  a.group_type_id,
+  b.teacher_id,
+  b.room_id,
+  a.stream_id,
+  d.building_id
+from v_subject_group a 
+    inner join schedule b
+        on a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
+    left join teacher c on c.id=b.teacher_id
+    left join room d on d.id=b.room_id
+    left join building g on d.building_id=g.id
+    inner join subject s on s.id =a.subject_id
+    inner join day_list dl on dl.day_no=b.day_id
+    inner join bell_list bl on bl.bell_id=b.bell_id
+    inner join depart f on f.id=a.depart_id;
+
+select * from v_schedule;
+
 
 --   v_teacher
 

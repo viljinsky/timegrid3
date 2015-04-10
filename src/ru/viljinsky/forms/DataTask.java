@@ -26,18 +26,6 @@ interface IDataTask{
     
 }
 
-class Values extends HashMap<String,Object>{
-    public static final String COLUMN_NOT_FOUND="COLUMN_NOT_FOUND";
-    public Integer getInteger(String columnName) throws Exception{
-        if (containsKey(columnName)){
-            Object result = get(columnName);
-            if (result==null)
-                return null;
-            return (Integer)result;
-        }
-        throw new Exception(COLUMN_NOT_FOUND+"'"+columnName+"'");
-    }
-}
 
 public class DataTask implements IDataTask, IDataTaskConstants{
 //    protected static DataModule dataModule = DataModule.getInstance();
@@ -417,49 +405,50 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         
     }
     
-    public static Integer createStream(String streamCaption,List<Integer[]> list) throws Exception{
-        Integer stream_id;//,depart_id,subject_id,group_id;
-        try{
-            DataModule.execute("insert into stream (stream_caption) values ('"+streamCaption+"')");
-            Recordset recordset = DataModule.getRecordet("select max(id) from stream;");
-            stream_id= recordset.getInteger(0);
-            String sql = "update subject_group set stream_id=? where depart_id=? and subject_id=? ;";
-            KeyMap map = new KeyMap();
-            map.put(1,stream_id);
-                for (Integer[] data:list){
-
-                map.put(2, data[0]);
-                map.put(3, data[1]);
-                DataModule.execute(sql, map);
-            }
-            DataModule.commit();
-            return stream_id;
-        } catch (Exception e){
-            DataModule.rollback();
-            throw new Exception("CREATE_STREAM_ERROR:\n"+e.getMessage());
-        }
-    }
-    
-    public static Integer createStream(Integer depart_id,Integer subject_id) throws Exception{
-        try{
-            DataModule.execute("insert into stream (stream_caption) values ('новый поток')");
-            Recordset recordset = DataModule.getRecordet("select max(id) from stream;");
-            Integer stream_id= recordset.getInteger(0);
-            String sql = "update subject_group set stream_id=? where subject_id=? and depart_id=?;";
-            KeyMap map = new KeyMap();
-            map.put(1,stream_id);
-            map.put(2, subject_id);
-            map.put(3, depart_id);
-            DataModule.execute(sql, map);
-            DataModule.commit();
-            return stream_id;
-        } catch (Exception e){
-            DataModule.rollback();
-            throw new Exception("CREATE_STREAM_ERROR:\n"+e.getMessage());
-        }
-        
-        
-    }
+//    @Deprecated
+//    public static Integer createStream(String streamCaption,List<Integer[]> list) throws Exception{
+//        Integer stream_id;//,depart_id,subject_id,group_id;
+//        try{
+//            DataModule.execute("insert into stream (stream_caption) values ('"+streamCaption+"')");
+//            Recordset recordset = DataModule.getRecordet("select max(id) from stream;");
+//            stream_id= recordset.getInteger(0);
+//            String sql = "update subject_group set stream_id=? where depart_id=? and subject_id=? ;";
+//            KeyMap map = new KeyMap();
+//            map.put(1,stream_id);
+//                for (Integer[] data:list){
+//
+//                map.put(2, data[0]);
+//                map.put(3, data[1]);
+//                DataModule.execute(sql, map);
+//            }
+//            DataModule.commit();
+//            return stream_id;
+//        } catch (Exception e){
+//            DataModule.rollback();
+//            throw new Exception("CREATE_STREAM_ERROR:\n"+e.getMessage());
+//        }
+//    }
+//    @Deprecated
+//    public static Integer createStream(Integer depart_id,Integer subject_id) throws Exception{
+//        try{
+//            DataModule.execute("insert into stream (stream_caption) values ('новый поток')");
+//            Recordset recordset = DataModule.getRecordet("select max(id) from stream;");
+//            Integer stream_id= recordset.getInteger(0);
+//            String sql = "update subject_group set stream_id=? where subject_id=? and depart_id=?;";
+//            KeyMap map = new KeyMap();
+//            map.put(1,stream_id);
+//            map.put(2, subject_id);
+//            map.put(3, depart_id);
+//            DataModule.execute(sql, map);
+//            DataModule.commit();
+//            return stream_id;
+//        } catch (Exception e){
+//            DataModule.rollback();
+//            throw new Exception("CREATE_STREAM_ERROR:\n"+e.getMessage());
+//        }
+//        
+//        
+//    }
     
     public static void excludeFromStream(Integer stream_id,Integer depart_id,Integer subject_id) throws Exception{
         DataModule.execute(String.format("update subject_group set stream_id=null where depart_id=%d and subject_id=%d", depart_id,subject_id));

@@ -677,7 +677,7 @@ class SchedulePanel extends JPanel implements ActionListener,IOpenedForm{
             dataset.open();
             combo.setDataset(dataset,"id","label");
             
-            dataset = dataModule.getDataset("v_schedule");
+            dataset = dataModule.getSQLDataset("select * from v_schedule order by depart_id,day_id,bell_id");
             grid.setDataset(dataset);
             
             

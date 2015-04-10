@@ -7,17 +7,13 @@
 package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
@@ -26,6 +22,7 @@ import ru.viljinsky.IDataset;
 import ru.viljinsky.KeyMap;
 import ru.viljinsky.Recordset;
 import ru.viljinsky.SelectDialog;
+import ru.viljinsky.Values;
 
 /**
  *
@@ -62,6 +59,22 @@ abstract class AbstractStreamDialog extends SelectDialog{
     JTextField field = new JTextField(20);
     Integer stream_id;
     EntryPanel entryPanel = new EntryPanel();
+    
+    public void setStreamId(Integer stream_id){
+        this.stream_id= stream_id;
+        if (stream_id!=null){
+            try{
+                Recordset recordset = DataModule.getRecordet("select id,stream_caption,subject_id from stream where id="+stream_id);
+                Values values = new Values();
+                values.put("id", recordset.get(0)[0]);
+                values.put("stream_caption", recordset.get(0)[1]);
+                values.put("subject_id", recordset.get(0)[2]);
+                entryPanel.setValues(values);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
 
     public AbstractStreamDialog() {
         super();
@@ -73,12 +86,6 @@ abstract class AbstractStreamDialog extends SelectDialog{
             e.printStackTrace();
         }
         
-//        JPanel panel = new JPanel();
-//        JLabel label = new JLabel("Stream");
-//        field.setText("Новый поток");
-//        panel.add(label);
-//        panel.add(field);
-//        add(panel,BorderLayout.PAGE_START);
     }
 
     public void setStreamCaption(String caption){
@@ -269,7 +276,14 @@ public class Dialogs {
     
     ///////////////////////////////////////////////////////////////////////////
     
-    private static final String sqlSubjectGroupToStream = "select a.depart_id || '-' || a.subject_id || '-' ||a.group_id as key," + " c.label ||' ' || b.subject_name  || a.subject_id || a.group_id as value \n" + "from subject_group a inner join subject b on a.subject_id=b.id inner join depart c on c.id=a.depart_id order by a.subject_id,a.depart_id ;";
+    private static final String sqlSubjectGroupToStream = 
+            "select a.depart_id || '-' || a.subject_id || '-' ||a.group_id as key," 
+          + " c.label ||' ' || b.subject_name  || a.subject_id || a.group_id as value \n" 
+          + "from subject_group a "
+          + "   inner join subject b on a.subject_id=b.id "
+          + "   inner join depart c on c.id=a.depart_id "
+          + "   where a.subject_id=%d "  
+          + "   order by a.subject_id,a.depart_id ;";
 
     public static boolean createStream(JComponent owner, Integer depart_id, Integer subject_id, Integer group_id) throws Exception {
         String sql = sqlSubjectGroupToStream;
@@ -277,7 +291,7 @@ public class Dialogs {
             @Override
             public void doOnEntry() throws Exception {
                 Integer depart_id,subject_id,group_id;
-                List<Integer[]> list = new ArrayList<>();
+//                List<Integer[]> list = new ArrayList<>();
                 for (Object obj : getSelected()) {
                     String s = (String) obj;
                     String[] ss = s.split("-");
@@ -285,16 +299,24 @@ public class Dialogs {
                     subject_id = Integer.valueOf(ss[1]);
                     group_id = Integer.valueOf(ss[2]);
                     System.out.println(String.format("depart %d group_id %d subject_id %d ", depart_id, group_id, subject_id));
-                    list.add(new Integer[]{depart_id, subject_id, group_id});
+                    DataModule.execute(String.format("update subject_group set stream_id=%d where depart_id=%d and subject_id=%d and group_id=%d",stream_id,depart_id,subject_id,group_id));
+//                    list.add(new Integer[]{depart_id, subject_id, group_id});
                 }
-                DataTask.createStream("StreanNew", list);
+                
+//                DataTask.createStream("StreanNew", list);
             }
         };
+        // моздание записи нового стрима
+        DataModule.execute("insert into stream (stream_caption,subject_id) values ('поток "+subject_id+"',"+subject_id+")");
+        Recordset recordset = DataModule.getRecordet("select id from stream where id=(select max(id) from stream)");
+        
         String s = String.format("%d-%d-%d", depart_id, subject_id, group_id);
-        Dataset dataset = DataModule.getSQLDataset(sql);
+        Dataset dataset = DataModule.getSQLDataset(String.format(sql,subject_id));
         dlg.setDataset(dataset, "key", "value");
         Set set = new HashSet();
         set.add(s);
+        
+        dlg.setStreamId(recordset.getInteger(0));
         dlg.setSelected(set);
         dlg.showModal(owner);
         return dlg.modalResult == SelectDialog.RESULT_OK;
@@ -336,15 +358,17 @@ public class Dialogs {
                 }
             }
         };
+        Integer subject_id=6;
         Recordset rs = DataModule.getRecordet("select depart_id||'-'||subject_id ||'-'||group_id from subject_group where stream_id=" + stream_id);
         Set set = new HashSet();
         for (int i = 0; i < rs.size(); i++) {
             set.add(rs.get(i)[0]);
         }
-        Dataset dataset = DataModule.getSQLDataset(sqlSubjectGroupToStream);
+        
+        Dataset dataset = DataModule.getSQLDataset(String.format(sqlSubjectGroupToStream,subject_id));
         dlg.setDataset(dataset, "key", "value");
         dlg.setSelected(set);
-        dlg.stream_id = stream_id;
+        dlg.setStreamId(stream_id);
         dlg.showModal(owner);
         return dlg.modalResult == SelectDialog.RESULT_OK;
     }
