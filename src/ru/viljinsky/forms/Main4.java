@@ -23,6 +23,7 @@ import ru.viljinsky.DataModule;
 import ru.viljinsky.util.SQLMonitor;
 
 
+
 ////////////////////////    MAIN 4 ////////////////////////////////////////////
 interface IMenu{
     public static final int FILE_OPEN   = 1;
@@ -86,19 +87,22 @@ public class Main4 extends JFrame{
             JOptionPane.showMessageDialog(this, "База \""+path+"\" - успешно создана");
         }
     }
-    protected void fileOpen() throws Exception{
-        String path;
-        int retVal=fileChooser.showOpenDialog(this);
-        if (retVal==JFileChooser.APPROVE_OPTION){
-            path = fileChooser.getSelectedFile().getAbsolutePath();
-            if (DataModule.isActive()){
-                close();
-                DataModule.close();
+    public void fileOpen(){
+        SelectDatabase dlg = new SelectDatabase();
+        dlg.showModal(rootPane);
+        if (dlg.modalResult==SelectDatabase.RESULT_OK)
+            try {
+                String path = dlg.getSelectedData();
+                if (DataModule.isActive()){
+                    close();
+                    DataModule.close();
+                }
+                DataModule.open(path);
+                setTitle(APP_NAME+"["+path+"]");
+                open();
+            } catch (Exception e){
+                JOptionPane.showMessageDialog(rootPane, e.getMessage());
             }
-            DataModule.open(path);
-            setTitle(APP_NAME+"["+path+"]");
-            open();
-        }
     }
     
     protected void fileClose() throws Exception{
@@ -221,13 +225,15 @@ public class Main4 extends JFrame{
         frame.setLocation(x,y);
         
         frame.setVisible(true);
+        frame.fileOpen();
       
-        try{
-            DataModule.open();
-            frame.open();
-        } catch (Exception e){
-            JOptionPane.showMessageDialog(frame, e.getMessage());
-        }
+//        try{
+//            DataModule.open();
+//            frame.open();
+//        } catch (Exception e){
+//           
+//            JOptionPane.showMessageDialog(frame, e.getMessage());
+//        }
         
     }
     
