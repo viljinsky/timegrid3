@@ -379,9 +379,9 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         "profile_type=caption",
         "day_list=day_caption",
         "bell_list=time_start;time_end",
-        "room=name",
+        "room=room_name",
         "teacher=last_name;first_name;patronymic",
-        "building=caption",
+        "building=building_name",
         "week=caption",
         "depart=label",
         "stream=stream_caption"

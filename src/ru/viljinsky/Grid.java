@@ -145,9 +145,9 @@ public class Grid extends JTable {
         
         public EdtDialog(IDataset dataset,Map<String,Object> values){
             super();
-            panel.setDataset(dataset);
+            entryPanel.setDataset(dataset);
             if (values!=null)
-                panel.setValues(values);
+                entryPanel.setValues(values);
         }
 
     }
@@ -305,7 +305,7 @@ class GridModel extends AbstractTableModel{
             @Override
             public void doOnEntry() throws Exception {
                 IDataset dataset = model.dataset;
-                int row = dataset.appned(panel.getValues());
+                int row = dataset.appned(entryPanel.getValues());
                 model.fireTableDataChanged();
                 getSelectionModel().setSelectionInterval(row, row);
                 scrollRectToVisible(getCellRect(row, getSelectedColumn(), true));
@@ -323,14 +323,14 @@ class GridModel extends AbstractTableModel{
     public void edit() {
         int row = getSelectedRow();
         if (row >= 0) {
-            Map<String, Object> values = model.dataset.getValues(row);
+            Values values = model.dataset.getValues(row);
             
             BaseDialog dlg = new EdtDialog(model.dataset, values) {
 
                 @Override
                 public void doOnEntry() throws Exception {
                     int row = getSelectedRow();
-                    model.dataset.edit(row, panel.getValues());
+                    model.dataset.edit(row, entryPanel.getValues());
                 }
                 
             };
@@ -365,12 +365,12 @@ class GridModel extends AbstractTableModel{
     }
 
     public void gridSelectionChange() {
-        System.out.println("gridSelectionChange" + getSelectedRow());
-        int row = getSelectedRow();
-        if (row >= 0) {
-            Map<String, Object> map = model.dataset.getValues(row);
-            System.out.println(map);
-        }
+//        System.out.println("gridSelectionChange" + getSelectedRow());
+//        int row = getSelectedRow();
+//        if (row >= 0) {
+//            Values map = model.dataset.getValues(row);
+//            System.out.println(map);
+//        }
     }
     
     public void setFilter(Map<String,Object> filter) throws Exception{
@@ -407,36 +407,27 @@ class GridModel extends AbstractTableModel{
      * @return 
      * @throws Exception  если нет выделенной строки
      */
-    private Map<String,Object> getSelectedValues() throws Exception{
+    private Values getSelectedValues() throws Exception{
         int row = getSelectedRow();
         if (row<0)
             throw new Exception("TABLE_HAS_NOT_SELECTED");
-        Map<String,Object> map = model.dataset.getValues(row);
+        Values map = model.dataset.getValues(row);
         return map;
     }
     
     public Integer getIntegerValue(String columnName) throws Exception{
-        Map<String,Object> values = getSelectedValues();
-        if (!values.containsKey(columnName))
-            throw new Exception("COLUMN_NOT_FOUND");
-        Object value = values.get(columnName);
-        if (value==null)
-            return null;
-        return Integer.valueOf(values.get(columnName).toString());
+        Values values = getSelectedValues();
+        return values.getInteger(columnName);
     }
     
     public String getStringValue(String columnName) throws Exception{
-        Map<String,Object> values = getSelectedValues();
-        if (!values.containsKey(columnName))
-            throw new Exception("COLUMN_NOT_FOUND");
-        return (String)values.get(columnName);
+        Values values = getSelectedValues();
+        return values.getString(columnName);
     }
     
     public Object getObjectValue(String columnName) throws Exception{
-        Map<String,Object> values = getSelectedValues();
-        if (!values.containsKey(columnName))
-            throw new Exception("COLUMN_NOT_FOUND");
-        return values.get(columnName);
+        Values values = getSelectedValues();
+        return values.getObject(columnName);
     }
     
 }
