@@ -26,8 +26,8 @@ public interface IDataset{
     public Integer getRowCount();
     public Column getColumn(Integer columnIndex);
     public Column getColumn(String columnName);
-    public Map<String,Object> getValues(Integer rowIndex);
-    public Map<String,Object> getNewValues();
+    public Values getValues(Integer rowIndex);
+    public Values getNewValues();
     public void setVlaues(Integer rowIndex,Map<String,Object> aValues) throws Exception;
     public Integer getColumnIndex(String columnName) throws Exception;
     

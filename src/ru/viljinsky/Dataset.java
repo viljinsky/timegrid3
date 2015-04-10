@@ -59,8 +59,8 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     }
     
     @Override
-    public Map<String,Object> getNewValues(){
-        Map<String,Object> result = new HashMap<>();
+    public Values getNewValues(){
+        Values result = new Values();
         for (int i : info.columns.keySet()){
             result.put(getColumnName(i), null);
         }
@@ -68,8 +68,8 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     }
     
     @Override
-    public Map<String,Object> getValues(Integer rowIndex){
-        Map<String,Object> result = new HashMap<>();
+    public Values getValues(Integer rowIndex){
+        Values result = new Values();
         Object[] rowset;
         rowset = get(rowIndex);
         Column column;

@@ -117,9 +117,13 @@ public class CreateData {
             throw new Error(e.getMessage());
         } finally {
             if (stmt!=null)
-                try {stmt.close();} catch (Exception e){};
+                try {
+                    stmt.close();
+                } catch (Exception e){};
             if (con!=null){
-                try {con.close();} catch (Exception e){};
+                try {
+                    con.close();
+                } catch (Exception e){};
             }
         }
     }
@@ -132,7 +136,6 @@ public class CreateData {
             cd.run(fileName,false,script);
             System.out.println("База данных создана '"+fileName+"'");
         } catch (Exception e){
-//            System.err.println("Ошибка при создании базы данных:\n"+e.getMessage());
             throw new Exception("Ошибка при создании базы данных:\n"+e.getMessage());
         }
     }
