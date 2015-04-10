@@ -20,6 +20,7 @@ import java.util.Map;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -28,6 +29,7 @@ import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
 import ru.viljinsky.IDataset;
+import ru.viljinsky.Values;
 import ru.viljinsky.timegrid.*;
 
 /**
@@ -44,6 +46,8 @@ public class TimeGridPanel extends JPanel{
     
     class TG extends TimeGrid{
 
+        protected int startRow,StartCol;
+        
         public TG(int col,int row){
             super(col,row);
         }
@@ -69,10 +73,64 @@ public class TimeGridPanel extends JPanel{
             }
         }
 
+//        @Override
+//        public void cellClick(int col, int row) {
+//            
+//        }
+//
+//        @Override
+//        public void drag(int dx, int dy) {
+////            super.drag(dx, dy); //To change body of generated methods, choose Tools | Templates.
+//        }
+
         @Override
-        public void cellClick(int col, int row) {
-            
+        public void startDrag(int col, int row) throws Exception{
+            super.startDrag(col, row);
+            startRow=row;
+            StartCol=col;
         }
+
+        @Override
+        public void stopDrag(int col, int row) throws Exception {
+            String sql;
+            try{
+                for (CellElement ce:getSelectedElements()){
+                    SubjectGroup sg = (SubjectGroup)(ce);
+                    sql = String.format(
+                            "update schedule set day_id=%d,bell_id=%d "
+                          + "where day_id=%d and bell_id=%d and depart_id=%d and subject_id=%d and group_id=%d;",
+                            sg.day_no+col-StartCol,sg.bell_id+row-startRow,sg.day_no,sg.bell_id, sg.depart_id,sg.subject_id,sg.group_id);
+                    System.out.println(sql);
+                    DataModule.execute(sql);
+                    sg.day_no+=col-StartCol;
+                    sg.bell_id+=row-startRow;
+                }
+                super.stopDrag(col, row);
+                DataModule.commit();
+                realign();
+                Values values = grSchedule.getValues();
+                grSchedule.requery();
+                if (values!=null){
+                    Values v = new Values();
+                    v.put("day_id", values.getInteger("day_id")+col-StartCol);
+                    v.put("bell_id", values.getInteger("bell_id")+row-startRow);
+                    v.put("depart_id", values.getInteger("depart_id"));
+                    v.put("group_id", values.getInteger("group_id"));
+                    v.put("subject_id", values.getInteger("subject_id"));
+                    
+                    System.out.println(values);
+                    grSchedule.locate(v);
+                }
+                
+            } catch (Exception e){
+                DataModule.rollback();
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            }
+                
+        }
+        
+        
         
         
         
@@ -165,7 +223,8 @@ public class TimeGridPanel extends JPanel{
         String subject_name;
         String room_no;
         String teacher_name;
-//        int group_id;
+        String group_label;
+        String depart_label;
 
         @Override
         public void draw(Graphics g, Rectangle b) {
@@ -184,29 +243,37 @@ public class TimeGridPanel extends JPanel{
             g.setColor(Color.BLUE);
             
             int x = b.x+2;int y = b.y+h;
+            g.drawString(depart_label, x, y);
+            y+=h;
             g.drawString(subject_name, x,y);
             y+=h;
             g.drawString(teacher_name, x, y);
             y+=h;
             g.drawString(room_no, x, y);
             y+=h;
-            g.drawString("Гр."+(group_id==null?"?":group_id.toString()),x,y);
+            g.drawString(group_label, x, y);
         }
         
         
         
-        public SubjectGroup(Map<String,Object> values){
-            day_no=(Integer)values.get("day_id");
-            bell_id = (Integer)values.get("bell_id");
-            teacher_name= (values.get("teacher_id")==null?"?":(String)values.get("teacher"));
-            room_no=(values.get("room_id")==null?"?": (String)values.get("room"));
-            subject_name =(String)values.get("subject_name");
+        public SubjectGroup(Values values){
+            try{
+                day_no=values.getInteger("day_id");
+                bell_id = values.getInteger("bell_id");
+                teacher_name= (values.get("teacher_id")==null?"?":values.getString("teacher"));
+                room_no=(values.get("room_id")==null?"?": values.getString("room"));
+                subject_name =values.getString("subject_name");
+
+                depart_id = values.getInteger("depart_id");
+                subject_id=values.getInteger("subject_id");
+                group_id=values.getInteger("group_id");
+                group_label = values.getString("group_label");
+                depart_label = values.getString("depart_label");
             
-            depart_id = (Integer)values.get("depart_id");
-            subject_id=(Integer)values.get("subject_id");
-            group_id=(Integer)values.get("group_id");
-            
-            setCell(day_no-1, bell_id-1);
+                setCell(day_no-1, bell_id-1);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
         
         public String toString(){
@@ -246,7 +313,7 @@ public class TimeGridPanel extends JPanel{
         IDataset dataset;
         
         SubjectGroup sg;
-        Map<String,Object> values;
+        Values values;
         
 
         dataset = grSchedule.getDataset();

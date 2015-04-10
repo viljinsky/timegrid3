@@ -196,12 +196,12 @@ public class TimeGrid extends AbstractTimeGrid{
     }
     
     @Override
-    public void startDrag(int col,int row){
+    public void startDrag(int col,int row) throws Exception{
         System.out.println("Start Drag");
     }
     
     @Override
-    public void stopDrag(int col,int row){
+    public void stopDrag(int col,int row) throws Exception{
         Cell cell = getSelectedCell();
         for (CellElement ce:cells.getSelected()){
             ce.col += col-cell.col;

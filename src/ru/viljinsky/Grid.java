@@ -136,6 +136,12 @@ public class Grid extends JTable {
     GridModel model;
     ICommand commands = null;
     
+    public Values getValues(){
+        if (getSelectedRow()>=0){
+            return model.dataset.getValues(getSelectedRow());
+        }
+        return null;
+    }
     
     public boolean isEditable(){
         return model!=null && model.dataset.isEditable();
@@ -153,59 +159,59 @@ public class Grid extends JTable {
     }
     
     
-class GridModel extends AbstractTableModel{
-    IDataset dataset;
-    public GridModel(Dataset dataset){
-        this.dataset=dataset;
-    }
-    
-    @Override
-    public int getRowCount() {
-        return dataset.getRowCount();
-    }
-
-    @Override
-    public int getColumnCount() {
-        return dataset.getColumnCount();
-    }
-
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        Map<String,Object> values = dataset.getValues(rowIndex);
-        Column column = dataset.getColumn(columnIndex);
-        Object value = values.get(column.columnName);
-        
-        switch (column.columnTypeName){
-            case "BLOB":
-                return (value==null?null:"TEXT");
-            case "BINARY":
-                return (value==null?null:"IMAGE");
-            default:
-                return value;
-                    
+    class GridModel extends AbstractTableModel{
+        IDataset dataset;
+        public GridModel(Dataset dataset){
+            this.dataset=dataset;
         }
-    }
 
-    @Override
-    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        Map<String,Object> values = dataset.getValues(rowIndex);
-        values.put(dataset.getColumn(columnIndex).columnName, aValue);
-        try{
-            dataset.setVlaues(rowIndex, values);
-        } catch (Exception e){
-            e.printStackTrace();
+        @Override
+        public int getRowCount() {
+            return dataset.getRowCount();
         }
-    }
 
-    @Override
-    public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return false;
-    }
+        @Override
+        public int getColumnCount() {
+            return dataset.getColumnCount();
+        }
 
-    @Override
-    public String getColumnName(int column) {
-        return dataset.getColumn(column).columnName;
-    }
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            Map<String,Object> values = dataset.getValues(rowIndex);
+            Column column = dataset.getColumn(columnIndex);
+            Object value = values.get(column.columnName);
+
+            switch (column.columnTypeName){
+                case "BLOB":
+                    return (value==null?null:"TEXT");
+                case "BINARY":
+                    return (value==null?null:"IMAGE");
+                default:
+                    return value;
+
+            }
+        }
+
+        @Override
+        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+            Map<String,Object> values = dataset.getValues(rowIndex);
+            values.put(dataset.getColumn(columnIndex).columnName, aValue);
+            try{
+                dataset.setVlaues(rowIndex, values);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return false;
+        }
+
+        @Override
+        public String getColumnName(int column) {
+            return dataset.getColumn(column).columnName;
+        }
 
         @Override
         public Class<?> getColumnClass(int columnIndex) {

@@ -268,6 +268,9 @@ public class DataModule implements IDataModuleConsts {
         try{
             stmt=con.createStatement();
             stmt.execute(sql);
+        } catch (Exception e){
+            System.err.println(sql);
+            throw new Exception(e);
         } finally {
             if (stmt!=null)
                 try {

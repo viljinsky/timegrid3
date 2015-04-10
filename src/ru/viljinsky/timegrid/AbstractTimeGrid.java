@@ -203,7 +203,10 @@ abstract class AbstractTimeGrid extends JPanel {
                     selectedRow = -1;
                 } else {
                     if (dragged) {
-                        stopDrag(cell.col, cell.row);
+                        try{
+                            stopDrag(cell.col, cell.row);
+                        } catch (Exception p){
+                        }
                     }
                     selectedCol = cell.col;
                     selectedRow = cell.row;
@@ -239,12 +242,17 @@ abstract class AbstractTimeGrid extends JPanel {
                 
                 
                 if (!dragged) {
-                    startDrag(selectedCol, selectedRow);
-                    dragObjects = new HashSet<>();
-                    for (CellElement ce:cells.getSelected()){
-                            dragObjects.add(new DragObject(ce));
+                    try{
+                        startDrag(selectedCol, selectedRow);
+                        dragObjects = new HashSet<>();
+                        for (CellElement ce:cells.getSelected()){
+                                dragObjects.add(new DragObject(ce));
+                        }
+                    } catch (Exception p){
+                        p.printStackTrace();
+                    } finally {
+                        dragged = true;
                     }
-                    dragged = true;
                 }
                 int x = e.getX();
                 int y = e.getY();
@@ -525,9 +533,9 @@ abstract class AbstractTimeGrid extends JPanel {
     
     public abstract void cellElementClick(CellElement ce);
 
-    public abstract void startDrag(int col, int row);
+    public abstract void startDrag(int col, int row) throws Exception;
 
-    public abstract void stopDrag(int col, int row);
+    public abstract void stopDrag(int col, int row) throws Exception;
 
     public abstract void drag(int dx, int dy);
     

@@ -21,7 +21,7 @@ public class CellElement {
     protected boolean selected = false;
     Rectangle bound = null;
     public static Integer WIDTH = 100;
-    public static Integer HEIGHT = 80;
+    public static Integer HEIGHT = 85;
     Color color = Color.MAGENTA;// ; new Color(255, 255, 200);
 
     public void draw(Graphics g, Rectangle b) {
