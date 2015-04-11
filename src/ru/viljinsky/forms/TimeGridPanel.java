@@ -17,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.DropMode;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -37,180 +38,23 @@ import ru.viljinsky.timegrid.*;
  * @author вадик
  */
 public class TimeGridPanel extends JPanel{
-    DataModule dataModule = DataModule.getInstance();
+//    DataModule dataModule = DataModule.getInstance();
     TG timeGrid = new TG(7,10);
     Grid grSchedule = new Grid();
-    Grid grSubjectGroup = new Grid();
+    Grid grSubjectGroup = new GridSubjectGroup();
     FilterPanel filterPanel = new FilterPanel();
+    
+    class GridSubjectGroup extends Grid{
+        
+
+        @Override
+        public void gridSelectionChange() {
+            Values values = getValues();
+            System.out.println(values);
+        }
+        
+    }
    
-    
-    class TG extends TimeGrid{
-
-        protected int startRow,StartCol;
-        
-        public TG(int col,int row){
-            super(col,row);
-        }
-        
-        @Override
-        public void cellElementClick(CellElement ce) {
-            if (ce instanceof SubjectGroup){
-                SubjectGroup sg = (SubjectGroup)ce;
-                System.out.println(sg);
-                
-                Map<String,Object> option = new HashMap<>();
-                option.put("day_id", sg.day_no);
-                option.put("bell_id", sg.bell_id);
-                option.put("subject_id", sg.subject_id);
-                option.put("group_id", sg.group_id);
-                try{
-                    if (grSchedule.locate(option)){
-                        System.out.println("OK");
-                    };
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-        }
-
-//        @Override
-//        public void cellClick(int col, int row) {
-//            
-//        }
-//
-//        @Override
-//        public void drag(int dx, int dy) {
-////            super.drag(dx, dy); //To change body of generated methods, choose Tools | Templates.
-//        }
-
-        @Override
-        public void startDrag(int col, int row) throws Exception{
-            super.startDrag(col, row);
-            startRow=row;
-            StartCol=col;
-        }
-
-        @Override
-        public void stopDrag(int col, int row) throws Exception {
-            String sql;
-            try{
-                for (CellElement ce:getSelectedElements()){
-                    SubjectGroup sg = (SubjectGroup)(ce);
-                    sql = String.format(
-                            "update schedule set day_id=%d,bell_id=%d "
-                          + "where day_id=%d and bell_id=%d and depart_id=%d and subject_id=%d and group_id=%d;",
-                            sg.day_no+col-StartCol,sg.bell_id+row-startRow,sg.day_no,sg.bell_id, sg.depart_id,sg.subject_id,sg.group_id);
-                    System.out.println(sql);
-                    DataModule.execute(sql);
-                    sg.day_no+=col-StartCol;
-                    sg.bell_id+=row-startRow;
-                }
-                super.stopDrag(col, row);
-                DataModule.commit();
-                realign();
-                Values values = grSchedule.getValues();
-                grSchedule.requery();
-                if (values!=null){
-                    Values v = new Values();
-                    v.put("day_id", values.getInteger("day_id")+col-StartCol);
-                    v.put("bell_id", values.getInteger("bell_id")+row-startRow);
-                    v.put("depart_id", values.getInteger("depart_id"));
-                    v.put("group_id", values.getInteger("group_id"));
-                    v.put("subject_id", values.getInteger("subject_id"));
-                    
-                    System.out.println(values);
-                    grSchedule.locate(v);
-                }
-                
-            } catch (Exception e){
-                DataModule.rollback();
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            }
-                
-        }
-        
-        
-        
-        
-        
-    }
-
-    ///////////////////////////  FILTER ////////////////////////////////////////
-    class FDBComboBox extends DBComboBox{
-        String keyFieldName;
-        public FDBComboBox(String label,String keyFieldName){
-            super();
-            this.label=label;
-            this.keyFieldName=keyFieldName;
-        }
-    }
-    
-    class FilterPanel extends JPanel implements ActionListener{
-        FDBComboBox comboDepart = new FDBComboBox("depart","depart_id");
-        FDBComboBox comboTeacher = new FDBComboBox("teacher","teacher_id");
-        FDBComboBox comboRoom = new FDBComboBox("room","room_id");
-        FDBComboBox comboWeek = new FDBComboBox("week","week_id");
-        FDBComboBox[] combos = {comboDepart,comboTeacher,comboRoom,comboWeek};
-        
-        
-        public FilterPanel(){
-            setLayout(new FlowLayout(FlowLayout.LEFT));
-            for (DBComboBox combo:combos){
-                add(new JLabel(combo.getLabel()));
-                combo.addActionListener(this);
-                add(combo);
-            }
-        }
-        
-        public void open() throws Exception{
-            Map<String,Object> filter = new HashMap<>();
-            Dataset dataset;
-            
-            dataset = dataModule.getDataset("depart");
-            comboDepart.setDataset(dataset, "id", "label");
-            filter.put("depart_id", null);
-            
-            dataset = dataModule.getDataset("teacher");
-            comboTeacher.setDataset(dataset, "id","last_name");
-            filter.put("teacher_id", null);
-            
-            dataset = dataModule.getDataset("room");
-            comboRoom.setDataset(dataset, "id","room_name");
-            filter.put("room_id",null);
-            
-            dataset = dataModule.getDataset("week");
-            comboWeek.setDataset(dataset, "id","caption");                        
-            filter.put("week_id", null);
-            setFilter(filter);
-        }
-
-        public void setFilter(Map<String,Object> filter){
-            for (FDBComboBox combo:combos){
-                combo.setValue(filter.get(combo.keyFieldName));
-            }
-        }
-        
-        public Map<String,Object> getFilter(){
-            Map<String,Object> filter = new HashMap<>();
-            for (FDBComboBox combo:combos){
-                if (combo.getValue()!=null)
-                    filter.put(combo.keyFieldName, combo.getValue());
-            }
-            return filter;
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            try{
-                fillSchedulePanel();
-            } catch (Exception ee){
-                ee.printStackTrace();
-            }
-        }
-    }
-    ////////////////////////////////  FILTER //////////////////////////////////
-    
     class SubjectGroup extends CellElement{
         int day_no;
         int bell_id;
@@ -280,6 +124,166 @@ public class TimeGridPanel extends JPanel{
             return "day_no:"+day_no+" bell_id:"+bell_id+" depart_id:"+ depart_id+" subject_id:"+subject_id+" group_id:"+group_id;
         }
     }
+
+    
+    class TG extends TimeGrid{
+
+        protected int startRow,StartCol;
+        
+        public TG(int col,int row){
+            super(col,row);
+        }
+        
+        @Override
+        public void cellElementClick(CellElement ce) {
+            if (ce instanceof SubjectGroup){
+                SubjectGroup sg = (SubjectGroup)ce;
+                System.out.println(sg);
+                
+                Map<String,Object> option = new HashMap<>();
+                option.put("day_id", sg.day_no);
+                option.put("bell_id", sg.bell_id);
+                option.put("subject_id", sg.subject_id);
+                option.put("group_id", sg.group_id);
+                try{
+                    if (grSchedule.locate(option)){
+                        System.out.println("OK");
+                    };
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        public void startDrag(int col, int row) throws Exception{
+            super.startDrag(col, row);
+            startRow=row;
+            StartCol=col;
+        }
+
+        @Override
+        public void stopDrag(int col, int row) throws Exception {
+            if (col==StartCol && row==startRow){
+                super.stopDrag(col, row);
+                return;
+            }
+            String sql;
+            try{
+                for (CellElement ce:getSelectedElements()){
+                    SubjectGroup sg = (SubjectGroup)(ce);
+                    sql = String.format(
+                            "update schedule set day_id=%d,bell_id=%d "
+                          + "where day_id=%d and bell_id=%d and depart_id=%d and subject_id=%d and group_id=%d;",
+                            sg.day_no+col-StartCol,sg.bell_id+row-startRow,sg.day_no,sg.bell_id, sg.depart_id,sg.subject_id,sg.group_id);
+                    System.out.println(sql);
+                    DataModule.execute(sql);
+                    sg.day_no+=col-StartCol;
+                    sg.bell_id+=row-startRow;
+                }
+                DataModule.commit();
+                super.stopDrag(col, row);
+                realign();
+                // обновление таблицы
+                Values values = grSchedule.getValues();
+                grSchedule.requery();
+                if (values!=null){
+                    Values v = new Values();
+                    v.put("day_id", values.getInteger("day_id")+col-StartCol);
+                    v.put("bell_id", values.getInteger("bell_id")+row-startRow);
+                    v.put("depart_id", values.getInteger("depart_id"));
+                    v.put("group_id", values.getInteger("group_id"));
+                    v.put("subject_id", values.getInteger("subject_id"));
+                    
+                    System.out.println(values);
+                    grSchedule.locate(v);
+                }
+                
+            } catch (Exception e){
+                DataModule.rollback();
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            }
+                
+        }
+        
+    }
+
+    ///////////////////////////  FILTER ////////////////////////////////////////
+    class FDBComboBox extends DBComboBox{
+        String keyFieldName;
+        public FDBComboBox(String label,String keyFieldName){
+            super();
+            this.label=label;
+            this.keyFieldName=keyFieldName;
+        }
+    }
+    
+    class FilterPanel extends JPanel implements ActionListener{
+        FDBComboBox comboDepart = new FDBComboBox("depart","depart_id");
+        FDBComboBox comboTeacher = new FDBComboBox("teacher","teacher_id");
+        FDBComboBox comboRoom = new FDBComboBox("room","room_id");
+        FDBComboBox comboWeek = new FDBComboBox("week","week_id");
+        FDBComboBox[] combos = {comboDepart,comboTeacher,comboRoom,comboWeek};
+        
+        
+        public FilterPanel(){
+            setLayout(new FlowLayout(FlowLayout.LEFT));
+            for (DBComboBox combo:combos){
+                add(new JLabel(combo.getLabel()));
+                combo.addActionListener(this);
+                add(combo);
+            }
+        }
+        
+        public void open() throws Exception{
+            Map<String,Object> filter = new HashMap<>();
+            Dataset dataset;
+            
+            dataset = DataModule.getDataset("depart");
+            comboDepart.setDataset(dataset, "id", "label");
+            filter.put("depart_id", null);
+            
+            dataset = DataModule.getDataset("teacher");
+            comboTeacher.setDataset(dataset, "id","last_name");
+            filter.put("teacher_id", null);
+            
+            dataset = DataModule.getDataset("room");
+            comboRoom.setDataset(dataset, "id","room_name");
+            filter.put("room_id",null);
+            
+            dataset = DataModule.getDataset("week");
+            comboWeek.setDataset(dataset, "id","caption");                        
+            filter.put("week_id", null);
+            setFilter(filter);
+        }
+
+        public void setFilter(Map<String,Object> filter){
+            for (FDBComboBox combo:combos){
+                combo.setValue(filter.get(combo.keyFieldName));
+            }
+        }
+        
+        public Values getFilter(){
+            Values filter = new Values();
+            for (FDBComboBox combo:combos){
+                if (combo.getValue()!=null)
+                    filter.put(combo.keyFieldName, combo.getValue());
+            }
+            return filter;
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try{
+                fillSchedulePanel();
+            } catch (Exception ee){
+                ee.printStackTrace();
+            }
+        }
+    }
+    ////////////////////////////////  FILTER //////////////////////////////////
+    
     
     
     public TimeGridPanel(){
@@ -306,7 +310,7 @@ public class TimeGridPanel extends JPanel{
     
     
     private void fillSchedulePanel() throws Exception{
-        Map<String,Object> filter = filterPanel.getFilter();
+        Values filter = filterPanel.getFilter();
         grSubjectGroup.setFilter(filter);
         grSchedule.setFilter(filter);
         
@@ -326,8 +330,6 @@ public class TimeGridPanel extends JPanel{
             timeGrid.addElement(sg);
         }
         timeGrid.realign();
-        
-//        repaint();
     }
     
     public void open() throws Exception{
@@ -345,10 +347,10 @@ public class TimeGridPanel extends JPanel{
         Dataset dataset;
         filterPanel.open();
 
-        dataset = dataModule.getSQLDataset(sql);
+        dataset = DataModule.getSQLDataset(sql);
         grSubjectGroup.setDataset(dataset);
         
-        dataset = dataModule.getSQLDataset("select * from v_schedule order by day_id,bell_id,group_id");
+        dataset = DataModule.getSQLDataset("select * from v_schedule order by day_id,bell_id,group_id");
         grSchedule.setDataset(dataset);
         
         Map<String,Object> filter = new HashMap<>();
