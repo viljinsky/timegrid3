@@ -25,6 +25,10 @@ public class TimeTableGrid extends TimeGrid {
         return dataset;
     }
 
+    public TimeTableGrid(){
+        super(7,10);
+    }
+    
     public TimeTableGrid(int col, int row) {
         super(col, row);
     }
@@ -87,6 +91,93 @@ public class TimeTableGrid extends TimeGrid {
         }
     }
 
+    @Override
+    public void delete() throws Exception{
+        TimeTableGroup group;
+        String sql = "delete from schedule where day_id=%d and bell_id=%d and depart_id=%d and subject_id=%d and group_id=%d";
+        try{
+            for (CellElement ce:getSelectedElements()){
+                group = (TimeTableGroup)ce;
+                DataModule.execute(String.format(sql,group.day_no,group.bell_id,group.depart_id,group.subject_id,group.group_id));
+            }
+            super.delete(); 
+            DataModule.commit();
+            realign();
+        } catch (Exception e){
+            DataModule.rollback();
+            throw new Exception("TIME_TABLE_DELETE_ERROR\n"+e.getMessage());
+        }
+    }
+    
+    public void insert(Values values) throws Exception{
+        String sql = "insert into schedule (day_id,bell_id,depart_id,subject_id,group_id,teacher_id,room_id)\n"
+                  + " values (%d,%d,%d,%d,%d,%d,%d)";
+        if (values==null)
+            return;
+        if (values.getInteger("unplaced")<=0)
+            return;
+        int day_id= getSelectedCol()+1;
+        int bell_id = getSelectedRow()+1;
+        int depart_id =values.getInteger("depart_id");
+        int subject_id=values.getInteger("subject_id");                
+        int group_id= values.getInteger("group_id");
+        try{
+            DataModule.execute(String.format(sql,
+                    day_id,
+                    bell_id,
+                    depart_id,
+                    subject_id,
+                    group_id,
+                    values.getInteger("teacher_id"),
+                    values.getInteger("room_id")
+                    ));
+            DataModule.commit();
+            values.put("day_id",selectedCol+1 );
+            values.put("bell_id",selectedRow+1);
+            Dataset dataset = DataModule.getSQLDataset(String.format(
+                    "select * from v_schedule where day_id=%d and bell_id=%d"
+                            + " and depart_id=%d "
+                            + " and subject_id=%d "
+                            + " and group_id=%d",
+                    day_id,bell_id,depart_id,subject_id,group_id));
+            dataset.open();
+            values = dataset.getValues(0);
+            TimeTableGroup group = new TimeTableGroup(values);
+            addElement(group);
+            realign();
+        } catch (Exception e){
+            DataModule.rollback();
+            throw new Exception("TIME_TABLE_GRID_INSERT_ERROR\n"+e.getMessage());
+        }
+        
+        
+    }
+
+    @Override
+    public void clear() throws Exception {
+        TimeTableGroup group;
+        try{
+            for (CellElement ce:cells){
+                group=(TimeTableGroup)ce;
+                DataModule.execute(String.format("delete from schedule where day_id=%d and bell_id=%d and depart_id=%d and subject_id=%d and group_id=%d",
+                        group.day_no,
+                        group.bell_id,
+                        group.depart_id,
+                        group.subject_id,
+                        group.group_id
+                        ));
+            }
+            DataModule.commit();
+            super.clear();
+            realign();
+        } catch (Exception e){
+            DataModule.rollback();
+            throw new Exception("TIME_TEBLE_CLEAR_ERROR\n"+e.getMessage());
+        }
+    }
+
+    
+    
     public void afterDataChange(int dCol, int dRow) {
     }
     

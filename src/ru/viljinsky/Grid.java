@@ -292,9 +292,9 @@ public class Grid extends JTable {
             setModel(new DefaultTableModel());
             return;
         }
-        if (!dataset.isActive()){
-            dataset.open();
-        }
+//        if (!dataset.isActive()){
+//            dataset.open();
+//        }
         model = new GridModel(dataset);
         setModel(model);
     }

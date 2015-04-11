@@ -29,8 +29,10 @@ public abstract class CommandMngr {
     
     public void setCommandList(String[] list){
         actions=new Action[list.length];
-        for (int i=0;i<actions.length;i++)
-            actions[i]=new Act(list[i]);
+        for (int i=0;i<actions.length;i++){
+            String[] s = list[i].split(";");
+            actions[i]=new Act(s[0]);
+        }
     }
 
     public Action getAction(String command){
@@ -58,6 +60,10 @@ public abstract class CommandMngr {
     public void updateActionList(){
         for (Action a:actions)
             updateAction(a);
+    }
+    
+    protected String getActionCommand(Action a){
+        return (String)a.getValue(Action.ACTION_COMMAND_KEY);
     }
     
     public abstract void updateAction(Action a);

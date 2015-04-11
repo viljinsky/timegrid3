@@ -139,6 +139,23 @@ abstract class AbstractTimeGrid extends JPanel {
     Integer[] rowHeights;
     Integer[] colWidths;
     int selectedRow = -1;
+
+    public int getSelectedRow() {
+        return selectedRow;
+    }
+
+//    public void setSelectedRow(int selectedRow) {
+//        this.selectedRow = selectedRow;
+//    }
+
+    public int getSelectedCol() {
+        return selectedCol;
+    }
+
+//    public void setSelectedCol(int selectedCol) {
+//        this.selectedCol = selectedCol;
+//    }
+    
     int selectedCol = -1;
     int shadowCol = -1;
     int shadowRow = -1;
@@ -378,7 +395,7 @@ abstract class AbstractTimeGrid extends JPanel {
         int height =calcRowHeight();
         setPreferredSize(new Dimension(width, height));
         revalidate();
-        System.out.println("revalidate");
+//        System.out.println("revalidate");
         repaint();
     }
     
@@ -389,7 +406,7 @@ abstract class AbstractTimeGrid extends JPanel {
     public void setOverCell(Cell cell) {
         if (!cell.equals(overCell)) {
             overCell = cell;
-            System.out.println(overCell);
+//            System.out.println(overCell);
         }
     }
 
@@ -420,6 +437,7 @@ abstract class AbstractTimeGrid extends JPanel {
         else
             return new Cell(selectedCol, selectedRow);
     }
+    
 
     /**
      * Получение границ яцейки  встроке row и колонке col

@@ -19,6 +19,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -244,23 +245,27 @@ public class TimeGrid extends AbstractTimeGrid{
     
     
     protected void doCommand(String command){
-        switch (command){
-            case "add":
-                add();
-                break;
-            case "delete":
-                delete();
-                break;
-            case "load":
-                load();
-                break;
-            case "save":
-                save();
-                break;
-            case "clear":
-                clear();
-                break;
-                
+        try{
+            switch (command){
+                case "add":
+                    add();
+                    break;
+                case "delete":
+                    delete();
+                    break;
+                case "load":
+                    load();
+                    break;
+                case "save":
+                    save();
+                    break;
+                case "clear":
+                    clear();
+                    break;
+
+            }
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
         System.out.println("command : '"+command+"'");
         repaint();
@@ -275,12 +280,12 @@ public class TimeGrid extends AbstractTimeGrid{
     }
     
 
-    public void delete(){
+    public void delete() throws Exception{
         for (CellElement ce:cells.getSelected())
             cells.remove(ce);
     }
     
-    public void clear(){
+    public void clear() throws Exception{
         cells.clear();
     }
     
