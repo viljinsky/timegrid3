@@ -178,6 +178,8 @@ public class Grid extends JTable {
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
             Map<String,Object> values = dataset.getValues(rowIndex);
+            if (values==null)
+                return null;
             Column column = dataset.getColumn(columnIndex);
             Object value = values.get(column.columnName);
 

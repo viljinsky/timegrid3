@@ -69,10 +69,12 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     
     @Override
     public Values getValues(Integer rowIndex){
-        Values result = new Values();
         Object[] rowset;
-        rowset = get(rowIndex);
         Column column;
+        Values result = new Values();
+        if (rowIndex<0 || rowIndex>=size())
+            return null;
+        rowset = get(rowIndex);
         for (int col:info.columns.keySet()){
             column=info.columns.get(col);
             result.put(column.columnName,rowset[col]);
