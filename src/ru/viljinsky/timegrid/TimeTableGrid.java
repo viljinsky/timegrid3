@@ -6,8 +6,11 @@
 
 package ru.viljinsky.timegrid;
 
+import java.awt.Color;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import javax.swing.JOptionPane;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
@@ -22,6 +25,7 @@ public class TimeTableGrid extends TimeGrid {
     protected int StartCol;
     Dataset dataset = null;
     Values filter = null;
+    public Set<Point> avalableCells = null;
 
     public Dataset getDataset() {
         return dataset;
@@ -68,19 +72,27 @@ public class TimeTableGrid extends TimeGrid {
 
     @Override
     public void stopDrag(int col, int row) throws Exception {
+        String sql ="update schedule set day_id=%d,bell_id=%d "
+                + "where day_id=%d "
+                + "and bell_id=%d "
+                + "and depart_id=%d "
+                + "and subject_id=%d "
+                + "and group_id=%d;";
+        TimeTableGroup group;
         if (col == StartCol && row == startRow) {
             super.stopDrag(col, row);
             return;
         }
-        String sql;
+        
         try {
             for (CellElement ce : getSelectedElements()) {
-                TimeTableGroup sg = (TimeTableGroup) (ce);
-                sql = String.format("update schedule set day_id=%d,bell_id=%d " + "where day_id=%d and bell_id=%d and depart_id=%d and subject_id=%d and group_id=%d;", sg.day_no + col - StartCol, sg.bell_id + row - startRow, sg.day_no, sg.bell_id, sg.depart_id, sg.subject_id, sg.group_id);
+                group = (TimeTableGroup) (ce);
+                sql = String.format(sql, group.day_no + col - StartCol, group.bell_id + row - startRow, 
+                        group.day_no, group.bell_id, group.depart_id, group.subject_id, group.group_id);
                 System.out.println(sql);
                 DataModule.execute(sql);
-                sg.day_no += col - StartCol;
-                sg.bell_id += row - startRow;
+                group.day_no += col - StartCol;
+                group.bell_id += row - startRow;
             }
             DataModule.commit();
             super.stopDrag(col, row);
@@ -226,6 +238,16 @@ public class TimeTableGrid extends TimeGrid {
             DataModule.rollback();
             throw new Exception("TIME_TEBLE_CLEAR_ERROR\n"+e.getMessage());
         }
+    }
+
+    @Override
+    public Color getCellBackground(int col, int row) {
+        if (avalableCells!=null){
+            if (avalableCells.contains(new Point(col,row)))
+                return Color.WHITE;
+                
+        }
+        return super.getCellBackground(col, row); //To change body of generated methods, choose Tools | Templates.
     }
 
     

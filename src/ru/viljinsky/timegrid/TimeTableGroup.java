@@ -52,6 +52,9 @@ public class TimeTableGroup extends CellElement {
         g.drawString(room_no, x, y);
         y += h;
         g.drawString(group_label, x, y);
+        if (week_id!=0){
+            g.drawString((week_id==1?"I нед.":"II нед."), x+50, y);
+        }
         if (ready){
             g.setColor(color.YELLOW);
             g.fillRect(b.x+b.width-10, b.y, 10, 10);
@@ -71,6 +74,7 @@ public class TimeTableGroup extends CellElement {
             group_label = values.getString("group_label");
             depart_label = values.getString("depart_label");
             ready = values.getBoolean("ready");
+            week_id=values.getInteger("week_id");
 //            moveble = !values.getBoolean("ready");
             setCell(day_no - 1, bell_id - 1);
         } catch (Exception e) {

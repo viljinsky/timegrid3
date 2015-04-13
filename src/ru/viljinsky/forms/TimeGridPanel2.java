@@ -9,8 +9,15 @@ package ru.viljinsky.forms;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Point;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import javax.swing.Action;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -25,6 +32,7 @@ import ru.viljinsky.CommandMngr;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
+import ru.viljinsky.Recordset;
 import ru.viljinsky.Values;
 import ru.viljinsky.timegrid.TimeTableGrid;
 
@@ -41,9 +49,13 @@ import ru.viljinsky.timegrid.TimeTableGrid;
         }
         
         public abstract Values getFilter();
+        public abstract Set<Point> getAvalabelCells();
     }
     
     class Depart extends TreeElement{
+        public static final String sql = 
+                "select day_id-1,bell_id-1 from shift_detail a inner join "+
+                "depart b on a.shift_id=b.shift_id where b.id=%d;";
     
         public Depart(Values values) throws Exception{
             id = values.getInteger("id");
@@ -56,10 +68,29 @@ import ru.viljinsky.timegrid.TimeTableGrid;
             result.put("depart_id", id);
             return result;
         }
+
+    @Override
+    public Set<Point> getAvalabelCells() {
+        Set<Point> result = new HashSet<>();
+        Object[] p;
+        try{
+            Recordset resordset = DataModule.getRecordet(String.format(sql, id));
+            
+            for (int i=0;i<resordset.size();i++){
+                p=resordset.get(i);
+                result.add(new Point((Integer)p[0],(Integer)p[1]));
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return result;
+    }
         
     }
     
     class Teacher extends TreeElement{
+        private static final String sql =
+                "";
         public Teacher(Values values) throws Exception{
             id = values.getInteger("id");
             label = values.getString("last_name");
@@ -70,9 +101,18 @@ import ru.viljinsky.timegrid.TimeTableGrid;
             result.put("teacher_id", id);
             return result;
         }
+
+        @Override
+        public Set<Point> getAvalabelCells() {
+            Set<Point> result = new HashSet<>();
+            
+            return result;
+        }
     }
     
     class Room extends TreeElement{
+        private static final String sql =
+                "";
         public Room(Values values) throws Exception{
             id= values.getInteger("id");
             label=values.getString("room_name");
@@ -83,6 +123,12 @@ import ru.viljinsky.timegrid.TimeTableGrid;
             result.put("room_id", id);
             return result;
         }
+
+    @Override
+    public Set<Point> getAvalabelCells() {
+        Set<Point> result = new HashSet<>();
+        return result;
+    }
         
     }
 
@@ -91,6 +137,28 @@ class ScheduleTree extends JTree{
     TreeElement selectedElement = null;
     
     public ScheduleTree(){
+        clear();
+        addTreeSelectionListener(new TreeSelectionListener() {
+
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode)getLastSelectedPathComponent();
+                if (node!=null){
+                    Object userObject = node.getUserObject();
+                    if (userObject!=null){
+                        if (userObject instanceof TreeElement){
+                            selectedElement  = (TreeElement)userObject;
+                            ElementChange();
+                        }
+                    }
+                }
+            }
+        });
+        
+    }
+    
+    public void clear(){
+        selectedElement = null;
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Расписания");
         departNodes = new DefaultMutableTreeNode("Классы");
         teacherNodes = new DefaultMutableTreeNode("Преподаватели");
@@ -99,24 +167,10 @@ class ScheduleTree extends JTree{
         root.add(teacherNodes);
         root.add(roomNodes);
         setModel(new DefaultTreeModel(root));
-        addTreeSelectionListener(new TreeSelectionListener() {
-
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode)getLastSelectedPathComponent();
-                Object userObject = node.getUserObject();
-                if (userObject!=null){
-                    if (userObject instanceof TreeElement){
-                        selectedElement  = (TreeElement)userObject;
-                        ElementChange();
-                    }
-                }
-            }
-        });
-        
     }
     
     public void ElementChange(){
+        
     }
     
     public void open() throws Exception{
@@ -157,7 +211,7 @@ interface TimeTableCommand {
     
 }
 
-public class TimeGridPanel2 extends JPanel  implements TimeTableCommand{
+public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedForm{
     ScheduleTree tree;
     TimeTableGrid grid;
     
@@ -300,6 +354,8 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand{
     public void treeElementChange(TreeElement element){
         System.out.println(element.getFilter());
         try{
+            grid.avalableCells = new HashSet(element.getAvalabelCells());
+//            System.out.println(element.getAvalabelCells());
             grid.SetFilter(element.getFilter());
             unplacedGrid.setFilter(element.getFilter());
             manager.updateActionList();
@@ -325,7 +381,7 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand{
   
     public static void main(String[] args) throws Exception{
         DataModule.open();
-        TimeGridPanel2 panel = new TimeGridPanel2();
+        final TimeGridPanel2 panel = new TimeGridPanel2();
         JFrame frame = new JFrame("TimeTablePanel");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(panel);
@@ -333,6 +389,39 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand{
         frame.setVisible(true);
         
         panel.open();
+        
+        frame.addWindowListener(new WindowAdapter() {
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                try{
+                    panel.close();
+                } catch (Exception p){
+                    p.printStackTrace();
+                }
+            }
+
+        });
+        
+    }
+
+    @Override
+    public String getCaption() {
+        return "TIMEGRIPPANEL2";
+    }
+
+    @Override
+    public JComponent getPanel() {
+        return this;
+    }
+
+    @Override
+    public void close() throws Exception {
+        System.out.println("close");
+        tree.clear();
+        unplacedGrid.getDataset().close();
+        grid.close();
+        
     }
     
 }

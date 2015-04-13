@@ -128,6 +128,7 @@ create table subject_group (
     subject_id integer references subject(id) on delete restrict,
     default_teacher_id integer references teacher(id),
     default_room_id integer references room(id),
+    default_week_id integer references week(id) default 0,
     stream_id integer references stream(id) on delete set null,
     pupil_count integer,
     primary key (depart_id,subject_id,group_id)

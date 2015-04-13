@@ -104,9 +104,21 @@ public class DataTask implements IDataTask, IDataTaskConstants{
                     }
                 }
             }
+            
+            sql = "update subject_group set default_week_id=group_id where subject_id in (\n"
+                    +"select a.subject_id \n" +
+                    "from curriculum_detail a \n" +
+                    "  inner join depart b \n" +
+                    "    on a.curriculum_id = b.curriculum_id\n" +
+                    "   and a.group_sequence>0 \n" +
+                    "   where b.id=subject_group.depart_id\n" +
+                    "   and b.id=%d " 
+                    + " );";
+            DataModule.execute(String.format(sql,depart_id));
+            
             DataModule.commit();
         } catch (Exception e){
-            DataModule.reopen();
+            DataModule.rollback();
             throw new Exception("FILL_SUBJECT_GROUP_ERROR\n"+e.getMessage());
         } finally {
             if (stmt!=null) stmt.close();

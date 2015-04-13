@@ -296,6 +296,9 @@ public class TimeGrid extends AbstractTimeGrid{
     }
 
 
+    public void close(){
+        cells.clear();
+    }
     
     
     class TimeGridAction extends AbstractAction{
