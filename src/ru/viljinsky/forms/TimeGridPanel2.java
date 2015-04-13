@@ -14,7 +14,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
@@ -22,7 +21,6 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
 import ru.viljinsky.CommandMngr;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
@@ -88,15 +86,79 @@ import ru.viljinsky.timegrid.TimeTableGrid;
         
     }
 
+class ScheduleTree extends JTree{
+    DefaultMutableTreeNode departNodes , teacherNodes, roomNodes;
+    TreeElement selectedElement = null;
+    
+    public ScheduleTree(){
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Расписания");
+        departNodes = new DefaultMutableTreeNode("Классы");
+        teacherNodes = new DefaultMutableTreeNode("Преподаватели");
+        roomNodes = new DefaultMutableTreeNode("Помещения");
+        root.add(departNodes);
+        root.add(teacherNodes);
+        root.add(roomNodes);
+        setModel(new DefaultTreeModel(root));
+        addTreeSelectionListener(new TreeSelectionListener() {
+
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode)getLastSelectedPathComponent();
+                Object userObject = node.getUserObject();
+                if (userObject!=null){
+                    if (userObject instanceof TreeElement){
+                        selectedElement  = (TreeElement)userObject;
+                        ElementChange();
+                    }
+                }
+            }
+        });
+        
+    }
+    
+    public void ElementChange(){
+    }
+    
+    public void open() throws Exception{
+        
+        DefaultMutableTreeNode node;
+        Dataset dataset ;
+        dataset = DataModule.getSQLDataset("select id,label from depart");
+        dataset.open();
+        for (int i=0;i<dataset.getRowCount();i++){
+            node = new DefaultMutableTreeNode(new Depart(dataset.getValues(i)));
+            departNodes.add(node);
+        }
+        
+        dataset = DataModule.getSQLDataset("select id,last_name from teacher");
+        dataset.open();
+        for (int i=0;i<dataset.getRowCount();i++){
+            node = new DefaultMutableTreeNode(new Teacher(dataset.getValues(i)));
+            teacherNodes.add(node);
+        }
+        
+        dataset = DataModule.getSQLDataset("select id,room_name from room");
+        dataset.open();
+        for (int i=0;i<dataset.getRowCount();i++){
+            node = new DefaultMutableTreeNode(new Room(dataset.getValues(i)));
+            roomNodes.add(node);
+        }
+        
+    }
+}
+
 interface TimeTableCommand {
-    public static final String TT_CLEAR = "TT_CLEAR";
-    public static final String TT_DELETE = "TT_DELETE";
-    public static final String TT_PLACE = "TT_PLACE";
-    public static final String TT_FIX = "TT_FIX";
+    public static final String TT_CLEAR     = "TT_CLEAR";
+    public static final String TT_DELETE    = "TT_DELETE";
+    public static final String TT_PLACE     = "TT_PLACE";
+    public static final String TT_PLACE_ALL = "TT_PLACE_ALL";
+    public static final String TT_FIX       = "TT_FIX";
+    public static final String TT_UNFIX     = "TT_UNFIX";
+    
 }
 
 public class TimeGridPanel2 extends JPanel  implements TimeTableCommand{
-    JTree tree;
+    ScheduleTree tree;
     TimeTableGrid grid;
     
     Grid unplacedGrid;
@@ -127,6 +189,17 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand{
             System.out.println(command);
             try{
                 switch (command){
+                    case TT_PLACE_ALL:
+                        TreeElement element =tree.selectedElement;
+                        if (element !=null){
+                            if (element instanceof Depart){
+                                Integer depart_id= element.id;
+                                ScheduleBuilder.placeDepart(depart_id);
+                                grid.reload();
+                            }
+                            unplacedGrid.requery();
+                        }
+                        break;
                     case TT_DELETE:
                         grid.delete();
                         unplacedGrid.requery();
@@ -139,6 +212,12 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand{
                         grid.clear();
                         unplacedGrid.requery();
                         break;
+                    case TT_FIX:
+                        grid.fix();
+                        break;
+                    case TT_UNFIX:
+                        grid.unfix();
+                        break;
                 }
             } catch (Exception e){
                 JOptionPane.showMessageDialog(TimeGridPanel2.this, e.getMessage());
@@ -149,7 +228,13 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand{
     public TimeGridPanel2(){
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(800, 600));
-        tree = new JTree();
+        tree = new ScheduleTree(){
+
+            @Override
+            public void ElementChange() {
+                treeElementChange(selectedElement);
+            }
+        };
         grid = new TimeTableGrid(){
 
             @Override
@@ -194,25 +279,13 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand{
         splitPane.setDividerLocation(200);
         add(splitPane);
         
-        tree.addTreeSelectionListener(new TreeSelectionListener() {
-
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
-                Object userObject = node.getUserObject();
-                if (userObject!=null){
-                    if (userObject instanceof TreeElement){
-                        TreeElement element = (TreeElement)userObject;
-                        treeElementChange(element);
-                    }
-                }
-            }
-        });
         
         manager.setCommandList(new String[]{
+             TT_PLACE_ALL+";Разместить всё",
              TT_PLACE+";Разместить",
              TT_DELETE+";Удалить",
-             TT_FIX+";Зафиксировать",
+             TT_FIX+";Болкировать",
+             TT_UNFIX+";Отм.блок",
              TT_CLEAR+";Очистить"
         });
         
@@ -236,41 +309,8 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand{
     }
     
     public void open() throws Exception{
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Расписания");
-        DefaultMutableTreeNode departNodes,teacherNodes,roomNodes;
-        departNodes = new DefaultMutableTreeNode("Классы");
-        teacherNodes = new DefaultMutableTreeNode("Преподаватели");
-        roomNodes = new DefaultMutableTreeNode("Помещения");
-        root.add(departNodes);
-        root.add(teacherNodes);
-        root.add(roomNodes);
-                
-        
-        DefaultMutableTreeNode node;
+        tree.open();
         Dataset dataset ;
-        dataset = DataModule.getSQLDataset("select id,label from depart");
-        dataset.open();
-        for (int i=0;i<dataset.getRowCount();i++){
-            node = new DefaultMutableTreeNode(new Depart(dataset.getValues(i)));
-            departNodes.add(node);
-        }
-        
-        dataset = DataModule.getSQLDataset("select id,last_name from teacher");
-        dataset.open();
-        for (int i=0;i<dataset.getRowCount();i++){
-            node = new DefaultMutableTreeNode(new Teacher(dataset.getValues(i)));
-            teacherNodes.add(node);
-        }
-        
-        dataset = DataModule.getSQLDataset("select id,room_name from room");
-        dataset.open();
-        for (int i=0;i<dataset.getRowCount();i++){
-            node = new DefaultMutableTreeNode(new Room(dataset.getValues(i)));
-            roomNodes.add(node);
-        }
-        
-        
-        tree.setModel(new DefaultTreeModel(root));
         
         dataset = DataModule.getSQLDataset(
            "select b.label,a.group_label,c.subject_name,a.unplaced,a.depart_id,a.subject_id,a.group_id,"

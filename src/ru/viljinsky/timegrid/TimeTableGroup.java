@@ -29,6 +29,7 @@ public class TimeTableGroup extends CellElement {
     String teacher_name;
     String group_label;
     String depart_label;
+    Boolean ready;
 
     @Override
     public void draw(Graphics g, Rectangle b) {
@@ -51,6 +52,10 @@ public class TimeTableGroup extends CellElement {
         g.drawString(room_no, x, y);
         y += h;
         g.drawString(group_label, x, y);
+        if (ready){
+            g.setColor(color.YELLOW);
+            g.fillRect(b.x+b.width-10, b.y, 10, 10);
+        }
     }
 
     public TimeTableGroup(Values values) {
@@ -65,6 +70,8 @@ public class TimeTableGroup extends CellElement {
             group_id = values.getInteger("group_id");
             group_label = values.getString("group_label");
             depart_label = values.getString("depart_label");
+            ready = values.getBoolean("ready");
+//            moveble = !values.getBoolean("ready");
             setCell(day_no - 1, bell_id - 1);
         } catch (Exception e) {
             e.printStackTrace();

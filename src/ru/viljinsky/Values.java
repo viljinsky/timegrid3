@@ -40,7 +40,16 @@ public class Values extends HashMap<String, Object> {
             return null;
         }
         throw new Exception(COLUMN_NOT_FOUND+"'"+columnName+"'");
-        
+    }
+    
+    public Boolean getBoolean(String columnName) throws Exception{
+        if (containsKey(columnName)){
+            Object result = get(columnName);
+            if (result!=null)
+                return Boolean.valueOf(result.toString());
+            return null;
+        }
+        throw new Exception(COLUMN_NOT_FOUND+"'"+columnName+"'");
     }
     
 }

@@ -6,6 +6,8 @@
 
 package ru.viljinsky.timegrid;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JOptionPane;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
@@ -42,7 +44,8 @@ public class TimeTableGrid extends TimeGrid {
         dataset = DataModule.getSQLDataset("select * from v_schedule");
         dataset.setFilter(filter);
         dataset.open();
-        clear();
+//        for ()
+        super.clear();
         Values values;
         TimeTableGroup ttGroup;
         for (int i = 0; i < dataset.getRowCount(); i++) {
@@ -97,15 +100,54 @@ public class TimeTableGrid extends TimeGrid {
         String sql = "delete from schedule where day_id=%d and bell_id=%d and depart_id=%d and subject_id=%d and group_id=%d";
         try{
             for (CellElement ce:getSelectedElements()){
-                group = (TimeTableGroup)ce;
-                DataModule.execute(String.format(sql,group.day_no,group.bell_id,group.depart_id,group.subject_id,group.group_id));
+                if (ce.moveble==true){
+                    group = (TimeTableGroup)ce;
+                    DataModule.execute(String.format(sql,group.day_no,group.bell_id,group.depart_id,group.subject_id,group.group_id));
+                    cells.remove(ce);
+                }
             }
-            super.delete(); 
+//            super.delete(); 
             DataModule.commit();
             realign();
         } catch (Exception e){
             DataModule.rollback();
             throw new Exception("TIME_TABLE_DELETE_ERROR\n"+e.getMessage());
+        }
+    }
+    
+    public void fix() throws Exception{
+        TimeTableGroup group;
+        String sql = "update schedule set ready='true' where day_id=%d and bell_id=%d and depart_id=%d and subject_id=%d and group_id=%d;";
+        try{
+            for (CellElement ce:getSelectedElements()){
+                group = (TimeTableGroup)ce;
+                DataModule.execute(String.format(sql,group.day_no,group.bell_id,group.depart_id,group.subject_id,group.group_id));
+                group.ready=true;
+            }
+            DataModule.commit();
+            repaint();
+            
+        } catch (Exception e){
+            DataModule.rollback();
+            throw new Exception("FIX_SCHEDULE_ERROR\n"+e.getMessage());
+        }
+    }
+    
+    public void unfix() throws Exception{
+        TimeTableGroup group;
+        String sql = "update schedule set ready='false' where day_id=%d and bell_id=%d and depart_id=%d and subject_id=%d and group_id=%d;";
+        try{
+            for (CellElement ce:getSelectedElements()){
+                group = (TimeTableGroup)ce;
+                DataModule.execute(String.format(sql,group.day_no,group.bell_id,group.depart_id,group.subject_id,group.group_id));
+                group.ready=false;
+            }
+            DataModule.commit();
+            repaint();
+            
+        } catch (Exception e){
+            DataModule.rollback();
+            throw new Exception("FIX_SCHEDULE_ERROR\n"+e.getMessage());
         }
     }
     
@@ -155,20 +197,30 @@ public class TimeTableGrid extends TimeGrid {
 
     @Override
     public void clear() throws Exception {
+        String sql = "delete from schedule "
+                    + "where day_id=%d "
+                    + "and bell_id=%d "
+                    + "and depart_id=%d "
+                    + "and subject_id=%d "
+                    + "and group_id=%d;";
         TimeTableGroup group;
         try{
-            for (CellElement ce:cells){
+            List<CellElement> list = new ArrayList(cells);
+            for (CellElement ce:list){
                 group=(TimeTableGroup)ce;
-                DataModule.execute(String.format("delete from schedule where day_id=%d and bell_id=%d and depart_id=%d and subject_id=%d and group_id=%d",
-                        group.day_no,
-                        group.bell_id,
-                        group.depart_id,
-                        group.subject_id,
-                        group.group_id
-                        ));
+                if (group.ready!=true){
+                    DataModule.execute(String.format(sql,
+                            group.day_no,
+                            group.bell_id,
+                            group.depart_id,
+                            group.subject_id,
+                            group.group_id
+                            ));
+                    cells.remove(group);
+                }
             }
             DataModule.commit();
-            super.clear();
+//            super.clear();
             realign();
         } catch (Exception e){
             DataModule.rollback();
