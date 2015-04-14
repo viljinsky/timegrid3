@@ -88,18 +88,30 @@ public class Main4 extends JFrame{
             JOptionPane.showMessageDialog(this, "База \""+path+"\" - успешно создана");
         }
     }
+    
     public void fileOpen(){
-        SelectDatabase dlg = new SelectDatabase();
+        String fileName ="\\.";
+        SelectDatabase dlg = new SelectDatabase(){
+
+            @Override
+            public void doOnEntry() throws Exception {
+                if (getFileName()==null)
+                    throw new Exception("Укажите файл");
+                if (isNewFile()){
+                    CreateData.execute(getFileName());
+                }
+            }
+        };
         dlg.showModal(rootPane);
         if (dlg.modalResult==SelectDatabase.RESULT_OK)
             try {
-                String path = dlg.getSelectedData();
+                fileName = dlg.getFileName();
                 if (DataModule.isActive()){
                     close();
                     DataModule.close();
                 }
-                DataModule.open(path);
-                setTitle(APP_NAME+"["+path+"]");
+                DataModule.open(fileName);
+                setTitle(APP_NAME+"["+fileName+"]");
                 open();
             } catch (Exception e){
                 JOptionPane.showMessageDialog(rootPane, e.getMessage());

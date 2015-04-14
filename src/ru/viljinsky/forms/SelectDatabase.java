@@ -8,13 +8,20 @@ package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.io.File;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
+//import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -35,16 +42,85 @@ class SelectDatabase extends BaseDialog {
     JRadioButton rCreateNew = new JRadioButton("Создать новую базу");
     JRadioButton rSelectExists = new JRadioButton("Выбрать из рание созданных");
     ButtonGroup group = new ButtonGroup();
-    SelectPanel selectPanel = new SelectPanel();
-    CreatePanel createPanel = new CreatePanel();
+    SelectDataPath panel1 = new SelectDataPath();
+    CreatePanel    panel2 = new CreatePanel();
+    SelectPanel    panel3 = new SelectPanel();
     
-    public String getSelectedData(){
-        if (rSelectExists.isSelected()){
-            return selectPanel.getFileName();
-        }
-        return null;
+    
+    
+    public boolean isNewFile(){
+        return rCreateNew.isSelected();
     }
     
+    public String getFileName(){
+        String path = panel1.textPath.getText();
+        if (!path.endsWith("\\")){
+            path+="\\";
+        }
+        
+        if (rCreateNew.isSelected()){
+            return path + panel2.getFileName();
+        } else if (rSelectExists.isSelected()){
+            return path + panel3.getFileName();
+        }  
+        return null;
+    }
+    // panel1
+    class SelectDataPath  extends JPanel{
+        JTextField textPath = new JTextField(20);
+        public SelectDataPath(){
+            setLayout(new FlowLayout(FlowLayout.LEFT));
+            add(new JLabel("Укажите путь"));
+            add(textPath);
+            JButton button = new JButton("...");
+            button.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    JFileChooser fc = new JFileChooser(new File(textPath.getText()));
+                    fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                    int retVal = fc.showDialog(rootPane, "Выбрать");
+                    if (retVal==JFileChooser.APPROVE_OPTION){
+                        proc1(fc.getSelectedFile().getPath());
+                    }
+                }
+            });
+            add(button);
+            setBorder(new TitledBorder("Путь к базам данных"));
+
+        }
+        
+    }
+    
+    // panel2
+    class CreatePanel extends JPanel{
+        JTextField txtDataName = new JTextField(20);
+        public CreatePanel(){
+            setLayout(new FlowLayout(FlowLayout.LEFT));
+            setBorder(new TitledBorder("Создать"));
+            JLabel label = new JLabel("Имя базы данных");
+            add(label);
+            add(txtDataName);
+            txtDataName.addFocusListener(new FocusAdapter() {
+
+                @Override
+                public void focusGained(FocusEvent e) {
+                    rCreateNew.setSelected(true);
+                }
+                
+            });
+                
+            
+        }
+        
+        public String getFileName(){
+            return txtDataName.getText();
+        }
+    }
+    
+    
+        
+    //panel3
     class SelectPanel extends JPanel{
         JList<String> fileList = new JList<>();
         public SelectPanel(){
@@ -52,18 +128,6 @@ class SelectDatabase extends BaseDialog {
             setBorder(new TitledBorder("Выбрать"));
             add(new JScrollPane(fileList));
 
-            DefaultListModel model = new DefaultListModel();
-            
-            File f = new File(".");
-            String path ;
-            for (File ff: f.listFiles())
-                if (ff.isFile()){
-                    path = ff.getName();
-                    if (path.endsWith(".db"))
-                        model.addElement(path);
-                }
-            fileList.setModel(model);
-            
             fileList.addListSelectionListener(new ListSelectionListener() {
 
                 @Override
@@ -80,22 +144,21 @@ class SelectDatabase extends BaseDialog {
             return fileList.getSelectedValue();
         }
     }
-    
-    class CreatePanel extends JPanel{
-        JTextField txtDataName = new JTextField(20);
-        public CreatePanel(){
-            setLayout(new FlowLayout(FlowLayout.LEFT));
-            setBorder(new TitledBorder("Создать"));
-            JLabel label = new JLabel("Имя базы данных");
-            add(label);
-            add(txtDataName);
-            
-        }
-        
-        public String getFileName(){
-            return txtDataName.getText();
-        }
+
+    public void proc1(String dir){
+        panel1.textPath.setText(dir);
+        DefaultListModel model = new DefaultListModel();
+        File f = new File(dir);
+        String fileName;
+        for (File ff:f.listFiles())
+            if (ff.isFile()){
+                fileName = ff.getName();
+                if (fileName.endsWith(".db"))
+                    model.addElement(ff.getName());
+            }
+        panel3.fileList.setModel(model);
     }
+    
 
     public SelectDatabase() {
         super();
@@ -103,7 +166,10 @@ class SelectDatabase extends BaseDialog {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         Box box;
         
-                
+        box = Box.createHorizontalBox();
+        box.add(panel1);
+        panel.add(box);
+        //---------------------------        
         group.add(rCreateNew);
         box = Box.createHorizontalBox();
         box.add(rCreateNew);
@@ -111,9 +177,9 @@ class SelectDatabase extends BaseDialog {
         panel.add(box);
         
         box = Box.createVerticalBox();
-        box.add(createPanel);
+        box.add(panel2);
         panel.add(box);
-        
+        //-----------------------------
         group.add(rSelectExists);
         box = Box.createHorizontalBox();
         box.add(rSelectExists);
@@ -121,29 +187,20 @@ class SelectDatabase extends BaseDialog {
         panel.add(box);
         
         box = Box.createVerticalBox();
-        box.add(selectPanel);
+        box.add(panel3);
         panel.add(box);
+        //------------------------------
         
         
         panel.setBorder(new EmptyBorder(20, 20, 20, 20));
         
         add(panel, BorderLayout.CENTER);
-        
+//        proc1("d:\\temp");
+        proc1(".");
     }
 
     @Override
     public void doOnEntry() throws Exception {
-        
-        if  (rCreateNew.isSelected()){
-                System.out.println("Создать новый файл "+createPanel.getFileName());
-                return;
-        }
-        if (rSelectExists.isSelected()){
-                System.out.println("Открыть существующий файл "+selectPanel.getFileName());
-                return;
-        }
-        throw new Exception("Выберите файл");
-        
     }
     
 }
