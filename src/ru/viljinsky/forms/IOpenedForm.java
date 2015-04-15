@@ -205,7 +205,6 @@ class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
                     new_profile_id=Dialogs.createProfile(this, profile_id);
                     if (new_profile_id!=null){
                         try{
-                            
                             Integer room_id=grid.getIntegerValue("id");
                             DataModule.execute("update room set profile_id="+new_profile_id+" where id="+room_id);
                             DataModule.commit();
@@ -230,8 +229,13 @@ class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
                     break;
                     
                 case CREATE_SHIFT:
+                    int room_id=grid.getIntegerValue("id");
                     shift_id=grid.getIntegerValue("shift_id");
-                    Dialogs.createShift(this, shift_id);
+                    shift_id=Dialogs.createShift(this, shift_id);
+                    if (shift_id!=null){
+                        DataModule.execute(String.format("update room set shift_id=%d where id=%d",shift_id,room_id));
+                        grid.requery();
+                    }
                     break;
                     
                 case EDIT_SHIFT:
@@ -887,6 +891,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
             shift_id=grid.getIntegerValue("shift_id");
             switch (command){
                 case CREATE_PROFILE:
+//                    Dialogs.createProfile(this, profile_id);
                     newProfileId = Dialogs.createProfile(this, profile_id);
                     if (newProfileId!=null){
                         try{

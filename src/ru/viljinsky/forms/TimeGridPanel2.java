@@ -127,7 +127,8 @@ import ru.viljinsky.timegrid.TimeTableGrid;
     
     class Room extends TreeElement{
         private static final String sql =
-                "";
+                "select day_id-1,bell_id-1 from shift_detail a inner join "+
+                "room b on a.shift_id=b.shift_id where b.id=%d;";
         public Room(Values values) throws Exception{
             id= values.getInteger("id");
             label=values.getString("room_name");
@@ -142,6 +143,17 @@ import ru.viljinsky.timegrid.TimeTableGrid;
     @Override
     public Set<Point> getAvalabelCells() {
         Set<Point> result = new HashSet<>();
+            Point p;
+            Object[] r;
+            try{
+                Recordset recordset = DataModule.getRecordet(String.format(sql,id));
+                for (int i=0;i<recordset.size();i++){
+                    r=recordset.get(i);
+                    result.add(new Point((Integer)r[0],(Integer)r[1]));
+                }
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         return result;
     }
         

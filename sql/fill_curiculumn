@@ -1,5 +1,0 @@
-delete from curriculum_detail;
-insert into curriculum_detail (curriculum_id,subject_id,hour_per_week,hour_per_day,group_type_id)
-select curriculum.id,subject.id,2,1,group_type.id
-from curriculum,subject,group_type
-where group_type.id=(select min(id) from group_type);

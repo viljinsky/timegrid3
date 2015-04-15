@@ -18,16 +18,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-//class DataMap extends HashMap<String,Object>{
-//}
-
 
 interface IDataModuleConsts {
     public static final String  DATABASE_NOT_ACTIVE = "База данных не открыта";
     public static final String  DATABASE_IS_ACTIVE  = "База открыта";
     public static final String  FILE_NOT_FOUND = "Файл \"%s\" не найден";
-    public static final String TABLE_NOT_FOUND = "TABLE_NOT_FOUND";
-    public static final String DEFAULT_DATA = "example.db";
+    public static final String  TABLE_NOT_FOUND = "TABLE_NOT_FOUND";
+    public static final String  DEFAULT_DATA = "example.db";
 }
 
 public class DataModule implements IDataModuleConsts {
@@ -45,7 +42,6 @@ public class DataModule implements IDataModuleConsts {
     public static Statement createStatement() throws Exception{
         return con.createStatement();
     }
-    
     
     public static List<DatasetInfo> getInfoList(){
         return infoList;
@@ -332,23 +328,5 @@ public class DataModule implements IDataModuleConsts {
         }
         return result;
     }
-    
-    public static void main(String[] args){
-        Dataset dataset;
-        try{
-            open();
-            for (String tableName:getTableNames()){
-                dataset = getDataset(tableName);
-                dataset.test();
-                dataset.open();
-                dataset.print();
-            }
-            
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        
-    }
-    
     
 }

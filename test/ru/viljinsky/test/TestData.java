@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package ru.viljinsky;
+package ru.viljinsky.test;
 
 /**
  *
@@ -13,7 +13,7 @@ package ru.viljinsky;
 
 import java.sql.*;
 
-public class Test {
+public class TestData {
     public static void main(String[] args) throws Exception{
         
         String tableName;
