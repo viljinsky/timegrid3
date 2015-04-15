@@ -8,6 +8,8 @@ package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -50,6 +52,11 @@ class GridPanel extends JPanel {
 
     void AddButton(JComponent component) {
         titlePanel.add(component);
+    }
+    
+    public void addAction(Action action){
+        JButton button = new JButton(action);
+        titlePanel.add(button);
     }
     
 }

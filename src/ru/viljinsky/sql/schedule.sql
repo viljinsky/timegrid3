@@ -19,7 +19,7 @@ create table week(
 drop table if exists building;
 create table building(
     id integer primary key autoincrement,
-    building_name varchar(20)
+    building_name varchar(20) unique
 );
 
 drop table if exists room;
@@ -41,7 +41,8 @@ create table subject(
     default_hour_per_week integer ,
     default_group_type_id integer references group_type(id),
     default_hour_per_day integer ,
-    color integer
+    color varchar(11) default '240 240 240'
+--     color_rgb varchar(20),
 );
 
 drop table if exists profile_type;
@@ -54,7 +55,7 @@ drop table if exists profile;
 create table profile(
     id integer primary key autoincrement,
     profile_type_id integer references profile_type(id),
-    profile_name varchar(18) not null
+    profile_name varchar(18) not null unique
 );
 
 drop table if exists profile_item;
@@ -74,7 +75,7 @@ drop table if exists shift;
 create table shift(
     id integer primary key autoincrement,
     shift_type_id integer references shift_type(id),
-    shift_name varchar(18) not null
+    shift_name varchar(18) not null unique
 );
 
 drop table if exists shift_detail;
@@ -262,7 +263,8 @@ select f.label as depart_label,dl.day_caption,bl.time_start ||'-'||time_end as l
   b.room_id,
   a.stream_id,
   d.building_id,
-  b.ready
+  b.ready,
+  s.color
 from v_subject_group a 
     inner join schedule b
         on a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
@@ -279,15 +281,30 @@ select * from v_schedule;
 
 --   v_teacher
 
+drop view if exists v_teacher;
 create view v_teacher as
-select a.last_name,a.first_name,a.patronymic,b.profile_name,c.room_name,d.building_name,
+select a.last_name,a.first_name,a.patronymic,b.profile_name,c.room_name,d.building_name,s.shift_name,
 a.id,a.profile_id,a.teacher_room_id,a.shift_id
  from teacher a
 left join profile b
 	on a.profile_id=b.id
+left join shift s on s.id=a.shift_id
 left join room c
 	on a.teacher_room_id=c.id
 left join building d on d.id=c.building_id;
+
+-- v_room
+
+create view v_room as
+select b.building_name,a.room_name,p.profile_name,s.shift_name,
+a.capacity,a.id,a.building_id,a.profile_id,a.shift_id
+ from room a
+inner join profile p on p.id =a.profile_id
+inner join shift s on s.id=a.shift_id
+inner join building b on b.id=a.building_id;
+
+select * from v_room;
+
 
 -- v_depart_on_schedule
 

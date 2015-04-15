@@ -21,6 +21,14 @@ public class DatasetInfo {
 
     String tableType; // TABLE or VIEW
     String tableName;
+    public String selectSQL;
+    public String insertSQL;
+    public String deleteSQL;
+    public String updateSQL;
+    
+    String primaryKey = "";
+    
+    Map<String, String> references = new HashMap<>();
     Map<Integer,Column> columns = new HashMap<>();
 
     public String getTableType() {
@@ -37,13 +45,6 @@ public class DatasetInfo {
     public String getTableName() {
         return tableName;
     }
-    String selectSQL;
-    String insertSQL;
-    String deleteSQL;
-    String updateSQL;
-    
-    String primaryKey = "";
-    Map<String, String> references = new HashMap<>();
 
     public DatasetInfo() {}
     

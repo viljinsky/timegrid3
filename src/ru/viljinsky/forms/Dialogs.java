@@ -8,6 +8,7 @@ package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,8 @@ abstract class AbstractProfileDialog extends SelectDialog{
         super();
         this.profile_id=profile_id;
         add(entryPanel,BorderLayout.PAGE_START);
+        Dataset dataset = DataModule.getSQLDataset("select * from profile");
+        entryPanel.setDataset(dataset);
     }
     
 }
@@ -118,9 +121,14 @@ public class Dialogs {
             
             @Override
             public void doOnEntry() throws Exception {
+                String profile_name = (String)entryPanel.getValues().get("profile_name");
                 
-                String profile_name=(String)entryPanel.getValues().get("profile_name");
-                DataModule.execute("update profile set profile_name='"+profile_name+"' where id="+profile_id);
+                Integer profile_type_id = entryPanel.getValues().getInteger("profile_type_id");
+                String sql = "insert into profile (profile_type_id,profile_name) values (%d,'%s');";
+                DataModule.execute(String.format(sql,profile_type_id,profile_name));
+                Recordset recordset = DataModule.getRecordet("select max(id) from profile");
+                profile_id = (Integer)recordset.get(0)[0];
+                
                 KeyMap map = new KeyMap();
                 map.put(1, profile_id);
                 for (Object obj:getSelected()){
@@ -129,19 +137,16 @@ public class Dialogs {
                 }
             }
         };
+
         
-        DataModule.execute("insert into profile (profile_type_id,profile_name) select profile_type_id,'*new profile*' from profile where id="+profile_id);
         Dataset dataset;
-        dataset = DataModule.getSQLDataset("select * from profile where id=(select max(id) from profile)");
-        dataset.open();
-        Map<String,Object> map = dataset.getValues(0);
-        
-        dlg.profile_id=(Integer)map.get("id");
-        dlg.entryPanel.setDataset(dataset);
-        dlg.entryPanel.setValues(map);
         dataset = DataModule.getDataset("subject");
         dlg.setDataset(dataset, "id", "subject_name");
         
+        dataset = DataModule.getSQLDataset("select null as id ,'Новый профиль' as profile_name,profile_type_id from profile where id="+profile_id);
+        dataset.open();;
+        Values values = dataset.getValues(0);
+        dlg.entryPanel.setValues(values);
         dlg.showModal(owner);
         if (dlg.modalResult==SelectDialog.RESULT_OK)
             return dlg.profile_id;
@@ -154,8 +159,18 @@ public class Dialogs {
             @Override
             public void doOnEntry() throws Exception {
                 try{
-                    String profile_name=(String)entryPanel.getValues().get("profile_name");
-                    DataModule.execute("update profile set profile_name='"+profile_name+"' where id="+profile_id);
+                    Values values = entryPanel.getValues();
+                    profile_id = values.getInteger("id");
+                    Dataset dataset = DataModule.getDataset("profile");
+                    dataset.test();
+                    Map<String,Object> filter = new HashMap<>();
+                    filter.put("id", profile_id);
+                    dataset.setFilter(filter);
+                    dataset.setFiltered(true);
+                            
+                    dataset.open();
+                    dataset.edit(0, values);
+                    
                     for (Object k:getRemoved()){
                         DataTask.excludeSubjectFromProfile(profile_id,(Integer)k);
                     }
@@ -172,7 +187,7 @@ public class Dialogs {
         
         IDataset dataset = DataModule.getSQLDataset("select * from profile where id="+profile_id);
         dataset.open();
-        dlg.entryPanel.setDataset(dataset);
+//        dlg.entryPanel.setDataset(dataset);
         if (!dataset.isEmpty()){
             Map<String,Object> map;
             map = dataset.getValues(0);
@@ -188,6 +203,7 @@ public class Dialogs {
         dataset = DataModule.getDataset("subject");
         dlg.setDataset(dataset, "id", "subject_name");
         dlg.setSelected(set);
+        dlg.profile_id=profile_id;
         return (dlg.showModal(owner)==SelectDialog.RESULT_OK);
         
     }

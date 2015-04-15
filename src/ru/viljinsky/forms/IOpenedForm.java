@@ -15,13 +15,16 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import ru.viljinsky.BaseDialog;
 import ru.viljinsky.CommandMngr;
 import ru.viljinsky.DBComboBox;
+import ru.viljinsky.DataEntryDialog;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
 import ru.viljinsky.IDataset;
 import ru.viljinsky.SelectDialog;
+import ru.viljinsky.Values;
 
 /**
  *
@@ -61,6 +64,15 @@ abstract class DetailPanel extends JPanel{
 
 ////////////////////////////    ROOM PANEL /////////////////////////////////////
 interface IRoomTeacherCommands{
+    
+    public static final String CREATE_TEACHER     = "CREATE_TEACHER";
+    public static final String EDIT_TEACHER       = "EDIT_TEACHER";
+    public static final String DELETE_TEACHER     = "DELETE_TEACHER";
+    
+    public static final String CREATE_ROOM     = "CREATE_ROOM";
+    public static final String EDIT_ROOM       = "EDIT_ROOM";
+    public static final String DELETE_ROOM     = "DELETE_ROOM";
+    
     public static final String CREATE_SHIFT     = "CREATE_SHIFT";
     public static final String REMOVE_SHIFT     = "REMOVE_SHIFT";
     public static final String EDIT_SHIFT       = "EDIT_SHIFT";
@@ -74,7 +86,6 @@ class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
     
     
     MasterGrid grid = new MasterGrid();
-    DataModule dataModule = DataModule.getInstance();
     SelectRoomPanel selectPanel = new SelectRoomPanel();
     
     DetailPanel shiftPanel = new ShiftRoomPanel();
@@ -91,22 +102,115 @@ class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
         }
     };
     
+    public RoomPanel(){
+        super(new BorderLayout());
+        JTabbedPane tabs =new JTabbedPane();
+        tabs.addTab("Subject group", selectPanel);
+        tabs.addTab("Profile",profilePanel);
+        tabs.addTab("Shift",shiftPanel);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        
+        GridPanel gridPanel = new GridPanel("Преподаватели", grid);
+        
+//        splitPane.setTopComponent(new JScrollPane(grid));
+        splitPane.setTopComponent(gridPanel);
+        
+        splitPane.setBottomComponent(tabs);
+        splitPane.setResizeWeight(0.5);
+                
+        add(splitPane);
+        setPreferredSize(new Dimension(800,600));
+        commands.setCommandList(new String[]{
+            CREATE_ROOM+";Добавить",
+            EDIT_ROOM+";Изменить",
+            DELETE_ROOM+";Удалить",
+            CREATE_SHIFT,
+            EDIT_SHIFT,
+            REMOVE_SHIFT,
+            CREATE_PROFILE,
+            EDIT_PROFILE,
+            REMOVE_PROFILE
+        });
+        
+       
+        gridPanel.addAction(commands.getAction(CREATE_ROOM));
+        gridPanel.addAction(commands.getAction(EDIT_ROOM));
+        gridPanel.addAction(commands.getAction(DELETE_ROOM));
+       
+        
+        shiftPanel.addAction(commands.getAction(CREATE_SHIFT));
+        shiftPanel.addAction(commands.getAction(EDIT_SHIFT));
+        shiftPanel.addAction(commands.getAction(REMOVE_SHIFT));
+        
+        profilePanel.addAction(commands.getAction(CREATE_PROFILE));
+        profilePanel.addAction(commands.getAction(EDIT_PROFILE));
+        profilePanel.addAction(commands.getAction(REMOVE_PROFILE));
+    }
     
     public void doCommand(String command){
         Integer shift_id,profile_id;
         Integer new_profile_id;
+        Dataset dataset;
+        DataEntryDialog dlg;
         try{
             switch(command){
+                case CREATE_ROOM:
+                    dataset = DataModule.getDataset("room");
+                    dlg = new DataEntryDialog() {
+
+                        @Override
+                        public void doOnEntry() throws Exception {
+                            Dataset ds = DataModule.getDataset("room");
+                            ds.test();
+                            ds.appned(getValues());
+                        }
+                    };
+                    dlg.setDataset(dataset);
+                    if (dlg.showModal(this)==BaseDialog.RESULT_OK){
+                        grid.requery();
+                    }
+                    
+                    break;
+                    
+                case EDIT_ROOM:
+                    dataset = DataModule.getDataset("room");
+                    dlg = new DataEntryDialog() {
+
+                        @Override
+                        public void doOnEntry() throws Exception {
+                            Map<String,Object> values = getValues();
+                            Dataset ds = DataModule.getDataset("room");
+                            ds.open();
+                            Map<String,Object> filter = new HashMap<>();
+                            filter.put("id", values.get("id"));
+                            ds.setFilter(filter);
+                            ds.setFiltered(true);
+                            ds.edit(0, values);
+                        }
+                    };
+                    dlg.setDataset(dataset);
+                    
+                    Values  values = grid.getValues();
+                    dlg.setValues(values);
+                    if (dlg.showModal(this)==BaseDialog.RESULT_OK){
+                        grid.requery();
+                    }
+                    break;
+                    
+                case DELETE_ROOM:
+                    break;
+                    
                 case CREATE_PROFILE:
                     profile_id = grid.getIntegerValue("profile_id");
                     new_profile_id=Dialogs.createProfile(this, profile_id);
                     if (new_profile_id!=null){
                         try{
+                            
                             Integer room_id=grid.getIntegerValue("id");
-                            dataModule.execute("update room set profile_id="+new_profile_id+" where id="+room_id);
-                            dataModule.commit();
+                            DataModule.execute("update room set profile_id="+new_profile_id+" where id="+room_id);
+                            DataModule.commit();
                         } catch (Exception p){
-                            dataModule.rollback();
+                            DataModule.rollback();
                             throw new Exception("CREATE_PROFILE_ERROR\n"+p.getMessage());
                         }    
                         grid.requery();
@@ -115,9 +219,11 @@ class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
                 case EDIT_PROFILE:
                     profile_id=grid.getIntegerValue("profile_id");
                     if (Dialogs.editProfile(this, profile_id)){
-                        profilePanel.grid.requery();
+//                        profilePanel.grid.requery();
+                        grid.requery();
                     }
                     break;
+                    
                 case REMOVE_PROFILE:
                     profile_id = grid.getIntegerValue("profile_id");
                     Dialogs.removeProfile(this, profile_id);
@@ -151,7 +257,7 @@ class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
         String sqlShift="select * from shift_detail a inner join room b on a.shift_id=b.shift_id where b.id=%room_id;";
         @Override
         public void reopen(Integer keyValue) throws Exception{
-            dataset = dataModule.getSQLDataset(sqlShift.replace("%room_id",keyValue.toString()));
+            dataset = DataModule.getSQLDataset(sqlShift.replace("%room_id",keyValue.toString()));
             dataset.open();
             grid.setDataset(dataset);
         }
@@ -161,7 +267,7 @@ class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
         String sqlProfile = "select * from v_room_profile where room_id=%room_id;";
         @Override
         public void reopen(Integer keyValue) throws Exception{
-            dataset = dataModule.getSQLDataset(sqlProfile.replace("%room_id", keyValue.toString()));
+            dataset = DataModule.getSQLDataset(sqlProfile.replace("%room_id", keyValue.toString()));
             dataset.open();
             grid.setDataset(dataset);
         }
@@ -184,19 +290,45 @@ class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
                 }
             }
         }
+
+        @Override
+        public void requery() throws Exception {
+            Integer room_id = getIntegerValue("id");
+            super.requery();
+            if (room_id!=null){
+                Map<String,Object> map = new HashMap<>();
+                map.put("id", room_id);
+                locate(map);
+                gridSelectionChange();
+            }
+        }
+        
+        
         
     }
     
     class SelectRoomPanel extends SelectPanel{
         
         int room_id=-1;
-        String sqlSource = "select s.subject_name,d.label,a.group_id,a.hour_per_week,a.subject_id,a.depart_id\n"+
-                            " from v_subject_group a inner join profile_item b on a.subject_id=b.subject_id\n" +
-                            "inner join room c on c.profile_id=b.profile_id\n" +
-                            "inner join subject s on s.id=a.subject_id\n"+ 
-                            "inner join depart d on d.id=a.depart_id\n"+
-//                            "order by a.depart_id,a.subject_id,a.group_id\n"+
-                            "where a.default_room_id is null and c.id=";
+        String sqlSource = 
+//                "select s.subject_name,d.label,a.group_id,a.hour_per_week,a.subject_id,a.depart_id\n"+
+//                            " from v_subject_group a inner join profile_item b on a.subject_id=b.subject_id\n" +
+//                            "inner join room c on c.profile_id=b.profile_id\n" +
+//                            "inner join subject s on s.id=a.subject_id\n"+ 
+//                            "inner join depart d on d.id=a.depart_id\n"+
+//                            "where a.default_room_id is null and c.id=";
+        
+                "select d.label,s.subject_name,v.group_label,v.pupil_count, "+
+                "t.last_name|| ' ' || substr(t.first_name,1,1) || '. ' || substr(t.patronymic,1,1)||'.', "+
+                "v.hour_per_week,v.depart_id,v.subject_id,v.group_id,v.stream_id,v.group_sequence "+
+                " from room a inner join profile_item b "+
+                "on a.profile_id=b.profile_id "+
+                "inner join v_subject_group v on v.subject_id=b.subject_id "+
+                "inner join depart d on d.id=v.depart_id "+
+                "inner join subject s on s.id=v.subject_id "+
+                "left join teacher t on t.id =v.default_teacher_id "+
+                "where v.default_room_id is null";// and a.id=3;";
+        
         String sqlDest ="select s.subject_name,d.label,a.group_id,a.hour_per_week,a.subject_id,a.depart_id\n"
                 + " from v_subject_group a\n"+
                  "inner join subject s on s.id=a.subject_id\n"+
@@ -222,9 +354,9 @@ class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
                     group_id=(Integer)values.get("group_id");
                     DataTask.includeGroupToRoom(depart_id, subject_id, group_id, room_id);
                 }
-                dataModule.commit();
+                DataModule.commit();
             } catch (Exception e){
-                dataModule.rollback();
+                DataModule.rollback();
                 throw new Exception("INCLUDE_ERROR\n"+e.getMessage());
             }
             requery();
@@ -243,9 +375,9 @@ class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
                     group_id=(Integer)values.get("group_id");
                     DataTask.excluderGroupFromRoom(depart_id, subject_id, group_id);
                 }
-                dataModule.commit();
+                DataModule.commit();
             } catch (Exception e){
-                dataModule.rollback();
+                DataModule.rollback();
                 throw new Exception("EXCLUDE_ERROR\n"+e.getMessage());
             }
             requery();
@@ -264,9 +396,9 @@ class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
                     group_id=(Integer)values.get("group_id");
                     DataTask.includeGroupToRoom(depart_id, subject_id, group_id, room_id);
                 }
-                dataModule.commit();
+                DataModule.commit();
             } catch (Exception e){
-                dataModule.rollback();
+                DataModule.rollback();
                 throw new Exception("INCLUDE_ERROR\n"+e.getMessage());
             }
             requery();
@@ -285,9 +417,9 @@ class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
                     group_id=(Integer)values.get("group_id");
                     DataTask.excluderGroupFromRoom(depart_id, subject_id, group_id);
                 }
-                dataModule.commit();
+                DataModule.commit();
             } catch (Exception e){
-                dataModule.rollback();
+                DataModule.rollback();
                 throw new Exception("EXCLUDE_ERROR\n"+e.getMessage());
             }
             requery();
@@ -295,52 +427,62 @@ class RoomPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands{
 
         @Override
         public void requery() throws Exception {
-            Dataset dataset = dataModule.getSQLDataset(sqlSource+room_id);
+            Dataset dataset;
+            if (chProfileOnly.isSelected())
+                dataset = DataModule.getSQLDataset(sqlSource+" and a.id="+room_id);
+            else
+                dataset = DataModule.getSQLDataset(sqlSource);
+                
             dataset.open();
             sourceGrid.setDataset(dataset);
             
-            dataset = dataModule.getSQLDataset(sqlDest+room_id);
+            dataset = DataModule.getSQLDataset(sqlDest+room_id);
             dataset.open();
             destanationGrid.setDataset(dataset);
         }
     }
 
     
-    public RoomPanel(){
-        super(new BorderLayout());
-        JTabbedPane tabs =new JTabbedPane();
-        tabs.addTab("Subject group", selectPanel);
-        tabs.addTab("Profile",profilePanel);
-        tabs.addTab("Shift",shiftPanel);
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        splitPane.setTopComponent(new JScrollPane(grid));
-        splitPane.setBottomComponent(tabs);
-        splitPane.setResizeWeight(0.5);
-                
-        add(splitPane);
-        setPreferredSize(new Dimension(800,600));
-        commands.setCommandList(new String[]{
-            CREATE_SHIFT,
-            EDIT_SHIFT,
-            REMOVE_SHIFT,
-            CREATE_PROFILE,
-            EDIT_PROFILE,
-            REMOVE_PROFILE
-        });
-        
-        shiftPanel.addAction(commands.getAction(CREATE_SHIFT));
-        shiftPanel.addAction(commands.getAction(EDIT_SHIFT));
-        shiftPanel.addAction(commands.getAction(REMOVE_SHIFT));
-        
-        profilePanel.addAction(commands.getAction(CREATE_PROFILE));
-        profilePanel.addAction(commands.getAction(EDIT_PROFILE));
-        profilePanel.addAction(commands.getAction(REMOVE_PROFILE));
-    }
+//    public RoomPanel(){
+//        super(new BorderLayout());
+//        JTabbedPane tabs =new JTabbedPane();
+//        tabs.addTab("Subject group", selectPanel);
+//        tabs.addTab("Profile",profilePanel);
+//        tabs.addTab("Shift",shiftPanel);
+//        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+//        splitPane.setTopComponent(new JScrollPane(grid));
+//        splitPane.setBottomComponent(tabs);
+//        splitPane.setResizeWeight(0.5);
+//                
+//        add(splitPane);
+//        setPreferredSize(new Dimension(800,600));
+//        commands.setCommandList(new String[]{
+//            CREATE_ROOM,
+//            EDIT_ROOM,
+//            DELETE_ROOM,
+//            CREATE_SHIFT,
+//            EDIT_SHIFT,
+//            REMOVE_SHIFT,
+//            CREATE_PROFILE,
+//            EDIT_PROFILE,
+//            REMOVE_PROFILE
+//        });
+//        
+//       
+//        
+//        shiftPanel.addAction(commands.getAction(CREATE_SHIFT));
+//        shiftPanel.addAction(commands.getAction(EDIT_SHIFT));
+//        shiftPanel.addAction(commands.getAction(REMOVE_SHIFT));
+//        
+//        profilePanel.addAction(commands.getAction(CREATE_PROFILE));
+//        profilePanel.addAction(commands.getAction(EDIT_PROFILE));
+//        profilePanel.addAction(commands.getAction(REMOVE_PROFILE));
+//    }
     
     
     @Override
     public void open() throws Exception {
-        Dataset dataset=dataModule.getDataset("room");
+        Dataset dataset=DataModule.getDataset("v_room");
         dataset.open();
         grid.setDataset(dataset);
         selectPanel.requery();
@@ -854,15 +996,25 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
 
     class TeacherSelectPanel extends SelectPanel{
         int teacher_id = -1;
-        String sourceSQL =  //"select * from v_subject_group where default_teacher_id is null;";
-          "select d.subject_name,e.label,c.group_label,c.hour_per_week, c.default_teacher_id,\n" +
-          "c.subject_id as teacher_id,c.group_id as group_id,c.depart_id as depart_id,c.subject_id as subject_id\n" +
-          "from teacher a inner join profile_item b\n" +
-          "on a.profile_id=b.profile_id\n" +
-          "inner join v_subject_group c on c.subject_id=b.subject_id\n" +
-          "inner join subject d on d.id=c.subject_id\n" +
-          "inner join depart e on e.id=c.depart_id\n" +
-          "where c.default_teacher_id is null and  a.id=";
+        String sourceSQL = 
+//          "select d.subject_name,e.label,c.group_label,c.hour_per_week, c.default_teacher_id,\n" +
+//          "c.subject_id as teacher_id,c.group_id as group_id,c.depart_id as depart_id,c.subject_id as subject_id\n" +
+//          "from teacher a inner join profile_item b\n" +
+//          "on a.profile_id=b.profile_id\n" +
+//          "inner join v_subject_group c on c.subject_id=b.subject_id\n" +
+//          "inner join subject d on d.id=c.subject_id\n" +
+//          "inner join depart e on e.id=c.depart_id\n" +
+//          "where c.default_teacher_id is null and  a.id=";
+        
+          "select s.subject_name,d.label,sg.group_label,sg.hour_per_week,\n" +
+            "sg.depart_id,sg.group_id,sg.subject_id,\n" +
+            "sg.group_sequence,sg.pupil_count,sg.stream_id,sg.default_teacher_id,sg.default_room_id \n" +
+            "from teacher a inner join profile_item b\n" +
+            "on a.profile_id=b.profile_id\n" +
+            "inner join v_subject_group sg on sg.subject_id=b.subject_id\n" +
+            "inner join subject s on b.subject_id=s.id\n" +
+            "inner join depart d on d.id=sg.depart_id\n" +
+            "where sg.default_teacher_id is null "; // and  a.id=9;";
         
         String destanationSQL = "select b.subject_name,d.label,a.group_label,a.hour_per_week,\n"
                 + "a.subject_id,a.group_id,a.group_type_id,a.default_room_id,a.depart_id \n"
@@ -884,7 +1036,11 @@ class TeacherPanel extends JPanel implements IOpenedForm,IRoomTeacherCommands {
         public void requery() throws Exception {
             Dataset dataset;
             
-            dataset = DataModule.getSQLDataset(sourceSQL+teacher_id);
+            if (chProfileOnly.isSelected()){
+                dataset = DataModule.getSQLDataset(sourceSQL+" and a.id="+teacher_id);
+            } else {
+                dataset = DataModule.getSQLDataset(sourceSQL);
+            }
             dataset.open();            
             sourceGrid.setDataset(dataset);
             

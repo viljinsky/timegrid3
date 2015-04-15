@@ -111,19 +111,3 @@ public abstract class BaseDialog extends JDialog implements ActionListener{
     
 }
 
-abstract class DataEntryDialog extends BaseDialog{
-    protected EntryPanel entryPanel;
-
-    @Override
-    public Container getPanel() {
-        entryPanel = new EntryPanel();
-        return entryPanel;
-    }
-    
-    
-    public void setDataset(IDataset dataset){
-        entryPanel.setDataset(dataset);
-    }
-
-    
-}

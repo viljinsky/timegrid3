@@ -286,8 +286,8 @@ public class EntryPanel extends JPanel {
         ;
     }
 
-    public Map<String, Object> getValues() {
-        Map<String, Object> map = new HashMap<>();
+    public Values getValues() {
+        Values map = new Values();
         String columnName;
         Object value;
         for (IEntryControl control : controls) {

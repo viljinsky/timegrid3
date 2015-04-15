@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -27,12 +28,25 @@ import ru.viljinsky.Grid;
 abstract class SelectPanel extends JPanel implements ActionListener {
     Grid sourceGrid;
     Grid destanationGrid;
+    protected JCheckBox chProfileOnly;
 
     public SelectPanel() {
         setPreferredSize(new Dimension(500, 200));
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         sourceGrid = new Grid();
         destanationGrid = new Grid();
+        chProfileOnly = new JCheckBox("Только по профилю",null,true);
+        chProfileOnly.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try{
+                    requery();
+                } catch (Exception ee){
+                    ee.printStackTrace();
+                }
+            }
+        });
         Map<String, String> btns = new HashMap<>();
         btns.put("INCLUDE", ">");
         btns.put("EXCLUDE", "<");
@@ -41,8 +55,9 @@ abstract class SelectPanel extends JPanel implements ActionListener {
         JButton btn;
         Box box;
         //            setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        box = Box.createHorizontalBox();
+        box = Box.createVerticalBox();
         box.add(new JScrollPane(sourceGrid));
+        box.add(chProfileOnly);
         add(box);
         add(Box.createHorizontalStrut(6));
         box = Box.createVerticalBox();

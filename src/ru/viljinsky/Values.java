@@ -27,7 +27,10 @@ public class Values extends HashMap<String, Object> {
             if (result == null) {
                 return null;
             }
-            return (Integer) result;
+            if (result instanceof Number)
+                return (Integer) result;
+            if (result instanceof String)
+                return Integer.valueOf((String)result);
         }
         throw new Exception(COLUMN_NOT_FOUND + "'" + columnName + "'");
     }

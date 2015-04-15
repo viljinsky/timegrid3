@@ -29,12 +29,13 @@ public class TimeTableGroup extends CellElement {
     String teacher_name;
     String group_label;
     String depart_label;
+    Color color= Color.CYAN;
     Boolean ready;
 
     @Override
     public void draw(Graphics g, Rectangle b) {
         int h = g.getFontMetrics().getHeight();
-        g.setColor(Color.white);
+        g.setColor(color);
         g.fillRect(b.x, b.y, b.width, b.height);
         if (selected) {
             g.setColor(Color.red);
@@ -76,6 +77,15 @@ public class TimeTableGroup extends CellElement {
             ready = values.getBoolean("ready");
             week_id=values.getInteger("week_id");
 //            moveble = !values.getBoolean("ready");
+            
+            
+            String color_rgb = values.getString("color");
+            if (color_rgb!=null){
+                String[] rgb = color_rgb.split(" ");
+                color = new Color(Integer.valueOf(rgb[0]),Integer.valueOf(rgb[1]),Integer.valueOf(rgb[2]));
+            }
+                
+            
             setCell(day_no - 1, bell_id - 1);
         } catch (Exception e) {
             e.printStackTrace();

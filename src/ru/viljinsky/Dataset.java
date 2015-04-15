@@ -110,28 +110,60 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         return info.columns.get(columnIndex).columnName;
     }
 
+    public void open(Map<String,Object> filter) throws Exception{
+        clear();
+        if (test()){
+            setFilter(filter);
+            filtered=true;
+            readData();
+        }
+    }
+    
     @Override
     public void open() throws Exception {
+        clear();
         if (test()){
-            clear();
-            Statement stmt = null;
-            try {
-                stmt = dataModule.createStatement();
-                ResultSet rs = stmt.executeQuery(info.selectSQL);
-                Object[] rowset;
-                while (rs.next()) {
-                    rowset = new Object[getColumnCount()];
-                    for (int i = 0; i < rowset.length; i++) {
-                        rowset[i] = rs.getObject(i + 1);
-                    }
-                    if (!filtered || checkFilter(rowset))
-                        add(rowset);
+            readData();
+//            Statement stmt = null;
+//            try {
+//                stmt = dataModule.createStatement();
+//                ResultSet rs = stmt.executeQuery(info.selectSQL);
+//                Object[] rowset;
+//                while (rs.next()) {
+//                    rowset = new Object[getColumnCount()];
+//                    for (int i = 0; i < rowset.length; i++) {
+//                        rowset[i] = rs.getObject(i + 1);
+//                    }
+//                    if (!filtered || checkFilter(rowset))
+//                        add(rowset);
+//                }
+//                this.active = true;
+//            } finally {
+//                if (stmt!=null){
+//                    stmt.close();
+//                }
+//            }
+        }
+    }
+    
+    private void readData() throws Exception{
+        Statement stmt = null;
+        try {
+            stmt = dataModule.createStatement();
+            ResultSet rs = stmt.executeQuery(info.selectSQL);
+            Object[] rowset;
+            while (rs.next()) {
+                rowset = new Object[getColumnCount()];
+                for (int i = 0; i < rowset.length; i++) {
+                    rowset[i] = rs.getObject(i + 1);
                 }
-                this.active = true;
-            } finally {
-                if (stmt!=null){
-                    stmt.close();
-                }
+                if (!filtered || checkFilter(rowset))
+                    add(rowset);
+            }
+            this.active = true;
+        } finally {
+            if (stmt!=null){
+                stmt.close();
             }
         }
     }
