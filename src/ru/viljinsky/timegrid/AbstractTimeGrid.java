@@ -7,7 +7,6 @@
 package ru.viljinsky.timegrid;
 
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -130,6 +129,13 @@ class DragObject{
     }
 }
 
+interface ITimeGridColor{
+    public static final Color GC_TIME_GRID_CELL_COLOR = Color.YELLOW;
+    public static final Color GC_TIME_GRID_HIGHLIGHT_CELL_COLOR = Color.ORANGE;
+    public static final Color GC_TIME_GRID_SELECTED_CELL_COLOR = Color.PINK;
+//    public static final Color GC_TIME_GRID_CELL_COLOR = new Color(255,250,250);
+//    public static final Color GC_TIME_GRID_CELL_COLOR = new Color(255,250,250);
+}
 
 abstract class AbstractTimeGrid extends JPanel {
     Set<DragObject> dragObjects = null;
@@ -395,6 +401,7 @@ abstract class AbstractTimeGrid extends JPanel {
         int height =calcRowHeight();
         setPreferredSize(new Dimension(width, height));
         revalidate();
+        
 //        System.out.println("revalidate");
         repaint();
     }

@@ -17,13 +17,18 @@ import java.awt.Rectangle;
 public class CellElement {
     int col=1;
     int row=1;
-    boolean moveble = false;
+    boolean moveble = true;
     protected boolean selected = false;
     Rectangle bound = null;
     public static Integer WIDTH = 100;
     public static Integer HEIGHT = 85;
     Color color = Color.MAGENTA;// ; new Color(255, 255, 200);
 
+    public void setCell(Cell cell){
+        col=cell.col;
+        row = cell.row;
+    }
+    
     public void draw(Graphics g, Rectangle b) {
         g.setColor(color);
         g.fillRect(b.x, b.y, b.width, b.height);

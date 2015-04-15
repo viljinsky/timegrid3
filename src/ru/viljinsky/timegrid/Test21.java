@@ -9,13 +9,11 @@ package ru.viljinsky.timegrid;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.TransferHandler;
 
 /**
  *
@@ -61,8 +59,6 @@ public class Test21 extends JFrame{
         public void columnHeaderClick(int col) {
             JOptionPane.showMessageDialog(rootPane, "columClick "+col);
         }
-        
-        
 
         @Override
         public void cellElementClick(CellElement ce) {
@@ -85,6 +81,7 @@ public class Test21 extends JFrame{
         scrollPane.setRowHeaderView(timeGrid.getRowHeader());
         splitPane.setRightComponent(scrollPane);
         splitPane.setLeftComponent(list);
+        splitPane.setDividerLocation(120);
         splitPane.setPreferredSize(new Dimension(600,400));
         setContentPane(splitPane);
         
@@ -94,10 +91,13 @@ public class Test21 extends JFrame{
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount()==2){
                     CellElement ce = new CellElement();
-                    if (timeGrid.getSelectedCell()==null)
+                    Cell cell = timeGrid.findFirstEmptyCell();
+                    if (cell==null)
+//                    if (timeGrid.getSelectedCell()==null)
                         JOptionPane.showMessageDialog(Test21.this, "not selected");
                     else{                                
-                        ce.setCell(timeGrid.selectedCol,timeGrid.selectedRow);
+//                        ce.setCell(timeGrid.selectedCol,timeGrid.selectedRow);
+                        ce.setCell(cell);
                         timeGrid.addElement(ce);
                         timeGrid.repaint();
                     }

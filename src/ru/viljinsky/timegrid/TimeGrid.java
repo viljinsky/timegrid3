@@ -313,6 +313,32 @@ public class TimeGrid extends AbstractTimeGrid{
         repaint();
     }
     
+    /**
+     * Определить, является ли ячейка col row свобожной, т.е. в ней не расположен
+     *  ни один елемент
+     * @param col
+     * @param row
+     * @return true если хотябы один елемент расположен вячейке, в протвном случее false
+     */
+    public boolean cellIsEmpty(int col,int row){
+        for (CellElement ce:cells){
+            if (ce.col==col && ce.row==row){
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    public Cell findFirstEmptyCell(){
+        for (int row=0;row<rowCount;row++){
+            for (int col=0;col<colCount;col++){
+                if (cellIsEmpty(col, row)){
+                    return new Cell(col,row);
+                }
+            }
+        }
+        return null;
+    }
     public void add(){
         CellElement ce = new CellElement();
         ce.col = selectedCol;

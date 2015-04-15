@@ -9,14 +9,12 @@ package ru.viljinsky.timegrid;
 import java.awt.Color;
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JOptionPane;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
-import ru.viljinsky.Recordset;
 import ru.viljinsky.Values;
 
 /**
