@@ -9,11 +9,14 @@ package ru.viljinsky.timegrid;
 import java.awt.Color;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.JOptionPane;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
+import ru.viljinsky.Recordset;
 import ru.viljinsky.Values;
 
 /**
@@ -26,6 +29,26 @@ public class TimeTableGrid extends TimeGrid {
     Dataset dataset = null;
     Values filter = null;
     public Set<Point> avalableCells = null;
+    public Map<Integer,String> colCaption = null;
+    public Map<Integer,String> rowCaption = null;
+
+    @Override
+    public String getRowHeaderText(int row) {
+        if (rowCaption==null)
+            return super.getRowHeaderText(row); //To change body of generated methods, choose Tools | Templates.
+        else
+            return rowCaption.get(row);
+    }
+
+    @Override
+    public String getColumnHeaderText(int col) {
+        if (colCaption==null)
+            return super.getColumnHeaderText(col); //To change body of generated methods, choose Tools | Templates.
+        else
+            return colCaption.get(col);
+    }
+    
+    
 
     public Dataset getDataset() {
         return dataset;
@@ -37,6 +60,18 @@ public class TimeTableGrid extends TimeGrid {
     
     public TimeTableGrid(int col, int row) {
         super(col, row);
+//        try{
+//            Recordset recordet = DataModule.getRecordet("select day_no,day_caption from day_list");
+//            colCaption = new HashMap<>();
+//            Object[] r;
+//            for (int i=0;i<recordet.size();i++){
+//                r=recordet.get(i);
+//                colCaption.put((Integer)r[0],(String)r[1]);
+//            }
+//        } catch (Exception e){
+//            colCaption=null;
+//            e.printStackTrace();
+//        }
     }
 
     public void SetFilter(Values filter) throws Exception {

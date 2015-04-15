@@ -40,7 +40,7 @@ public class TimeTableGroup extends CellElement {
             g.setColor(Color.red);
             g.drawRect(b.x, b.y, b.width, b.height);
         }
-        g.setColor(Color.BLUE);
+        g.setColor(Color.BLACK);
         int x = b.x + 2;
         int y = b.y + h;
         g.drawString(depart_label, x, y);

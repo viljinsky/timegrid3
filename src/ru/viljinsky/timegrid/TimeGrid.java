@@ -8,6 +8,7 @@ package ru.viljinsky.timegrid;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -48,6 +49,22 @@ abstract class TimeGridHeader extends JPanel{
     
     public abstract int hitTest(int x,int y);
     
+    public void drawCellLabel(Graphics g,Rectangle rect,String label){
+        String[] strs = label.split("\n");
+        String str = strs[0];
+        FontMetrics fm = g.getFontMetrics();
+        int w = fm.stringWidth(str);
+        int h = fm.getHeight();
+        int x = rect.x+(rect.width-w)/2;
+        int y = rect.y+rect.height-(rect.height - h)/2;
+        g.setColor(Color.black);
+        for (String s:strs){
+            g.drawString(s,x,y);
+            y+=h;
+        }
+    }
+    
+    
 };
 
 public class TimeGrid extends AbstractTimeGrid{
@@ -62,6 +79,26 @@ public class TimeGrid extends AbstractTimeGrid{
         realign();
     }
     
+    /**
+     * Получение текста заголовка колонок
+     * @param col от 0 до colcount
+     * @return строка заголовка колонки
+     */
+    public String getColumnHeaderText(int col){
+        return String.format("column%d", col);
+    }
+    
+    /**
+     * Получение текста заголовка строки 
+     * @param row номер строки от 0 до rowcount
+     * @return String заголовок строки
+     */
+    public String getRowHeaderText(int row){
+        return String.format("Row%d",row);
+    }
+    
+    
+    
     public JComponent getColumnHeader(){
         return columnHeader;
     }
@@ -70,14 +107,6 @@ public class TimeGrid extends AbstractTimeGrid{
         return rowHeader;
     }
 
-//    @Override
-//    public Color getCellBackground(int col, int row) {
-//        if (col%2==0)
-//            return Color.LIGHT_GRAY;
-//        else
-//            return Color.WHITE;
-//    }
-    
     
     class ColumnHeader extends TimeGridHeader{
         public ColumnHeader(){
@@ -100,6 +129,10 @@ public class TimeGrid extends AbstractTimeGrid{
             setPreferredSize(new Dimension(width,HOR_HEIGHT));
         }
         
+        public void drawColumnHeaderCell(Graphics g,Rectangle rect,int col){
+            drawCellLabel(g, rect, getColumnHeaderText(col));
+        }
+    
         @Override
         public void paintComponent(Graphics g){
             Rectangle r =  new Rectangle(0,0,getWidth(),getHeight()) ;g.getClipBounds();
@@ -111,11 +144,14 @@ public class TimeGrid extends AbstractTimeGrid{
             r1.height-=1;
             for (int i=0;i<getColumnCount();i++){
                 r1.width=getColumnWidth(i);
+                drawColumnHeaderCell(g, r1, i);
+                g.setColor(Color.gray);
                 g.drawLine(r1.x, r1.y, r1.x, r1.y+r1.height);
                 r1.x+=r1.width;
             }
             g.drawLine(r1.x, r1.y, r1.x, r1.y+r1.height);
         }
+        
         
         @Override
         public int hitTest(int x,int y){
@@ -150,6 +186,10 @@ public class TimeGrid extends AbstractTimeGrid{
             setPreferredSize(new Dimension(VER_WEDTH,height));
         }
         
+        public void drawRowHeaderCell(Graphics g,Rectangle rect,int row){
+            drawCellLabel(g, rect, getRowHeaderText(row));
+        }
+        
         @Override
         public void paintComponent(Graphics g){
             Rectangle r = new Rectangle(0,0,getWidth(),getHeight());//g.getClipBounds();
@@ -161,9 +201,11 @@ public class TimeGrid extends AbstractTimeGrid{
             
             Rectangle r1 = new Rectangle(r);
             r1.width-=1;
-            g.setColor(Color.gray);
             for (int i=0;i<getRowCount();i++){
+                
                 r1.height=getRowHeight(i);
+                drawRowHeaderCell(g, r1, i);
+                g.setColor(Color.gray);
                 g.drawLine(r1.x, r1.y, r1.x+r1.width,  r1.y);
                 r1.y+=r1.height;
             }

@@ -13,7 +13,9 @@ import java.awt.Point;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -376,6 +378,24 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
                    + " inner join subject c on c.id=a.subject_id"
         );
         unplacedGrid.setDataset(dataset);
+        
+        Map<Integer,String> columnHeaderCaprion = new HashMap<>();
+        Recordset recordset = DataModule.getRecordet("select day_no,day_caption from day_list");
+        Object[] r;
+        for (int i=0;i<recordset.size();i++){
+            r=recordset.get(i);
+            columnHeaderCaprion.put(i,(String)r[1]);
+        }
+        grid.colCaption = columnHeaderCaprion;
+        
+        Map<Integer,String> rowHeaderCaption = new HashMap<>();
+        recordset=DataModule.getRecordet("select bell_id,time_start || '\n' || time_end from bell_list");
+        for (int i=0;i<recordset.size();i++){
+            r=recordset.get(i);
+            rowHeaderCaption.put(i, (String)r[1]);
+        }
+        
+        grid.rowCaption = rowHeaderCaption;
         
     }
   
