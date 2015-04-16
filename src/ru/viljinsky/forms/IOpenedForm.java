@@ -189,6 +189,9 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
                     break;
                     
                 case DELETE_ROOM:
+                    room_id = grid.getIntegerValue("id");
+                    if (Dialogs.deleteRoom(this, room_id))
+                        grid.requery();
                     break;
                     
                 case CREATE_PROFILE:
@@ -308,7 +311,7 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
         String sqlSource = 
             "select d.label,s.subject_name,v.group_label,v.pupil_count, "+
             "t.last_name|| ' ' || substr(t.first_name,1,1) || '. ' || substr(t.patronymic,1,1)||'.', "+
-            "v.hour_per_week,v.depart_id,v.subject_id,v.group_id,v.stream_id,v.group_sequence "+
+            "v.hour_per_week,v.depart_id,v.subject_id,v.group_id,v.stream_id,v.group_sequence_id "+
             " from room a inner join profile_item b "+
             "on a.profile_id=b.profile_id "+
             "inner join v_subject_group v on v.subject_id=b.subject_id "+
@@ -528,6 +531,9 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
                     break;
                     
                 case DELETE_DEPART:
+                    depart_id = grid1.getIntegerValue("id");
+                    if (Dialogs.deleteDepart(this, depart_id))
+                        grid1.requery();
                     break;
                     
                 case FILL_GROUP:
@@ -627,7 +633,7 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
     public Map<String, String> getParams() {
         Map<String,String> map = new HashMap<>();
         map.put(MASTER_DATASET,"curriculum");
-        map.put(SLAVE_DATASET, "curriculum_detail");
+        map.put(SLAVE_DATASET, "v_curriculum_detail");
         map.put(REFERENCES, "curriculum_id=id");
         return map;
     }
@@ -665,6 +671,9 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
                     break;
                     
                 case DELETE_CURRICULUM:
+                    curriculum_id=grid1.getIntegerValue("id");
+                    if (Dialogs.deleteCurriculum(this,curriculum_id))
+                        grid1.requery();
                     break;
                     
                 case FILL_CURRICULUM:
@@ -889,7 +898,9 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
                     break;
                     
                 case DELETE_TEACHER:
-            grid.requery();
+                    teacher_id = grid.getIntegerValue("id");
+                    if (Dialogs.deleteTeacher(this, teacher_id))
+                        grid.requery();
                     break;
                     
                 case CREATE_PROFILE:
@@ -903,17 +914,17 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
                             throw new Exception("UPDATE_ERROR\n"+p.getMessage());
                         }
                     }
-            grid.requery();
+                    grid.requery();
                     break;
                     
                 case EDIT_PROFILE:
                     Dialogs.editProfile(this,profile_id);
-            grid.requery();
+                    grid.requery();
                     break;
                     
                 case REMOVE_PROFILE:
                     Dialogs.removeProfile(this, profile_id);
-            grid.requery();
+                    grid.requery();
                     break;
                  
                 case CREATE_SHIFT:
@@ -927,16 +938,16 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
                             throw new Exception("CREATE_SHIFT_ERROR\n"+p.getMessage());
                         }
                     }
-            grid.requery();
+                    grid.requery();
                     break;
                     
                 case EDIT_SHIFT:
                     Dialogs.editShift(this, shift_id);
-            grid.requery();
+                    grid.requery();
                     break;
                 case REMOVE_SHIFT:
                     Dialogs.removeShift();
-            grid.requery();
+                    grid.requery();
                     break;
             }
         } catch (Exception e){
@@ -1011,7 +1022,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
         
           "select s.subject_name,d.label,sg.group_label,sg.hour_per_week,\n" +
             "sg.depart_id,sg.group_id,sg.subject_id,\n" +
-            "sg.group_sequence,sg.pupil_count,sg.stream_id,sg.default_teacher_id,sg.default_room_id \n" +
+            "sg.group_sequence_id,sg.pupil_count,sg.stream_id,sg.default_teacher_id,sg.default_room_id \n" +
             "from teacher a inner join profile_item b\n" +
             "on a.profile_id=b.profile_id\n" +
             "inner join v_subject_group sg on sg.subject_id=b.subject_id\n" +

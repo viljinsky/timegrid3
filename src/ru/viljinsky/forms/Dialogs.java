@@ -525,6 +525,21 @@ public class Dialogs {
         
     }
     
+    public static boolean deleteCurriculum(JComponent owner, Integer curriculum_id) throws Exception{
+        if (JOptionPane.showConfirmDialog(owner,"Удалить учебный план","Внимание",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
+            try{
+                DataModule.execute("delete from curriculum where id ="+curriculum_id+";");
+                DataModule.commit();
+                return true;
+            } catch (Exception e){
+                DataModule.rollback();
+                throw new Exception("DELETE_CURRICULUM_ERROR\n"+e.getMessage());
+            }
+        }
+        return false;
+    }
+    
+    
     /////////////////////// TEACHER ////////////////////////////////////////////
     
     
@@ -582,6 +597,21 @@ public class Dialogs {
         
     }
     
+    public static boolean deleteTeacher(JComponent owner,Integer teacher_id) throws Exception{
+        if (JOptionPane.showConfirmDialog(owner, "Удалить преподавателя","Внимание",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
+            try{
+                DataModule.execute("delete from teacher where id="+teacher_id+";");
+                DataModule.commit();
+                return true;
+            } catch (Exception e){
+                DataModule.rollback();
+                throw new Exception("DELETE_TEACHER_ERROR\n"+e.getMessage());
+            }
+        }
+        return false;
+    }
+    
+    
     ///////////////////////    ROOM  ///////////////////////////////////////////
     
     public static Integer createRoom(JComponent owner) throws Exception{
@@ -638,6 +668,19 @@ public class Dialogs {
         
     }
     
+    public static boolean deleteRoom(JComponent owner,Integer room_id) throws Exception{
+        if (JOptionPane.showConfirmDialog(owner, "Удалить помещение","Внимание",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
+            try{
+                DataModule.execute("delete from room where id="+room_id+";");
+                DataModule.commit();
+                return true;
+            } catch (Exception e){
+                DataModule.rollback();
+                throw new Exception("DELETE_ROOM_ERROR\n"+e.getMessage());
+            }
+        }
+        return false;
+    }
     
     //////////////////////  DEPART /////////////////////////////////////////////
     
@@ -698,4 +741,19 @@ public class Dialogs {
         dlg.setValues(values);
         return (dlg.showModal(owner)==BaseDialog.RESULT_OK);
     }
+    
+    public static boolean deleteDepart(JComponent owner,Integer depart_id) throws Exception{
+        if (JOptionPane.showConfirmDialog(owner, "Удалить подразделение","Внимание",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
+            try{
+                DataModule.execute("delete from depart where id="+depart_id+";");
+                DataModule.commit();
+                return true;
+            } catch (Exception e){
+                DataModule.rollback();
+                throw new Exception("DELETE_DEPART_ERROR\n"+e.getMessage());
+            }
+        }
+        return false;
+    }
+
 }

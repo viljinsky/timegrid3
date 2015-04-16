@@ -166,7 +166,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             try{
                 rs = stmt.executeQuery(info.selectSQL+" limit 1;");
             } catch (Exception e){
-                throw new Exception("TEST_ERROR:\n"+e.getMessage());
+                throw new Exception("TEST_ERROR:\n table '"+info.tableType+"'\n'"+info.selectSQL+"'\n"+e.getMessage());
             }
             ResultSetMetaData rsmeta = rs.getMetaData();
             for (int i = 0; i < rsmeta.getColumnCount(); i++) {

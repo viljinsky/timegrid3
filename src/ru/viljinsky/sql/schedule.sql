@@ -8,6 +8,13 @@ create table stream (
     teacher_id integer references teacher(id)
 );
 
+drop table if exists group_sequence;
+create table group_sequence (id integer primary key ,group_sequence_name varchar(20));
+
+insert into group_sequence (id,group_sequence_name) values (0,'Каждую неделю');
+insert into group_sequence (id,group_sequence_name) values (1,'Неетная неделя');
+insert into group_sequence (id,group_sequence_name) values (2,'Чётная неделя');
+
 
 
 drop table if exists week;
@@ -55,7 +62,8 @@ drop table if exists profile;
 create table profile(
     id integer primary key autoincrement,
     profile_type_id integer references profile_type(id),
-    profile_name varchar(18) not null unique
+    profile_name varchar(18) not null,
+    unique(profile_type_id,profile_name)
 );
 
 drop table if exists profile_item;
@@ -75,7 +83,8 @@ drop table if exists shift;
 create table shift(
     id integer primary key autoincrement,
     shift_type_id integer references shift_type(id),
-    shift_name varchar(18) not null unique
+    shift_name varchar(18) not null,
+    unique (shift_type_id,shift_name)
 );
 
 drop table if exists shift_detail;
@@ -91,12 +100,12 @@ create table shift_detail(
 drop table if exists teacher;
 create table teacher(
     id integer primary key autoincrement,
-    last_name varchar(18),
+    last_name varchar(18) not null,
     first_name varchar(18),
     patronymic varchar(18),
     photo binary,
-    profile_id integer references profile(id),
-    shift_id integer references shift(id),
+    profile_id integer not null references profile(id),
+    shift_id integer  references shift(id),
     teacher_room_id integer references room(id) on delete set null,
     comments blob
     
@@ -112,10 +121,10 @@ create table skill(
 drop table if exists depart;
 create table depart(
     id integer primary key autoincrement,
-    label varchar(10) unique,
-    skill_id integer references skill(id),
+    label varchar(10) not null unique,
+    skill_id integer not null references skill(id),
     shift_id integer references shift(id),
-    curriculum_id integer references curriculum(id),
+    curriculum_id integer not null references curriculum(id),
     class_room integer references room(id),
     class_former integer references teacher(id),
     boy_count integer,
@@ -138,8 +147,9 @@ create table subject_group (
 drop table if exists curriculum; 
 create table curriculum(
     id integer primary key autoincrement,
-    skill_id integer references skill(id),
-    caption varchar(18));
+    skill_id integer not null references skill(id),
+    caption varchar(18) not null unique
+);
 
 drop table if exists group_type;
 create table group_type(
@@ -154,7 +164,7 @@ create table curriculum_detail(
     hour_per_day integer not null,
     hour_per_week integer not null,
     group_type_id integer not null default 0 references group_type(id),
-    group_sequence integer default 0,
+    group_sequence_id integer default 0 references group_sequence(id),
     constraint pk_cur_det primary key (curriculum_id,subject_id)    
 );
 
@@ -211,7 +221,7 @@ case
 	when c.group_type_id = 1  and a.group_id=2 then 'Д'
 	when c.group_type_id = 2 then 'ГР.' || a.group_id
 end as group_label,
-a.group_id,a.depart_id,a.subject_id,c.group_type_id,a.stream_id,c.hour_per_week,c.hour_per_day,c.group_sequence,
+a.group_id,a.depart_id,a.subject_id,c.group_type_id,a.stream_id,c.hour_per_week,c.hour_per_day,c.group_sequence_id,
 a.default_teacher_id,a.default_room_id,a.pupil_count
  from subject_group a inner join depart b on a.depart_id=b.id inner join curriculum_detail c
 on c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id;
@@ -221,7 +231,7 @@ select * from v_subject_group;
 drop view if exists v_subject_group_on_schedule;
 create view  v_subject_group_on_schedule as
 select a.depart_id,a.subject_id,a.group_id,a.hour_per_week,a.hour_per_day,a.group_type_id,a.default_teacher_id,a.default_room_id,count(b.bell_id) as placed,
-a.stream_id,a.group_sequence,a.pupil_count
+a.stream_id,a.group_sequence_id,a.pupil_count
  from v_subject_group a
 left join schedule b on a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
 group by a.depart_id,a.subject_id,a.group_id,a.hour_per_week,a.hour_per_day,a.group_id,a.group_type_id,a.pupil_count;
@@ -235,7 +245,7 @@ create view  v_subject_group_on_schedule as
 select a.group_label,a.depart_id,a.subject_id,a.group_id,a.hour_per_week,a.hour_per_day,a.group_type_id,a.default_teacher_id,a.default_room_id,
 count(b.bell_id) as placed,
 a.hour_per_week - count(b.bell_id) as unplaced,
-a.stream_id,a.group_sequence,a.pupil_count
+a.stream_id,a.group_sequence_id,a.pupil_count
  from v_subject_group a
 left join schedule b on a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
 group by a.depart_id,a.subject_id,a.group_id,a.hour_per_week,a.hour_per_day,a.group_id,a.group_type_id,a.pupil_count;
@@ -318,4 +328,13 @@ from subject_group a
        inner join depart b on a.depart_id=b.id 
        inner join curriculum_detail c on 
        c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id;
+
+create view v_curriculum_detail as
+select s.subject_name,g.group_sequence_name,t.group_type_caption,a.hour_per_week,a.hour_per_day,
+a.subject_id,a.curriculum_id,a.group_type_id,a.group_sequence_id
+ from curriculum_detail a
+ inner join subject s on a.subject_id=s.id
+ inner join group_sequence g on g.id=a.group_sequence_id
+ inner join group_type t on t.id=a.group_type_id 
+;
 

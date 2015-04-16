@@ -110,7 +110,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
                     "from curriculum_detail a \n" +
                     "  inner join depart b \n" +
                     "    on a.curriculum_id = b.curriculum_id\n" +
-                    "   and a.group_sequence>0 \n" +
+                    "   and a.group_sequence_id>0 \n" +
                     "   where b.id=subject_group.depart_id\n" +
                     "   and b.id=%d " 
                     + " );";
