@@ -17,6 +17,7 @@ import java.util.Set;
 public interface IDataset{
     public boolean isActive();
     public void open() throws Exception;
+    public void open(Map<String,Object> filter) throws Exception;
     public boolean test() throws Exception;
     public void close() throws Exception;
     public boolean isEmpty();
@@ -44,6 +45,7 @@ public interface IDataset{
     /**
      * Установка фильтра на датасет 
      * @param filterMap карта фильтра <имя_роля><операция> = <шаблон>
+     * @throws java.lang.Exception
      */
     public void setFilter(Map<String,Object> filterMap) throws Exception;
     public void setFiltered(boolean aFiltered);

@@ -10,12 +10,15 @@ import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import ru.viljinsky.BaseDialog;
+import ru.viljinsky.DataEntryDialog;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.EntryPanel;
@@ -105,6 +108,31 @@ abstract class AbstractStreamDialog extends SelectDialog{
     }
 
 }
+
+abstract class CurriculumDialog extends SelectDialog{
+    EntryPanel entryPanel = new EntryPanel();
+    public CurriculumDialog() {
+        super();
+        getContentPane().add(entryPanel,BorderLayout.PAGE_START);
+        try{
+            Dataset dataset = DataModule.getDataset("curriculum");
+            entryPanel.setDataset(dataset);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+    
+    public void setValues(Values values){
+        entryPanel.setValues(values);
+    }
+    
+    public Values getValues(){
+        return entryPanel.getValues();
+    }
+
+}
+
         
 public class Dialogs {
     public static final String NOT_READY_YET = "Не готово ещё";
@@ -411,4 +439,263 @@ public class Dialogs {
         return false;
     }
     
+
+    
+    public static Integer createCurriculum(JComponent owner) throws Exception {
+        CurriculumDialog dlg  = new CurriculumDialog() {
+            @Override
+            public void doOnEntry() throws Exception {
+                try{
+                    Values values = getValues();
+                    Dataset dataset = DataModule.getDataset("curriculum");
+                    dataset.test();
+                    dataset.appned(values);
+                    Integer curriculum_id=values.getInteger("id");
+                    Integer subject_id;
+                    for (Object n:getSelected()){
+                        subject_id = (Integer)n;
+                        DataTask.includeSubjectFromCurriculumn(curriculum_id, subject_id);
+                    }
+                    DataModule.commit();
+                } catch (Exception e){
+                    DataModule.rollback();
+                    throw new Exception ("CREATE_CURRICULUM_ERROR\n"+e.getMessage());
+                }
+                
+            }
+        };
+        
+        Dataset dataset = DataModule.getDataset("subject");
+        dlg.setDataset(dataset, "id", "subject_name");
+        if (dlg.showModal(owner)==BaseDialog.RESULT_OK){
+            return 1;
+        }
+        return null;
+    }
+
+    public static Boolean editCurriculum(JComponent owner, Integer curriculum_id) throws Exception {
+        CurriculumDialog dlg = new CurriculumDialog() {
+
+            @Override
+            public void doOnEntry() throws Exception {
+                try{
+                    Values values = getValues();
+                    Dataset dataset = DataModule.getDataset("curriculum");
+                    Map<String,Object> filter = new HashMap<>();
+                    filter.put("id",values.getInteger("id"));
+                    dataset.open(filter);
+                    dataset.edit(0, values);
+                    
+                    Integer subject_id;
+                    Integer curriculum_id = values.getInteger("id");
+                    for (Object n:getRemoved()){
+                        subject_id=(Integer)n;
+                        DataTask.excludeSubjectFromCurriculumn(curriculum_id, subject_id);
+                    }
+                    for (Object n:getAdded()){
+                        subject_id =(Integer)n;
+                        DataTask.includeSubjectFromCurriculumn(curriculum_id, subject_id);
+                    }
+                    
+                    DataModule.commit();
+                } catch (Exception e){
+                    DataModule.rollback();
+                    throw new Exception("EDIT_CURRICULUM_ERROR\n"+e.getMessage());
+                    
+                }
+            }
+        };
+        Dataset dataset ;
+        
+        Map<String,Object> filter = new HashMap<>();
+        filter.put("id", curriculum_id);
+        dataset = DataModule.getDataset("curriculum");
+        dataset.open(filter);
+        Values values = dataset.getValues(0);
+        
+        dataset = DataModule.getSQLDataset("select subject_id from curriculum_detail where curriculum_id="+curriculum_id);
+        dataset.open();
+        Set<Object> set = dataset.getColumnSet("subject_id");
+        
+        dataset = DataModule.getDataset("subject");
+        dlg.setDataset(dataset, "id","subject_name");
+        dlg.setValues(values);
+        dlg.setSelected(set);
+        return dlg.showModal(owner)==BaseDialog.RESULT_OK;
+        
+    }
+    
+    /////////////////////// TEACHER ////////////////////////////////////////////
+    
+    
+    public static Integer createTeacher(JComponent owner) throws Exception{
+         Dataset dataset = DataModule.getDataset("teacher");
+         DataEntryDialog entryDialog = new DataEntryDialog() {
+
+            @Override
+            public void doOnEntry() throws Exception {
+                try{
+                    Dataset dataset = DataModule.getDataset("teacher");
+                    dataset.test();
+                    dataset.appned(getValues());
+                    DataModule.commit();
+                } catch (Exception e){
+                    DataModule.rollback();
+                    throw new Exception("CREATE_TEACHER_ERROR\n"+e.getMessage());
+                }
+            }
+        };
+        entryDialog.setDataset(dataset);
+        if (entryDialog.showModal(owner)==BaseDialog.RESULT_OK){
+            return 1;
+        }
+        return null;
+    }
+    
+    public static Boolean editTeacher(JComponent owner,Integer teacher_id) throws Exception{
+        Dataset dataset = DataModule.getDataset("teacher");
+        DataEntryDialog entryDialog = new DataEntryDialog() {
+
+            @Override
+            public void doOnEntry() throws Exception {
+                try{
+                    Values values = getValues();
+                    Dataset dataset = DataModule.getDataset("teacher");
+                    Map<String,Object> filter = new HashMap<>();
+                    filter.put("id", values.getInteger("id"));
+                    dataset.open(filter);
+                    dataset.edit(0, values);
+                    DataModule.commit();
+                } catch (Exception e){
+                    DataModule.rollback();
+                    throw new Exception("EDIT_TEACHER_ERROR\n"+e.getMessage());
+                }
+            }
+        };
+        Map<String,Object> filter = new HashMap<>();
+        filter.put("id", teacher_id);
+        dataset.open(filter);
+        Values values = dataset.getValues(0);
+        entryDialog.setDataset(dataset);
+        entryDialog.setValues(values);
+        return entryDialog.showModal(owner)==BaseDialog.RESULT_OK;
+        
+    }
+    
+    ///////////////////////    ROOM  ///////////////////////////////////////////
+    
+    public static Integer createRoom(JComponent owner) throws Exception{
+        Dataset dataset = DataModule.getDataset("room");
+        DataEntryDialog dlg = new DataEntryDialog() {
+
+            @Override
+            public void doOnEntry() throws Exception {
+                try{
+                    Dataset ds = DataModule.getDataset("room");
+                    ds.test();
+                    ds.appned(getValues());
+                    DataModule.commit();
+                } catch (Exception e){
+                    DataModule.rollback();
+                    throw new Exception("CREATE_ROOM_ERROR\n"+e.getMessage());
+                }
+            }
+        };
+        dlg.setDataset(dataset);
+        if (dlg.showModal(owner)==BaseDialog.RESULT_OK){
+            return 1;
+        }
+        return null;
+    }
+    
+    public static Boolean editRoom(JComponent owner,Integer room_id) throws Exception{
+        Dataset dataset = DataModule.getDataset("room");
+        DataEntryDialog dlg = new DataEntryDialog() {
+
+            @Override
+            public void doOnEntry() throws Exception {
+                try{
+                    Values values = getValues();
+                    Dataset ds = DataModule.getDataset("room");
+                    Map<String,Object> filter = new HashMap<>();
+                    filter.put("id", values.getInteger("id"));
+                    ds.open(filter);
+                    ds.edit(0, values);
+                    DataModule.commit();
+                } catch (Exception e){
+                    DataModule.rollback();
+                    throw new Exception("EDIT_ROOM_ERROR\n"+e.getMessage());
+                }
+            }
+        };
+        Map<String,Object> filter = new HashMap<>();
+        filter.put("id",room_id);
+        dataset.open(filter);
+        Values values = dataset.getValues(0);
+        dlg.setDataset(dataset);
+        dlg.setValues(values);
+        return (dlg.showModal(owner)==BaseDialog.RESULT_OK);
+        
+    }
+    
+    
+    //////////////////////  DEPART /////////////////////////////////////////////
+    
+    
+    public static Integer createDepart(JComponent owner) throws Exception{
+        Dataset dataset = DataModule.getDataset("depart");
+        
+        DataEntryDialog entryDialog = new DataEntryDialog() {
+
+            @Override
+            public void doOnEntry() throws Exception {
+                try{
+                    Dataset dataset = DataModule.getDataset("depart");
+                    dataset.test();
+                    dataset.appned(getValues());
+                    DataModule.commit();
+                } catch (Exception e){
+                    DataModule.rollback();
+                    throw new Exception("CREATE_DEPART_ERROR\n"+e.getMessage());
+                }
+            }
+        };
+        
+        entryDialog.setDataset(dataset);
+        if (entryDialog.showModal(owner)==SelectDialog.RESULT_OK){
+            return 1;
+        }
+        return null;
+    }
+    
+    public static Boolean editDepart(JComponent owner,Integer depart_id) throws Exception{
+        Dataset dataset = DataModule.getDataset("depart");
+        DataEntryDialog dlg = new DataEntryDialog() {
+
+            @Override
+            public void doOnEntry() throws Exception {
+                try{
+                    Values values = getValues();
+                    Dataset ds = DataModule.getDataset("depart");
+                    ds.test();
+                    Map<String,Object> filter = new HashMap<>();
+                    filter.put("id",values.getInteger("id"));
+                    ds.open(filter);
+                    ds.edit(0, values);
+                    DataModule.commit();
+                } catch (Exception e){
+                    DataModule.rollback();
+                    throw new Exception("EDIT_DEPART_ERROR\n"+e.getMessage());
+                }
+            }
+        };
+        Map<String,Object> filter = new Hashtable<>();
+        filter.put("id",depart_id);
+        dataset.open(filter);
+        Values values = dataset.getValues(0);
+        
+        dlg.setDataset(dataset);
+        dlg.setValues(values);
+        return (dlg.showModal(owner)==BaseDialog.RESULT_OK);
+    }
 }

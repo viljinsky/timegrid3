@@ -110,6 +110,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         return info.columns.get(columnIndex).columnName;
     }
 
+    @Override
     public void open(Map<String,Object> filter) throws Exception{
         clear();
         if (test()){
@@ -124,25 +125,6 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         clear();
         if (test()){
             readData();
-//            Statement stmt = null;
-//            try {
-//                stmt = dataModule.createStatement();
-//                ResultSet rs = stmt.executeQuery(info.selectSQL);
-//                Object[] rowset;
-//                while (rs.next()) {
-//                    rowset = new Object[getColumnCount()];
-//                    for (int i = 0; i < rowset.length; i++) {
-//                        rowset[i] = rs.getObject(i + 1);
-//                    }
-//                    if (!filtered || checkFilter(rowset))
-//                        add(rowset);
-//                }
-//                this.active = true;
-//            } finally {
-//                if (stmt!=null){
-//                    stmt.close();
-//                }
-//            }
         }
     }
     
@@ -184,7 +166,7 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
             try{
                 rs = stmt.executeQuery(info.selectSQL+" limit 1;");
             } catch (Exception e){
-                throw new Exception("TestError:\n"+e.getMessage());
+                throw new Exception("TEST_ERROR:\n"+e.getMessage());
             }
             ResultSetMetaData rsmeta = rs.getMetaData();
             for (int i = 0; i < rsmeta.getColumnCount(); i++) {

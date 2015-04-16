@@ -386,17 +386,22 @@ public class Grid extends JTable {
         model.dataset.open();
         model.fireTableDataChanged();
     }
-    
-    public boolean locate(Map<String,Object> options) throws Exception{
+    /**
+     * Поиск первой строки соответвующей фильтру
+     * @param filter
+     * @return
+     * @throws Exception 
+     */
+    public boolean locate(Map<String,Object> filter) throws Exception{
         Map<String,Object> values;
         Object v1,v2;
         boolean b;
         for (int i=0;i<model.dataset.getRowCount();i++){
             values = model.dataset.getValues(i);
             b=true;
-            for (String columName:options.keySet()){
+            for (String columName:filter.keySet()){
                 v1 = values.get(columName);
-                v2 = options.get(columName);
+                v2 = filter.get(columName);
                 b = v1.equals(v2);
                 if (!b) break;
             }

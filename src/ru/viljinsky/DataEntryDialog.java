@@ -30,7 +30,7 @@ public abstract class DataEntryDialog extends BaseDialog {
         entryPanel.setValues(values);
     }
     
-    public Map<String,Object> getValues(){
+    public Values getValues(){
         return entryPanel.getValues();
     }
     
