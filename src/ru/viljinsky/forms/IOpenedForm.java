@@ -516,7 +516,7 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
 }
     
     public void doCommand(String commad){
-        Integer stream_id=-1,depart_id=-1,subject_id=-1,group_id=-1;
+        Integer stream_id=-1,depart_id=-1,subject_id=-1,group_id=-1,skill_id=-1;
         try{
             switch(commad){
                 case CREATE_DEPART:
@@ -633,9 +633,9 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
     @Override
     public Map<String, String> getParams() {
         Map<String,String> map = new HashMap<>();
-        map.put(MASTER_DATASET,"curriculum");
+        map.put(MASTER_DATASET,"v_curriculum");
         map.put(SLAVE_DATASET, "v_curriculum_detail");
-        map.put(REFERENCES, "curriculum_id=id");
+        map.put(REFERENCES, "curriculum_id=curriculum_id;skill_id=skill_id");
         return map;
     }
 
@@ -699,14 +699,16 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
     }
     
     protected void fillCurriculumnDetail() throws Exception {
-        Integer curriculum_id = grid1.getIntegerValue("id");
-        DataTask.fillCurriculumn(curriculum_id);
+        Integer curriculum_id = grid1.getIntegerValue("curriculum_id");
+        Integer skill_id = grid1.getIntegerValue("skill_id");
+        DataTask.fillCurriculumn(curriculum_id,skill_id);
         grid2.requery();
     }
     
     protected void clearCurriculumDetail() throws Exception{
-        Integer curriculum_id = grid1.getIntegerValue("id");
-        DataTask.removeCurriculum(curriculum_id);
+        Integer curriculum_id = grid1.getIntegerValue("curriculum_id");
+        Integer skill_id = grid1.getIntegerValue("skill_id");
+        DataTask.removeCurriculum(curriculum_id,skill_id);
         grid2.requery();
     }
     

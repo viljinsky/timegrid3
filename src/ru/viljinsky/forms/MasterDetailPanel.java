@@ -20,6 +20,7 @@ import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
 import ru.viljinsky.IDataset;
+import ru.viljinsky.Values;
 
 /**
  *
@@ -34,7 +35,6 @@ interface IMasterDetailConsts{
 }
 
 abstract class MasterDetailPanel extends JPanel implements IMasterDetailConsts {
-    protected DataModule dataModule = DataModule.getInstance();
     Grid grid1;
     Grid grid2;
     GridPanel masterPanel;
@@ -73,23 +73,40 @@ abstract class MasterDetailPanel extends JPanel implements IMasterDetailConsts {
 
         @Override
         public void gridSelectionChange() {
-            String[] ss = params.get(REFERENCES).split("=");
-            String keys = ss[0];
-            String vv = ss[1];
             IDataset dataset = grid1.getDataset();
             if (dataset==null)
                 return;
             int row = getSelectedRow();
-            if (row >= 0) {
-                Map<String, Object> values = dataset.getValues(row);
-                Map<String, Object> filter = new HashMap<>();
-                filter.put(keys, values.get(vv));
-                try {
-                    grid2.setFilter(filter);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(null, e.getMessage());
+            if (row < 0) 
+                return;
+            
+            Values values = dataset.getValues(row);
+            Map<String, Object> filter = new HashMap<>();
+            try {
+            
+            
+                String[] refs = params.get(REFERENCES).split(";");
+
+                String[] ss;
+                String keys,vv;
+
+                try{
+
+                    for (String ref_item:refs){
+                        ss=ref_item.split("=");
+                        keys=ss[0];
+                        vv=ss[1];
+                        filter.put(keys, values.get(vv));
+                    }
+                    
+                } catch (Exception e){
+                    throw new Exception("PARSE_REF_ERROR\n"+refs);
                 }
+            
+                grid2.setFilter(filter);
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, e.getMessage());
             }
         }
     }
@@ -115,10 +132,10 @@ abstract class MasterDetailPanel extends JPanel implements IMasterDetailConsts {
         try {
             Dataset dataset1;
             Dataset dataset2;
-            dataset1 = dataModule.getDataset(params.get(MASTER_DATASET));
+            dataset1 = DataModule.getDataset(params.get(MASTER_DATASET));
             dataset1.test();
             grid1.setDataset(dataset1);
-            dataset2 = dataModule.getDataset(params.get(SLAVE_DATASET));
+            dataset2 = DataModule.getDataset(params.get(SLAVE_DATASET));
             dataset2.test();
             grid2.setDataset(dataset2);
             dataset1.open();

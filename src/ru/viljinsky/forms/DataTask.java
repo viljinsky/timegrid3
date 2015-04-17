@@ -35,12 +35,13 @@ public class DataTask implements IDataTask, IDataTaskConstants{
      * @param curriculum_id
      * @throws Exception 
      */
-    public static void fillCurriculumn(Integer curriculum_id) throws Exception{
-        String sql = "insert into curriculum_detail (curriculum_id,subject_id,hour_per_day,hour_per_week,group_type_id)\n"+
-                     "select curriculum.id,subject.id,subject.default_hour_per_day,subject.default_hour_per_week,subject.default_group_type_id \n"+
-                     "from curriculum ,subject where curriculum.id=?;";
+    public static void fillCurriculumn(Integer curriculum_id,Integer skill_id) throws Exception{
+        String sql = "insert into curriculum_detail (curriculum_id,skill_id,subject_id,hour_per_day,hour_per_week,group_type_id)\n"+
+                     "select curriculum.id,?,subject.id,subject.default_hour_per_day,subject.default_hour_per_week,subject.default_group_type_id \n"+
+                     "from curriculum ,subject where curriculum.id=? ;";
         KeyMap map = new KeyMap();
-        map.put(1, curriculum_id);
+        map.put(1, skill_id);
+        map.put(2, curriculum_id);
         try{
             DataModule.execute(sql, map);
             DataModule.commit();
@@ -56,10 +57,11 @@ public class DataTask implements IDataTask, IDataTaskConstants{
      * @param curriculumn_id
      * @throws Exception 
      */
-    public static void removeCurriculum(Integer curriculumn_id) throws Exception{
-        String sql = "delete from curriculum_detail where curriculum_id=?;";
+    public static void removeCurriculum(Integer curriculumn_id,Integer skill_id) throws Exception{
+        String sql = "delete from curriculum_detail where curriculum_id=? and skill_id=?;";
         KeyMap map = new KeyMap();
         map.put(1, curriculumn_id);
+        map.put(2, skill_id);
         try{
             DataModule.execute(sql, map);
             DataModule.commit();
@@ -73,7 +75,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
     public static void fillSubjectGroup2(Integer depart_id) throws Exception{
         String sql = 
                 "select a.subject_id,a.group_type_id,a.a.hour_per_day,a.hour_per_week from curriculum_detail a "
-                + "inner join depart b on a.curriculum_id=b.curriculum_id "
+                + "inner join depart b on a.curriculum_id=b.curriculum_id and a.skill_id=b.skill_id "
                 + "where b.id="+depart_id+";";
         
         Dataset dataset = DataModule.getSQLDataset(sql);
