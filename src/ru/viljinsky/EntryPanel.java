@@ -6,21 +6,27 @@
 
 package ru.viljinsky;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ComboBoxModel;
 import javax.swing.JCheckBox;
+import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ListDataListener;
 
 /**
@@ -34,7 +40,66 @@ interface IEntryControl{
     public void setValue(Object value);
     public Object getValue();
 }
+class ColorControl extends JLabel implements IEntryControl{
+    Color color;
+    Column column;
+    
+    public ColorControl(Column column){
+        setOpaque(true);
+        this.column=column;
+        addMouseListener(new MouseAdapter() {
 
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                selectColor();
+            }
+            
+        });
+    }
+    
+    private void selectColor(){
+        ColorDialog dlg = new ColorDialog(color) {
+            
+            @Override
+            public void doOnEntry() throws Exception {
+                Color g =colorChooser.getColor();
+                setValue(String.format("%d %d %d", g.getRed(),g.getGreen(),g.getBlue()));
+            }
+        };
+        dlg.showModal(null);
+    }
+    
+    @Override
+    public String getColumnName() {
+        return column.getColumnName();
+    }
+
+    @Override
+    public JComponent getComponent() {
+        return this;
+    }
+
+    @Override
+    public void setValue(Object value) {
+        if (value == null){
+            value = new String("255 255 255");
+        }
+        setText(value.toString());
+        setBorder(new LineBorder(Color.BLACK));
+        String sValue = (String)value;
+        String[] rgb = sValue.split(" ");
+        color = new Color(Integer.valueOf(rgb[0]), Integer.valueOf(rgb[1]),Integer.valueOf(rgb[2]));
+        this.setBackground(color);
+    }
+
+    @Override
+    public Object getValue() {
+        int blue = color.getBlue();
+        int red =color.getRed();
+        int green =color.getGreen();
+        return String.format("%d %d %d", red,green,blue);
+    }
+}
 class ComboControl extends JComboBox implements IEntryControl{
     
     Map<Object,String> map = new HashMap<>();
@@ -224,15 +289,17 @@ public class EntryPanel extends JPanel {
         Box box;
         for (int i = 0; i < controls.length; i++) {
             column = dataset.getColumn(i);
-            //            System.out.println("-->"+column.columnClassName);
             try {
                 lookupValues = dataset.getLookup(column.columnName);
             } catch (Exception e) {
                 lookupValues = null;
                 e.printStackTrace();
             }
+            
             if (lookupValues != null) {
                 cntr = new ComboControl(column, lookupValues);
+            } else if (column.columnName.equals("color")){
+                cntr= new ColorControl(column);
             } else {
                 switch (column.columnTypeName) {
                     case "BOOLEAN":

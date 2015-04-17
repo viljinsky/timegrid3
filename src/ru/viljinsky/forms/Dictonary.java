@@ -153,7 +153,7 @@ public class Dictonary extends JDialog{
         frame.pack();
         frame.setVisible(true);
         
-        DataModule.getInstance().open();
+        DataModule.open();
         frame.open();
     }
     

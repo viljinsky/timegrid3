@@ -51,6 +51,27 @@ public abstract class CommandMngr {
         public Act(String name) {
             super(name);
             putValue(ACTION_COMMAND_KEY, name);
+            switch (name){
+                case "CREATE_CURRICULUM":
+                case "CREATE_TEACHER":
+                case "CREATE_ROOM":
+                case "CREATE_DEPART":
+                    putValue(NAME, "Добавить");
+                    break;
+                case "EDIT_CURRICULUM":
+                case "EDIT_TEACHER":
+                case "EDIT_ROOM":
+                case "EDIT_DEPART":
+                    putValue(NAME, "Изменить");
+                    break;
+                case "DELETE_CURRICULUM":
+                case "DELETE_TEACHER":
+                case "DELETE_ROOM":
+                case "DELETE_DEPART":
+                    putValue(NAME, "Удалить");
+                    break;
+                    
+            }
         }
 
         @Override

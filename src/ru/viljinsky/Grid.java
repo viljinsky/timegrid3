@@ -30,11 +30,11 @@ import javax.swing.table.DefaultTableModel;
  */
 
 interface IGridConstants{
-    public static String GRID_APPEND = "add";
-    public static String GRID_EDIT = "edit";
-    public static String GRID_DELETE = "delete";
-    public static String GRID_REFRESH = "refresh";
-    public static String GRID_REQUERY = "requery";
+    public static String GRID_APPEND = "ADD";
+    public static String GRID_EDIT = "EDIT";
+    public static String GRID_DELETE = "DELETE";
+    public static String GRID_REFRESH = "REFRESH";
+    public static String GRID_REQUERY = "REQUERY";
 }
 
 class GridCommand implements ICommand,IGridConstants{
@@ -147,7 +147,7 @@ public class Grid extends JTable {
         return model!=null && model.dataset.isEditable();
     }
     
-    abstract class EdtDialog extends DataEntryDialog{
+    abstract class EdtDialog extends EntryDialog{
         
         public EdtDialog(IDataset dataset,Map<String,Object> values){
             super();
@@ -261,7 +261,7 @@ public class Grid extends JTable {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount()==2){
-                    edit();
+                    doublClick();
                 }
             }
 
@@ -285,6 +285,11 @@ public class Grid extends JTable {
         });
     }
 
+    public void doublClick(){
+        edit();
+    }
+
+    
     public void setDataset(Dataset dataset) throws Exception{
         if (dataset==null){
             model = null;
@@ -324,6 +329,7 @@ public class Grid extends JTable {
         dlg.showModal(owner);
         
     }
+    
     public void append() {
         append(null);
     }

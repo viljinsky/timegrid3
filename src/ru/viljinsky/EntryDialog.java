@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author вадик
  */
-public abstract class DataEntryDialog extends BaseDialog {
+public abstract class EntryDialog extends BaseDialog {
     protected EntryPanel entryPanel;
 
     @Override

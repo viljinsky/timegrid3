@@ -18,7 +18,7 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import ru.viljinsky.BaseDialog;
-import ru.viljinsky.DataEntryDialog;
+import ru.viljinsky.EntryDialog;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.EntryPanel;
@@ -545,7 +545,7 @@ public class Dialogs {
     
     public static Integer createTeacher(JComponent owner) throws Exception{
          Dataset dataset = DataModule.getDataset("teacher");
-         DataEntryDialog entryDialog = new DataEntryDialog() {
+         EntryDialog entryDialog = new EntryDialog() {
 
             @Override
             public void doOnEntry() throws Exception {
@@ -569,7 +569,7 @@ public class Dialogs {
     
     public static Boolean editTeacher(JComponent owner,Integer teacher_id) throws Exception{
         Dataset dataset = DataModule.getDataset("teacher");
-        DataEntryDialog entryDialog = new DataEntryDialog() {
+        EntryDialog entryDialog = new EntryDialog() {
 
             @Override
             public void doOnEntry() throws Exception {
@@ -616,7 +616,7 @@ public class Dialogs {
     
     public static Integer createRoom(JComponent owner) throws Exception{
         Dataset dataset = DataModule.getDataset("room");
-        DataEntryDialog dlg = new DataEntryDialog() {
+        EntryDialog dlg = new EntryDialog() {
 
             @Override
             public void doOnEntry() throws Exception {
@@ -640,7 +640,7 @@ public class Dialogs {
     
     public static Boolean editRoom(JComponent owner,Integer room_id) throws Exception{
         Dataset dataset = DataModule.getDataset("room");
-        DataEntryDialog dlg = new DataEntryDialog() {
+        EntryDialog dlg = new EntryDialog() {
 
             @Override
             public void doOnEntry() throws Exception {
@@ -688,7 +688,7 @@ public class Dialogs {
     public static Integer createDepart(JComponent owner) throws Exception{
         Dataset dataset = DataModule.getDataset("depart");
         
-        DataEntryDialog entryDialog = new DataEntryDialog() {
+        EntryDialog entryDialog = new EntryDialog() {
 
             @Override
             public void doOnEntry() throws Exception {
@@ -713,7 +713,7 @@ public class Dialogs {
     
     public static Boolean editDepart(JComponent owner,Integer depart_id) throws Exception{
         Dataset dataset = DataModule.getDataset("depart");
-        DataEntryDialog dlg = new DataEntryDialog() {
+        EntryDialog dlg = new EntryDialog() {
 
             @Override
             public void doOnEntry() throws Exception {

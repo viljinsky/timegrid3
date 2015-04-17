@@ -53,6 +53,7 @@ interface IAppCommand{
 //    public static final String EDIT_SHIFT ="EDIT_SHIFT";
     public static final String ADD_GROUP = "ADD_GROUP";
     public static final String DELETE_GROUP ="DELETE_GROUP";
+    
     public static final String ADD_STREAM ="ADD_STREAM";
     public static final String EDIT_STREAM ="EDIT_STREAM";
     public static final String REMOVE_STREAM= "REMOVE_STREAM";
@@ -144,9 +145,9 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
         add(splitPane);
         setPreferredSize(new Dimension(800,600));
         commands.setCommandList(new String[]{
-            CREATE_ROOM+";Добавить",
-            EDIT_ROOM+";Изменить",
-            DELETE_ROOM+";Удалить",
+            CREATE_ROOM,
+            EDIT_ROOM,
+            DELETE_ROOM,
             CREATE_SHIFT,
             EDIT_SHIFT,
             REMOVE_SHIFT,

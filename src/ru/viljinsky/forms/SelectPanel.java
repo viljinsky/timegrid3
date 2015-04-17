@@ -6,6 +6,7 @@
 
 package ru.viljinsky.forms;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,7 +33,7 @@ abstract class SelectPanel extends JPanel implements ActionListener {
 
     public SelectPanel() {
         setPreferredSize(new Dimension(500, 200));
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setLayout(new BorderLayout());
         sourceGrid = new Grid();
         destanationGrid = new Grid();
         chProfileOnly = new JCheckBox("Только по профилю",null,true);
@@ -53,12 +54,14 @@ abstract class SelectPanel extends JPanel implements ActionListener {
         btns.put("INCLUDE_ALL", ">>");
         btns.put("EXCLUDE_ALL", "<<");
         JButton btn;
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
         Box box;
         //            setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         box = Box.createVerticalBox();
         box.add(new JScrollPane(sourceGrid));
-        box.add(chProfileOnly);
-        add(box);
+//        box.add(chProfileOnly);
+        panel.add(box);
         add(Box.createHorizontalStrut(6));
         box = Box.createVerticalBox();
         for (String btnName : btns.keySet()) {
@@ -72,12 +75,14 @@ abstract class SelectPanel extends JPanel implements ActionListener {
             box.add(box1);
             box.add(Box.createVerticalStrut(12));
         }
-        add(box);
-        add(Box.createHorizontalStrut(6));
+        panel.add(box);
+        panel.add(Box.createHorizontalStrut(6));
         box = Box.createHorizontalBox();
         box.add(new JScrollPane(destanationGrid));
-        add(box);
-        setBorder(new EmptyBorder(12,6,12,6));
+        panel.add(box);
+        panel.setBorder(new EmptyBorder(12,6,12,6));
+        add(panel);
+        add(chProfileOnly,BorderLayout.PAGE_END);
     }
 
     @Override
