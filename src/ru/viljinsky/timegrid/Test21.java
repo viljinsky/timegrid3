@@ -6,6 +6,7 @@
 
 package ru.viljinsky.timegrid;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -22,7 +23,7 @@ import javax.swing.JSplitPane;
 
 public class Test21 extends JFrame{
     TG timeGrid = new TG();
-    JList list = new JList(new String[]{"One","Two","Three"});
+    JList list = new JList(new String[]{"green","blue","yellow"});
     
     class TG extends TimeGrid{
         public TG(){
@@ -37,6 +38,9 @@ public class Test21 extends JFrame{
                     System.out.println(ce.toString());
                     ce.moveCell(col-col0, row-row0);
             }
+            realign();
+//            rowHeader.setPrefferedHeight(height);
+//            rowHeader.repaint();
         }
         
         @Override
@@ -91,6 +95,19 @@ public class Test21 extends JFrame{
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount()==2){
                     CellElement ce = new CellElement();
+                    String s =(String)list.getSelectedValue();
+                    switch (s){
+                        case "green":
+                            ce.color=Color.green;
+                            break;
+                        case "blue":
+                            ce.color=Color.blue;
+                            break;
+                        case "yellow":
+                            ce.color=Color.yellow;
+                                    
+                            break;
+                    }
                     Cell cell = timeGrid.findFirstEmptyCell();
                     if (cell==null)
 //                    if (timeGrid.getSelectedCell()==null)

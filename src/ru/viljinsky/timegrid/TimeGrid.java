@@ -63,19 +63,22 @@ abstract class TimeGridHeader extends JPanel{
             y+=h;
         }
     }
+    public abstract void setPrefferedWidth(int width);
+    public abstract void setPrefferedHeight(int height);
+    
     
     
 };
 
 public class TimeGrid extends AbstractTimeGrid{
     
-    ColumnHeader columnHeader = new ColumnHeader();
-    RowHeader rowHeader = new RowHeader();
     
     public TimeGrid(int col,int row){
         super();
         setColCount(col);
         setRowCount(row);
+        columnHeader = new ColumnHeader();
+        rowHeader = new RowHeader();
         realign();
     }
     
@@ -165,6 +168,11 @@ public class TimeGrid extends AbstractTimeGrid{
             }
             return -1;
         }
+
+        @Override
+        public void setPrefferedHeight(int height) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
     }
     
     class RowHeader extends TimeGridHeader{
@@ -224,6 +232,11 @@ public class TimeGrid extends AbstractTimeGrid{
                 r.y+=rowHeights[row];
             }
             return -1;
+        }
+
+        @Override
+        public void setPrefferedWidth(int width) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
     

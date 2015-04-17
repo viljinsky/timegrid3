@@ -145,6 +145,11 @@ abstract class AbstractTimeGrid extends JPanel {
     Integer[] rowHeights;
     Integer[] colWidths;
     int selectedRow = -1;
+    protected int width=300;
+    protected int height=500;
+    
+    TimeGridHeader columnHeader;
+    TimeGridHeader rowHeader;
 
     public int getSelectedRow() {
         return selectedRow;
@@ -397,12 +402,14 @@ abstract class AbstractTimeGrid extends JPanel {
     }
     
     public void realign(){
-        int width = calcColWidth();
-        int height =calcRowHeight();
+        width = calcColWidth();
+        height =calcRowHeight();
         setPreferredSize(new Dimension(width, height));
+        rowHeader.setPrefferedHeight(height);
+        columnHeader.setPrefferedWidth(width);
         revalidate();
-        
-//        System.out.println("revalidate");
+        rowHeader.repaint();
+        columnHeader.repaint();
         repaint();
     }
     
@@ -567,5 +574,8 @@ abstract class AbstractTimeGrid extends JPanel {
     public abstract void columnHeaderClick(int col);
     
     public abstract void rowHeaderClick(int row);
+    
+    
+    
     
 }
