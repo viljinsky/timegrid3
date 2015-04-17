@@ -17,11 +17,12 @@ import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-import ru.viljinsky.BaseDialog;
-import ru.viljinsky.EntryDialog;
+
+import ru.viljinsky.dialogs.BaseDialog;
+import ru.viljinsky.dialogs.EntryDialog;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
-import ru.viljinsky.EntryPanel;
+import ru.viljinsky.dialogs.EntryPanel;
 import ru.viljinsky.IDataset;
 import ru.viljinsky.KeyMap;
 import ru.viljinsky.Recordset;

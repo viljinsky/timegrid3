@@ -6,6 +6,8 @@
 
 package ru.viljinsky;
 
+import ru.viljinsky.dialogs.BaseDialog;
+import ru.viljinsky.dialogs.EntryDialog;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;

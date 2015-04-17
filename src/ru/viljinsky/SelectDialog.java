@@ -8,6 +8,7 @@ package ru.viljinsky;
 
 
 
+import ru.viljinsky.dialogs.BaseDialog;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;

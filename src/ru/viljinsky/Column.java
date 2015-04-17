@@ -64,5 +64,9 @@ public class Column {
     public String getColumnName() {
         return columnName;
     }
+
+    public String getColumTypeName() {
+        return columnTypeName;
+    }
     
 }

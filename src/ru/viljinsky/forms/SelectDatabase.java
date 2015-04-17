@@ -30,7 +30,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import ru.viljinsky.BaseDialog;
+import ru.viljinsky.dialogs.BaseDialog;
 
 /**
  *

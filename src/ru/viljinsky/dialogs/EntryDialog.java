@@ -4,10 +4,12 @@
  * and open the template in the editor.
  */
 
-package ru.viljinsky;
+package ru.viljinsky.dialogs;
 
 import java.awt.Container;
 import java.util.Map;
+import ru.viljinsky.IDataset;
+import ru.viljinsky.Values;
 
 /**
  *

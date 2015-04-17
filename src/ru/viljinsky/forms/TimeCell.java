@@ -42,31 +42,37 @@ class CellsList extends ArrayList<EmptyCell>{
 
 public class TimeCell {
     private static DataModule datamodule = DataModule.getInstance();
-    public static final String sqlEMPTY_TEACHER_CELLS=""
-            + "--  свободные часы из графика преподавателя\n" +
+    public static final String SQL_EMPTY_TEACHER_CELLS=
+            "--  свободные часы из графика преподавателя\n" +
             "select b.day_id,b.bell_id from teacher a \n" +
             "inner join shift_detail b on a.shift_id=b.shift_id\n" +
             "where a.id=%teacher_id and \n" +
-            "not exists (select * from schedule where day_id=b.day_id and bell_id=b.bell_id and teacher_id=a.id)\n" +
+            "not exists (select * from schedule \n" +
+            "where day_id=b.day_id and bell_id=b.bell_id and teacher_id=a.id)\n" +
             "order by b.bell_id,b.day_id;";
     
-    public static final String sqlEMPTY_ROOM_CELLS =
+    public static final String SQL_EMPTY_ROOM_CELLS =
+            "-- свододные часы в графике помещения \n"+
             "select b.day_id,b.bell_id from room a \n" +
             "inner join shift_detail b on a.shift_id=b.shift_id\n" +
             "where a.id=%room_id and \n" +
             "not exists (\n"+
-            "  select * from schedule where day_id=b.day_id and bell_id=b.bell_id and room_id=a.id\n" +
+            "  select * from schedule \n"+
+            "  where day_id=b.day_id and bell_id=b.bell_id and room_id=a.id\n" +
             ");";
     
-    public static final String sqlEMPTY_DEPART_CELLS =
-            "select a.day_id,bell_id from shift_detail a inner join depart b on a.shift_id=b.shift_id\n" +
+    public static final String SQL_EMPTY_DEPART_CELLS =
+            "-- свободные часы в графике класса \n"+
+            "select a.day_id,bell_id from shift_detail a \n" +
+            "inner join depart b on a.shift_id=b.shift_id \n" +
             "where b.id=%depart_id and not exists (\n" +
-            "	select * from schedule where day_id=a.day_id and bell_id=a.bell_id and depart_id=b.id\n" +
+            "  select * from schedule \n"+
+            "  where day_id=a.day_id and bell_id=a.bell_id and depart_id=b.id \n" +
             ");";
     
     public static CellsList getEmptyDepartCell(Integer depart_id) throws Exception{
         CellsList result = new CellsList();
-        Dataset dataset = datamodule.getSQLDataset(sqlEMPTY_DEPART_CELLS.replace("%depart_id", depart_id.toString()));
+        Dataset dataset = datamodule.getSQLDataset(SQL_EMPTY_DEPART_CELLS.replace("%depart_id", depart_id.toString()));
         dataset.open();
         for (int i=0;i<dataset.size();i++){
             result.add(new EmptyCell(dataset.get(i)));
@@ -75,7 +81,7 @@ public class TimeCell {
     }
     public static CellsList getEmptyTeacherCell(Integer teacher_id) throws Exception{
         CellsList result = new CellsList();
-        Dataset dataset = datamodule.getSQLDataset(sqlEMPTY_TEACHER_CELLS.replaceAll("%teacher_id", teacher_id.toString()));
+        Dataset dataset = datamodule.getSQLDataset(SQL_EMPTY_TEACHER_CELLS.replaceAll("%teacher_id", teacher_id.toString()));
         dataset.open();
         for (int i=0;i<dataset.size();i++){
             result.add(new EmptyCell(dataset.get(i)));
@@ -85,7 +91,7 @@ public class TimeCell {
     
     public static CellsList getEmptyRoomCell(Integer room_id) throws Exception{
         CellsList result = new CellsList();
-        Dataset dataset = datamodule.getSQLDataset(sqlEMPTY_ROOM_CELLS.replace("%room_id",room_id.toString()));
+        Dataset dataset = datamodule.getSQLDataset(SQL_EMPTY_ROOM_CELLS.replace("%room_id",room_id.toString()));
         dataset.open();
         for (int i=0;i<dataset.size();i++){
             result.add(new EmptyCell(dataset.get(i)));

@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
-import ru.viljinsky.BaseDialog;
+import ru.viljinsky.dialogs.BaseDialog;
 
 /**
  *

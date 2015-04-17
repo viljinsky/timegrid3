@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package ru.viljinsky;
+package ru.viljinsky.dialogs;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -16,10 +16,8 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ComboBoxModel;
 import javax.swing.JCheckBox;
-import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -28,6 +26,9 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListDataListener;
+import ru.viljinsky.Column;
+import ru.viljinsky.IDataset;
+import ru.viljinsky.Values;
 
 /**
  *
@@ -41,11 +42,12 @@ interface IEntryControl{
     public Object getValue();
 }
 class ColorControl extends JLabel implements IEntryControl{
-    Color color;
+    Color color = new Color(255,255,255);
     Column column;
     
     public ColorControl(Column column){
         setOpaque(true);
+        setText("255 255 255");
         this.column=column;
         addMouseListener(new MouseAdapter() {
 
@@ -81,12 +83,17 @@ class ColorControl extends JLabel implements IEntryControl{
 
     @Override
     public void setValue(Object value) {
+        String sValue;
         if (value == null){
             value = new String("255 255 255");
         }
-        setText(value.toString());
+        sValue = (String)value;
+        if (sValue.isEmpty())
+            sValue = new String("125 125 125");
+            
+        
+        setText(sValue);
         setBorder(new LineBorder(Color.BLACK));
-        String sValue = (String)value;
         String[] rgb = sValue.split(" ");
         color = new Color(Integer.valueOf(rgb[0]), Integer.valueOf(rgb[1]),Integer.valueOf(rgb[2]));
         this.setBackground(color);
@@ -153,7 +160,7 @@ class ComboControl extends JComboBox implements IEntryControl{
 
     @Override
     public String getColumnName() {
-        return column.columnName;
+        return column.getColumnName();
     }
 
     @Override
@@ -182,7 +189,7 @@ class BoolControl extends JCheckBox implements IEntryControl{
 
     @Override
     public String getColumnName() {
-        return column.columnName;
+        return column.getColumnName();
     }
 
     @Override
@@ -290,7 +297,7 @@ public class EntryPanel extends JPanel {
         for (int i = 0; i < controls.length; i++) {
             column = dataset.getColumn(i);
             try {
-                lookupValues = dataset.getLookup(column.columnName);
+                lookupValues = dataset.getLookup(column.getColumnName());
             } catch (Exception e) {
                 lookupValues = null;
                 e.printStackTrace();
@@ -298,24 +305,24 @@ public class EntryPanel extends JPanel {
             
             if (lookupValues != null) {
                 cntr = new ComboControl(column, lookupValues);
-            } else if (column.columnName.equals("color")){
+            } else if (column.getColumnName().equals("color")){
                 cntr= new ColorControl(column);
             } else {
-                switch (column.columnTypeName) {
+                switch (column.getColumTypeName()) {
                     case "BOOLEAN":
                         cntr = new BoolControl(column);
                         break;
                     case "BLOB":
-                        cntr = new TextControl(column.columnName);
+                        cntr = new TextControl(column.getColumnName());
                         break;
                     default:
-                        cntr = new EditControl(column.columnName);
+                        cntr = new EditControl(column.getColumnName());
                 }
             }
             controls[i] = cntr;
-            if (!column.columnTypeName.equals("BLOB")) {
+            if (!column.getColumTypeName().equals("BLOB")) {
                 box = Box.createHorizontalBox();
-                box.add(new JLabel(dataset.getColumn(i).columnName));
+                box.add(new JLabel(dataset.getColumn(i).getColumnName()));
                 box.add(Box.createHorizontalStrut(6));
                 box.add(cntr.getComponent());
                 box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));

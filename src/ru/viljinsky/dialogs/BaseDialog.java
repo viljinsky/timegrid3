@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package ru.viljinsky;
+package ru.viljinsky.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
