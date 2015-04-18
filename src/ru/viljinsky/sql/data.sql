@@ -81,25 +81,24 @@ insert into room(id,building_id,room_name,shift_id,profile_id)          values (
 --                Предметы
 --                 
 
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week) 
-    values (1,'Русский яз',1,0,4);
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
-    values (2,'Литература',1,0,2);
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
-    values (3,'Алгебра',1,0,2);
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
-    values (4,'Геометрия',1,0,2);
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
-
-    values (5,'Физика',1,0,2);
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
-    values (6,'Химия',1,0,2);
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
-    values (7,'Иностранный яз.',1,2,2);
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
-     values (8,'Физ.культура',1,1,2);
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week)
-     values (9,'Информатика',1,2,2);
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color) 
+    values (1,'Русский яз',     1,0,4,'255 200 170');
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
+    values (2,'Литература',     1,0,2,'255 170 200');
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
+    values (3,'Алгебра'   ,     1,0,2,'200 255 170');
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
+    values (4,'Геометрия' ,     1,0,2,'170 255 200');
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
+    values (5,'Физика'    ,     1,0,2,'200 170 255');
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
+    values (6,'Химия',          1,0,2,'170 200 255');
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
+    values (7,'Иностранный яз.',1,2,2,'200 200 255');
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
+     values (8,'Физ.культура',  1,1,2,'200 255 200');
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
+     values (9,'Информатика',   1,2,2,'255 200 200');
 
 
 -- русский и лит.        

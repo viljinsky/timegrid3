@@ -372,3 +372,17 @@ b.id as skill_id,b.caption as skill from
 curriculum a,skill b;
 
 select * from v_curriculum;
+
+
+--- Для расчётов всободных часов
+create view v_schedule_calc as
+select a.day_id,a.bell_id,a.depart_id,a.group_id ,c.group_type_id
+from schedule a 
+inner join depart d on a.depart_id=d.id
+inner join curriculum_detail c 
+	on  c.skill_id=d.skill_id 
+	and c.curriculum_id=d.curriculum_id
+	and c.subject_id=a.subject_id
+order by a.day_id,a.bell_id;
+
+select * from v_schedule_calc where depart_id=1;

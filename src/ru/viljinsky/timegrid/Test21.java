@@ -6,8 +6,14 @@
 
 package ru.viljinsky.timegrid;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JFrame;
@@ -31,7 +37,19 @@ public class Test21 extends JFrame{
         }
         int col0,row0;
 
+        @Override
+        public void paint(Graphics g) {
+            super.paint(g); 
+            Rectangle b = getBound(3, 4);
+            Graphics2D g2 =(Graphics2D)g;
+            Stroke s = new BasicStroke(4);
+            g2.setStroke(s);
+            g2.setColor(Color.RED);
+            g2.drawRect(b.x, b.y, b.width, b.height);
+        }
 
+
+        
         @Override
         public void stopDrag(int col, int row) {
             for (CellElement ce:getSelectedElements()){

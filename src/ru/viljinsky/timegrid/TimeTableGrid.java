@@ -6,8 +6,13 @@
 
 package ru.viljinsky.timegrid;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +34,26 @@ public class TimeTableGrid extends TimeGrid {
     public Set<Point> avalableCells = null;
     public Map<Integer,String> colCaption = null;
     public Map<Integer,String> rowCaption = null;
+    public List<Point> emptyCells = new ArrayList<>();
+
+    
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        if (emptyCells.isEmpty())
+            return;
+        Rectangle b;
+        Graphics2D g2 = (Graphics2D)g;
+        Stroke stroke = new BasicStroke(4);
+        g2.setStroke(stroke);
+        g2.setColor(Color.BLUE);
+        for (Point p:emptyCells){
+            b= getBound(p.x, p.y);
+            g2.drawRect(b.x, b.y, b.width, b.height);
+        }
+    }
+    
+    
 
     @Override
     public String getRowHeaderText(int row) {
@@ -66,6 +91,8 @@ public class TimeTableGrid extends TimeGrid {
     }
 
     public void reload() throws Exception {
+        emptyCells.clear();
+                
         dataset = DataModule.getSQLDataset("select * from v_schedule");
         dataset.setFilter(filter);
         dataset.open();
@@ -185,14 +212,20 @@ public class TimeTableGrid extends TimeGrid {
     }
     
     public void insert(Values values) throws Exception{
+        
+        if (emptyCells.isEmpty()){
+            throw new Exception("EMPTY_CELLS_LIST IS EMPTY");
+        }
+        Point p = emptyCells.get(0);
+        
         String sql = "insert into schedule (day_id,bell_id,depart_id,subject_id,group_id,teacher_id,room_id)\n"
                   + " values (%d,%d,%d,%d,%d,%d,%d)";
         if (values==null)
             return;
         if (values.getInteger("unplaced")<=0)
             return;
-        int day_id= getSelectedCol()+1;
-        int bell_id = getSelectedRow()+1;
+        int day_id= p.x+1;// getSelectedCol()+1;
+        int bell_id = p.y+1;// getSelectedRow()+1;
         int depart_id =values.getInteger("depart_id");
         int subject_id=values.getInteger("subject_id");                
         int group_id= values.getInteger("group_id");
@@ -219,6 +252,7 @@ public class TimeTableGrid extends TimeGrid {
             values = dataset.getValues(0);
             TimeTableGroup group = new TimeTableGroup(values);
             addElement(group);
+            emptyCells.clear();
             realign();
         } catch (Exception e){
             DataModule.rollback();
@@ -274,6 +308,21 @@ public class TimeTableGrid extends TimeGrid {
     
     
     public void afterDataChange(int dCol, int dRow) {
+    }
+    
+    public void selectValues(Values values){
+        TimeTableGroup group;
+        try{
+        for (CellElement ce:cells){
+            group =(TimeTableGroup)ce;
+            group.selected=(group.depart_id.equals(values.getInteger("depart_id")) 
+                    && group.subject_id.equals(values.getInteger("subject_id"))
+                    && group.group_id.equals(values.getInteger("group_id")));
+            
+        }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
     
 }

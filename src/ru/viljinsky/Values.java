@@ -39,7 +39,10 @@ public class Values extends HashMap<String, Object> {
         if (containsKey(columnName)){
             Object result = get(columnName);
             if (result!=null)
-                return (String)result;
+                if (result instanceof Number)
+                    return result.toString();
+                else    
+                    return (String)result;
             return null;
         }
         throw new Exception(COLUMN_NOT_FOUND+"'"+columnName+"'");

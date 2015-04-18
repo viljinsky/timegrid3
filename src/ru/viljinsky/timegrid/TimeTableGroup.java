@@ -22,6 +22,7 @@ public class TimeTableGroup extends CellElement {
     public Integer subject_id;
     public Integer group_id;
     
+    public Boolean checked = false;
     Integer group_type_id;
     Integer week_id;
     String subject_name;
@@ -56,10 +57,20 @@ public class TimeTableGroup extends CellElement {
         if (week_id!=0){
             g.drawString((week_id==1?"I нед.":"II нед."), x+50, y);
         }
+        
+//        g.setColor(Color.WHITE);
+//        g.fillRect(b.x+b.width-10, b.y, 10, 10);
         if (ready){
             g.setColor(color.YELLOW);
             g.fillRect(b.x+b.width-10, b.y, 10, 10);
+            g.setColor(Color.BLACK);
+            g.drawRect(b.x+b.width-10, b.y, 10, 10);
         }
+        // checked
+        g.setColor(Color.WHITE);
+        g.fillRect(b.x+b.width-20, b.y, 10, 10);
+        g.setColor(Color.BLACK);
+        g.drawRect(b.x+b.width-20, b.y, 10, 10);
     }
 
     public TimeTableGroup(Values values) {

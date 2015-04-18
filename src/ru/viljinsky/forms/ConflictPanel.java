@@ -22,7 +22,7 @@ import ru.viljinsky.Values;
  * @author вадик
  */
 public class ConflictPanel extends JPanel{
-    String script = "drop view if exists v_teacher_conflict;\n" +
+    public static String script = "drop view if exists v_teacher_conflict;\n" +
 "create view v_teacher_conflict as\n" +
 "select day_id,bell_id,teacher_id,count(*) as count\n" +
 "from schedule\n" +
@@ -86,6 +86,7 @@ public class ConflictPanel extends JPanel{
         frame.setVisible(true);
         try{
             DataModule.open();
+            DataModule.execute(script);
             panel.open();
         } catch (Exception e){
             e.printStackTrace();

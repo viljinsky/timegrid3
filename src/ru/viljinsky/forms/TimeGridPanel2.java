@@ -15,6 +15,7 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.Action;
@@ -241,7 +242,6 @@ interface TimeTableCommand {
 public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedForm{
     ScheduleTree tree;
     TimeTableGrid grid;
-    
     Grid unplacedGrid;
     
     CommandMngr manager = new CommandMngr() {
@@ -342,6 +342,22 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
 
             @Override
             public void gridSelectionChange() {
+                Values values = unplacedGrid.getValues();
+                if (values!=null) 
+                    try{
+//                        System.out.println(values);
+                        grid.selectValues(values);
+//                        TimeCell.getEmptyDepartCell(values.getInteger("depart_id"));
+                        if (values.getInteger("unplaced")==0)
+                            grid.emptyCells.clear();
+                        else                                    
+                            grid.emptyCells = getEmptyDepartCells(values);
+                        grid.repaint();
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                
+        
                 manager.updateActionList();
             }
 
@@ -378,6 +394,72 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         
     }
     
+    public List<Point> getEmptyDepartCells(Values values) throws Exception{
+        // для всего класса
+        String sql_depart = 
+                "select a.day_id,a.bell_id from shift_detail a inner join depart d on a.shift_id=d.shift_id\n" +
+                "  where d.id=%depart_id and not exists (select * from \n" +
+                "  v_schedule_calc where depart_id=d.id and day_id=a.day_id and bell_id=a.bell_id)\n"+
+                "order by a.bell_id,a.day_id;";
+        // для групп
+        String sql_group =
+                "select a.day_id,a.bell_id \n" +
+                "from shift_detail a inner join depart d\n" +
+                "on a.shift_id=d.shift_id\n" +
+                "where d.id=%depart_id  and ( " +
+                "	select count(*) from v_schedule_calc \n" +
+                "          where day_id=a.day_id and bell_id=a.bell_id and depart_id= d.id\n" +
+                "		and ((group_type_id in (0,%group_type_a)) or ((group_type_id=%group_type_b) and  (group_id=%group_id))) \n" +
+                
+                ")=0 \n"+
+                "order by a.bell_id,a.day_id;";
+                
+        Point p;
+        Object[] r;
+        List<Point> emptyCells = new ArrayList<>();
+        
+        String sql;
+        switch (values.getInteger("group_type_id")){
+            case 0:
+                sql = sql_depart.replace("%depart_id",values.getString("depart_id"));
+                break;
+            case 1:
+                sql = sql_group.replace("%depart_id", 
+                        values.getString("depart_id"))
+                        .replace("%group_id", values.getString("group_id"))
+                        .replace("%group_type_a", "2")
+                        .replace("%group_type_b", "1")
+                        ;
+                break;
+            case 2:     
+                sql = sql_group.replace("%depart_id", 
+                        values.getString("depart_id"))
+                        .replace("%group_id", values.getString("group_id"))
+                        .replace("%group_type_a", "1")
+                        .replace("%group_type_b", "2")
+                        ;
+                System.out.println(sql);
+                break;
+            default:
+                throw new Exception ("ONKNOW_GROUP_TYPE");
+        }
+        
+        
+        Recordset recordset = DataModule.getRecordet(sql);
+        for (int i=0;i<recordset.size();i++){
+            r = recordset.get(i);
+            p= new Point((Integer)r[0]-1,(Integer)r[1]-1);
+            System.out.println(p);
+            emptyCells.add(p);
+        }
+        
+        
+        
+//        grid.emptyCells=emptyCells;
+        return emptyCells;
+        
+    }
+    
     public void treeElementChange(TreeElement element){
         System.out.println(element.getFilter());
         try{
@@ -397,7 +479,7 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         
         dataset = DataModule.getSQLDataset(
            "select b.label,a.group_label,c.subject_name,a.unplaced,a.depart_id,a.subject_id,a.group_id,"
-                   + " a.default_teacher_id as teacher_id,a.default_room_id as room_id "
+                   + " a.default_teacher_id as teacher_id,a.default_room_id as room_id ,a.group_type_id "
                    + " from v_subject_group_on_schedule a "
                    + " inner join depart b on b.id = a.depart_id"
                    + " inner join subject c on c.id=a.subject_id"
