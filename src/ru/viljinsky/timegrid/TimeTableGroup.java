@@ -21,6 +21,9 @@ public class TimeTableGroup extends CellElement {
     public Integer depart_id;
     public Integer subject_id;
     public Integer group_id;
+
+    Integer teacher_id;
+    Integer room_id;
     
     public Boolean checked = false;
     Integer group_type_id;
@@ -73,6 +76,18 @@ public class TimeTableGroup extends CellElement {
         g.drawRect(b.x+b.width-20, b.y, 10, 10);
     }
 
+    public Values getValues(){
+        Values result = new Values();
+        result.put("depart_id",depart_id);
+        result.put("group_id",group_id);
+        result.put("subject_id",subject_id);
+        result.put("teacher_id",teacher_id);
+        result.put("room_id",room_id);
+        result.put("group_type_id",group_type_id);
+        
+        return result;
+    }
+    
     public TimeTableGroup(Values values) {
         try {
             day_no = values.getInteger("day_id");
@@ -87,8 +102,9 @@ public class TimeTableGroup extends CellElement {
             depart_label = values.getString("depart_label");
             ready = values.getBoolean("ready");
             week_id=values.getInteger("week_id");
-//            moveble = !values.getBoolean("ready");
-            
+            teacher_id = values.getInteger("teacher_id");
+            room_id = values.getInteger("room_id");
+            group_type_id=values.getInteger("group_type_id");
             
             String color_rgb = values.getString("color");
             if (color_rgb!=null){

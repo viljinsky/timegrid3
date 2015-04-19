@@ -37,7 +37,9 @@ import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
 import ru.viljinsky.Recordset;
 import ru.viljinsky.Values;
+import ru.viljinsky.timegrid.CellElement;
 import ru.viljinsky.timegrid.TimeTableGrid;
+import ru.viljinsky.timegrid.TimeTableGroup;
 
 /**
  *
@@ -319,9 +321,24 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         grid = new TimeTableGrid(){
 
             @Override
+            public void cellElementClick(CellElement ce) {
+                TimeTableGroup group = (TimeTableGroup)ce;
+                Values values = group.getValues();
+                System.out.println(values);
+                try{
+                    emptyCells=getEmptyDepartCells(values);
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+
+
+            @Override
             public void cellClick(int col, int row) {
                 super.cellClick(col, row);
                 manager.updateActionList();
+                
+                
             }
 
             @Override
@@ -393,7 +410,35 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         add(commands,BorderLayout.PAGE_START);
         
     }
-    
+    /**
+     * Поиск свободных ячеек преподователя
+     * @param values  teacher_id
+     * @return
+     * @throws Exception 
+     */
+    public List<Point> getEmptyTeacherCells(Values values) throws Exception{
+        Integer teacher_id;
+        teacher_id=values.getInteger("teacher_id");
+        if (teacher_id==null)
+            return null;
+        
+        String sql = "select day_id,bell_id from shift_detail a inner join teacher b on a.shift_id=b.shift_id\n"
+                + "where b.id=%teacher_id  and (select count(*) from schedule where day_id=a.day_id and bell_id=a.bell_id and teacher_id=b.id)=0";
+        List<Point> result = new ArrayList<>();
+        Recordset r = DataModule.getRecordet(sql.replace("%teacher_id", teacher_id.toString()));
+        Object[] p;
+        for (int i=0;i<r.size();i++){
+            p=r.get(i);
+            result.add(new Point((Integer)p[0]-1,(Integer)p[1]-1));
+        }
+        return result;
+    }
+    /**
+     * Поиск свободных ячеек ккласса-группы
+     * @param values depart_id,group_id,subject_id,group_type_id,teacher,room
+     * @return
+     * @throws Exception 
+     */
     public List<Point> getEmptyDepartCells(Values values) throws Exception{
         // для всего класса
         String sql_depart = 
@@ -414,27 +459,30 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
                 ")=0 \n"+
                 "order by a.bell_id,a.day_id;";
                 
+        Integer group_type_id = values.getInteger("group_type_id");
+        Integer depart_id = values.getInteger("depart_id");
+        Integer group_id= values.getInteger("group_id");
         Point p;
         Object[] r;
         List<Point> emptyCells = new ArrayList<>();
         
         String sql;
-        switch (values.getInteger("group_type_id")){
+        switch (group_type_id){
             case 0:
-                sql = sql_depart.replace("%depart_id",values.getString("depart_id"));
+                sql = sql_depart.replace("%depart_id",depart_id.toString());
                 break;
             case 1:
                 sql = sql_group.replace("%depart_id", 
-                        values.getString("depart_id"))
-                        .replace("%group_id", values.getString("group_id"))
+                        depart_id.toString())
+                        .replace("%group_id", group_id.toString())
                         .replace("%group_type_a", "2")
                         .replace("%group_type_b", "1")
                         ;
                 break;
             case 2:     
                 sql = sql_group.replace("%depart_id", 
-                        values.getString("depart_id"))
-                        .replace("%group_id", values.getString("group_id"))
+                        depart_id.toString())
+                        .replace("%group_id", group_id.toString())
                         .replace("%group_type_a", "1")
                         .replace("%group_type_b", "2")
                         ;
@@ -454,9 +502,17 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         }
         
         
-        
+        List<Point> result = new ArrayList<>(emptyCells);
+        if (values.getInteger("teacher_id")!=null){
+            List<Point> L = getEmptyTeacherCells(values);
+            for (Point pp:emptyCells){
+                if (!L.contains(pp)){
+                    result.remove(pp);
+                }
+            }
+        }
 //        grid.emptyCells=emptyCells;
-        return emptyCells;
+        return result;
         
     }
     

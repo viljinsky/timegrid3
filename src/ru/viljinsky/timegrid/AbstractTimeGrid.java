@@ -87,7 +87,7 @@ class Cells extends ArrayList<CellElement>{
         return false;
     }
 
-    Set<CellElement> getCells(int col,int row){
+    public Set<CellElement> getCells(int col,int row){
         Set<CellElement> list = new HashSet<>();
         for (CellElement ce:this){
             if (ce.col==col && ce.row==row)

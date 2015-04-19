@@ -132,6 +132,8 @@ public class TimeTableGrid extends TimeGrid {
             return;
         }
         
+        emptyCells.clear();
+        
         try {
             for (CellElement ce : getSelectedElements()) {
                 group = (TimeTableGroup) (ce);
