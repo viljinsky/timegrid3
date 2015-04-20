@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Point;
@@ -25,6 +26,8 @@ import javax.swing.JPanel;
  * @author вадик
  */
 public abstract class BaseDialog extends JDialog implements ActionListener{
+    private static final Cursor waitCursor = new Cursor(Cursor.WAIT_CURSOR);
+    private static final Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
     public static int RESULT_NONE = 0;
     public static int RESULT_OK = 1;
     public static int RESULT_CANCEL = 2;
@@ -86,11 +89,14 @@ public abstract class BaseDialog extends JDialog implements ActionListener{
         switch (e.getActionCommand()){
             case "OK":
                 try{
+                    setCursor(waitCursor);
                     doOnEntry();
                     modalResult=RESULT_OK;
                     setVisible(false);
                 } catch(Exception ex){
                     JOptionPane.showMessageDialog(rootPane, ex.getMessage());
+                } finally {
+                    setCursor(defaultCursor);
                 }
                 break;
             case "CANCEL":

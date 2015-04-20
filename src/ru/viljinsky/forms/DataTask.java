@@ -332,20 +332,22 @@ public class DataTask implements IDataTask, IDataTaskConstants{
 
     ///////////////////////////  CURRICULUM PANEL //////////////////////////////
     
-    public static void includeSubjectFromCurriculumn(Integer curriculum_id, Integer subject_id) throws Exception{
-       String sql = "insert into curriculum_detail (curriculum_id,subject_id,hour_per_week,hour_per_day,group_type_id )\n"+
-                 "select ?,id,default_hour_per_week,default_hour_per_day,default_group_type_id from subject where id=?;";
+    public static void includeSubjectToCurriculumn(Integer curriculum_id, Integer skill_id,Integer subject_id) throws Exception{
+       String sql = "insert into curriculum_detail (curriculum_id,skill_id,subject_id,hour_per_week,hour_per_day,group_type_id )\n"+
+                 "select ?,?,id,default_hour_per_week,default_hour_per_day,default_group_type_id from subject where id=?;";
        KeyMap map= new KeyMap();
        map.put(1, curriculum_id);
-       map.put(2, subject_id);
+       map.put(2, skill_id);
+       map.put(3, subject_id);
        DataModule.execute(sql, map);
     }
 
-    public static void excludeSubjectFromCurriculumn(Integer curriculum_id, Integer subject_id) throws Exception {
-       String sql = "delete from curriculum_detail where curriculum_id=? and subject_id=?;";
+    public static void excludeSubjectFromCurriculumn(Integer curriculum_id, Integer skill_id, Integer subject_id) throws Exception {
+       String sql = "delete from curriculum_detail where curriculum_id=? and skill_id=? and subject_id=?;";
        KeyMap map= new KeyMap();
        map.put(1, curriculum_id);
-       map.put(2, subject_id);
+       map.put(2, skill_id);
+       map.put(3, subject_id);
        DataModule.execute(sql, map);
     }
 

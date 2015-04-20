@@ -35,6 +35,7 @@ import ru.viljinsky.CommandMngr;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
+import ru.viljinsky.IDataset;
 import ru.viljinsky.Recordset;
 import ru.viljinsky.Values;
 import ru.viljinsky.timegrid.CellElement;
@@ -273,15 +274,29 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
             try{
                 switch (command){
                     case TT_PLACE_ALL:
-                        TreeElement element =tree.selectedElement;
-                        if (element !=null){
-                            if (element instanceof Depart){
-                                Integer depart_id= element.id;
-                                ScheduleBuilder.placeDepart(depart_id);
-                                grid.reload();
-                            }
-                            unplacedGrid.requery();
+                        IDataset ds = unplacedGrid.getDataset();
+                        Values values;
+                        for (int i=0;i<ds.getRowCount();i++){
+                            values=ds.getValues(i);
+                            if (values.getInteger("unplaced")==0)
+                                continue;
+                            List<Point> L1 = TimeGridPanel2.this.getEmptyDepartCells(values);
+                            if (L1.isEmpty())
+                                continue;
+                            grid.emptyCells=L1;
+                            grid.insert(values);
                         }
+                        unplacedGrid.requery();
+                        
+//                        TreeElement element =tree.selectedElement;
+//                        if (element !=null){
+//                            if (element instanceof Depart){
+//                                Integer depart_id= element.id;
+//                                ScheduleBuilder.placeDepart(depart_id);
+//                                grid.reload();
+//                            }
+//                            unplacedGrid.requery();
+//                        }
                         break;
                     case TT_DELETE:
                         grid.delete();
@@ -511,7 +526,7 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
                 }
             }
         }
-//        grid.emptyCells=emptyCells;
+        
         return result;
         
     }

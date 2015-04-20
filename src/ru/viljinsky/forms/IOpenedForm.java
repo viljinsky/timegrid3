@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -19,6 +20,7 @@ import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
 import ru.viljinsky.IDataset;
+import ru.viljinsky.SelectDialog;
 
 /**
  *
@@ -33,6 +35,8 @@ public interface IOpenedForm {
 }
 
 interface IAppCommand{
+    
+    public static final String REFRESH = "REFRESH";
     
     // curriculumn panel
     
@@ -52,6 +56,7 @@ interface IAppCommand{
     public static final String CLEAR_GROUP ="CLEAR";
 //    public static final String EDIT_SHIFT ="EDIT_SHIFT";
     public static final String ADD_GROUP = "ADD_GROUP";
+    public static final String EDIT_GROUP = "EDIT_GROUP";
     public static final String DELETE_GROUP ="DELETE_GROUP";
     
     public static final String ADD_STREAM ="ADD_STREAM";
@@ -82,9 +87,6 @@ interface IAppCommand{
     
 }
 
-
-abstract class  AbstractOpenedForm implements IOpenedForm{
-}
 
 abstract class DetailPanel extends JPanel{
     Grid grid;
@@ -486,7 +488,7 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
         Map<String,String> params;
         params = new HashMap<>();
         params.put(MASTER_DATASET,"depart");
-        params.put(SLAVE_DATASET,"subject_group");
+        params.put(SLAVE_DATASET,"v_subject_group");
         params.put(REFERENCES,"depart_id=id");
         return params;
     }
@@ -496,7 +498,7 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
         commands.setCommandList(new String[]{
             CREATE_DEPART,EDIT_DEPART,DELETE_DEPART,
             FILL_GROUP,CLEAR_GROUP,EDIT_SHIFT,ADD_GROUP,
-            DELETE_GROUP,ADD_STREAM,EDIT_STREAM,REMOVE_STREAM
+            DELETE_GROUP,ADD_STREAM,EDIT_STREAM,REMOVE_STREAM,REFRESH,EDIT_GROUP
         });
         
         addMasterAction(commands.getAction(CREATE_DEPART));
@@ -507,7 +509,10 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
         addMasterAction(commands.getAction(CLEAR_GROUP));
         addMasterAction(commands.getAction(EDIT_SHIFT));
         
+        addMasterAction(commands.getAction(REFRESH));
+        
         addDetailAction(commands.getAction(ADD_GROUP));
+        addDetailAction(commands.getAction(EDIT_GROUP));
         addDetailAction(commands.getAction(DELETE_GROUP));
         
         addDetailAction(commands.getAction(ADD_STREAM));
@@ -519,11 +524,15 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
         Integer stream_id=-1,depart_id=-1,subject_id=-1,group_id=-1,skill_id=-1;
         try{
             switch(commad){
-                case CREATE_DEPART:
-                    depart_id = Dialogs.createDepart(this);
-                    if (depart_id!=null)
-                        grid1.requery();
+                case REFRESH:
+                    grid1.requery();
                     break;
+                case CREATE_DEPART:
+                    throw new UnsupportedOperationException();
+//                    depart_id = Dialogs.createDepart(this);
+//                    if (depart_id!=null)
+//                        grid1.requery();
+//                    break;
                     
                 case EDIT_DEPART:
                     depart_id = grid1.getIntegerValue("id");
@@ -559,6 +568,14 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
                     subject_id = grid2.getIntegerValue("subject_id");
                     DataTask.addSubjectGroup(depart_id,subject_id);
                     grid2.requery();
+                    break;
+                    
+                case EDIT_GROUP:
+                    depart_id = grid1.getIntegerValue("id");
+                    subject_id = grid2.getIntegerValue("subject_id");
+                    group_id = grid2.getIntegerValue("group_id");
+                    if (Dialogs.editSubjectGroup(this,depart_id,subject_id,group_id))
+                        grid2.requery();
                     break;
                     
                 case DELETE_GROUP:
@@ -644,12 +661,15 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
         super();
         commands.setCommandList(new String[]{
             CREATE_CURRICULUM,EDIT_CURRICULUM,DELETE_CURRICULUM,CLEAR_CURRICULUM,
-            FILL_CURRICULUM});
+            FILL_CURRICULUM,CREATE_DEPART});
+        
+        addMasterAction(commands.getAction(FILL_CURRICULUM));
+        addMasterAction(commands.getAction(CREATE_DEPART));
+        
         addMasterAction(commands.getAction(CREATE_CURRICULUM));
         addMasterAction(commands.getAction(EDIT_CURRICULUM));
         addMasterAction(commands.getAction(DELETE_CURRICULUM));
         addMasterAction(commands.getAction(CLEAR_CURRICULUM));
-        addMasterAction(commands.getAction(FILL_CURRICULUM));
         
     }
     
@@ -672,7 +692,7 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
                     break;
                     
                 case DELETE_CURRICULUM:
-                    curriculum_id=grid1.getIntegerValue("id");
+                    curriculum_id=grid1.getIntegerValue("curriculum_id");
                     if (Dialogs.deleteCurriculum(this,curriculum_id))
                         grid1.requery();
                     break;
@@ -683,6 +703,10 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
                     
                 case CLEAR_CURRICULUM:
                     clearCurriculumDetail();
+                    break;
+                    
+                case CREATE_DEPART:
+                    createDepart();
                     break;
 //                case EDIT_CURRICULUM:
 //                    editDetails();
@@ -698,11 +722,67 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
         doCommand(e.getActionCommand());
     }
     
+    class CurriculumnDetailDialg extends SelectDialog{
+        public Integer skill_id;
+        public Integer curriculum_id;
+
+        @Override
+        public void doOnEntry() throws Exception {
+            Integer subject_id;
+            try{
+                for (Object n:getAdded()){
+                    subject_id=(Integer)n;
+                    DataTask.includeSubjectToCurriculumn(curriculum_id, skill_id,subject_id);
+                }
+
+                for (Object n:getRemoved()){
+                    subject_id=(Integer)n;
+                    DataTask.excludeSubjectFromCurriculumn(curriculum_id, skill_id, subject_id);
+                }
+                DataModule.commit();
+            } catch (Exception e){
+                DataModule.rollback();
+                throw new Exception("FILL_CURRICULUM_ERROR\n"+e.getMessage());
+            }
+        }
+    }
+    
     protected void fillCurriculumnDetail() throws Exception {
-        Integer curriculum_id = grid1.getIntegerValue("curriculum_id");
-        Integer skill_id = grid1.getIntegerValue("skill_id");
-        DataTask.fillCurriculumn(curriculum_id,skill_id);
-        grid2.requery();
+        CurriculumnDetailDialg dlg = new CurriculumnDetailDialg();
+        dlg.curriculum_id=grid1.getIntegerValue("curriculum_id");
+        dlg.skill_id=grid1.getIntegerValue("skill_id");
+        
+        IDataset ds = grid2.getDataset();
+        Set<Object> set= ds.getColumnSet("subject_id");
+        Dataset dataDataset = DataModule.getSQLDataset("select id,subject_name from subject");
+        dlg.setDataset(dataDataset, "id", "subject_name");
+        dlg.setSelected(set);
+        if (dlg.showModal(this)==SelectDialog.RESULT_OK){
+            grid2.requery();
+        }
+    }
+    
+    public void createDepart() throws Exception{
+        Integer skill_id,curriculum_id;
+        skill_id=grid1.getIntegerValue("skill_id");
+        curriculum_id = grid1.getIntegerValue("curriculum_id");
+        Integer depart_id = Dialogs.createDepart(this, curriculum_id, skill_id);
+//        String label = (String)JOptionPane.showInputDialog(this,"Введите метку класса" , "Новый класс", JOptionPane.PLAIN_MESSAGE, null, null, grid1.getStringValue("skill"));
+//        if (label!=null){
+//            try{
+//                DataModule.execute(String.format("insert into depart (label,skill_id,curriculum_id) values ('%s',%d,%d)",label,skill_id,curriculum_id));
+//                Recordset r = DataModule.getRecordet("select max(id) from depart");
+        if (depart_id!=null){
+            try {
+                DataTask.fillSubjectGroup2(depart_id);
+                DataModule.commit();
+                JOptionPane.showMessageDialog(this,"CREATE_DEPART OK");
+            } catch (Exception e){
+                DataModule.rollback();
+                throw new Exception("CREATE_DEPART_ERROR\n"+e.getMessage());
+            }
+        }
+        
     }
     
     protected void clearCurriculumDetail() throws Exception{

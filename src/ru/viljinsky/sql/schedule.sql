@@ -123,7 +123,7 @@ create table depart(
     id integer primary key autoincrement,
     label varchar(10) not null unique,
     skill_id integer not null references skill(id),
-    shift_id integer references shift(id),
+    shift_id integer not null references shift(id),
     curriculum_id integer not null references curriculum(id),
     class_room integer references room(id),
     class_former integer references teacher(id),
@@ -166,6 +166,7 @@ create table curriculum_detail(
     hour_per_week integer not null,
     group_type_id integer not null default 0 references group_type(id),
     group_sequence_id integer default 0 references group_sequence(id),
+    is_stream boolean default false,
     constraint pk_cur_det primary key (curriculum_id,skill_id,subject_id)    
 );
 
@@ -228,31 +229,54 @@ select * from v_room_profile;
 -- on c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id;
 -- select * from v_subject_group;
 
+-- drop view if exists v_subject_group;
+-- create view v_subject_group as
+-- select 
+-- case 
+-- 	when c.group_type_id = 0 then ''
+-- 	when c.group_type_id = 1  and a.group_id=1 then 'М'
+-- 	when c.group_type_id = 1  and a.group_id=2 then 'Д'
+-- 	when c.group_type_id = 2 then 'ГР.' || a.group_id
+-- end as group_label,
+-- a.group_id,a.depart_id,a.subject_id,c.group_type_id,a.stream_id,c.hour_per_week,c.hour_per_day,c.group_sequence_id,
+-- a.default_teacher_id,a.default_room_id,a.pupil_count
+--  from subject_group a inner join depart b on a.depart_id=b.id inner join curriculum_detail c
+-- on c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id and c.skill_id=b.skill_id;
+-- select * from v_subject_group;
+
 drop view if exists v_subject_group;
 create view v_subject_group as
 select 
+s.subject_name,
 case 
 	when c.group_type_id = 0 then ''
 	when c.group_type_id = 1  and a.group_id=1 then 'М'
 	when c.group_type_id = 1  and a.group_id=2 then 'Д'
 	when c.group_type_id = 2 then 'ГР.' || a.group_id
 end as group_label,
+g.group_sequence_name,
 a.group_id,a.depart_id,a.subject_id,c.group_type_id,a.stream_id,c.hour_per_week,c.hour_per_day,c.group_sequence_id,
 a.default_teacher_id,a.default_room_id,a.pupil_count
- from subject_group a inner join depart b on a.depart_id=b.id inner join curriculum_detail c
-on c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id and c.skill_id=b.skill_id;
+ from subject_group a 
+	inner join depart b on a.depart_id=b.id 
+	inner join curriculum_detail c
+ 		on c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id and c.skill_id=b.skill_id
+	inner join subject s on a.subject_id=s.id
+        inner join group_sequence g on g.id=c.group_sequence_id 
+        order by a.depart_id,s.subject_name,a.group_id;
 select * from v_subject_group;
 
---  subject_group_on_schedule
-drop view if exists v_subject_group_on_schedule;
-create view  v_subject_group_on_schedule as
-select a.depart_id,a.subject_id,a.group_id,a.hour_per_week,a.hour_per_day,a.group_type_id,a.default_teacher_id,a.default_room_id,count(b.bell_id) as placed,
-a.stream_id,a.group_sequence_id,a.pupil_count
- from v_subject_group a
-left join schedule b on a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
-group by a.depart_id,a.subject_id,a.group_id,a.hour_per_week,a.hour_per_day,a.group_id,a.group_type_id,a.pupil_count;
 
-select * from v_subject_group_on_schedule;
+--  subject_group_on_schedule
+-- drop view if exists v_subject_group_on_schedule;
+-- create view  v_subject_group_on_schedule as
+-- select a.depart_id,a.subject_id,a.group_id,a.hour_per_week,a.hour_per_day,a.group_type_id,a.default_teacher_id,a.default_room_id,count(b.bell_id) as placed,
+-- a.stream_id,a.group_sequence_id,a.pupil_count
+--  from v_subject_group a
+-- left join schedule b on a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
+-- group by a.depart_id,a.subject_id,a.group_id,a.hour_per_week,a.hour_per_day,a.group_id,a.group_type_id,a.pupil_count;
+-- 
+-- select * from v_subject_group_on_schedule;
 
 -- v_subject_group_on_schedule
 
@@ -345,14 +369,6 @@ from subject_group a
        inner join curriculum_detail c on 
        c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id;
 
--- create view v_curriculum_detail as
--- select s.subject_name,g.group_sequence_name,t.group_type_caption,a.hour_per_week,a.hour_per_day,
--- a.subject_id,a.curriculum_id,a.group_type_id,a.group_sequence_id
---  from curriculum_detail a
---  inner join subject s on a.subject_id=s.id
---  inner join group_sequence g on g.id=a.group_sequence_id
---  inner join group_type t on t.id=a.group_type_id 
--- ;
 
 drop view if exists v_curriculum_detail;
 create view v_curriculum_detail as
@@ -376,7 +392,7 @@ select * from v_curriculum;
 
 --- Для расчётов всободных часов
 create view v_schedule_calc as
-select a.day_id,a.bell_id,a.depart_id,a.group_id ,c.group_type_id
+select a.day_id,a.bell_id,a.depart_id,a.group_id ,c.group_type_id,a.week_id
 from schedule a 
 inner join depart d on a.depart_id=d.id
 inner join curriculum_detail c 

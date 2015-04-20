@@ -55,7 +55,7 @@ public abstract class CommandMngr {
                 case "CREATE_CURRICULUM":
                 case "CREATE_TEACHER":
                 case "CREATE_ROOM":
-                case "CREATE_DEPART":
+//                case "CREATE_DEPART":
                     putValue(NAME, "Добавить");
                     break;
                 case "EDIT_CURRICULUM":

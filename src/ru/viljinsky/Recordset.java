@@ -20,5 +20,12 @@ public class Recordset extends ArrayList<Object[]> {
         Object[] result = get(0);
         return (Integer)result[columnIndex];
     }
+    public String getString(int columnIndex) throws Exception{
+        if (isEmpty()){
+            throw new Exception("RECORDSET IS EMPTY");
+        }
+        Object[] result= get(0);
+        return result[columnIndex].toString();
+    }
     
 }

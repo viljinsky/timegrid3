@@ -130,51 +130,6 @@ public class Report extends JPanel{
         }
     }
     
-//    public void open() throws Exception{
-//        Dataset depart = DataModule.getDataset("depart");
-//        Dataset day_list = DataModule.getDataset("day_list");
-//        Dataset bell_list = DataModule.getDataset("bell_list");
-//        Dataset schedule = DataModule.getSQLDataset("select a.*,b.subject_name from schedule a inner join subject b on a.subject_id=b.id");
-//        depart.open();
-//        day_list.open();
-//        bell_list.open();
-//        Values departValues;
-//        Values day_values;
-//        Values bell_values;
-//        Values schedule_values;
-//        Map<String,Object> filter=new HashMap<>();
-//        for (int i=0;i<depart.size();i++){
-//            departValues= depart.getValues(i);
-//            text.append(departValues.getString("label")+"\n");
-//            for (int j=0;j<day_list.size();j++){
-//                day_values = day_list.getValues(j);
-//                text.append(day_values.getString("day_caption")+"\n");
-//                for (int k=0;k<bell_list.size();k++){
-//                    bell_values=bell_list.getValues(k);
-//                    text.append("\t"+bell_values.getString("time_start")+"-"+bell_values.getString("time_end")+"\n");
-//                    
-//                    filter.clear();
-//                    filter.put("day_id", day_values.getObject("day_no"));
-//                    filter.put("bell_id", bell_values.getObject("bell_id"));
-//                    filter.put("depart_id", departValues.getObject("id"));
-//                    
-//                    schedule.open(filter);
-//                    for (int n=0;n<schedule.size();n++){
-//                        schedule_values=schedule.getValues(n);
-////                        System.out.println(schedule_values.toString());
-//                        text.append("\t\t"+schedule_values.getString("group_id")+"  "+schedule_values.getString("subject_id")+"  "+schedule_values.getString("subject_name")+ "\n");
-//                    }
-//                    
-//                    
-//                }
-//                // day
-//                text.append("\n");
-//            }
-//            // depart
-//            text.append("\n\n\n");
-//            
-//        }
-//    }
     
     public static void main(String[] args){
         JFrame frame = new JFrame("Report");

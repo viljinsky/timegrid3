@@ -13,6 +13,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -21,6 +23,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 //import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -42,11 +45,14 @@ class SelectDatabase extends BaseDialog {
     JRadioButton rCreateNew = new JRadioButton("Создать новую базу");
     JRadioButton rSelectExists = new JRadioButton("Выбрать из рание созданных");
     ButtonGroup group = new ButtonGroup();
+    /**  общий путь к файлам      */
     SelectDataPath panel1 = new SelectDataPath();
+    /**  новый файл  */
     CreatePanel    panel2 = new CreatePanel();
+    /** выбор существующего файла */
     SelectPanel    panel3 = new SelectPanel();
     
-    
+    DefaultListModel model;    
     
     public boolean isNewFile(){
         return rCreateNew.isSelected();
@@ -121,12 +127,25 @@ class SelectDatabase extends BaseDialog {
     
         
     //panel3
-    class SelectPanel extends JPanel{
+    class SelectPanel extends JPanel implements ActionListener{
         JList<String> fileList = new JList<>();
+        JButton btnDelete = new JButton("DELETE");
+        JButton btnRename = new JButton("RENAME");
+        JButton btnCopy = new JButton("COPY");
+        
         public SelectPanel(){
             setLayout(new BorderLayout());
             setBorder(new TitledBorder("Выбрать"));
             add(new JScrollPane(fileList));
+            JPanel controls = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            controls.add(btnCopy);
+            btnCopy.addActionListener(this);
+            controls.add(btnRename);
+            btnRename.addActionListener(this);
+            controls.add(btnDelete);
+            btnDelete.addActionListener(this);
+            add(controls,BorderLayout.PAGE_END);
+                    
 
             fileList.addListSelectionListener(new ListSelectionListener() {
 
@@ -143,11 +162,100 @@ class SelectDatabase extends BaseDialog {
         public String getFileName(){
             return fileList.getSelectedValue();
         }
+        
+        private void copyFile() throws Exception{
+            String fileName = SelectDatabase.this.getFileName();
+            String newFileName=fileName.replace(".db", "_копия.db");
+            FileInputStream fis = null;
+            FileOutputStream fos = null; 
+            try{
+                fis= new FileInputStream(fileName);
+                fos = new FileOutputStream(newFileName);
+                int c;
+
+                while ( (c=fis.read()) !=-1 ){
+                    fos.write(c);
+                }
+            
+            } finally {
+                if (fis!=null){
+                    fis.close();
+                }
+                if (fos!=null){
+                    fos.close();
+                }
+            }
+  
+            File file = new File(newFileName);
+            model.addElement(file.getName());
+            
+//            JOptionPane.showMessageDialog(rootPane, "OK "+newFileName);
+            
+        }
+        
+        private void deleteFile() throws Exception{
+            String fileName = SelectDatabase.this.getFileName();
+            File file = new File(fileName);
+            int index = fileList.getSelectedIndex();
+            if (JOptionPane.showConfirmDialog(rootPane, "Удалить "+fileName,"jkjwkw",JOptionPane.YES_NO_OPTION)== JOptionPane.YES_OPTION){
+                if (file.delete()){
+                    model.remove(index);
+                }  else {
+                    throw new Exception("CAN NOT DELETE FILE");
+                }
+            }
+            
+        }
+        
+        private void renameFile() throws Exception{
+            String fileName = SelectDatabase.this.getFileName();
+            File file = new File(fileName);
+            String newFileName = (String)JOptionPane.showInputDialog(rootPane, "Переименовать", "Внимание", JOptionPane.PLAIN_MESSAGE, null, null, fileName);
+            if (newFileName!=null){
+
+                File newFile = new File(newFileName);
+                if (file.renameTo(newFile)){
+                    System.out.println("-->"+newFileName);
+                } else {
+                    throw new Exception("CAN NOT RENAME FILE");
+                }
+            }
+            
+        }
+        
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            doCommand(e.getActionCommand());
+        }
+        
+        public void doCommand(String command){
+            try{
+                 
+                switch(command){
+                    case "DELETE":
+                        deleteFile();
+                        break;
+                    case "COPY":
+                        copyFile();
+                        break;
+                    case "RENAME":
+                        renameFile();
+                        break;
+                }
+            } catch (NullPointerException e){
+                JOptionPane.showMessageDialog(rootPane,"Что то не указано (null)");            
+            } catch (Exception e){
+                JOptionPane.showMessageDialog(rootPane, e.getMessage());
+            }
+        }
+        
+        
     }
 
     public void proc1(String dir){
         panel1.textPath.setText(dir);
-        DefaultListModel model = new DefaultListModel();
+        model = new DefaultListModel();
         File f = new File(dir);
         String fileName;
         for (File ff:f.listFiles())
@@ -203,4 +311,12 @@ class SelectDatabase extends BaseDialog {
     public void doOnEntry() throws Exception {
     }
     
+    public static void main(String[] args){
+        SelectDatabase dlg = new SelectDatabase();
+//        dlg.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        dlg.pack();
+        dlg.setVisible(true);
+        dlg.dispose();
+        dlg=null;
+    }
 }

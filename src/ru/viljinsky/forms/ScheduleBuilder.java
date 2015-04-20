@@ -12,8 +12,6 @@ import java.util.Map;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Recordset;
-import ru.viljinsky.forms.DataTask;
-import ru.viljinsky.forms.EmptyCell;
 
 /**
  *
@@ -32,6 +30,7 @@ public class ScheduleBuilder {
      * @param subject_id
      * @throws Exception 
      */
+    @Deprecated
     public static void placeDepartHour(Integer depart_id,Integer subject_id) throws Exception{
         Integer group_id,teacher_id,room_id;
         String sql = String.format("select group_id,default_teacher_id,default_room_id from subject_group where depart_id=%d and subject_id=%d",depart_id,subject_id);
