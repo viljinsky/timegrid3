@@ -148,6 +148,14 @@ public class Grid extends JTable {
     public boolean isEditable(){
         return model!=null && model.dataset.isEditable();
     }
+
+    public void close() throws Exception{
+        if (model!=null){
+            model.dataset.close();
+            model.fireTableDataChanged();
+            
+        }
+    }
     
     abstract class EdtDialog extends EntryDialog{
         

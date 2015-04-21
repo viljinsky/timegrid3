@@ -1,6 +1,6 @@
-insert into week(id,caption) values (0,'Каждую неделю');
-insert into week(id,caption) values (1,'Нечётная нед.');
-insert into week(id,caption) values (2,'Чётная нед.');
+insert into week(id,caption) values (0,'I/II нед.');
+insert into week(id,caption) values (1,'I нед.');
+insert into week(id,caption) values (2,'II нед.');
 
 
 

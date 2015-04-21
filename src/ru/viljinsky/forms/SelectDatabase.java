@@ -120,7 +120,10 @@ class SelectDatabase extends BaseDialog {
         }
         
         public String getFileName(){
-            return txtDataName.getText();
+            String fileName = txtDataName.getText();
+            if (!fileName.endsWith(".db"))
+                fileName = fileName+".db";
+            return fileName;
         }
     }
     

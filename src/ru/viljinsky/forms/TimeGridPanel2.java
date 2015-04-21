@@ -208,21 +208,21 @@ class ScheduleTree extends JTree{
         
         DefaultMutableTreeNode node;
         Dataset dataset ;
-        dataset = DataModule.getSQLDataset("select id,label from depart");
+        dataset = DataModule.getSQLDataset("select id,label from depart order by skill_id");
         dataset.open();
         for (int i=0;i<dataset.getRowCount();i++){
             node = new DefaultMutableTreeNode(new Depart(dataset.getValues(i)));
             departNodes.add(node);
         }
         
-        dataset = DataModule.getSQLDataset("select id,last_name from teacher");
+        dataset = DataModule.getSQLDataset("select id,last_name,first_name,patronymic from teacher order by last_name,first_name,patronymic");
         dataset.open();
         for (int i=0;i<dataset.getRowCount();i++){
             node = new DefaultMutableTreeNode(new Teacher(dataset.getValues(i)));
             teacherNodes.add(node);
         }
         
-        dataset = DataModule.getSQLDataset("select id,room_name from room");
+        dataset = DataModule.getSQLDataset("select id,room_name from room order by room_name");
         dataset.open();
         for (int i=0;i<dataset.getRowCount();i++){
             node = new DefaultMutableTreeNode(new Room(dataset.getValues(i)));
@@ -239,7 +239,7 @@ interface TimeTableCommand {
     public static final String TT_PLACE_ALL = "TT_PLACE_ALL";
     public static final String TT_FIX       = "TT_FIX";
     public static final String TT_UNFIX     = "TT_UNFIX";
-    
+    public static final String TT_REFRESH   = "TT_REFRESH";
 }
 
 public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedForm{
@@ -270,7 +270,6 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
 
         @Override
         public void doCommand(String command) {
-            System.out.println(command);
             try{
                 switch (command){
                     case TT_PLACE_ALL:
@@ -287,16 +286,6 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
                             grid.insert(values);
                         }
                         unplacedGrid.requery();
-                        
-//                        TreeElement element =tree.selectedElement;
-//                        if (element !=null){
-//                            if (element instanceof Depart){
-//                                Integer depart_id= element.id;
-//                                ScheduleBuilder.placeDepart(depart_id);
-//                                grid.reload();
-//                            }
-//                            unplacedGrid.requery();
-//                        }
                         break;
                     case TT_DELETE:
                         grid.delete();
@@ -315,6 +304,11 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
                         break;
                     case TT_UNFIX:
                         grid.unfix();
+                        break;
+                    case TT_REFRESH:
+                        tree.clear();
+                        tree.open();
+                        unplacedGrid.close();
                         break;
                 }
             } catch (Exception e){
@@ -377,9 +371,7 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
                 Values values = unplacedGrid.getValues();
                 if (values!=null) 
                     try{
-//                        System.out.println(values);
                         grid.selectValues(values);
-//                        TimeCell.getEmptyDepartCell(values.getInteger("depart_id"));
                         if (values.getInteger("unplaced")==0)
                             grid.emptyCells.clear();
                         else                                    
@@ -388,8 +380,6 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
                     } catch (Exception e){
                         e.printStackTrace();
                     }
-                
-        
                 manager.updateActionList();
             }
 
@@ -410,12 +400,13 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         
         
         manager.setCommandList(new String[]{
-             TT_PLACE_ALL+";Разместить всё",
-             TT_PLACE+";Разместить",
-             TT_DELETE+";Удалить",
-             TT_FIX+";Болкировать",
-             TT_UNFIX+";Отм.блок",
-             TT_CLEAR+";Очистить"
+             TT_PLACE_ALL,
+             TT_PLACE,
+             TT_DELETE,
+             TT_FIX,
+             TT_UNFIX,
+             TT_CLEAR,
+             TT_REFRESH   
         });
         
         JPanel commands = new JPanel(new FlowLayout(FlowLayout.LEFT));

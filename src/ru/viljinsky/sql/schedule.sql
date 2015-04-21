@@ -12,8 +12,8 @@ drop table if exists group_sequence;
 create table group_sequence (id integer primary key ,group_sequence_name varchar(20));
 
 insert into group_sequence (id,group_sequence_name) values (0,'Каждую неделю');
-insert into group_sequence (id,group_sequence_name) values (1,'Неетная неделя');
-insert into group_sequence (id,group_sequence_name) values (2,'Чётная неделя');
+insert into group_sequence (id,group_sequence_name) values (1,'Через неделю');
+-- insert into group_sequence (id,group_sequence_name) values (2,'Чётная неделя');
 
 
 
@@ -214,39 +214,11 @@ select * from v_room_profile;
 
 
 -- v_subject_group
--- drop view if exists v_subject_group;
--- create view v_subject_group as
--- select 
--- case 
--- 	when c.group_type_id = 0 then ''
--- 	when c.group_type_id = 1  and a.group_id=1 then 'М'
--- 	when c.group_type_id = 1  and a.group_id=2 then 'Д'
--- 	when c.group_type_id = 2 then 'ГР.' || a.group_id
--- end as group_label,
--- a.group_id,a.depart_id,a.subject_id,c.group_type_id,a.stream_id,c.hour_per_week,c.hour_per_day,c.group_sequence_id,
--- a.default_teacher_id,a.default_room_id,a.pupil_count
---  from subject_group a inner join depart b on a.depart_id=b.id inner join curriculum_detail c
--- on c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id;
--- select * from v_subject_group;
-
--- drop view if exists v_subject_group;
--- create view v_subject_group as
--- select 
--- case 
--- 	when c.group_type_id = 0 then ''
--- 	when c.group_type_id = 1  and a.group_id=1 then 'М'
--- 	when c.group_type_id = 1  and a.group_id=2 then 'Д'
--- 	when c.group_type_id = 2 then 'ГР.' || a.group_id
--- end as group_label,
--- a.group_id,a.depart_id,a.subject_id,c.group_type_id,a.stream_id,c.hour_per_week,c.hour_per_day,c.group_sequence_id,
--- a.default_teacher_id,a.default_room_id,a.pupil_count
---  from subject_group a inner join depart b on a.depart_id=b.id inner join curriculum_detail c
--- on c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id and c.skill_id=b.skill_id;
--- select * from v_subject_group;
 
 drop view if exists v_subject_group;
 create view v_subject_group as
 select 
+a.default_week_id,
 s.subject_name,
 case 
 	when c.group_type_id = 0 then ''
@@ -254,7 +226,9 @@ case
 	when c.group_type_id = 1  and a.group_id=2 then 'Д'
 	when c.group_type_id = 2 then 'ГР.' || a.group_id
 end as group_label,
-g.group_sequence_name,
+case when a.default_week_id = 0 then '' 
+     else w.caption end as week_caption,
+-- g.group_sequence_name,
 a.group_id,a.depart_id,a.subject_id,c.group_type_id,a.stream_id,c.hour_per_week,c.hour_per_day,c.group_sequence_id,
 a.default_teacher_id,a.default_room_id,a.pupil_count
  from subject_group a 
@@ -262,23 +236,13 @@ a.default_teacher_id,a.default_room_id,a.pupil_count
 	inner join curriculum_detail c
  		on c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id and c.skill_id=b.skill_id
 	inner join subject s on a.subject_id=s.id
-        inner join group_sequence g on g.id=c.group_sequence_id 
+--        inner join group_sequence g on g.id=c.group_sequence_id 
+	inner join week w on w.id = a.default_week_id
         order by a.depart_id,s.subject_name,a.group_id;
+
 select * from v_subject_group;
 
-
---  subject_group_on_schedule
--- drop view if exists v_subject_group_on_schedule;
--- create view  v_subject_group_on_schedule as
--- select a.depart_id,a.subject_id,a.group_id,a.hour_per_week,a.hour_per_day,a.group_type_id,a.default_teacher_id,a.default_room_id,count(b.bell_id) as placed,
--- a.stream_id,a.group_sequence_id,a.pupil_count
---  from v_subject_group a
--- left join schedule b on a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
--- group by a.depart_id,a.subject_id,a.group_id,a.hour_per_week,a.hour_per_day,a.group_id,a.group_type_id,a.pupil_count;
--- 
--- select * from v_subject_group_on_schedule;
-
--- v_subject_group_on_schedule
+--                          v_subject_group_on_schedule
 
 drop view if exists v_subject_group_on_schedule;
 create view  v_subject_group_on_schedule as
@@ -372,7 +336,7 @@ from subject_group a
 
 drop view if exists v_curriculum_detail;
 create view v_curriculum_detail as
-select s.subject_name,g.group_sequence_name,t.group_type_caption,a.hour_per_week,a.hour_per_day,
+select s.subject_name,g.group_sequence_name,t.group_type_caption,a.hour_per_week,a.hour_per_day,a.is_stream,
 a.subject_id,a.curriculum_id,a.group_type_id,a.group_sequence_id,a.skill_id
  from curriculum_detail a
  inner join subject s on a.subject_id=s.id

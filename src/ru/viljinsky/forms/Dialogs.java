@@ -691,8 +691,8 @@ public class Dialogs {
     
         
         
-        Recordset r = DataModule.getRecordet("select caption from skill where id="+skill_id);
-        String label = r.getString(0);
+        Recordset r = DataModule.getRecordet("select caption,(select count(*) from depart where skill_id=a.id)+1 as count from skill a where a.id="+skill_id+";");
+        String label = r.getString(0)+" "+r.getString(1);
         
         r = DataModule.getRecordet(String.format("select count(*) from curriculum_detail where skill_id=%d and curriculum_id=%d",skill_id,curriculum_id));
         if (r.getInteger(0)==0){
@@ -785,6 +785,42 @@ public class Dialogs {
         dlg.setDataset(DataModule.getDataset("subject_group"));
         dlg.setValues(values);
         return dlg.showModal(owner)==BaseDialog.RESULT_OK;
+    }
+
+    public static boolean editCurriculumDetail(JComponent owner, Integer curriculum_id, Integer skill_id, Integer subject_id) throws Exception{
+        EntryDialog dlg = new EntryDialog() {
+
+            @Override
+            public void doOnEntry() throws Exception {
+                try{
+                    Dataset dataset = DataModule.getDataset("curriculum_detail");
+                    Values values = getValues();
+                    Map<String,Object> filter = new HashMap<>();
+                    filter.put("curriculum_id", values.getInteger("curriculum_id"));
+                    filter.put("skill_id", values.getInteger("skill_id"));
+                    filter.put("subject_id", values.getInteger("subject_id"));
+                    dataset.open(filter);
+                    dataset.edit(0, values);
+                    DataModule.commit();
+                } catch (Exception e){
+                    DataModule.rollback();
+                    throw new Exception("EDIT_CURRICULUM_ERROR\n"+e.getMessage());
+                }
+                
+            }
+        };
+        Values values = new Values();
+        values.put("curriculum_id",curriculum_id);
+        values.put("skill_id",skill_id);
+        values.put("subject_id",subject_id);
+        
+        
+        Dataset dataset = DataModule.getDataset("curriculum_detail");
+        dataset.open(values);
+        values = dataset.getValues(0);
+        dlg.setDataset(dataset);
+        dlg.setValues(values);
+        return dlg.showModal(owner)==EntryDialog.RESULT_OK;
     }
 
 }

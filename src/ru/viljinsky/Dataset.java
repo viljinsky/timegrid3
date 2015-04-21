@@ -400,7 +400,8 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         "building=building_name",
         "week=caption",
         "depart=label",
-        "stream=stream_caption"
+        "stream=stream_caption",
+        "group_sequence=group_sequence_name"
     } ;
     
     public Map<String,String> getLookupMap(){

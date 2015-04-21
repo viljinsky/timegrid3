@@ -45,6 +45,7 @@ interface IAppCommand{
     public static final String DELETE_CURRICULUM = "DELETE_CURRICULUM";
     public static final String FILL_CURRICULUM = "FILL_CURRICULUM";
     public static final String CLEAR_CURRICULUM = "CLEAR_CURRICULUM";
+    public static final String EDIT_CURRICULUM_DETAIL = "EDITCURRICULUM_DETAIL";
     
     // depart panel
     
@@ -661,20 +662,22 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
         super();
         commands.setCommandList(new String[]{
             CREATE_CURRICULUM,EDIT_CURRICULUM,DELETE_CURRICULUM,CLEAR_CURRICULUM,
-            FILL_CURRICULUM,CREATE_DEPART});
+            FILL_CURRICULUM,CREATE_DEPART,EDIT_CURRICULUM_DETAIL});
         
-        addMasterAction(commands.getAction(FILL_CURRICULUM));
-        addMasterAction(commands.getAction(CREATE_DEPART));
         
         addMasterAction(commands.getAction(CREATE_CURRICULUM));
         addMasterAction(commands.getAction(EDIT_CURRICULUM));
         addMasterAction(commands.getAction(DELETE_CURRICULUM));
         addMasterAction(commands.getAction(CLEAR_CURRICULUM));
+        addMasterAction(commands.getAction(CREATE_DEPART));
+        
+        addDetailAction(commands.getAction(FILL_CURRICULUM));
+        addDetailAction(commands.getAction(EDIT_CURRICULUM_DETAIL));
         
     }
     
     public void doCommand(String command){
-        Integer curriculum_id;
+        Integer curriculum_id,subject_id,skill_id;
         try{
             switch (command){
                 case CREATE_CURRICULUM:
@@ -701,6 +704,13 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
                     fillCurriculumnDetail();
                     break;
                     
+                case EDIT_CURRICULUM_DETAIL:
+                    curriculum_id = grid2.getIntegerValue("curriculum_id");
+                    subject_id = grid2.getIntegerValue("subject_id");
+                    skill_id=grid2.getIntegerValue("skill_id");
+                    if (Dialogs.editCurriculumDetail(this,curriculum_id,skill_id,subject_id))
+                        grid2.requery();
+                    break;
                 case CLEAR_CURRICULUM:
                     clearCurriculumDetail();
                     break;
