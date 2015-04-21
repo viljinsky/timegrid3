@@ -138,7 +138,7 @@ create table subject_group (
     subject_id integer references subject(id) on delete restrict,
     default_teacher_id integer references teacher(id),
     default_room_id integer references room(id),
-    default_week_id integer references week(id) default 0,
+    week_id integer references week(id) default 0,
     stream_id integer references stream(id) on delete set null,
     pupil_count integer,
     primary key (depart_id,subject_id,group_id)
@@ -186,14 +186,14 @@ drop table if exists schedule;
 create table schedule (
     day_id integer references day_list(day_no),
     bell_id integer references bell_list(bell_id),
-    week_id integer  default 0 references week(id),
+--     week_id integer  default 0 references week(id),
     depart_id integer references depart(id),
     subject_id integer references subject(id),
     group_id integer,
     teacher_id integer references teacher(id),
     room_id integer integer references room(id),
     ready boolean default 'false',
-    primary key (day_id,bell_id,week_id,depart_id,subject_id,group_id) 
+    primary key (day_id,bell_id,depart_id,subject_id,group_id) 
 );
 
 ----------    Профили учетелей
@@ -218,7 +218,7 @@ select * from v_room_profile;
 drop view if exists v_subject_group;
 create view v_subject_group as
 select 
-a.default_week_id,
+a.week_id,
 s.subject_name,
 case 
 	when c.group_type_id = 0 then ''
@@ -226,7 +226,7 @@ case
 	when c.group_type_id = 1  and a.group_id=2 then 'Д'
 	when c.group_type_id = 2 then 'ГР.' || a.group_id
 end as group_label,
-case when a.default_week_id = 0 then '' 
+case when a.week_id = 0 then '' 
      else w.caption end as week_caption,
 -- g.group_sequence_name,
 a.group_id,a.depart_id,a.subject_id,c.group_type_id,a.stream_id,c.hour_per_week,c.hour_per_day,c.group_sequence_id,
@@ -237,7 +237,7 @@ a.default_teacher_id,a.default_room_id,a.pupil_count
  		on c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id and c.skill_id=b.skill_id
 	inner join subject s on a.subject_id=s.id
 --        inner join group_sequence g on g.id=c.group_sequence_id 
-	inner join week w on w.id = a.default_week_id
+	inner join week w on w.id = a.week_id
         order by a.depart_id,s.subject_name,a.group_id;
 
 select * from v_subject_group;
@@ -270,7 +270,7 @@ select f.label as depart_label,dl.day_caption,bl.time_start ||'-'||time_end as l
   b.bell_id,
   a.depart_id,
   a.group_id,
-  b.week_id,
+  a.week_id,
   a.subject_id,
   a.group_type_id,
   b.teacher_id,
@@ -356,7 +356,7 @@ select * from v_curriculum;
 
 --- Для расчётов всободных часов
 create view v_schedule_calc as
-select a.day_id,a.bell_id,a.depart_id,a.group_id ,c.group_type_id,a.week_id
+select a.day_id,a.bell_id,a.depart_id,a.group_id ,c.group_type_id --,a.week_id
 from schedule a 
 inner join depart d on a.depart_id=d.id
 inner join curriculum_detail c 

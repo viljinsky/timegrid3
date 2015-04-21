@@ -98,7 +98,9 @@ insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,d
 insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
      values (8,'Физ.культура',  1,1,2,'200 255 200');
 insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
-     values (9,'Информатика',   1,2,2,'255 200 200');
+     values (9,'Информатика',   1,2,1,'255 200 200');
+insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
+     values (10,'Информатика (лекц)',   1,0,1,'255 255 170');
 
 
 -- русский и лит.        
@@ -149,13 +151,13 @@ insert into curriculum (id,caption) values (1,'Уч. план 1');
 -- insert into curriculum (id,skill_id,caption) values (3,3,'Уч. план 10-го класса');
 
 insert into curriculum_detail(curriculum_id,skill_id,subject_id,hour_per_day,hour_per_week,group_sequence_id)
-  values(1,1,1,2,2,0);
+  values(1,1,1,1,2,0);
     
 insert into curriculum_detail(curriculum_id,skill_id,subject_id,hour_per_day,hour_per_week,group_sequence_id)
-  values(1,1,2,2,2,0);
+  values(1,1,2,1,2,0);
 
 insert into curriculum_detail(curriculum_id,skill_id,subject_id,hour_per_day,hour_per_week,group_sequence_id)
-  values(1,1,3,2,2,0);
+  values(1,1,3,1,2,0);
 
 -- insert into depart(id,label,skill_id,shift_id,curriculum_id) values (1,'8-a',1,1,1);
 -- insert into depart(id,label,skill_id,shift_id,curriculum_id) values (2,'8-б',1,1,1);

@@ -58,18 +58,18 @@ public class ScheduleBuilder {
      * @throws Exception 
      */
     public static void placeParallelGroupHour(int depart_id,int subject_id) throws Exception{
-        Integer teacher_id,room_id,group_id,week_id;
-        Recordset recordset = DataModule.getRecordet(String.format("select group_id,default_teacher_id,default_room_id,default_week_id from subject_group where depart_id=%d and subject_id=%d",depart_id,subject_id));
+        Integer teacher_id,room_id,group_id;//week_id;
+        Recordset recordset = DataModule.getRecordet(String.format("select group_id,default_teacher_id,default_room_id from subject_group where depart_id=%d and subject_id=%d",depart_id,subject_id));
         EmptyCell cell = DataTask.findEmptyCell(depart_id, null, null);
-        String sql = "insert into schedule (day_id,bell_id,depart_id,subject_id,group_id,teacher_id,room_id,week_id)"
-                + " values (%d,%d,%d,%d,%d,%d,%d,%d)";
+        String sql = "insert into schedule (day_id,bell_id,depart_id,subject_id,group_id,teacher_id,room_id)"
+                + " values (%d,%d,%d,%d,%d,%d,%d)";
         try{
             for (int i=0;i<recordset.size();i++){
                 group_id=(Integer)recordset.get(i)[0];
                 teacher_id =(Integer)recordset.get(i)[1];
                 room_id =(Integer)recordset.get(i)[2];
-                week_id=(Integer)recordset.get(i)[3];
-                DataModule.execute(String.format(sql,cell.day_id,cell.bell_id,depart_id,subject_id,group_id,teacher_id,room_id,week_id ));
+//                week_id=(Integer)recordset.get(i)[3];
+                DataModule.execute(String.format(sql,cell.day_id,cell.bell_id,depart_id,subject_id,group_id,teacher_id,room_id));
             }
         } catch (Exception e){
             e.printStackTrace();

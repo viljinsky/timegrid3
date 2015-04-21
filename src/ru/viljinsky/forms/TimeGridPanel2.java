@@ -333,7 +333,7 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
             public void cellElementClick(CellElement ce) {
                 TimeTableGroup group = (TimeTableGroup)ce;
                 Values values = group.getValues();
-                System.out.println(values);
+//                System.out.println(values);
                 try{
                     emptyCells=getEmptyDepartCells(values);
                 } catch (Exception e){
@@ -345,6 +345,7 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
             @Override
             public void cellClick(int col, int row) {
                 super.cellClick(col, row);
+                emptyCells.clear();
                 manager.updateActionList();
                 
                 
@@ -415,6 +416,49 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         }
         add(commands,BorderLayout.PAGE_START);
         
+    
+    }
+
+    /**
+     * Нужно определить допустимое количество занятий в день по указанному предмету
+     * @param values depert_id,subject_id
+     * @return сет допустимых ней 1,2,5,7
+     * @throws Exception 
+     */
+    public Set<Integer> getAvalableDay(Values values) throws Exception{
+        Set<Integer> result = new HashSet<>();
+//        System.out.println(values);
+        String sql;
+        sql =
+            "select distinct t.day_id,c.hour_per_day -\n" +
+            "(select count(*) \n" +
+            "     from schedule \n" +
+            "     where depart_id=d.id and day_id=t.day_id and group_id=a.group_id and subject_id=a.subject_id) as count\n" +
+            "from subject_group a inner join \n" +
+            "      depart d on a.depart_id=d.id \n" +
+            "	inner join curriculum_detail c\n" +
+            "		on c.skill_id=d.skill_id and c.curriculum_id=d.curriculum_id and c.subject_id=a.subject_id,\n" +
+            "      shift_detail t	\n" +
+            "where a.depart_id=%depart_id and a.group_id=%group_id and a.subject_id=%subject_id and t.shift_id=d.shift_id;"        ;
+        
+        Recordset r= DataModule.getRecordet(
+                sql.replace("%subject_id", values.getString("subject_id"))
+                .replace("%depart_id", values.getString("depart_id"))
+                .replace("%group_id", values.getString("group_id"))
+        );
+        Object[] obj;
+        int day_id,count;
+        for (int i=0;i<r.size();i++){
+            obj = r.get(i);
+            day_id=(Integer)obj[0];
+            if (values.containsKey("day_id"))
+                count=(values.getInteger("day_id")==day_id?(Integer)obj[1]+1:(Integer)obj[1]);
+            else 
+                count=(Integer)obj[1];
+            if (count>0)
+                result.add(day_id);
+        }
+        return result;
     }
     /**
      * Поиск свободных ячеек преподователя
@@ -470,7 +514,10 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         Integer group_id= values.getInteger("group_id");
         Point p;
         Object[] r;
+        
         List<Point> emptyCells = new ArrayList<>();
+        Set<Integer> avalableDays = getAvalableDay(values);
+        System.out.println(avalableDays);
         
         String sql;
         switch (group_type_id){
@@ -495,7 +542,7 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
                 System.out.println(sql);
                 break;
             default:
-                throw new Exception ("ONKNOW_GROUP_TYPE");
+                throw new Exception ("UNKNOW_GROUP_TYPE");
         }
         
         
@@ -504,7 +551,8 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
             r = recordset.get(i);
             p= new Point((Integer)r[0]-1,(Integer)r[1]-1);
             System.out.println(p);
-            emptyCells.add(p);
+            if (avalableDays.contains(p.x+1))
+                emptyCells.add(p);
         }
         
         
@@ -517,6 +565,8 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
                 }
             }
         }
+        
+        
         
         return result;
         
@@ -535,6 +585,7 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         }
     }
     
+    @Override
     public void open() throws Exception{
         tree.open();
         Dataset dataset ;
@@ -568,6 +619,25 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         
     }
   
+    @Override
+    public String getCaption() {
+        return "TIMEGRIPPANEL2";
+    }
+
+    @Override
+    public JComponent getPanel() {
+        return this;
+    }
+
+    @Override
+    public void close() throws Exception {
+        System.out.println("close");
+        tree.clear();
+        unplacedGrid.getDataset().close();
+        grid.close();
+        
+    }
+
     public static void main(String[] args) throws Exception{
         DataModule.open();
         final TimeGridPanel2 panel = new TimeGridPanel2();
@@ -592,25 +662,5 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
 
         });
         
-    }
-
-    @Override
-    public String getCaption() {
-        return "TIMEGRIPPANEL2";
-    }
-
-    @Override
-    public JComponent getPanel() {
-        return this;
-    }
-
-    @Override
-    public void close() throws Exception {
-        System.out.println("close");
-        tree.clear();
-        unplacedGrid.getDataset().close();
-        grid.close();
-        
-    }
-    
+    }    
 }

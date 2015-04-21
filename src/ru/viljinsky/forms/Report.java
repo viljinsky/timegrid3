@@ -46,7 +46,7 @@ public class Report extends JPanel{
             "       end\n" +
             "   else 'гр.' || a.group_id end\n" +
             "   as group_label,\n" +
-            " sh.week_id,\n" +
+            " a.week_id,\n" +
             " a.stream_id,\n" +
             " t.last_name as teacher_name,r.room_name\n" +
             " from subject_group a inner join depart d on a.depart_id=d.id \n"+

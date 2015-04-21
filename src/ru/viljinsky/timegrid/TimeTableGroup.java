@@ -84,6 +84,8 @@ public class TimeTableGroup extends CellElement {
         result.put("teacher_id",teacher_id);
         result.put("room_id",room_id);
         result.put("group_type_id",group_type_id);
+        result.put("day_id", day_no);
+        result.put("bell_id", bell_id);
         
         return result;
     }

@@ -107,7 +107,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
                 }
             }
             
-            sql = "update subject_group set default_week_id=group_id where subject_id in (\n"
+            sql = "update subject_group set week_id=group_id where subject_id in (\n"
                     +"select a.subject_id \n" +
                     "from curriculum_detail a \n" +
                     "  inner join depart b \n" +
