@@ -35,7 +35,9 @@ abstract class SelectPanel extends JPanel implements ActionListener {
         setPreferredSize(new Dimension(500, 200));
         setLayout(new BorderLayout());
         sourceGrid = new Grid();
+        sourceGrid.setAutoCreateRowSorter(true);
         destanationGrid = new Grid();
+        destanationGrid.setAutoCreateRowSorter(true);
         chProfileOnly = new JCheckBox("Только по профилю",null,true);
         chProfileOnly.addActionListener(new ActionListener() {
 

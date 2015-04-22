@@ -344,7 +344,7 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
             IDataset dataset = sourceGrid.getDataset();
             try{
                 for (int row:sourceGrid.getSelectedRows()){
-                    values=dataset.getValues(row);
+                    values=dataset.getValues(sourceGrid.convertRowIndexToModel(row));
                     depart_id=(Integer)values.get("depart_id");
                     subject_id=(Integer)values.get("subject_id");
                     group_id=(Integer)values.get("group_id");
@@ -365,7 +365,7 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
             IDataset dataset = destanationGrid.getDataset();
             try{
                 for (int row: destanationGrid.getSelectedRows()){
-                    values=dataset.getValues(row);
+                    values=dataset.getValues(destanationGrid.convertRowIndexToModel(row));
                     depart_id=(Integer)values.get("depart_id");
                     subject_id=(Integer)values.get("subject_id");
                     group_id=(Integer)values.get("group_id");
@@ -1163,7 +1163,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
             int depart_id,subject_id,group_id;
             try{
                 for (int row : sourceGrid.getSelectedRows()){
-                    values=dataset.getValues(row);
+                    values=dataset.getValues(sourceGrid.convertRowIndexToModel(row));
                     depart_id=(Integer)values.get("depart_id");
                     subject_id=(Integer)values.get("subject_id");
                     group_id=(Integer)values.get("group_id");
@@ -1184,7 +1184,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
             int depart_id,subject_id,group_id;
             try{
                 for (int row : destanationGrid.getSelectedRows()){
-                    values=dataset.getValues(row);
+                    values=dataset.getValues(destanationGrid.convertRowIndexToModel(row));
                     depart_id=(Integer)values.get("depart_id");
                     subject_id=(Integer)values.get("subject_id");
                     group_id=(Integer)values.get("group_id");

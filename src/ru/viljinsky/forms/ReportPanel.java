@@ -75,6 +75,7 @@ public class ReportPanel extends JPanel implements IOpenedForm {
                     command1();
                     break;
                 case "COMMAND2":
+                    command2();
                     break;
                 case "COMMAND3":
                     break;
@@ -95,5 +96,11 @@ public class ReportPanel extends JPanel implements IOpenedForm {
         text.setText(new ReportBuilder().getScheduleReport());
         text.setCaretPosition(0);
         
+    }
+    
+    public void command2() throws Exception{
+        text.setContentType("text/html");
+        text.setText(new ReportBuilder().getSchedueReport2());
+        text.setCaretPosition(0);
     }
 }

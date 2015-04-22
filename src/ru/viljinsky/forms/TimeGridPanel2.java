@@ -7,6 +7,7 @@
 package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Point;
@@ -275,28 +276,41 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
             TimeGridPanel2.this.doCommand(command);
         }
     };
+
+    public void wait(boolean b){
+        if (b)
+            setCursor(new Cursor(Cursor.WAIT_CURSOR));
+        else
+            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+    }
+    
     
     public void doCommand(String command){
         try{
             switch (command){
                 case TT_PLACE_ALL:
+                    
                     IDataset ds = unplacedGrid.getDataset();
                     Values values;
                     List<Point> L1;
-                    int count;
+                    int count,unplaced=0,placed=0;
+                    wait(true);
                     for (int i=0;i<ds.getRowCount();i++){
                         values=ds.getValues(i);
                         count = values.getInteger("unplaced");
+                        unplaced +=count;
                         for (int n=0;n<count;n++){
                             L1 = getEmptyDepartCells(values);
-                            if (!L1.isEmpty()){
-                                grid.emptyCells=L1;
-                                grid.insert(values);
-                            }
+                            if (L1.isEmpty())
+                                break;
+                            grid.emptyCells=L1;
+                            grid.insert(values);
+                            placed+=1;
                         }
                     }
                     unplacedGrid.requery();
-                    JOptionPane.showMessageDialog(this, "PLACEMENT_COMPLETED");
+                    wait(false);
+                    JOptionPane.showMessageDialog(this, String.format("PLACEMENT_COMPLETED \n Расставлено %d из %d",placed,unplaced));
                     break;
                 case TT_DELETE:
                     grid.delete();
@@ -470,6 +484,27 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         return result;
     }
     /**
+     * Поиск свободных ячеек помещения
+     * @param values
+     * @return
+     * @throws Exception 
+     */
+    public List<Point> getEmptyRoomCells(Values values) throws Exception{
+        Integer room_id=values.getInteger("room_id");
+        if (room_id==null)
+            return null;
+        List<Point> result = new ArrayList<>();
+        String sql = "select day_id,bell_id from shift_detail a inner join room b on a.shift_id=b.shift_id\n"
+                + "where b.id=%room_id  and (select count(*) from schedule where day_id=a.day_id and bell_id=a.bell_id and room_id=b.id)=0";
+        Recordset recordes = DataModule.getRecordet(sql.replace("%room_id", room_id.toString()));
+        Object[] p;
+        for (int i=0;i<recordes.size();i++){
+            p=recordes.get(i);
+            result.add(new Point((Integer)p[0]-1,(Integer)p[1]-1));
+        }
+        return result;
+    }
+    /**
      * Поиск свободных ячеек преподователя
      * @param values  teacher_id
      * @return
@@ -566,12 +601,21 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         
         
         List<Point> result = new ArrayList<>(emptyCells);
+        List<Point> L;
         if (values.getInteger("teacher_id")!=null){
-            List<Point> L = getEmptyTeacherCells(values);
+            L = getEmptyTeacherCells(values);
             for (Point pp:emptyCells){
                 if (!L.contains(pp)){
                     result.remove(pp);
                 }
+            }
+        }
+        
+        if (values.getInteger("room_id")!=null){
+            L= getEmptyRoomCells(values);
+            for (Point pp:emptyCells){
+                if (!L.contains(pp))
+                    result.remove(pp);
             }
         }
         
