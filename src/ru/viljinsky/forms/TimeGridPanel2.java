@@ -250,6 +250,13 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
     TimeTableGrid grid;
     Grid unplacedGrid;
     
+    public void waitCursor(boolean b){
+    if (b)
+        setCursor(new Cursor(Cursor.WAIT_CURSOR));
+    else
+        setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+    }
+
     CommandMngr manager = new CommandMngr() {
 
         @Override
@@ -277,14 +284,6 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         }
     };
 
-    public void wait(boolean b){
-        if (b)
-            setCursor(new Cursor(Cursor.WAIT_CURSOR));
-        else
-            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-    }
-    
-    
     public void doCommand(String command){
         try{
             switch (command){
@@ -294,7 +293,7 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
                     Values values;
                     List<Point> L1;
                     int count,unplaced=0,placed=0;
-                    wait(true);
+                    waitCursor(true);
                     for (int i=0;i<ds.getRowCount();i++){
                         values=ds.getValues(i);
                         count = values.getInteger("unplaced");
@@ -309,7 +308,7 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
                         }
                     }
                     unplacedGrid.requery();
-                    wait(false);
+                    waitCursor(false);
                     JOptionPane.showMessageDialog(this, String.format("PLACEMENT_COMPLETED \n Расставлено %d из %d",placed,unplaced));
                     break;
                 case TT_DELETE:
@@ -317,8 +316,13 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
                     unplacedGrid.requery();
                     break;
                 case TT_PLACE:
-                    grid.insert(unplacedGrid.getValues());
-                    unplacedGrid.requery();
+                    waitCursor(true);
+                    try{
+                        grid.insert(unplacedGrid.getValues());
+                        unplacedGrid.requery();
+                    } finally {
+                        waitCursor(false);
+                    }
                     break;
                 case TT_CLEAR:
                     grid.clear();
@@ -385,6 +389,20 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
                 super.rowHeaderClick(row);
                 manager.updateActionList();
             }
+
+            @Override
+            public void stopDrag(int col, int row) throws Exception {
+                waitCursor(true);
+                try{
+                    super.stopDrag(col, row);
+                } catch (Exception e){
+                    JOptionPane.showMessageDialog(this,e.getMessage());                    
+                } finally {
+                    waitCursor(false);
+                }
+            }
+            
+            
             
         };
         

@@ -37,6 +37,7 @@ public class TimeTableGrid extends TimeGrid {
     public List<Point> emptyCells = new ArrayList<>();
 
     
+    
     @Override
     public void paint(Graphics g) {
         super.paint(g);
@@ -126,14 +127,33 @@ public class TimeTableGrid extends TimeGrid {
                 + "and depart_id=%d "
                 + "and subject_id=%d "
                 + "and group_id=%d;";
-        TimeTableGroup group;
+
         if (col == StartCol && row == startRow) {
             super.stopDrag(col, row);
+            emptyCells.clear();
             return;
         }
         
-        emptyCells.clear();
         
+        TimeTableGroup group;
+        // проверка попадания в emptyCell
+        Point testPoint;
+        try{
+            for (CellElement ce:getSelectedElements()){
+                group=(TimeTableGroup)ce;
+                testPoint = new Point(group.day_no+col-StartCol-1,group.bell_id+row-startRow-1);
+                if (!emptyCells.contains(testPoint)){
+                    throw new Exception("CAN_NOT_PLACE_IN_THIS_CELL");
+                }
+
+            }
+        }
+        finally{
+            emptyCells.clear();
+        }
+        
+        
+    
         try {
             for (CellElement ce : getSelectedElements()) {
                 group = (TimeTableGroup) (ce);

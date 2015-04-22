@@ -7,6 +7,7 @@
 package ru.viljinsky.timegrid;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -81,6 +82,9 @@ public class TimeGrid extends AbstractTimeGrid{
         rowHeader = new RowHeader();
         realign();
     }
+    
+
+    
     
     /**
      * Получение текста заголовка колонок
@@ -190,6 +194,7 @@ public class TimeGrid extends AbstractTimeGrid{
             });
         }
         
+        @Override
         public void setPrefferedHeight(int height){
             setPreferredSize(new Dimension(VER_WEDTH,height));
         }
