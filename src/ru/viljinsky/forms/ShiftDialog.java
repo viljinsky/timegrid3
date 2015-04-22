@@ -13,14 +13,15 @@ import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
 import ru.viljinsky.dialogs.BaseDialog;
 
 /**
@@ -30,14 +31,26 @@ import ru.viljinsky.dialogs.BaseDialog;
 
 public class ShiftDialog extends BaseDialog{
     ShiftPanel drawPanel = new ShiftPanel();
+    JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
     
-    public ShiftDialog() {
+    
+    public ShiftDialog(){
         super();
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        panel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        JButton btn;
+        btn = new JButton("SELECT_ALL");
+        controls.add(btn);
+        btn.addActionListener(this);
+        
+        btn = new JButton("UNSELECT_ALL");
+        controls.add(btn);
+        btn.addActionListener(this);
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(drawPanel,BorderLayout.CENTER);
+        panel.add(controls,BorderLayout.PAGE_END);
+        
         getContentPane().add(panel,BorderLayout.CENTER);
-        panel.add(drawPanel);
+        
     }
     
     public void setSelected(List<Integer[]> list){
@@ -70,6 +83,25 @@ public class ShiftDialog extends BaseDialog{
             System.out.println("REMOVED"+n[0]+" "+n[1]);
         }
     }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String command = e.getActionCommand();
+        switch (command){
+            case "SELECT_ALL":
+                System.out.println(command);
+                drawPanel.selectAll();
+                break;
+            case "UNSELECT_ALL":
+                System.out.println(command);
+                drawPanel.unSelectAll();
+                break;
+            default:
+                super.actionPerformed(e);
+        }
+    }
+    
+    
     
 }
 
@@ -83,6 +115,20 @@ class ShiftPanel extends JPanel {
     Integer CELL_HEIGHT = 25;
     Integer dayCount = 7;
     Integer bellCount = 10;
+
+    void selectAll() {
+        cells.clear();
+        for (int i=0;i<dayCount;i++)
+            for (int j=0;j<bellCount;j++){
+                cells.add(new Cell(i,j));
+            }
+        repaint();
+    }
+
+    void unSelectAll() {
+        cells.clear();
+        repaint();
+    }
 
     class Cell {
 

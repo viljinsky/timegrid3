@@ -231,7 +231,13 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
                     shift_id=grid.getIntegerValue("shift_id");
                     shift_id=Dialogs.createShift(this, shift_id);
                     if (shift_id!=null){
-                        DataModule.execute(String.format("update room set shift_id=%d where id=%d",shift_id,room_id));
+                        try{
+                            DataModule.execute(String.format("update room set shift_id=%d where id=%d",shift_id,room_id));
+                            DataModule.commit();
+                        } catch (Exception e){
+                            DataModule.rollback();
+                            throw new Exception("CREATE_SHIFT_ERROR\n"+e.getMessage());
+                        }
                         grid.requery();
                     }
                     break;

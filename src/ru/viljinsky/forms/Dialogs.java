@@ -49,7 +49,13 @@ abstract class AbstractShiftDialog extends ShiftDialog{
         }
     }
     
+    public void setValues(Values values){
+        entryPanel.setValues(values);
+    }
     
+    public Values getValues(){
+        return entryPanel.getValues();
+    }
     
 }
 
@@ -61,8 +67,12 @@ abstract class AbstractProfileDialog extends SelectDialog{
         super();
         this.profile_id=profile_id;
         add(entryPanel,BorderLayout.PAGE_START);
-        Dataset dataset = DataModule.getSQLDataset("select * from profile");
-        entryPanel.setDataset(dataset);
+        try{
+            Dataset dataset = DataModule.getDataset("profile");
+            entryPanel.setDataset(dataset);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
     
 }
@@ -182,9 +192,14 @@ public class Dialogs {
         dataset = DataModule.getDataset("subject");
         dlg.setDataset(dataset, "id", "subject_name");
         
-        dataset = DataModule.getSQLDataset("select null as id ,'Новый профиль' as profile_name,profile_type_id from profile where id="+profile_id);
-        dataset.open();;
-        Values values = dataset.getValues(0);
+        Recordset recordset = DataModule.getRecordet("select a.caption,\n" +
+        "(select count(*) from profile where profile_type_id=a.id) as count,\n" +
+        "b.profile_type_id from profile_type a inner join profile b\n" +
+        "on a.id=b.profile_type_id\n" +
+        "where b.id="+profile_id+";");
+        Values values = new Values();
+        values.put("profile_name",recordset.getString(0)+"("+recordset.getString(1)+")");
+        values.put("profile_type_id", recordset.getInteger(2));
         dlg.entryPanel.setValues(values);
         dlg.showModal(owner);
         if (dlg.modalResult==SelectDialog.RESULT_OK)
@@ -253,16 +268,11 @@ public class Dialogs {
             @Override
             public void doOnEntry() throws Exception {
                 try{
-                    Values values = entryPanel.getValues();
+                    Values values = getValues();
                     Dataset dataset = DataModule.getDataset("shift");
                     dataset.open();
                     dataset.appned(values);
                     shift_id = values.getInteger("id");
-                    
-//                    String profile_name=(String)entryPanel.getValues().get("profile_name");
-//                    DataModule.execute("update profile set profile_name='"+profile_name+"' where id="+shift_id);
-                    
-                    
                     DataTask.editShift(shift_id, getAdded(),getRemoved());
                     DataModule.commit();
                 } catch (Exception e){
@@ -273,14 +283,14 @@ public class Dialogs {
             
         };
 
-
-//        DataModule.execute("insert into shift(shift_type_id,shift_name) select shift_type_id,'new shift name' from shift where id="+shift_id);
-//        Dataset dataset = DataModule.getSQLDataset("select * from shift where id=(select max(id) from shift)");
-//        dataset.open();
-//        Map<String,Object> map = dataset.getValues(0);
-//        dlg.entryPanel.setDataset(dataset);
-//        dlg.entryPanel.setValues(map);
-//        dlg.shift_id = (Integer)map.get("id");
+        Recordset recordset = DataModule.getRecordet("select a.caption,b.shift_type_id,(select count(*) from shift where shift_type_id=a.id) as count\n" +
+        " from shift_type a inner join shift b on a.id=b.shift_type_id\n" +
+        "where b.id="+shift_id+";");
+        
+        Values values = new Values();
+        values.put("shift_name", recordset.getString(0)+"("+recordset.getString(2)+")");
+        values.put("shift_type_id", recordset.getInteger(1));
+        dlg.setValues(values);
         dlg.showModal(owner);
         if (dlg.modalResult==SelectDialog.RESULT_OK){
             return dlg.shift_id;
