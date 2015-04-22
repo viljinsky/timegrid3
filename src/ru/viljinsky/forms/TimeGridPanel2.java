@@ -101,7 +101,7 @@ import ru.viljinsky.timegrid.TimeTableGroup;
                 
         public Teacher(Values values) throws Exception{
             id = values.getInteger("id");
-            label = values.getString("last_name");
+            label = values.getString("teacher_name");
         }
         @Override
         public Values getFilter() {
@@ -215,7 +215,9 @@ class ScheduleTree extends JTree{
             departNodes.add(node);
         }
         
-        dataset = DataModule.getSQLDataset("select id,last_name,first_name,patronymic from teacher order by last_name,first_name,patronymic");
+        dataset = DataModule.getSQLDataset(
+                "select id,last_name || ' ' || substr(first_name,1,1)||'.'|| substr(patronymic,1,1)||'.' as teacher_name "
+              + "from teacher order by teacher_name");
         dataset.open();
         for (int i=0;i<dataset.getRowCount();i++){
             node = new DefaultMutableTreeNode(new Teacher(dataset.getValues(i)));
@@ -270,53 +272,61 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
 
         @Override
         public void doCommand(String command) {
-            try{
-                switch (command){
-                    case TT_PLACE_ALL:
-                        IDataset ds = unplacedGrid.getDataset();
-                        Values values;
-                        for (int i=0;i<ds.getRowCount();i++){
-                            values=ds.getValues(i);
-                            if (values.getInteger("unplaced")==0)
-                                continue;
-                            List<Point> L1 = TimeGridPanel2.this.getEmptyDepartCells(values);
-                            if (L1.isEmpty())
-                                continue;
-                            grid.emptyCells=L1;
-                            grid.insert(values);
-                        }
-                        unplacedGrid.requery();
-                        break;
-                    case TT_DELETE:
-                        grid.delete();
-                        unplacedGrid.requery();
-                        break;
-                    case TT_PLACE:
-                        grid.insert(unplacedGrid.getValues());
-                        unplacedGrid.requery();
-                        break;
-                    case TT_CLEAR:
-                        grid.clear();
-                        unplacedGrid.requery();
-                        break;
-                    case TT_FIX:
-                        grid.fix();
-                        break;
-                    case TT_UNFIX:
-                        grid.unfix();
-                        break;
-                    case TT_REFRESH:
-                        tree.clear();
-                        tree.open();
-                        unplacedGrid.close();
-                        break;
-                }
-            } catch (Exception e){
-                JOptionPane.showMessageDialog(TimeGridPanel2.this, e.getMessage());
-            }
+            TimeGridPanel2.this.doCommand(command);
         }
     };
     
+    public void doCommand(String command){
+        try{
+            switch (command){
+                case TT_PLACE_ALL:
+                    IDataset ds = unplacedGrid.getDataset();
+                    Values values;
+                    List<Point> L1;
+                    int count;
+                    for (int i=0;i<ds.getRowCount();i++){
+                        values=ds.getValues(i);
+                        count = values.getInteger("unplaced");
+                        for (int n=0;n<count;n++){
+                            L1 = getEmptyDepartCells(values);
+                            if (!L1.isEmpty()){
+                                grid.emptyCells=L1;
+                                grid.insert(values);
+                            }
+                        }
+                    }
+                    unplacedGrid.requery();
+                    JOptionPane.showMessageDialog(this, "PLACEMENT_COMPLETED");
+                    break;
+                case TT_DELETE:
+                    grid.delete();
+                    unplacedGrid.requery();
+                    break;
+                case TT_PLACE:
+                    grid.insert(unplacedGrid.getValues());
+                    unplacedGrid.requery();
+                    break;
+                case TT_CLEAR:
+                    grid.clear();
+                    unplacedGrid.requery();
+                    break;
+                case TT_FIX:
+                    grid.fix();
+                    break;
+                case TT_UNFIX:
+                    grid.unfix();
+                    break;
+                case TT_REFRESH:
+                    tree.clear();
+                    tree.open();
+                    unplacedGrid.close();
+                    break;
+            }
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(TimeGridPanel2.this, e.getMessage());
+        }
+        
+    }
     public TimeGridPanel2(){
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(800, 600));
@@ -333,7 +343,6 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
             public void cellElementClick(CellElement ce) {
                 TimeTableGroup group = (TimeTableGroup)ce;
                 Values values = group.getValues();
-//                System.out.println(values);
                 try{
                     emptyCells=getEmptyDepartCells(values);
                 } catch (Exception e){

@@ -9,7 +9,6 @@ package ru.viljinsky.test;
 import java.awt.Container;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.xml.bind.JAXBIntrospector;
 import ru.viljinsky.*;
 import ru.viljinsky.forms.*;
 /**

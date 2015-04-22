@@ -901,7 +901,7 @@ class SchedulePanel extends JPanel implements ActionListener,IOpenedForm{
             depart_id = (Integer)combo.getValue();
             switch (command){
                 case "Fill":
-                    ScheduleBuilder.placeDepart(depart_id);
+//                    ScheduleBuilder.placeDepart(depart_id);
 //                    DataTask.fillSchedule(depart_id);
                     break;
                 case "Clear":

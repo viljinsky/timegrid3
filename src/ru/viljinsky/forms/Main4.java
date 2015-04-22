@@ -48,7 +48,8 @@ public class Main4 extends JFrame{
         new TeacherPanel(),
         new RoomPanel(),
         new SchedulePanel(),
-        new TimeGridPanel2()
+        new TimeGridPanel2(),
+        new ReportPanel()
     };
 
     public Main4(String title){
@@ -160,9 +161,9 @@ public class Main4 extends JFrame{
                     TestShift2.showShiftDialog(rootPane);
                     
                     break;
-                case "timegrid":
-                    TimeGridPanel.showFrame(rootPane);
-                    break;
+//                case "timegrid":
+//                    TimeGridPanel.showFrame(rootPane);
+//                    break;
                     
                 case "exit":
                     System.exit(0);
@@ -194,7 +195,7 @@ public class Main4 extends JFrame{
         result.add(new Act("sqlMonitor"));
         result.add(new Act("testShift"));
         result.add(new Act("DICTIONARY"));
-        result.add(new Act("timegrid"));
+//        result.add(new Act("timegrid"));
         return result;
     }
 
