@@ -797,6 +797,29 @@ public class Dialogs {
         return dlg.showModal(owner)==BaseDialog.RESULT_OK;
     }
 
+    protected static void updateGroupSequence(Values values) throws Exception{
+        String sql = 
+                "update subject_group set week_id=%group_id\n" +
+                "where subject_id=%subject_id and depart_id in (\n" +
+                "  select a.id from depart a inner join curriculum_detail b on a.skill_id=b.skill_id \n" +
+                "  and a.curriculum_id=b.curriculum_id\n" +
+                "  where b.curriculum_id=%curriculum_id and b.skill_id=%skill_id\n" +
+                ");";
+        if (values.getInteger("group_sequence_id")==1){
+            DataModule.execute(
+                     sql.replace("%subject_id",values.getString("subject_id"))
+                    .replace("%skill_id", values.getString("skill_id"))
+                    .replace("%curriculum_id", values.getString("curriculum_id"))
+                    .replace("%group_id", "group_id"));
+        }  else {
+            DataModule.execute(
+                    sql.replace("%subject_id",values.getString("subject_id"))
+                    .replace("%skill_id", values.getString("skill_id"))
+                    .replace("%curriculum_id", values.getString("curriculum_id"))
+                    .replace("%group_id", "0"));
+        }
+    }
+    
     public static boolean editCurriculumDetail(JComponent owner, Integer curriculum_id, Integer skill_id, Integer subject_id) throws Exception{
         EntryDialog dlg = new EntryDialog() {
 
@@ -811,6 +834,9 @@ public class Dialogs {
                     filter.put("subject_id", values.getInteger("subject_id"));
                     dataset.open(filter);
                     dataset.edit(0, values);
+                    
+                    updateGroupSequence(values);
+                    
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();

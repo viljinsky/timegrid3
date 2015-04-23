@@ -69,19 +69,23 @@ public class ReportPanel extends JPanel implements IOpenedForm {
     }
  
     public void doCommand(String command){
+        text.setContentType("text/html");
         try{
             switch(command){
                 case "COMMAND1":
-                    command1();
+                    text.setText(new ReportBuilder().getScheduleReport());
                     break;
                 case "COMMAND2":
-                    command2();
+                    text.setText(new ReportBuilder().getSchedueReport2());
                     break;
                 case "COMMAND3":
+                    text.setText(new ReportBuilder().getScheduleError());
+                    
                     break;
                 default:    
                     throw new Exception("UNKNOW_COMMAND ");    
             }
+            text.setCaretPosition(0);
         } catch (Exception e){
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
@@ -91,16 +95,14 @@ public class ReportPanel extends JPanel implements IOpenedForm {
     }
     
     
-    public void command1() throws Exception{
-        text.setContentType("text/html");
-        text.setText(new ReportBuilder().getScheduleReport());
-        text.setCaretPosition(0);
-        
-    }
-    
-    public void command2() throws Exception{
-        text.setContentType("text/html");
-        text.setText(new ReportBuilder().getSchedueReport2());
-        text.setCaretPosition(0);
-    }
+//    public void command1() throws Exception{
+//        text.setContentType("text/html");
+//        text.setCaretPosition(0);
+//        
+//    }
+//    
+//    public void command2() throws Exception{
+//        text.setContentType("text/html");
+//        text.setCaretPosition(0);
+//    }
 }

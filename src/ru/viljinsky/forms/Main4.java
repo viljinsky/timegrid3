@@ -232,8 +232,13 @@ public class Main4 extends JFrame{
         frame.pack();
         
         // позичионирование главного окна
-        int x,y;
+        int x,y,w,h;
         Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+
+        h= d.height*8/10;
+        w= h*5/4;
+        frame.setSize(new Dimension(w,h));
+        
         x=(d.width-frame.getWidth())/2;
         y=(d.height-frame.getHeight())/2;         
         frame.setLocation(x,y);
@@ -241,13 +246,6 @@ public class Main4 extends JFrame{
         frame.setVisible(true);
         frame.fileOpen();
       
-//        try{
-//            DataModule.open();
-//            frame.open();
-//        } catch (Exception e){
-//           
-//            JOptionPane.showMessageDialog(frame, e.getMessage());
-//        }
         
     }
     

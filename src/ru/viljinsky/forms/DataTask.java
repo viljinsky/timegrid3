@@ -179,15 +179,22 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         map.put(4, group_id);
         DataModule.execute(sql, map);
         
+        sql = "update schedule set room_id=? where depart_id=? and subject_id=? and group_id=?";
+        DataModule.execute(sql,map);
+        
     }
     
     public static void excluderGroupFromRoom(int depart_id,int subject_id,int group_id) 
             throws Exception{
-        String sql ="update subject_group set default_room_id=null where depart_id=? and subject_id=? and group_id=?;";
+        String sql ="update subject_group set default_room_id=? where depart_id=? and subject_id=? and group_id=?;";
         KeyMap map = new KeyMap();
-        map.put(1, depart_id);
-        map.put(2,subject_id);
-        map.put(3,group_id);
+        map.put(1,null);
+        map.put(2, depart_id);
+        map.put(3,subject_id);
+        map.put(4,group_id);
+        DataModule.execute(sql,map);
+        
+        sql ="update schedule set room_id=? where depart_id=? and subject_id=? and group_id=?;";
         DataModule.execute(sql,map);
     }
     
@@ -206,12 +213,15 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         sql = "update subject_group set default_room_id =(\n" +
               "select teacher_room_id from teacher where id=?)\n" +
               "where depart_id=? and subject_id=? and group_id=?;";
-        map.clear();;
+        map.clear();
         map.put(1,teacher_id);
         map.put(2,depart_id);
         map.put(3,subject_id);
         map.put(4, group_id);
         DataModule.execute(sql, map);
+        
+        sql = "update schedule set teacher_id=? where depart_id=? and subject_id=? and group_id=? and room_id is null";
+        DataModule.execute(sql,map);
                 
 //        dataModule.execute("update subject_group set default_room_id=");
         
@@ -227,6 +237,10 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         map.put(2, depart_id);
         map.put(3, subject_id);
         map.put(4, group_id);
+        DataModule.execute(sql, map);
+        
+        sql = "update schedule set teacher_id=?\n"
+                   + "where depart_id=? and subject_id=? and group_id=?;";
         DataModule.execute(sql, map);
     }
 
