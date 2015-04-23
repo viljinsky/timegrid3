@@ -319,9 +319,9 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
         
         int room_id=-1;
         String sqlSource = 
-            "select d.label,s.subject_name,v.group_label,v.pupil_count, "+
+            "select s.subject_name,d.label,v.group_label,\n"+
             "t.last_name|| ' ' || substr(t.first_name,1,1) || '. ' || substr(t.patronymic,1,1)||'.', "+
-            "v.hour_per_week,v.depart_id,v.subject_id,v.group_id,v.stream_id,v.group_sequence_id "+
+            "v.hour_per_week,v.pupil_count,v.depart_id,v.subject_id,v.group_id,v.stream_id,v.group_sequence_id "+
             " from room a inner join profile_item b "+
             "on a.profile_id=b.profile_id "+
             "inner join v_subject_group v on v.subject_id=b.subject_id "+
@@ -331,10 +331,12 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
             "where v.default_room_id is null";// and a.id=3;";
         
         String sqlDest =
-            "select s.subject_name,d.label,a.group_id,a.hour_per_week,a.subject_id,a.depart_id\n"+
+            "select s.subject_name,d.label,a.group_label,t.last_name || ' ' || substr(t.first_name,1,1) || '. ' || substr(t.patronymic,1,1) as teacher_name,\n"+
+            "a.hour_per_week,a.subject_id,a.depart_id,a.group_id\n"+
             " from v_subject_group a\n"+
             "inner join subject s on s.id=a.subject_id\n"+
             " inner join depart d on d.id=a.depart_id\n"+
+            " left join teacher t on t.id=a.default_teacher_id\n" +   
             " where a.default_room_id=";
 
         
@@ -1129,11 +1131,12 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
             "inner join depart d on d.id=sg.depart_id\n" +
             "where sg.default_teacher_id is null "; // and  a.id=9;";
         
-        String destanationSQL = "select b.subject_name,d.label,a.group_label,a.hour_per_week,\n"
+        String destanationSQL = "select b.subject_name,d.label,a.group_label,a.hour_per_week,r.room_name, \n"
                 + "a.subject_id,a.group_id,a.group_type_id,a.default_room_id,a.depart_id \n"
-                + "from v_subject_group a\n"
-                + " inner join subject b on a.subject_id=b.id\n"
-                + " inner join depart d on d.id=a.depart_id\n"
+                + "from v_subject_group a \n"
+                + " inner join subject b on a.subject_id=b.id \n"
+                + " inner join depart d on d.id=a.depart_id \n"
+                + " left join room r on r.id=a.default_room_id \n"
                 + " where a.default_teacher_id=";
 
         public void setTeacherId(Integer teacher_id) {

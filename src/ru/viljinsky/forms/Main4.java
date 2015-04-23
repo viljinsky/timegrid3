@@ -47,7 +47,7 @@ public class Main4 extends JFrame{
         new DepartPanel(),
         new TeacherPanel(),
         new RoomPanel(),
-        new SchedulePanel(),
+//        new SchedulePanel(),
         new TimeGridPanel2(),
         new ReportPanel()
     };

@@ -509,12 +509,16 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
      */
     public List<Point> getEmptyRoomCells(Values values) throws Exception{
         Integer room_id=values.getInteger("room_id");
+        Integer depart_id = values.getInteger("depart_id");
         if (room_id==null)
             return null;
         List<Point> result = new ArrayList<>();
         String sql = "select day_id,bell_id from shift_detail a inner join room b on a.shift_id=b.shift_id\n"
-                + "where b.id=%room_id  and (select count(*) from schedule where day_id=a.day_id and bell_id=a.bell_id and room_id=b.id)=0";
-        Recordset recordes = DataModule.getRecordet(sql.replace("%room_id", room_id.toString()));
+                + "where b.id=%room_id  and (select count(*) from schedule where day_id=a.day_id and bell_id=a.bell_id and room_id=b.id and depart_id<>%depart_id)=0";
+        Recordset recordes = DataModule.getRecordet(
+                sql.replace("%room_id", room_id.toString())
+                .replace("%depart_id", depart_id.toString())
+        );
         Object[] p;
         for (int i=0;i<recordes.size();i++){
             p=recordes.get(i);
@@ -692,7 +696,7 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
   
     @Override
     public String getCaption() {
-        return "TIMEGRIPPANEL2";
+        return "TIMEGRIPPANEL";
     }
 
     @Override
