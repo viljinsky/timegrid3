@@ -367,6 +367,30 @@ order by a.day_id,a.bell_id;
 
 select * from v_schedule_calc where depart_id=1;
 
+-----------------------  v_depart ----------------------------------------------
+create view v_depart as
+select
+	a.label as depart_label,
+	s.shift_name,
+        b.caption as curriculum_caption,
+	t.last_name || ' ' || substr(t.first_name,1,1) || '. ' || substr(t.patronymic,1,1) || '.'as teacher,
+	r.room_name  as room,
+	g.building_name as main_building,
+	a.boy_count,
+	a.gerl_count,
+	a.id as depart_id,
+	a.curriculum_id,
+	a.skill_id,
+	 a.shift_id
+from depart a
+	inner join curriculum b on a.curriculum_id=b.id
+	inner join skill c on c.id=a.skill_id
+	inner join shift s on s.id=a.shift_id
+	left join teacher t on a.class_former=t.id
+	left join room r on r.id=a.class_room
+	left join building g on g.id=r.building_id;
+select * from v_depart;
+
 ------------------------security--------------------------
 
 create table user_role(

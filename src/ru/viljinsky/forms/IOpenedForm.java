@@ -496,21 +496,21 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
     public Map<String, String> getParams() {
         Map<String,String> params;
         params = new HashMap<>();
-        params.put(MASTER_DATASET,"depart");
+        params.put(MASTER_DATASET,"v_depart");
         params.put(SLAVE_DATASET,"v_subject_group");
-        params.put(REFERENCES,"depart_id=id");
+        params.put(REFERENCES,"depart_id=depart_id");
         return params;
     }
 
     public DepartPanel() {
         super();
         commands.setCommandList(new String[]{
-            CREATE_DEPART,EDIT_DEPART,DELETE_DEPART,
+            EDIT_DEPART,DELETE_DEPART,
             FILL_GROUP,CLEAR_GROUP,EDIT_SHIFT,ADD_GROUP,
             DELETE_GROUP,ADD_STREAM,EDIT_STREAM,REMOVE_STREAM,REFRESH,EDIT_GROUP
         });
         
-        addMasterAction(commands.getAction(CREATE_DEPART));
+//        addMasterAction(commands.getAction(CREATE_DEPART));
         addMasterAction(commands.getAction(EDIT_DEPART));
         addMasterAction(commands.getAction(DELETE_DEPART));
         
@@ -536,33 +536,33 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
                 case REFRESH:
                     grid1.requery();
                     break;
-                case CREATE_DEPART:
-                    throw new UnsupportedOperationException();
-//                    depart_id = Dialogs.createDepart(this);
-//                    if (depart_id!=null)
-//                        grid1.requery();
-//                    break;
-                    
+//                case CREATE_DEPART:
+//                    throw new UnsupportedOperationException();
+////                    depart_id = Dialogs.createDepart(this);
+////                    if (depart_id!=null)
+////                        grid1.requery();
+////                    break;
+//                    
                 case EDIT_DEPART:
-                    depart_id = grid1.getIntegerValue("id");
+                    depart_id = grid1.getIntegerValue("depart_id");
                     if (Dialogs.editDepart(this, depart_id))
                         grid1.requery();
                     break;
                     
                 case DELETE_DEPART:
-                    depart_id = grid1.getIntegerValue("id");
+                    depart_id = grid1.getIntegerValue("depart_id");
                     if (Dialogs.deleteDepart(this, depart_id))
                         grid1.requery();
                     break;
                     
                 case FILL_GROUP:
-                    depart_id=grid1.getIntegerValue("id");
+                    depart_id=grid1.getIntegerValue("depart_id");
                     DataTask.fillSubjectGroup2(depart_id);
                     grid2.requery();
                     break;
                     
                 case CLEAR_GROUP:
-                    depart_id=grid1.getIntegerValue("id");
+                    depart_id=grid1.getIntegerValue("depart_id");
                     DataTask.clearSubjectGroup(depart_id);
                     grid2.requery();
                     break;
@@ -642,6 +642,21 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
 
 class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpenedForm,IAppCommand{
 
+    DBComboBox curriculumComboBox = new DBComboBox(){
+
+        @Override
+        public void onValueChange() {
+            System.out.println("Выбран учебный план : "+getValue().toString());
+            Map<String,Object> map = new HashMap<>();
+            map.put("curriculum_id", getValue());
+            try{
+                masterPanel.grid.setFilter(map);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    };
+    
     CommandMngr commands = new CommandMngr() {
 
         @Override
@@ -669,18 +684,21 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
     public CurriculumPanel() {
         super();
         commands.setCommandList(new String[]{
-            CREATE_CURRICULUM,EDIT_CURRICULUM,DELETE_CURRICULUM,CLEAR_CURRICULUM,
+            CREATE_CURRICULUM,EDIT_CURRICULUM,DELETE_CURRICULUM,
             FILL_CURRICULUM,CREATE_DEPART,EDIT_CURRICULUM_DETAIL});
-        
+
+        addMasterControl(curriculumComboBox);
+
         
         addMasterAction(commands.getAction(CREATE_CURRICULUM));
         addMasterAction(commands.getAction(EDIT_CURRICULUM));
         addMasterAction(commands.getAction(DELETE_CURRICULUM));
-        addMasterAction(commands.getAction(CLEAR_CURRICULUM));
+//        addMasterAction(commands.getAction(CLEAR_CURRICULUM));
         addMasterAction(commands.getAction(CREATE_DEPART));
         
         addDetailAction(commands.getAction(FILL_CURRICULUM));
         addDetailAction(commands.getAction(EDIT_CURRICULUM_DETAIL));
+        
         
     }
     
@@ -696,7 +714,7 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
                     break;
                     
                 case EDIT_CURRICULUM:
-                    curriculum_id=grid1.getIntegerValue("id");
+                    curriculum_id=grid1.getIntegerValue("curriculum_id");
                     if (Dialogs.editCurriculum(this,curriculum_id)){
                         grid1.requery();
                     };
@@ -719,9 +737,10 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
                     if (Dialogs.editCurriculumDetail(this,curriculum_id,skill_id,subject_id))
                         grid2.requery();
                     break;
-                case CLEAR_CURRICULUM:
-                    clearCurriculumDetail();
-                    break;
+                    
+//                case CLEAR_CURRICULUM:
+//                    clearCurriculumDetail();
+//                    break;
                     
                 case CREATE_DEPART:
                     createDepart();
@@ -785,11 +804,6 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
         skill_id=grid1.getIntegerValue("skill_id");
         curriculum_id = grid1.getIntegerValue("curriculum_id");
         Integer depart_id = Dialogs.createDepart(this, curriculum_id, skill_id);
-//        String label = (String)JOptionPane.showInputDialog(this,"Введите метку класса" , "Новый класс", JOptionPane.PLAIN_MESSAGE, null, null, grid1.getStringValue("skill"));
-//        if (label!=null){
-//            try{
-//                DataModule.execute(String.format("insert into depart (label,skill_id,curriculum_id) values ('%s',%d,%d)",label,skill_id,curriculum_id));
-//                Recordset r = DataModule.getRecordet("select max(id) from depart");
         if (depart_id!=null){
             try {
                 DataTask.fillSubjectGroup2(depart_id);
@@ -803,45 +817,13 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
         
     }
     
-    protected void clearCurriculumDetail() throws Exception{
-        Integer curriculum_id = grid1.getIntegerValue("curriculum_id");
-        Integer skill_id = grid1.getIntegerValue("skill_id");
-        DataTask.removeCurriculum(curriculum_id,skill_id);
-        grid2.requery();
-    }
-    
-//    protected void editDetails() throws Exception{
-//        SelectDialog dlg = new SelectDialog() {
-//
-//            @Override
-//            public void doOnEntry() throws Exception {
-//                Integer curriculum_id=grid1.getIntegerValue("id");
-//                try{
-//                    for (Object k:getRemoved()){
-//                        DataTask.excludeSubjectFromCurriculumn(curriculum_id,(Integer)k);
-//                    }
-//                    for (Object k:getAdded()){
-//                        DataTask.includeSubjectFromCurriculumn(curriculum_id,(Integer)k);
-//                    }
-//                    dataModule.commit();
-//                }catch(Exception e){
-//                    dataModule.rollback();
-//                    throw new Exception("INCLUDE_EXCLUDE_ERROR\n"+e.getMessage());
-//                    
-//                }
-//            }
-//        };
-//        IDataset dataset;
-//
-//        Set<Object> set = grid2.getDataset().getColumnSet("subject_id");
-//        
-//        dataset = dataModule.getDataset("subject");
-//        dlg.setDataset(dataset, "id", "subject_name");
-//        dlg.setSelected(set);
-//        if (dlg.showModal(null)==SelectDialog.RESULT_OK){
-//             grid2.requery();
-//        };
+//    protected void clearCurriculumDetail() throws Exception{
+//        Integer curriculum_id = grid1.getIntegerValue("curriculum_id");
+//        Integer skill_id = grid1.getIntegerValue("skill_id");
+//        DataTask.removeCurriculum(curriculum_id,skill_id);
+//        grid2.requery();
 //    }
+    
 
     @Override
     public String getCaption() {
@@ -853,6 +835,21 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
         return this;
     }
 
+    @Override
+    public void open() {
+        super.open(); 
+        try{
+            Dataset ds = DataModule.getDataset("curriculum");
+            curriculumComboBox.setDataset(ds, "id", "caption");
+            if (!ds.isEmpty()){
+                curriculumComboBox.setValue(ds.getValues(0).getInteger("id"));
+            }
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+    }
+
+    
 }
 
 ///////////////////////////  SCHEDULE PANEL ///////////////////////////////////
