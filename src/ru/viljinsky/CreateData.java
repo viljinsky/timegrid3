@@ -129,7 +129,7 @@ public class CreateData {
     }
     
     public static void execute(String fileName) throws Exception{
-        String[] script = {"sql/schedule.sql","sql/data.sql"};
+        String[] script = {"sql//schedule.sql","sql//data.sql"};
         CreateData cd = new CreateData();
         System.out.println("Создаётся новая база данных...");
         try{
@@ -142,7 +142,7 @@ public class CreateData {
     
     public static void main(String[] args){
         String fileName = DataModule.DEFAULT_DATA;//  "example.db";
-        String[] script = {"sql/schedule.sql","sql/data.sql"};
+        String[] script = {"sql//schedule.sql","sql//data.sql"};
         CreateData cd = new CreateData();
         System.out.println("Создаётся новая база данных...");
         try{

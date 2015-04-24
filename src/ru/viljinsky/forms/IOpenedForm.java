@@ -20,6 +20,7 @@ import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
 import ru.viljinsky.IDataset;
+import ru.viljinsky.Recordset;
 import ru.viljinsky.SelectDialog;
 
 /**
@@ -301,7 +302,10 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
 
         @Override
         public void requery() throws Exception {
-            Integer room_id = getIntegerValue("id");
+            
+            Integer room_id = null;
+            if (getSelectedRow()>=0)
+                    room_id = getIntegerValue("id");
             super.requery();
             if (room_id!=null){
                 Map<String,Object> map = new HashMap<>();
@@ -799,6 +803,7 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
         }
     }
     
+    public static final String MSG_GREATE_DEPART_OK = "Класс \"%s\" успешно создан";
     public void createDepart() throws Exception{
         Integer skill_id,curriculum_id;
         skill_id=grid1.getIntegerValue("skill_id");
@@ -808,7 +813,8 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
             try {
                 DataTask.fillSubjectGroup2(depart_id);
                 DataModule.commit();
-                JOptionPane.showMessageDialog(this,"CREATE_DEPART OK");
+                Recordset r=DataModule.getRecordet("select label from depart where id="+depart_id);
+                JOptionPane.showMessageDialog(this,String.format(MSG_GREATE_DEPART_OK,r.getString(0)));
             } catch (Exception e){
                 DataModule.rollback();
                 throw new Exception("CREATE_DEPART_ERROR\n"+e.getMessage());
@@ -979,8 +985,8 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
         Integer newProfileId,newShiftId;
         Integer teacher_id;
         try{
-            profile_id=grid.getIntegerValue("profile_id");
-            shift_id=grid.getIntegerValue("shift_id");
+//            profile_id=grid.getIntegerValue("profile_id");
+//            shift_id=grid.getIntegerValue("shift_id");
             switch (command){
                 
                 case CREATE_TEACHER:
@@ -1002,6 +1008,8 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
                     break;
                     
                 case CREATE_PROFILE:
+                    profile_id=grid.getIntegerValue("profile_id");
+//            shift_id=grid.getIntegerValue("shift_id");
                     newProfileId = Dialogs.createProfile(this, profile_id);
                     if (newProfileId!=null){
                         try{
@@ -1016,16 +1024,22 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
                     break;
                     
                 case EDIT_PROFILE:
+                    profile_id=grid.getIntegerValue("profile_id");
+//            shift_id=grid.getIntegerValue("shift_id");
                     Dialogs.editProfile(this,profile_id);
                     grid.requery();
                     break;
                     
                 case REMOVE_PROFILE:
+                    profile_id=grid.getIntegerValue("profile_id");
+//            shift_id=grid.getIntegerValue("shift_id");
                     Dialogs.removeProfile(this, profile_id);
                     grid.requery();
                     break;
                  
                 case CREATE_SHIFT:
+//            profile_id=grid.getIntegerValue("profile_id");
+                    shift_id=grid.getIntegerValue("shift_id");
                     newShiftId = Dialogs.createShift(this, shift_id);
                     if (newShiftId!=null){
                         try{
@@ -1040,6 +1054,8 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
                     break;
                     
                 case EDIT_SHIFT:
+//            profile_id=grid.getIntegerValue("profile_id");
+                    shift_id=grid.getIntegerValue("shift_id");
                     Dialogs.editShift(this, shift_id);
                     grid.requery();
                     break;

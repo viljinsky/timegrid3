@@ -138,9 +138,9 @@ public class Main4 extends JFrame{
         try{
             switch(command){
                 
-                case "fileNew":
-                    fileNew();
-                    break;
+//                case "fileNew":
+//                    fileNew();
+//                    break;
                 case "fileOpen":
                     fileOpen();
                     break;

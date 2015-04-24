@@ -21,8 +21,10 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListDataListener;
@@ -106,6 +108,43 @@ class ColorControl extends JLabel implements IEntryControl{
         int green =color.getGreen();
         return String.format("%d %d %d", red,green,blue);
     }
+}
+class IntegerControl extends JSpinner implements IEntryControl{
+    Column column;
+    SpinnerNumberModel model = new SpinnerNumberModel();
+    
+    public IntegerControl(Column column){
+        super();
+        this.column = column;
+        model.setMaximum(Integer.MAX_VALUE);
+        model.setMinimum(Integer.MIN_VALUE);
+        setModel(model);
+        
+    }
+
+    @Override
+    public String getColumnName() {
+        return column.getColumnName();
+    }
+
+    @Override
+    public JComponent getComponent() {
+        return this;
+    }
+
+    @Override
+    public void setValue(Object value) {
+        if (value!=null)
+        super.setValue(value); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object getValue() {
+        return super.getValue(); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
+
 }
 class ComboControl extends JComboBox implements IEntryControl{
     
@@ -307,13 +346,18 @@ public class EntryPanel extends JPanel {
                 cntr = new ComboControl(column, lookupValues);
             } else if (column.getColumnName().equals("color")){
                 cntr= new ColorControl(column);
-            } else {
+            } else if (column.isPrimary()){
+                cntr = new EditControl(column.getColumnName());
+            } else  {
                 switch (column.getColumTypeName()) {
                     case "BOOLEAN":
                         cntr = new BoolControl(column);
                         break;
                     case "BLOB":
                         cntr = new TextControl(column.getColumnName());
+                        break;
+                    case "INTEGER":
+                        cntr = new IntegerControl(column);
                         break;
                     default:
                         cntr = new EditControl(column.getColumnName());

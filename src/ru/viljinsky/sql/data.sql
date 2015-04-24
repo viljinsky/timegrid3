@@ -33,8 +33,8 @@ insert into bell_list(bell_id,time_start,time_end) values (8,'17:00','17:45');
 insert into bell_list(bell_id,time_start,time_end) values (9,'18:00','18:45');
 insert into bell_list(bell_id,time_start,time_end) values (10,'19:00','19:45');
 
-insert into profile_type(id,caption) values (1,'Профиль преподавателя');
-insert into profile_type(id,caption) values (2,'Профиль помещения');
+insert into profile_type(id,caption,default_profile_id) values (1,'Профиль преподавателя',null);
+insert into profile_type(id,caption,default_profile_id) values (2,'Профиль помещения',8);
 
 --    Графики преподавателей
 
@@ -54,9 +54,9 @@ insert into profile(id,profile_type_id,profile_name) values (10,2,'Ком.каб
 insert into profile(id,profile_type_id,profile_name) values (11,2,'Лингофонный каб.');
 
 
-insert into shift_type(id,caption) values (1,'График класса');
-insert into shift_type(id,caption) values (2,'График преподователя');
-insert into shift_type(id,caption) values (3,'График помещения');
+insert into shift_type(id,caption,default_shift_id) values (1,'График класса',1);
+insert into shift_type(id,caption,default_shift_id) values (2,'График преподователя',3);
+insert into shift_type(id,caption,default_shift_id) values (3,'График помещения',5);
 
 insert into shift(id,shift_type_id,shift_name) values(1,1,'Первая смена');  
 insert into shift(id,shift_type_id,shift_name) values(2,1,'Вторая смена');  

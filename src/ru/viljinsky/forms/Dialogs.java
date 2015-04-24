@@ -469,54 +469,61 @@ public class Dialogs {
     }
 
     public static Boolean editCurriculum(JComponent owner, Integer curriculum_id) throws Exception {
-        CurriculumDialog dlg = new CurriculumDialog() {
-
-            @Override
-            public void doOnEntry() throws Exception {
-//                try{
-//                    Values values = getValues();
-//                    Dataset dataset = DataModule.getDataset("curriculum");
-//                    Map<String,Object> filter = new HashMap<>();
-//                    filter.put("id",values.getInteger("id"));
-//                    dataset.open(filter);
-//                    dataset.edit(0, values);
-//                    
-//                    Integer subject_id;
-//                    Integer curriculum_id = values.getInteger("id");
-//                    for (Object n:getRemoved()){
-//                        subject_id=(Integer)n;
-//                        DataTask.excludeSubjectFromCurriculumn(curriculum_id, subject_id);
-//                    }
-//                    for (Object n:getAdded()){
-//                        subject_id =(Integer)n;
-//                        DataTask.includeSubjectFromCurriculumn(curriculum_id, subject_id);
-//                    }
-//                    
-//                    DataModule.commit();
-//                } catch (Exception e){
-//                    DataModule.rollback();
-//                    throw new Exception("EDIT_CURRICULUM_ERROR\n"+e.getMessage());
-//                    
-//                }
-            }
-        };
-        Dataset dataset ;
-        
-        Map<String,Object> filter = new HashMap<>();
-        filter.put("id", curriculum_id);
-        dataset = DataModule.getDataset("curriculum");
-        dataset.open(filter);
-        Values values = dataset.getValues(0);
-        
-        dataset = DataModule.getSQLDataset("select subject_id from curriculum_detail where curriculum_id="+curriculum_id);
-        dataset.open();
-        Set<Object> set = dataset.getColumnSet("subject_id");
-        
-        dataset = DataModule.getDataset("subject");
-        dlg.setDataset(dataset, "id","subject_name");
-        dlg.setValues(values);
-        dlg.setSelected(set);
-        return dlg.showModal(owner)==BaseDialog.RESULT_OK;
+        String caption ;
+        Recordset r = DataModule.getRecordet("select caption from curriculum where id="+curriculum_id);
+        caption = r.getString(0);
+        String curriculumn_name = (String)JOptionPane.showInputDialog(owner, "Учебный план", "Введите название", JOptionPane.PLAIN_MESSAGE, null, null, caption);
+        if (curriculumn_name==null)
+            return false;
+        return true;
+//        CurriculumDialog dlg = new CurriculumDialog() {
+//
+//            @Override
+//            public void doOnEntry() throws Exception {
+////                try{
+////                    Values values = getValues();
+////                    Dataset dataset = DataModule.getDataset("curriculum");
+////                    Map<String,Object> filter = new HashMap<>();
+////                    filter.put("id",values.getInteger("id"));
+////                    dataset.open(filter);
+////                    dataset.edit(0, values);
+////                    
+////                    Integer subject_id;
+////                    Integer curriculum_id = values.getInteger("id");
+////                    for (Object n:getRemoved()){
+////                        subject_id=(Integer)n;
+////                        DataTask.excludeSubjectFromCurriculumn(curriculum_id, subject_id);
+////                    }
+////                    for (Object n:getAdded()){
+////                        subject_id =(Integer)n;
+////                        DataTask.includeSubjectFromCurriculumn(curriculum_id, subject_id);
+////                    }
+////                    
+////                    DataModule.commit();
+////                } catch (Exception e){
+////                    DataModule.rollback();
+////                    throw new Exception("EDIT_CURRICULUM_ERROR\n"+e.getMessage());
+////                    
+////                }
+//            }
+//        };
+//        Dataset dataset ;
+//        
+//        Map<String,Object> filter = new HashMap<>();
+//        filter.put("id", curriculum_id);
+//        dataset = DataModule.getDataset("curriculum");
+//        dataset.open(filter);
+//        Values values = dataset.getValues(0);
+//        
+//        dataset = DataModule.getSQLDataset("select subject_id from curriculum_detail where curriculum_id="+curriculum_id);
+//        dataset.open();
+//        Set<Object> set = dataset.getColumnSet("subject_id");
+//        
+//        dataset = DataModule.getDataset("subject");
+//        dlg.setDataset(dataset, "id","subject_name");
+//        dlg.setValues(values);
+//        dlg.setSelected(set);
+//        return dlg.showModal(owner)==BaseDialog.RESULT_OK;
         
     }
     
@@ -540,6 +547,7 @@ public class Dialogs {
     
     public static Integer createTeacher(JComponent owner) throws Exception{
          Dataset dataset = DataModule.getDataset("teacher");
+         dataset.test();
          EntryDialog entryDialog = new EntryDialog() {
 
             @Override
@@ -555,7 +563,11 @@ public class Dialogs {
                 }
             }
         };
+        Recordset r= DataModule.getRecordet("select default_shift_id from shift_type where id=2");
+        Values values = new Values();
+        values.put("shift_id",r.getInteger(0));
         entryDialog.setDataset(dataset);
+        entryDialog.setValues(values);
         if (entryDialog.showModal(owner)==BaseDialog.RESULT_OK){
             return 1;
         }
@@ -610,7 +622,17 @@ public class Dialogs {
     ///////////////////////    ROOM  ///////////////////////////////////////////
     
     public static Integer createRoom(JComponent owner) throws Exception{
+        Recordset r;
         Dataset dataset = DataModule.getDataset("room");
+        dataset.test();
+        r = DataModule.getRecordet("select default_shift_id from shift_type where id=3");
+        Integer shift_id=r.getInteger(0);
+        r = DataModule.getRecordet("select default_profile_id from profile_type where id=2");        
+        Integer profile_id=r.getInteger(0);
+        Integer building_id;
+        r=DataModule.getRecordet("select id from building limit 1");
+        building_id = r.getInteger(0);
+        
         EntryDialog dlg = new EntryDialog() {
 
             @Override
@@ -626,9 +648,16 @@ public class Dialogs {
                 }
             }
         };
+        Values values = new Values();
+        values.put("shift_id",shift_id);
+        values.put("profile_id",profile_id);
+        values.put("building_id",building_id);
+        
         dlg.setDataset(dataset);
+        dlg.setValues(values);
         if (dlg.showModal(owner)==BaseDialog.RESULT_OK){
-            return 1;
+            r = DataModule.getRecordet("select max(id) from room");
+            return r.getInteger(0);
         }
         return null;
     }
@@ -682,6 +711,7 @@ public class Dialogs {
     
     public static Integer createDepart(JComponent owner,Integer curriculum_id,Integer skill_id) throws Exception{
         Dataset dataset = DataModule.getDataset("depart");
+        dataset.test();
         
         EntryDialog entryDialog = new EntryDialog() {
 
@@ -702,18 +732,23 @@ public class Dialogs {
         
         
         Recordset r = DataModule.getRecordet("select caption,(select count(*) from depart where skill_id=a.id)+1 as count from skill a where a.id="+skill_id+";");
-        String label = r.getString(0)+" "+r.getString(1);
+        String label = r.getString(0)+" ("+r.getString(1)+")";
         
         r = DataModule.getRecordet(String.format("select count(*) from curriculum_detail where skill_id=%d and curriculum_id=%d",skill_id,curriculum_id));
         if (r.getInteger(0)==0){
             throw new Exception("CURRICULUM_IS_EMPTY");
         }
         
+        r=DataModule.getRecordet("select default_shift_id from shift_type where id=1");
+        Integer shift_id=r.getInteger(0);
+        
+        
         entryDialog.setDataset(dataset);
         Values values = new Values();
         values.put("curriculum_id",curriculum_id);
         values.put("skill_id", skill_id);
         values.put("label", label);
+        values.put("shift_id",shift_id);
         entryDialog.setValues(values);
         if (entryDialog.showModal(owner)==SelectDialog.RESULT_OK){
             r=DataModule.getRecordet("select max(id) from depart");

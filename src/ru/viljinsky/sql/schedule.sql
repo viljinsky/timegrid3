@@ -55,7 +55,8 @@ create table subject(
 drop table if exists profile_type;
 create table profile_type (
     id integer primary key,
-    caption varchar(45)
+    caption varchar(45),
+    default_profile_id integer
 );
 
 drop table if exists profile;
@@ -76,7 +77,8 @@ create table profile_item(
 drop table if exists shift_type;
 create table shift_type(
     id integer primary key,
-    caption varchar(45)
+    caption varchar(45),
+    default_shift_id integer 
 );
 
 drop table if exists shift;
