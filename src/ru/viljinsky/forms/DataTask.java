@@ -112,6 +112,16 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         }
     }
     
+    public static void addSubjectToDepart(Integer depart_id,Integer subject_id) throws Exception{
+        String sql = "insert into subject_group (group_id,depart_id,subject_id)values (1,%d,%d)";
+        DataModule.execute(String.format(sql,depart_id,subject_id));
+        
+    }
+    
+    public static void removeSubjectFromDepart(Integer depart_id,Integer subject_id) throws Exception{
+     String sql  = "delete from subject_group where depart_id=%d and subject_id=%d";
+     DataModule.execute(String.format(sql, depart_id,subject_id));
+    }
     
     public static void fillSubjectGroup2(Integer depart_id) throws Exception{
         String sql = 
@@ -157,14 +167,18 @@ public class DataTask implements IDataTask, IDataTaskConstants{
                     "   where b.id=subject_group.depart_id\n" +
                     "   and b.id=%d " 
                     + " );";
-            DataModule.execute(String.format(sql,depart_id));
-            
+            DataModule.execute(String.format(sql,depart_id));            
             DataModule.commit();
+            
         } catch (Exception e){
+            
             DataModule.rollback();
             throw new Exception("FILL_SUBJECT_GROUP_ERROR\n"+e.getMessage());
+            
         } finally {
+            
             if (stmt!=null) stmt.close();
+            
         }
     }
     
@@ -295,6 +309,13 @@ public class DataTask implements IDataTask, IDataTaskConstants{
        map.put(2, skill_id);
        map.put(3, subject_id);
        DataModule.execute(sql, map);
+       
+       Recordset r = DataModule.getRecordet(String.format("select id from depart where skill_id=%d and curriculum_id=%d",skill_id,curriculum_id));
+       Integer depart_id;
+       for (int i=0;i<r.size();i++){
+            depart_id=(Integer)r.get(i)[0];
+            addSubjectToDepart(depart_id, subject_id);
+       }
     }
 
     public static void excludeSubjectFromCurriculumn(Integer curriculum_id, Integer skill_id, Integer subject_id) throws Exception {
@@ -302,8 +323,15 @@ public class DataTask implements IDataTask, IDataTaskConstants{
        KeyMap map= new KeyMap();
        map.put(1, curriculum_id);
        map.put(2, skill_id);
-       map.put(3, subject_id);
+       map.put(3, subject_id);       
        DataModule.execute(sql, map);
+       
+       Recordset r = DataModule.getRecordet(String.format("select id from depart where skill_id=%d and curriculum_id=%d",skill_id,curriculum_id));
+       Integer depart_id;
+       for (int i=0;i<r.size();i++){
+            depart_id=(Integer)r.get(i)[0];
+            removeSubjectFromDepart(depart_id, subject_id);
+       }
     }
 
     static void excludeSubjectFromProfile(Integer profile_id, Integer subject_id) throws Exception{
