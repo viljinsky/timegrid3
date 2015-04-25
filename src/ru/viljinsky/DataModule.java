@@ -261,12 +261,13 @@ public class DataModule implements IDataModuleConsts {
     }
     
     public static void execute(String sql) throws Exception{
+//        System.out.println(sql);
         Statement stmt=null;
         try{
             stmt=con.createStatement();
             stmt.execute(sql);
         } catch (Exception e){
-            System.err.println(sql);
+            System.err.println("EXECUTE_SQL_ERROR\n SQL:\""+sql+"\"\n"+e.getMessage());
             throw new Exception(e);
         } finally {
             if (stmt!=null)

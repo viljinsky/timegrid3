@@ -256,7 +256,9 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
                     break;
                     
                 case REMOVE_SHIFT:
-                    Dialogs.removeShift();
+                    shift_id=grid.getIntegerValue("shift_id");
+                    if (Dialogs.removeShift(this,shift_id))
+                        grid.requery();
                     break;
             }
         } catch (Exception e){
@@ -268,12 +270,21 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
     //--------------------------------------------------------------------------
     
     class ShiftRoomPanel extends DetailPanel{
-        String sqlShift="select * from shift_detail a inner join room b on a.shift_id=b.shift_id where b.id=%room_id;";
+        DBShiftPanel shPanel = new DBShiftPanel();
+        String sqlShift="select a.* from shift_detail a inner join room b on a.shift_id=b.shift_id where b.id=%room_id;";
+
+        public ShiftRoomPanel() {
+            super();
+            gridPanel.add(shPanel,BorderLayout.EAST);
+        }
+
+        
         @Override
         public void reopen(Integer keyValue) throws Exception{
             dataset = DataModule.getSQLDataset(sqlShift.replace("%room_id",keyValue.toString()));
             dataset.open();
             grid.setDataset(dataset);
+            shPanel.setDataset(dataset);
         }
     }
     
@@ -866,102 +877,103 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
 ///////////////////////////  SCHEDULE PANEL ///////////////////////////////////
 
 
-class SchedulePanel extends JPanel implements ActionListener,IOpenedForm{
-    Grid grid = new Grid();
-    DataModule dataModule = DataModule.getInstance();
-    GridPanel panel;
-    Combo combo = new Combo();
+//class SchedulePanel extends JPanel implements ActionListener,IOpenedForm{
+//    Grid grid = new Grid();
+//    DataModule dataModule = DataModule.getInstance();
+//    GridPanel panel;
+//    Combo combo = new Combo();
+//
+//    @Override
+//    public void close() throws Exception {
+////        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
+//    
+//    class Combo extends DBComboBox{
+//
+//        @Override
+//        public void onValueChange() {
+//            System.out.println("->>"+getValue());
+//            Map<String,Object> filter = new HashMap<>();
+//            filter.put("depart_id",getValue());
+//            try{
+//                grid.setFilter(filter);
+//            } catch (Exception e){
+//                e.printStackTrace();
+//            }
+//        }
+//        
+//    }
+//    
+//    public SchedulePanel(){
+//        super(new BorderLayout());
+//        panel = new GridPanel("Schedule", grid);
+//        add(panel,BorderLayout.CENTER);
+//        JButton button;
+//        
+//        button = new JButton("Clear");
+//        button.addActionListener(this);
+//        panel.AddButton(button);
+//        
+//        button = new JButton("Fill");
+//        button.addActionListener(this);
+//        panel.AddButton(button);
+//        
+//        panel.AddButton(combo);
+//        
+//    }
+//    
+//    public void doCommand(String command){
+//        Integer depart_id;        
+//        try{
+//            depart_id = (Integer)combo.getValue();
+//            switch (command){
+//                case "Fill":
+////                    ScheduleBuilder.placeDepart(depart_id);
+////                    DataTask.fillSchedule(depart_id);
+//                    break;
+//                case "Clear":
+//                    DataTask.clearSchedule(depart_id);
+//                    break;
+//            }
+//            grid.requery();
+//            
+//        } catch (Exception e){
+//            JOptionPane.showMessageDialog(this, e.getMessage());
+//        }
+//    }
+//    @Override
+//    public void open(){
+//        Dataset dataset;
+//        try{
+//            
+//            dataset = dataModule.getDataset("depart");
+//            dataset.open();
+//            combo.setDataset(dataset,"id","label");
+//            
+//            dataset = dataModule.getSQLDataset("select * from v_schedule order by depart_id,day_id,bell_id");
+//            grid.setDataset(dataset);
+//            
+//            
+//        } catch (Exception e){
+//        }
+//    }
+//
+//    @Override
+//    public void actionPerformed(ActionEvent e) {
+//        doCommand(e.getActionCommand());
+//    }
+//
+//    @Override
+//    public String getCaption() {
+//        return "SCHEDULE";
+//    }
+//
+//    @Override
+//    public JComponent getPanel() {
+//        return this;
+//    }
+//}
 
-    @Override
-    public void close() throws Exception {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    class Combo extends DBComboBox{
-
-        @Override
-        public void onValueChange() {
-            System.out.println("->>"+getValue());
-            Map<String,Object> filter = new HashMap<>();
-            filter.put("depart_id",getValue());
-            try{
-                grid.setFilter(filter);
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-        
-    }
-    
-    public SchedulePanel(){
-        super(new BorderLayout());
-        panel = new GridPanel("Schedule", grid);
-        add(panel,BorderLayout.CENTER);
-        JButton button;
-        
-        button = new JButton("Clear");
-        button.addActionListener(this);
-        panel.AddButton(button);
-        
-        button = new JButton("Fill");
-        button.addActionListener(this);
-        panel.AddButton(button);
-        
-        panel.AddButton(combo);
-        
-    }
-    
-    public void doCommand(String command){
-        Integer depart_id;        
-        try{
-            depart_id = (Integer)combo.getValue();
-            switch (command){
-                case "Fill":
-//                    ScheduleBuilder.placeDepart(depart_id);
-//                    DataTask.fillSchedule(depart_id);
-                    break;
-                case "Clear":
-                    DataTask.clearSchedule(depart_id);
-                    break;
-            }
-            grid.requery();
-            
-        } catch (Exception e){
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }
-    }
-    @Override
-    public void open(){
-        Dataset dataset;
-        try{
-            
-            dataset = dataModule.getDataset("depart");
-            dataset.open();
-            combo.setDataset(dataset,"id","label");
-            
-            dataset = dataModule.getSQLDataset("select * from v_schedule order by depart_id,day_id,bell_id");
-            grid.setDataset(dataset);
-            
-            
-        } catch (Exception e){
-        }
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        doCommand(e.getActionCommand());
-    }
-
-    @Override
-    public String getCaption() {
-        return "SCHEDULE";
-    }
-
-    @Override
-    public JComponent getPanel() {
-        return this;
-    }
-}
 ////////////////////////////////  TEACHER PANEL ////////////////////////////////
 
 class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
@@ -1034,20 +1046,17 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
                     
                 case EDIT_PROFILE:
                     profile_id=grid.getIntegerValue("profile_id");
-//            shift_id=grid.getIntegerValue("shift_id");
                     Dialogs.editProfile(this,profile_id);
                     grid.requery();
                     break;
                     
                 case REMOVE_PROFILE:
                     profile_id=grid.getIntegerValue("profile_id");
-//            shift_id=grid.getIntegerValue("shift_id");
                     Dialogs.removeProfile(this, profile_id);
                     grid.requery();
                     break;
                  
                 case CREATE_SHIFT:
-//            profile_id=grid.getIntegerValue("profile_id");
                     shift_id=grid.getIntegerValue("shift_id");
                     newShiftId = Dialogs.createShift(this, shift_id);
                     if (newShiftId!=null){
@@ -1063,14 +1072,15 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
                     break;
                     
                 case EDIT_SHIFT:
-//            profile_id=grid.getIntegerValue("profile_id");
                     shift_id=grid.getIntegerValue("shift_id");
                     Dialogs.editShift(this, shift_id);
                     grid.requery();
                     break;
+                    
                 case REMOVE_SHIFT:
-                    Dialogs.removeShift();
-                    grid.requery();
+                    shift_id=grid.getIntegerValue("shift_id");
+                    if (Dialogs.removeShift(this,shift_id))
+                        grid.requery();
                     break;
             }
         } catch (Exception e){
@@ -1091,13 +1101,21 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
     }
     
     class ShiftTeacherPanel extends DetailPanel{
-        String sqlTeacherShift = "select * from shift_detail a inner join teacher b on a.shift_id=b.shift_id where b.id=%teacher_id;";
+        DBShiftPanel shPanel = new DBShiftPanel();
+        String sqlTeacherShift = "select a.* from shift_detail a inner join teacher b on a.shift_id=b.shift_id where b.id=%teacher_id;";
+
+        public ShiftTeacherPanel() {
+            super();
+            gridPanel.add(shPanel,BorderLayout.WEST);
+                    
+        }
         
         @Override
         public void reopen(Integer keyValue) throws Exception{
             dataset = DataModule.getSQLDataset(sqlTeacherShift.replace("%teacher_id", keyValue.toString()));
             dataset.open();
             grid.setDataset(dataset);
+            shPanel.setDataset(dataset);
         }
         
     }

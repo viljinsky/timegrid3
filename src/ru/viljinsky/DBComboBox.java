@@ -91,6 +91,10 @@ public class DBComboBox extends JComboBox<String> {
         });
     }
     
+    public void requery(){
+        
+    }
+    
     public String getLabel(){
         return label;
     }

@@ -43,6 +43,7 @@ abstract class AbstractShiftDialog extends ShiftDialog{
         getContentPane().add(entryPanel,BorderLayout.PAGE_START);
         try{
             Dataset dataset = DataModule.getDataset("shift");
+            dataset.test();
             entryPanel.setDataset(dataset);
         } catch (Exception e){
             e.printStackTrace();
@@ -69,6 +70,7 @@ abstract class AbstractProfileDialog extends SelectDialog{
         add(entryPanel,BorderLayout.PAGE_START);
         try{
             Dataset dataset = DataModule.getDataset("profile");
+            dataset.test();
             entryPanel.setDataset(dataset);
         } catch (Exception e){
             e.printStackTrace();
@@ -339,8 +341,40 @@ public class Dialogs {
         return (dlg.modalResult==SelectDialog.RESULT_OK);
     }
     
-    public static boolean removeShift() throws Exception{
-        throw new UnsupportedOperationException(NOT_READY_YET);
+    public static boolean removeShift(JComponent owner,Integer shift_id) throws Exception{
+        
+        Integer default_shift_id;
+        Integer shift_type_id;
+        String sql  = "select a.id,default_shift_id from shift_type a inner join shift b on b.shift_type_id=a.id where b.id ="+shift_id;
+        Recordset r = DataModule.getRecordet(sql);
+        default_shift_id = r.getInteger(1);
+        shift_type_id=r.getInteger(0);
+        
+        if (default_shift_id==shift_id){
+            throw new Exception("CAN_NOT_DELETE_DEFAULT_SHIFT");
+        }
+        
+        if (JOptionPane.showConfirmDialog(owner, "Удалить график","Внимание",JOptionPane.YES_NO_OPTION)!=JOptionPane.YES_OPTION)
+            return false;
+        
+        try{
+            switch (shift_type_id){
+                case 2:
+                    DataModule.execute(String.format("update teacher set shift_id=%d where shift_id=%d",default_shift_id,shift_id));
+                    break;
+                case 3:
+                    DataModule.execute(String.format("update room set shift_id=%d where shift_id=%d",default_shift_id,shift_id));
+                    break;
+
+                default:
+                    throw new Exception("UNKNOW_SHIFT_TYPE");
+            }
+            DataModule.execute(String.format("delete from shift where id=%d",shift_id));
+            DataModule.commit();
+        } catch (Exception e){
+            DataModule.rollback();
+        }
+        return true;
     }
     
     ///////////////////////////////////////////////////////////////////////////

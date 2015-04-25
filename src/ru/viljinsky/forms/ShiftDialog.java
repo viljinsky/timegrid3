@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -22,6 +23,8 @@ import java.util.List;
 import java.util.Set;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import ru.viljinsky.Dataset;
+import ru.viljinsky.Values;
 import ru.viljinsky.dialogs.BaseDialog;
 
 /**
@@ -72,15 +75,15 @@ public class ShiftDialog extends BaseDialog{
     @Override
     public void doOnEntry() throws Exception {
         for (Integer[] n:getSelected()){
-            System.out.println(n[0]+" "+n[1]);
+//            System.out.println(n[0]+" "+n[1]);
         }
         
         for (Integer[] n:getAdded()){
-            System.out.println("ADDED"+n[0]+" "+n[1]);
+//            System.out.println("ADDED"+n[0]+" "+n[1]);
         }
         
         for (Integer[] n:getRemoved()){
-            System.out.println("REMOVED"+n[0]+" "+n[1]);
+//            System.out.println("REMOVED"+n[0]+" "+n[1]);
         }
     }
 
@@ -89,11 +92,11 @@ public class ShiftDialog extends BaseDialog{
         String command = e.getActionCommand();
         switch (command){
             case "SELECT_ALL":
-                System.out.println(command);
+//                System.out.println(command);
                 drawPanel.selectAll();
                 break;
             case "UNSELECT_ALL":
-                System.out.println(command);
+//                System.out.println(command);
                 drawPanel.unSelectAll();
                 break;
             default:
@@ -105,65 +108,36 @@ public class ShiftDialog extends BaseDialog{
     
 }
 
+/////////////////////////   SHIFT_PANEL ///////////////////////////////////////
+class DBShiftPanel extends ShiftPanel{
+    Dataset dataset;
+    public void setDataset(Dataset dataset) throws Exception{
+        this.dataset = dataset;
+        Values values;
+        cells.clear();
+        if (dataset==null)
+            return;
+        for (int i=0;i<dataset.size();i++){
+            values= dataset.getValues(i);
+            cells.add(new Point(values.getInteger("day_id")-1,values.getInteger("bell_id")-1));
+        }
+        repaint();
+    }
+}
 
 class ShiftPanel extends JPanel {
-    Set<Cell> cells = new HashSet<>();
-    Set<Cell> oldValues = new HashSet<>();
+    FontMetrics fontMetrics;
+    Set<Point> cells = new HashSet<>();
+    Set<Point> oldValues = new HashSet<>();
     Integer COLUMN_HEADER_HEIGHT = 30;
     Integer ROW_HEADER_WIDHT = 100;
     Integer CELL_WIDTH = 25;
     Integer CELL_HEIGHT = 25;
     Integer dayCount = 7;
     Integer bellCount = 10;
-
-    void selectAll() {
-        cells.clear();
-        for (int i=0;i<dayCount;i++)
-            for (int j=0;j<bellCount;j++){
-                cells.add(new Cell(i,j));
-            }
-        repaint();
-    }
-
-    void unSelectAll() {
-        cells.clear();
-        repaint();
-    }
-
-    class Cell {
-
-        Integer day;
-        Integer bell;
-
-        public Cell(int day, int bell) {
-            this.day = day;
-            this.bell = bell;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (obj instanceof Cell) {
-                Cell c = (Cell) obj;
-                return c.day == day && c.bell == bell;
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return day * 100 + bell;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("%d %d", day, bell);
-        }
-    }
-
+    String[] columnHeaders;
+    String[] rowHeaders;
+    
     public ShiftPanel() {
         setPreferredSize(new Dimension(300, 300));
         addMouseListener(new MouseAdapter() {
@@ -173,12 +147,43 @@ class ShiftPanel extends JPanel {
                 repaint();
             }
         });
+        columnHeaders= new String[]{"Пн","Вт","Ср","Чт","Пт","Cб","Вс"};
+        rowHeaders= new String[]{"10-11","11-12","12-13","13-14","14-15","15-16","16-17","17-18","18-19"};
+        dayCount=columnHeaders.length;
+        bellCount=rowHeaders.length;
+    }
+    
+    public void setDayList(){
+    }
+    
+    public void setBellList(){
     }
 
+    void selectAll() {
+        cells.clear();
+        for (int i=0;i<dayCount;i++)
+            for (int j=0;j<bellCount;j++){
+                cells.add(new Point(i,j));
+            }
+        repaint();
+    }
+
+    void unSelectAll() {
+        cells.clear();
+        repaint();
+    }
+
+
     public void drawColumnHeader(Graphics g, int day) {
+        String caption = columnHeaders[day];
+        int h = fontMetrics.getHeight();
+        int w = fontMetrics.stringWidth(caption);
+        
         Rectangle r = getColumnHeaderBound(day);
         g.setColor(Color.gray);
         g.drawRect(r.x, r.y, r.width, r.height);
+        g.setColor(Color.BLACK);
+        g.drawString(caption, r.x+(r.width-w)/2, r.y+h);
     }
 
     public Rectangle getColumnHeaderBound(int day) {
@@ -186,9 +191,14 @@ class ShiftPanel extends JPanel {
     }
 
     public void drawRowHeader(Graphics g, int bell) {
+        String caption = rowHeaders[bell];
+        int h= fontMetrics.getHeight();
+        int w=fontMetrics.stringWidth(caption);
         Rectangle r = getRowHeaderRectangle(bell);
         g.setColor(Color.gray);
         g.drawRect(r.x, r.y, r.width, r.height);
+        g.setColor(Color.BLACK);
+        g.drawString(caption, r.x+(r.width-w)/2, r.y+h);
     }
 
     public Rectangle getRowHeaderRectangle(int bell) {
@@ -208,6 +218,7 @@ class ShiftPanel extends JPanel {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
+        fontMetrics =g.getFontMetrics();
         // drow columnHeader
         for (int day = 0; day < dayCount; day++) {
             drawColumnHeader(g, day);
@@ -225,7 +236,7 @@ class ShiftPanel extends JPanel {
     }
 
     public boolean isExists(int day, int bell) {
-        Cell cell = new Cell(day, bell);
+        Point cell = new Point(day, bell);
         return cells.contains(cell);
     }
 
@@ -258,22 +269,22 @@ class ShiftPanel extends JPanel {
     }
 
     public void clickCell(int day, int bell) {
-        System.out.println(String.format("day:%d bell:%d", day, bell));
-        Cell cell = new Cell(day, bell);
+//        System.out.println(String.format("day:%d bell:%d", day, bell));
+        Point cell = new Point(day, bell);
         if (cells.contains(cell)) {
             cells.remove(cell);
         } else {
             cells.add(cell);
         }
-        System.out.println(cells);
+//        System.out.println(cells);
     }
 
     public void columnClick(int day) {
-        System.out.println("day =" + day);
-        boolean b = cells.contains(new Cell(day, 0));
-        Cell cell;
+//        System.out.println("day =" + day);
+        boolean b = cells.contains(new Point(day, 0));
+        Point cell;
         for (int bell = 0; bell < bellCount; bell++) {
-            cell = new Cell(day, bell);
+            cell = new Point(day, bell);
             if (b) {
                 cells.remove(cell);
             } else {
@@ -283,11 +294,11 @@ class ShiftPanel extends JPanel {
     }
 
     public void rowClick(int bell) {
-        System.out.println("bell=" + bell);
-        Cell cell;
-        boolean b = cells.contains(new Cell(0, bell));
+//        System.out.println("bell=" + bell);
+        Point cell;
+        boolean b = cells.contains(new Point(0, bell));
         for (int day = 0; day < dayCount; day++) {
-            cell = new Cell(day, bell);
+            cell = new Point(day, bell);
             if (b) {
                 cells.remove(cell);
             } else {
@@ -299,8 +310,8 @@ class ShiftPanel extends JPanel {
     
     public List<Integer[]> getSelected(){
         List<Integer[]> result = new ArrayList<>();
-        for (Cell cell:cells){
-            result.add(new Integer[]{cell.day,cell.bell});
+        for (Point cell:cells){
+            result.add(new Integer[]{cell.x,cell.y});
         }
         return result;
     }
@@ -308,16 +319,16 @@ class ShiftPanel extends JPanel {
     public void setSelected(List<Integer[]> list){
         cells.clear();
         for (Integer[] n:list){
-            cells.add(new Cell(n[0],n[1]));
+            cells.add(new Point(n[0],n[1]));
         }
         oldValues = new HashSet<>(cells);
     }
     
     public List<Integer[]> getRemoved(){
         List<Integer[]> result = new ArrayList<>();
-        for (Cell cell:oldValues){
+        for (Point cell:oldValues){
             if (!cells.contains(cell)){
-                result.add(new Integer[]{cell.day,cell.bell});
+                result.add(new Integer[]{cell.x,cell.y});
             }
         }
         return result;
@@ -325,9 +336,9 @@ class ShiftPanel extends JPanel {
     
     public List<Integer[]> getAdded(){
         List<Integer[]> result = new ArrayList<>();
-        for (Cell cell:cells){
+        for (Point cell:cells){
             if (!oldValues.contains(cell)){
-                result.add(new Integer[]{cell.day,cell.bell});
+                result.add(new Integer[]{cell.x,cell.y});
             }
         }
         return result;
