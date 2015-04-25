@@ -383,6 +383,17 @@ public class Grid extends JTable {
         model.dataset.open();
         model.fireTableDataChanged();
     }
+    
+    public void requery(Values values) throws Exception{
+        model.dataset.open();
+        model.fireTableDataChanged();
+        Integer row = model.dataset.locate(values);
+        if (row>=0){
+            getSelectionModel().setSelectionInterval(row, row);
+            scrollRectToVisible(getCellRect(row, getSelectedColumn(), true));
+        }
+        
+    }
 
     public void refresh() {
         model.fireTableDataChanged();

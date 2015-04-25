@@ -476,55 +476,6 @@ public class Dialogs {
         if (curriculumn_name==null)
             return false;
         return true;
-//        CurriculumDialog dlg = new CurriculumDialog() {
-//
-//            @Override
-//            public void doOnEntry() throws Exception {
-////                try{
-////                    Values values = getValues();
-////                    Dataset dataset = DataModule.getDataset("curriculum");
-////                    Map<String,Object> filter = new HashMap<>();
-////                    filter.put("id",values.getInteger("id"));
-////                    dataset.open(filter);
-////                    dataset.edit(0, values);
-////                    
-////                    Integer subject_id;
-////                    Integer curriculum_id = values.getInteger("id");
-////                    for (Object n:getRemoved()){
-////                        subject_id=(Integer)n;
-////                        DataTask.excludeSubjectFromCurriculumn(curriculum_id, subject_id);
-////                    }
-////                    for (Object n:getAdded()){
-////                        subject_id =(Integer)n;
-////                        DataTask.includeSubjectFromCurriculumn(curriculum_id, subject_id);
-////                    }
-////                    
-////                    DataModule.commit();
-////                } catch (Exception e){
-////                    DataModule.rollback();
-////                    throw new Exception("EDIT_CURRICULUM_ERROR\n"+e.getMessage());
-////                    
-////                }
-//            }
-//        };
-//        Dataset dataset ;
-//        
-//        Map<String,Object> filter = new HashMap<>();
-//        filter.put("id", curriculum_id);
-//        dataset = DataModule.getDataset("curriculum");
-//        dataset.open(filter);
-//        Values values = dataset.getValues(0);
-//        
-//        dataset = DataModule.getSQLDataset("select subject_id from curriculum_detail where curriculum_id="+curriculum_id);
-//        dataset.open();
-//        Set<Object> set = dataset.getColumnSet("subject_id");
-//        
-//        dataset = DataModule.getDataset("subject");
-//        dlg.setDataset(dataset, "id","subject_name");
-//        dlg.setValues(values);
-//        dlg.setSelected(set);
-//        return dlg.showModal(owner)==BaseDialog.RESULT_OK;
-        
     }
     
     public static boolean deleteCurriculum(JComponent owner, Integer curriculum_id) throws Exception{
@@ -543,7 +494,8 @@ public class Dialogs {
     
     
     /////////////////////// TEACHER ////////////////////////////////////////////
-    
+
+  
     
     public static Integer createTeacher(JComponent owner) throws Exception{
          Dataset dataset = DataModule.getDataset("teacher");
@@ -553,9 +505,7 @@ public class Dialogs {
             @Override
             public void doOnEntry() throws Exception {
                 try{
-                    Dataset dataset = DataModule.getDataset("teacher");
-                    dataset.test();
-                    dataset.appned(getValues());
+                    getDataset().appned(getValues());
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
@@ -563,14 +513,15 @@ public class Dialogs {
                 }
             }
         };
-        Recordset r= DataModule.getRecordet("select default_shift_id from shift_type where id=2");
         Values values = new Values();
-        values.put("shift_id",r.getInteger(0));
+        values.put("shift_id",DataTask.getDefaultShiftId("teacher"));
+        values.put("profile_id", DataTask.getDefaultProfileId("teacher"));
         entryDialog.setDataset(dataset);
         entryDialog.setValues(values);
-        if (entryDialog.showModal(owner)==BaseDialog.RESULT_OK){
-            return 1;
-        }
+        
+        if (entryDialog.showModal(owner)==BaseDialog.RESULT_OK)
+            return DataTask.getLastId("teacher") ;
+        
         return null;
     }
     
@@ -581,12 +532,7 @@ public class Dialogs {
             @Override
             public void doOnEntry() throws Exception {
                 try{
-                    Values values = getValues();
-                    Dataset dataset = DataModule.getDataset("teacher");
-                    Map<String,Object> filter = new HashMap<>();
-                    filter.put("id", values.getInteger("id"));
-                    dataset.open(filter);
-                    dataset.edit(0, values);
+                    getDataset().edit(0, getValues());
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
@@ -625,10 +571,10 @@ public class Dialogs {
         Recordset r;
         Dataset dataset = DataModule.getDataset("room");
         dataset.test();
-        r = DataModule.getRecordet("select default_shift_id from shift_type where id=3");
-        Integer shift_id=r.getInteger(0);
-        r = DataModule.getRecordet("select default_profile_id from profile_type where id=2");        
-        Integer profile_id=r.getInteger(0);
+//        r = DataModule.getRecordet("select default_shift_id from shift_type where id=3");
+//        Integer shift_id=r.getInteger(0);
+//        r = DataModule.getRecordet("select default_profile_id from profile_type where id=2");        
+//        Integer profile_id=r.getInteger(0);
         Integer building_id;
         r=DataModule.getRecordet("select id from building limit 1");
         building_id = r.getInteger(0);
@@ -638,9 +584,7 @@ public class Dialogs {
             @Override
             public void doOnEntry() throws Exception {
                 try{
-                    Dataset ds = DataModule.getDataset("room");
-                    ds.test();
-                    ds.appned(getValues());
+                    getDataset().appned(getValues());
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
@@ -648,17 +592,18 @@ public class Dialogs {
                 }
             }
         };
+        
         Values values = new Values();
-        values.put("shift_id",shift_id);
-        values.put("profile_id",profile_id);
+        values.put("shift_id",DataTask.getDefaultShiftId("room"));
+        values.put("profile_id",DataTask.getDefaultProfileId("room"));
         values.put("building_id",building_id);
         
         dlg.setDataset(dataset);
         dlg.setValues(values);
-        if (dlg.showModal(owner)==BaseDialog.RESULT_OK){
-            r = DataModule.getRecordet("select max(id) from room");
-            return r.getInteger(0);
-        }
+        
+        if (dlg.showModal(owner)==BaseDialog.RESULT_OK)
+            return DataTask.getLastId("room");
+        
         return null;
     }
     
@@ -669,12 +614,7 @@ public class Dialogs {
             @Override
             public void doOnEntry() throws Exception {
                 try{
-                    Values values = getValues();
-                    Dataset ds = DataModule.getDataset("room");
-                    Map<String,Object> filter = new HashMap<>();
-                    filter.put("id", values.getInteger("id"));
-                    ds.open(filter);
-                    ds.edit(0, values);
+                    getDataset().edit(0, getValues());
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
@@ -739,16 +679,16 @@ public class Dialogs {
             throw new Exception("CURRICULUM_IS_EMPTY");
         }
         
-        r=DataModule.getRecordet("select default_shift_id from shift_type where id=1");
-        Integer shift_id=r.getInteger(0);
-        
+//        r=DataModule.getRecordet("select default_shift_id from shift_type where id=1");
+//        Integer shift_id=r.getInteger(0);
+//        
         
         entryDialog.setDataset(dataset);
         Values values = new Values();
         values.put("curriculum_id",curriculum_id);
         values.put("skill_id", skill_id);
         values.put("label", label);
-        values.put("shift_id",shift_id);
+        values.put("shift_id",DataTask.getDefaultShiftId("depart"));
         entryDialog.setValues(values);
         if (entryDialog.showModal(owner)==SelectDialog.RESULT_OK){
             r=DataModule.getRecordet("select max(id) from depart");

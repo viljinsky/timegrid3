@@ -28,6 +28,10 @@ public abstract class EntryDialog extends BaseDialog {
         entryPanel.setDataset(dataset);
     }
     
+    public IDataset getDataset(){
+        return entryPanel.dataset;
+    }
+    
     public void setValues(Map<String,Object> values){
         entryPanel.setValues(values);
     }

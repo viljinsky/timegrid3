@@ -28,7 +28,48 @@ interface IDataTask{
 
 
 public class DataTask implements IDataTask, IDataTaskConstants{
-//    protected static DataModule dataModule = DataModule.getInstance();
+    
+    public static Integer getLastId(String tableName) throws Exception{
+        Recordset r = DataModule.getRecordet("select max(id) from "+tableName);
+        return r.getInteger(0);
+    }
+    
+    public static Integer getDefaultProfileId(String tableName) throws Exception{
+        Recordset r;
+        String sql ;
+        switch (tableName){
+            case "teacher":
+                sql = "select default_profile_id from profile_type where id=1";
+                break;
+            case "room":
+                sql = "select default_profile_id from profile_type where id=2";
+                break;
+            default:
+                throw new Exception("UNKNOW_TABLE_NAME\n"+tableName);
+        }
+        r=DataModule.getRecordet(sql);
+        return r.getInteger(0);
+    };
+    
+    public static Integer getDefaultShiftId(String tableName) throws Exception{
+        Recordset r;
+        String sql;
+        switch (tableName){
+            case "teacher":
+                sql = "select default_shift_id from shift_type where id=2";
+                break;
+            case "room":
+                sql = "select default_shift_id from shift_type where id=3";
+                break;
+            case "depart":
+                sql = "select default_shift_id from shift_type where id=1";
+                break;
+            default:
+                throw new Exception ("INKNOW_TABLE_NAME_ERROR\n"+tableName);
+        };
+        r = DataModule.getRecordet(sql);
+        return r.getInteger(0);
+    }
     
     /**
      * Доболение все предметов в учебный план

@@ -22,6 +22,7 @@ import ru.viljinsky.Grid;
 import ru.viljinsky.IDataset;
 import ru.viljinsky.Recordset;
 import ru.viljinsky.SelectDialog;
+import ru.viljinsky.Values;
 
 /**
  *
@@ -178,13 +179,17 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
         Integer shift_id,profile_id;
         Integer new_profile_id;
         Integer room_id;
+        Values values;
         try{
             switch(command){
 
                 case CREATE_ROOM:
                     room_id = Dialogs.createRoom(this);
-                    if (room_id!=null)
-                        grid.requery();
+                    if (room_id!=null){
+                        values = new Values();
+                        values.put("id",room_id);
+                        grid.requery(values);
+                    }
                     break;
                     
                 case EDIT_ROOM:
@@ -584,7 +589,7 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
                     break;
                     
                 case EDIT_GROUP:
-                    depart_id = grid1.getIntegerValue("id");
+                    depart_id = grid1.getIntegerValue("depart_id");
                     subject_id = grid2.getIntegerValue("subject_id");
                     group_id = grid2.getIntegerValue("group_id");
                     if (Dialogs.editSubjectGroup(this,depart_id,subject_id,group_id))
@@ -984,6 +989,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
         Integer shift_id,profile_id;
         Integer newProfileId,newShiftId;
         Integer teacher_id;
+        Values values;
         try{
 //            profile_id=grid.getIntegerValue("profile_id");
 //            shift_id=grid.getIntegerValue("shift_id");
@@ -991,8 +997,11 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
                 
                 case CREATE_TEACHER:
                     teacher_id = Dialogs.createTeacher(this);
-                    if (teacher_id!=null)
-                        grid.requery();
+                    if (teacher_id!=null){
+                        values = new Values();
+                        values.put("id", teacher_id);
+                        grid.requery(values);
+                    }
                     break;
                     
                 case EDIT_TEACHER:

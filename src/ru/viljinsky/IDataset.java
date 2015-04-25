@@ -41,6 +41,7 @@ public interface IDataset{
     public String getReferences(String columnName);
     public Map<Object,String> getLookup(String columnName) throws Exception;
     public Column[] getColumns();
+    public Integer locate(Values values) throws Exception;
     
     /**
      * Установка фильтра на датасет 

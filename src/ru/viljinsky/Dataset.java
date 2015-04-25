@@ -573,4 +573,25 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         }
         return result;
     }
+
+    @Override
+    public Integer locate(Values values) throws Exception {
+        Object[] rowset;
+        Integer columnIndex;
+        Integer rowIndex;
+        boolean mach = false;
+        for (rowIndex=0;rowIndex<size();rowIndex++){
+            rowset = get(rowIndex);
+            mach = true;
+            for(String key:values.keySet()){
+                columnIndex = getColumnIndex(key);
+                mach = rowset[columnIndex].equals(values.getObject(key));
+                if (!mach)
+                    break;
+            }
+            if (mach)
+                return rowIndex;
+        }
+        return -1;
+    }
 }

@@ -33,7 +33,7 @@ insert into bell_list(bell_id,time_start,time_end) values (8,'17:00','17:45');
 insert into bell_list(bell_id,time_start,time_end) values (9,'18:00','18:45');
 insert into bell_list(bell_id,time_start,time_end) values (10,'19:00','19:45');
 
-insert into profile_type(id,caption,default_profile_id) values (1,'Профиль преподавателя',null);
+insert into profile_type(id,caption,default_profile_id) values (1,'Профиль преподавателя',1);
 insert into profile_type(id,caption,default_profile_id) values (2,'Профиль помещения',8);
 
 --    Графики преподавателей
