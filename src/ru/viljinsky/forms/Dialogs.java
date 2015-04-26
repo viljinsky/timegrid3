@@ -509,6 +509,13 @@ public class Dialogs {
         String curriculumn_name = (String)JOptionPane.showInputDialog(owner, "Учебный план", "Введите название", JOptionPane.PLAIN_MESSAGE, null, null, caption);
         if (curriculumn_name==null)
             return false;
+        try{
+            DataModule.execute("update curriculum set caption='"+curriculumn_name+"' where id="+curriculum_id);
+            DataModule.commit();
+        } catch(Exception e){
+            DataModule.rollback();
+            throw new Exception("EDIT_CURRICUM_ERROR\n"+e.getMessage());
+        }
         return true;
     }
     
@@ -605,10 +612,6 @@ public class Dialogs {
         Recordset r;
         Dataset dataset = DataModule.getDataset("room");
         dataset.test();
-//        r = DataModule.getRecordet("select default_shift_id from shift_type where id=3");
-//        Integer shift_id=r.getInteger(0);
-//        r = DataModule.getRecordet("select default_profile_id from profile_type where id=2");        
-//        Integer profile_id=r.getInteger(0);
         Integer building_id;
         r=DataModule.getRecordet("select id from building limit 1");
         building_id = r.getInteger(0);
@@ -782,15 +785,17 @@ public class Dialogs {
             @Override
             public void doOnEntry() throws Exception {
                 try{
-                    Values values = getValues();
-                    Map<String,Object> filter = new HashMap<>();
-                    filter.put("depart_id", values.getInteger("depart_id"));
-                    filter.put("subject_id", values.getInteger("subject_id"));
-                    filter.put("group_id", values.getInteger("group_id"));
                     
-                    Dataset dataset = DataModule.getDataset("subject_group");
-                    dataset.open(filter);
-                    dataset.edit(0, values);
+                    Values values = getValues();
+                    getDataset().edit(0, values);
+//                    Map<String,Object> filter = new HashMap<>();
+//                    filter.put("depart_id", values.getInteger("depart_id"));
+//                    filter.put("subject_id", values.getInteger("subject_id"));
+//                    filter.put("group_id", values.getInteger("group_id"));
+//                    
+//                    Dataset dataset = DataModule.getDataset("subject_group");
+//                    dataset.open(filter);
+//                    dataset.edit(0, values);
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
@@ -798,11 +803,16 @@ public class Dialogs {
                 }
             }
         };
-        Dataset dataset = DataModule.getSQLDataset(String.format("select * from subject_group where depart_id=%d and subject_id=%d and group_id=%d",depart_id,subject_id,group_id));
-        dataset.open();
-        Values values= dataset.getValues(0);
-        dlg.setDataset(DataModule.getDataset("subject_group"));
-        dlg.setValues(values);
+        Values values = new Values();
+        values.put("depart_id", depart_id);
+        values.put("subject_id", subject_id);
+        values.put("group_id",group_id);
+        Dataset dataset = DataModule.getDataset("subject_group");//  DataModule.getSQLDataset(String.format("select * from subject_group where depart_id=%d and subject_id=%d and group_id=%d",depart_id,subject_id,group_id));
+        dataset.open(values);
+//        Values values= dataset.getValues(0);
+//        dlg.setDataset(DataModule.getDataset("subject_group"));
+        dlg.setDataset(dataset);
+        dlg.setValues(dataset.getValues(0));
         return dlg.showModal(owner)==BaseDialog.RESULT_OK;
     }
 

@@ -29,6 +29,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListDataListener;
 import ru.viljinsky.Column;
+import ru.viljinsky.ColumnMap;
 import ru.viljinsky.IDataset;
 import ru.viljinsky.Values;
 
@@ -333,8 +334,16 @@ public class EntryPanel extends JPanel {
         IEntryControl cntr;
         Map<Object, String> lookupValues = null;
         Box box;
+        String[] params;
+        String columnLabel;
         for (int i = 0; i < controls.length; i++) {
             column = dataset.getColumn(i);
+            params = ColumnMap.getParams(new String(column.getTableName()+"."+column.getColumnName()));
+            if (params==null)
+                columnLabel=column.getColumnName();
+            else
+                columnLabel=params[0].isEmpty()?column.getColumnName():params[0];
+            
             try {
                 lookupValues = dataset.getLookup(column.getColumnName());
             } catch (Exception e) {
@@ -366,7 +375,7 @@ public class EntryPanel extends JPanel {
             controls[i] = cntr;
             if (!column.getColumTypeName().equals("BLOB")) {
                 box = Box.createHorizontalBox();
-                box.add(new JLabel(dataset.getColumn(i).getColumnName()));
+                box.add(new JLabel(columnLabel));//params[0].isEmpty()?column.getColumnName():params[0]));//dataset.getColumn(i).getColumnName()));
                 box.add(Box.createHorizontalStrut(6));
                 box.add(cntr.getComponent());
                 box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));

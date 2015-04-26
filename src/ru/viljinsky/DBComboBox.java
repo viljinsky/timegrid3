@@ -90,8 +90,14 @@ public class DBComboBox extends JComboBox<String> {
             }
         });
     }
+    Dataset dataset;
+    String columnName;
+    String lookupColumnName;
     
-    public void requery(){
+    public void requery() throws Exception{
+        dataset.open();
+        model = new Model(dataset, columnName, lookupColumnName);
+        setModel(model);
         
     }
     
@@ -100,6 +106,9 @@ public class DBComboBox extends JComboBox<String> {
     }
 
     public void setDataset(Dataset dataset, String columnName, String lookupColumnName) throws Exception{
+        this.dataset = dataset;
+        this.columnName=columnName;
+        this.lookupColumnName = lookupColumnName;
         try{
             model = new Model(dataset, columnName, lookupColumnName);
             setModel(model);

@@ -14,7 +14,7 @@ import javax.swing.JPopupMenu;
  *
  * @author вадик
  */
-interface ICommand{
+public interface ICommand{
     public void doCommand(String command);
     public void updateAction(Action a);
     public void updateActionList();

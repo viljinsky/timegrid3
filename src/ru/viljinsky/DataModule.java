@@ -159,7 +159,6 @@ public class DataModule implements IDataModuleConsts {
         for (DatasetInfo info:infoList){
             if (info.tableName.equals(tableName)){
                 dataset = new Dataset(info);
-//                dataset.test();
                 datasetList.add(dataset);
                 return dataset;
             }
@@ -261,7 +260,6 @@ public class DataModule implements IDataModuleConsts {
     }
     
     public static void execute(String sql) throws Exception{
-//        System.out.println(sql);
         Statement stmt=null;
         try{
             stmt=con.createStatement();

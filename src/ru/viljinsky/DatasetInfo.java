@@ -73,13 +73,17 @@ public class DatasetInfo {
             column.columnTypeName=rs.getString("TYPE_NAME");
             columnTypeName=rs.getString("TYPE_NAME");
             column.columnType=rs.getInt("DATA_TYPE");
+            
+//            System.out.println(column.columnName);
+//            System.out.println("--->"+rs.getString("SQL_DATA_TYPE"));
+//            System.out.println("   >"+rs.getString("SOURCE_DATA_TYPE"));
 
             switch (columnTypeName){
                     case  "INTEGER":
                         column.columnClass= Integer.class;
                         break;
                         
-                    case "FLOAT":
+                    case "FLOAT":case "REAL": 
                         column.columnClass= Float.class;
                         break;
                         

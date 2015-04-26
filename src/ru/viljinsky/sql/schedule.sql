@@ -297,17 +297,44 @@ select * from v_schedule;
 
 --   v_teacher
 
+create view v_teacher_hour as
+select a.default_teacher_id,c.group_sequence_id,cast(sum(c.hour_per_week) as real) as total_hour
+ from subject_group a inner join depart b
+on a.depart_id=b.id
+inner join curriculum_detail c on c.skill_id=b.skill_id and b.curriculum_id=c.curriculum_id and c.subject_id=a.subject_id
+group by a.default_teacher_id,c.group_sequence_id;
+
+-- select a.default_teacher_id,c.group_sequence_id,sum(c.hour_per_week) as total_hour
+--  from subject_group a inner join depart b
+-- on a.depart_id=b.id
+-- inner join curriculum_detail c on c.skill_id=b.skill_id and b.curriculum_id=c.curriculum_id and c.subject_id=a.subject_id
+-- group by a.default_teacher_id,c.group_sequence_id;
+-- select * from v_teacher_hour;
+
+
+
 drop view if exists v_teacher;
 create view v_teacher as
 select a.last_name,a.first_name,a.patronymic,b.profile_name,c.room_name,d.building_name,s.shift_name,
-a.id,a.profile_id,a.teacher_room_id,a.shift_id
+th.total_hour,a.id,a.profile_id,a.teacher_room_id,a.shift_id
  from teacher a
 left join profile b
 	on a.profile_id=b.id
 left join shift s on s.id=a.shift_id
 left join room c
 	on a.teacher_room_id=c.id
-left join building d on d.id=c.building_id;
+left join building d on d.id=c.building_id
+left join v_teacher_hour th on th.default_teacher_id=a.id;
+
+-- select a.last_name,a.first_name,a.patronymic,b.profile_name,c.room_name,d.building_name,s.shift_name,
+-- a.id,a.profile_id,a.teacher_room_id,a.shift_id
+--  from teacher a
+-- left join profile b
+-- 	on a.profile_id=b.id
+-- left join shift s on s.id=a.shift_id
+-- left join room c
+-- 	on a.teacher_room_id=c.id
+-- left join building d on d.id=c.building_id;
 
 -- v_room
 

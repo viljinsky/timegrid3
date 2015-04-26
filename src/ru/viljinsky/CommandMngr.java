@@ -14,7 +14,7 @@ import javax.swing.Action;
  *   Манагер комманд
  * @author вадик
  */
-public abstract class CommandMngr {
+public abstract class CommandMngr{
     private Action[] actions;
     
     public CommandMngr(){

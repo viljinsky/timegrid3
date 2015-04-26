@@ -65,6 +65,10 @@ public class Column {
         return columnName;
     }
 
+    public String getTableName(){
+        return tableName;
+    }
+    
     public String getColumTypeName() {
         return columnTypeName;
     }

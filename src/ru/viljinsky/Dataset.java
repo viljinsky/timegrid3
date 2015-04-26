@@ -221,6 +221,10 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
 
             }
             
+//            System.out.println("***"+info.tableName+"**");
+//            for (Column column:getColumns()){
+//                System.out.println(column.tableName+"."+column.columnName+"  ("+column.columnLabel+" "+column.columnTypeName+")");
+//            }
             
             return true;
         } catch (SQLException e) {

@@ -729,21 +729,27 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
                 case CREATE_CURRICULUM:
                     curriculum_id =  Dialogs.createCurriculum(this);
                     if (curriculum_id!=null){
-                        grid1.requery();
+                        curriculumComboBox.requery();
+                        curriculumComboBox.setValue(curriculum_id);
                     }
                     break;
                     
                 case EDIT_CURRICULUM:
-                    curriculum_id=grid1.getIntegerValue("curriculum_id");
+                    curriculum_id=(Integer)curriculumComboBox.getValue();
                     if (Dialogs.editCurriculum(this,curriculum_id)){
-                        grid1.requery();
+                        curriculumComboBox.requery();
+                        curriculumComboBox.setValue(curriculum_id);
                     };
                     break;
                     
                 case DELETE_CURRICULUM:
-                    curriculum_id=grid1.getIntegerValue("curriculum_id");
-                    if (Dialogs.deleteCurriculum(this,curriculum_id))
-                        grid1.requery();
+                    curriculum_id=(Integer)curriculumComboBox.getValue();
+//                    curriculum_id=grid1.getIntegerValue("curriculum_id");
+                    if (Dialogs.deleteCurriculum(this,curriculum_id)){
+                        curriculumComboBox.requery();
+//                        curriculumComboBox.setValue(curriculum_id);
+//                          grid1.requery();
+                    }
                     break;
                     
                 case FILL_CURRICULUM:
@@ -1155,6 +1161,8 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
         }
         
         
+        
+        
     }
 
     class TeacherSelectPanel extends SelectPanel{
@@ -1335,6 +1343,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
         shiftPanel.addAction(commands.getAction(CREATE_SHIFT));
         shiftPanel.addAction(commands.getAction(EDIT_SHIFT));
         shiftPanel.addAction(commands.getAction(REMOVE_SHIFT));
+        
     }
 
     @Override

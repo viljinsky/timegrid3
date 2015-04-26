@@ -25,6 +25,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 /**
  *
@@ -137,6 +139,11 @@ public class Grid extends JTable {
     Component owner = null;
     GridModel model;
     ICommand commands = null;
+    
+    
+    public void setCommands(ICommand commands){
+        this.commands=commands;
+    }
     
     public Values getValues(){
         if (getSelectedRow()>=0){
@@ -294,6 +301,7 @@ public class Grid extends JTable {
             }
         });
     }
+    
 
     public void doublClick(){
         edit();
@@ -312,6 +320,25 @@ public class Grid extends JTable {
 //        }
         model = new GridModel(dataset);
         setModel(model);
+        TableColumnModel cmodel = getColumnModel();
+        TableColumn tcolumn;
+        Column column;
+        String[] params; 
+        for (int i=0;i<cmodel.getColumnCount();i++){
+            tcolumn = cmodel.getColumn(i);
+            column = dataset.getColumn(i);
+            tcolumn.setIdentifier(dataset.getColumn(i));
+            
+            params = ColumnMap.getParams(new String(column.tableName+"."+column.columnName));
+            if (params!=null){
+                tcolumn.setHeaderValue(params[0].isEmpty()?column.columnName:params[0]);
+                if (params.length>1 && params[1].equals("false")){
+                    tcolumn.setMinWidth(0);
+                    tcolumn.setMinWidth(0);
+                    tcolumn.setPreferredWidth(0);
+                }
+            }
+        }
     }
 
     public IDataset getDataset(){
