@@ -235,7 +235,8 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
                     
                 case REMOVE_PROFILE:
                     profile_id = grid.getIntegerValue("profile_id");
-                    Dialogs.removeProfile(this, profile_id);
+                    if (Dialogs.removeProfile(this, profile_id)==true)
+                        grid.requery();
                     break;
                     
                 case CREATE_SHIFT:
@@ -281,7 +282,7 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
 
         public ShiftRoomPanel() {
             super();
-            gridPanel.add(shPanel,BorderLayout.EAST);
+            gridPanel.add(shPanel,BorderLayout.WEST);
         }
 
         

@@ -162,6 +162,8 @@ public class Dialogs {
     public static final String EDIT_STREAM_ERROR = "EDIT_STREAM_ERROR\n";
     public static final String CONFIRM_REMOVE_STREAM = "CONFIRM_REMOVE_STREAM";
             
+    public static final String PROFILE_DLG_CAPTION="Профиль";
+    
     public static Integer createProfile(JComponent owner,Integer profile_id) throws Exception{
         AbstractProfileDialog dlg = new AbstractProfileDialog(profile_id) {
             
@@ -203,6 +205,7 @@ public class Dialogs {
         values.put("profile_name",recordset.getString(0)+"("+recordset.getString(1)+")");
         values.put("profile_type_id", recordset.getInteger(2));
         dlg.entryPanel.setValues(values);
+        dlg.setTitle(PROFILE_DLG_CAPTION);
         dlg.showModal(owner);
         if (dlg.modalResult==SelectDialog.RESULT_OK)
             return dlg.profile_id;
@@ -261,7 +264,31 @@ public class Dialogs {
     }
     
     public static boolean removeProfile(JComponent owner,Integer profile_id) throws Exception{
-        throw new UnsupportedOperationException(NOT_READY_YET);
+        if (JOptionPane.showConfirmDialog(owner, "Удалить профиль", PROFILE_DLG_CAPTION, JOptionPane.YES_NO_OPTION)!=JOptionPane.YES_OPTION)
+            return false;
+        try{
+            Integer def_profile_id=DataTask.getDefaultProfileId(profile_id);
+            Integer profile_type_id = DataTask.getProfileTypeId(profile_id);
+            String sql;
+            switch (profile_type_id){
+                case 1:
+                    sql="update teacher set profile_id=%d where profile_id=%d";
+                    break;
+                case 2:
+                    sql="update room set profile_id=%d where profile_id=%d";                    
+                    break;
+                default:
+                    throw new Exception ("UNKNOW_PROFILE_ID\n\""+profile_id+"\"");
+            }
+            DataModule.execute(String.format(sql,def_profile_id,profile_id));
+            DataModule.execute(String.format("delete from profile where id=%d",profile_id));
+            DataModule.commit();
+        } catch (Exception e){
+            DataModule.rollback();
+            throw new Exception("REMOVE_PROFILE_ERROR\n"+e.getMessage());
+        }
+        return true;
+        
     }
     
     public static Integer  createShift(JComponent owner,Integer shift_id) throws Exception{

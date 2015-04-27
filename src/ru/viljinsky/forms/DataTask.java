@@ -41,6 +41,24 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         
     }
     
+    /**
+     * Поиск профиля по умолчаниию для профиля
+     * @param profile_id
+     * @return
+     * @throws Exception 
+     */
+    public static Integer getDefaultProfileId(Integer profile_id) throws Exception{
+        String sql = "select default_profile_id from profile_type a inner join profile b on a.id=b.profile_type_id where b.id=%profile_id";
+        Recordset r = DataModule.getRecordet(sql.replace("%profile_id", profile_id.toString()));
+        return r.getInteger(0);
+    }
+    
+    public static Integer getProfileTypeId(Integer profile_id) throws Exception{
+        String sql = "select profile_type_id from profile where id=%profile_id";
+        Recordset r = DataModule.getRecordet(sql.replace("%profile_id", profile_id.toString()));
+        return r.getInteger(0);
+    }
+        
     public static Integer getDefaultProfileId(String tableName) throws Exception{
         Recordset r;
         String sql ;
