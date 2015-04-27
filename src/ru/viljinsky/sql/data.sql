@@ -14,13 +14,13 @@ insert into group_type (id,group_type_caption) values (1,'м.-д.');
 insert into group_type (id,group_type_caption) values (2,'группы');
 
 
-insert into day_list(day_no,day_caption) values (1,'Понедельник');
-insert into day_list(day_no,day_caption) values (2,'Вторник');
-insert into day_list(day_no,day_caption) values (3,'Среда');
-insert into day_list(day_no,day_caption) values (4,'Четверг');
-insert into day_list(day_no,day_caption) values (5,'Пятница');
-insert into day_list(day_no,day_caption) values (6,'Суббота');
-insert into day_list(day_no,day_caption) values (7,'Воскресение');
+insert into day_list(day_no,day_short_name,day_caption) values (1,'Пн','Понедельник');
+insert into day_list(day_no,day_short_name,day_caption) values (2,'Вт','Вторник');
+insert into day_list(day_no,day_short_name,day_caption) values (3,'Ср','Среда');
+insert into day_list(day_no,day_short_name,day_caption) values (4,'Чт','Четверг');
+insert into day_list(day_no,day_short_name,day_caption) values (5,'Пт','Пятница');
+insert into day_list(day_no,day_short_name,day_caption) values (6,'Сб','Суббота');
+insert into day_list(day_no,day_short_name,day_caption) values (7,'Вс','Воскресение');
 
 insert into bell_list(bell_id,time_start,time_end) values (1,'10:00','10:45');
 insert into bell_list(bell_id,time_start,time_end) values (2,'11:00','11:45');
@@ -103,42 +103,6 @@ insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,d
 --     values (10,'Информатика (лекц)',   1,0,1,'255 255 170');
 
 
--- русский и лит.        
-insert into teacher (id,last_name,first_name,patronymic,profile_id) 
-    values (1,'Ежёва','Ирина','Ивановна',1);
-insert into teacher (id,last_name,first_name,patronymic,profile_id) 
-    values (2,'Белкина','Людмила','Олеговна',1);
-
--- алг и геометрия
-insert into teacher (id,last_name,first_name,patronymic,profile_id)
-    values (3,'Сорокина','Лариса','Петровна',2);
-insert into teacher (id,last_name,first_name,patronymic,profile_id)
-    values (4,'Орлова','Татьяна','Игоревна',2);
-
--- физика
-insert into teacher (id,last_name,first_name,patronymic,profile_id)
-    values (5,'Медведева','Клавдия','Николоаевна',3);
-
--- химия
-insert into teacher (id,last_name,first_name,patronymic,profile_id)
-    values (6,'Волкова','Марфа','Сидоровна',4);
-
--- иностранный
-insert into teacher (id,last_name,first_name,patronymic,profile_id)
-    values (7,'Птичкина','Раиса','Григорьевна',5);
-insert into teacher (id,last_name,first_name,patronymic,profile_id)
-    values (8,'Рыбкина','Софья','Петровна',5);
-
--- физкультура
-insert into teacher (id,last_name,first_name,patronymic,profile_id)
-    values (9,'Ужёва','Тамра','Сидоровна',6);
-insert into teacher (id,last_name,first_name,patronymic,profile_id)
-    values (10,'Синицина','Ирина','Олеговна',6);
-
--- информатика
-insert into teacher (id,last_name,first_name,patronymic,profile_id)
-    values (11,'Карпова','Вероника','Маврикиевна',7);
-
 
 
 insert into skill(id,caption) values(1,'8-класс');
@@ -172,14 +136,14 @@ delete from shift_detail;
 insert into shift_detail (day_id,bell_id,shift_id)
 select day_no,bell_id,id
 from day_list,bell_list,shift
-where shift.id=1 and bell_id between 1 and 5;
+where shift.id=1 and bell_id between 1 and 5 and not day_no=7;
 
 -- вторая смена
 
 insert into shift_detail (day_id,bell_id,shift_id)
 select day_no,bell_id,id
 from day_list,bell_list,shift
-where shift.id=2 and bell_id between 6 and 10;
+where shift.id=2 and bell_id between 6 and 10 and not day_no=7;
 
 -- преподаватели и помещения
 insert into shift_detail (day_id,bell_id,shift_id)
@@ -210,6 +174,99 @@ insert into profile_item (profile_id,subject_id) values(7,9);
 
 insert into profile_item (profile_id,subject_id) select a.id,b.id
 from profile a ,subject b where a.id in (8,9,10,11);
+
+-- графики преподавателей
+
+insert into shift (id,shift_type_id,shift_name)
+values(10,2,'Вт,Ср,Чт,Пт,Сб') ;
+
+insert into shift_detail (shift_id,day_id,bell_id)
+select 10 ,a.day_no,b.bell_id from day_list a,bell_list b
+where  not a.day_no in (1,7);
+
+insert into shift (id,shift_type_id,shift_name)
+values(11,2,'Пт,Ср,Чт,Пт,Сб') ;
+
+insert into shift_detail (shift_id,day_id,bell_id)
+select 11 ,a.day_no,b.bell_id from day_list a,bell_list b
+where  not a.day_no in (2,7);
+
+--
+
+insert into shift (id,shift_type_id,shift_name)
+values(12,2,'Пт,Вт,Чт,Пт,Сб') ;
+
+insert into shift_detail (shift_id,day_id,bell_id)
+select 12 ,a.day_no,b.bell_id from day_list a,bell_list b
+where  not a.day_no in (3,7);
+
+--
+insert into shift (id,shift_type_id,shift_name)
+values(14,2,'Пт,Вт,Ср,Пт,Сб') ;
+
+insert into shift_detail (shift_id,day_id,bell_id)
+select 14 ,a.day_no,b.bell_id from day_list a,bell_list b
+where  not a.day_no in (4,7);
+--
+insert into shift (id,shift_type_id,shift_name)
+values(15,2,'Пт,Вт,Ср,Чт,Сб') ;
+
+insert into shift_detail (shift_id,day_id,bell_id)
+select 15 ,a.day_no,b.bell_id from day_list a,bell_list b
+where  not a.day_no in (5,7);
+
+--
+insert into shift (id,shift_type_id,shift_name)
+values(16,2,'Пт,Вт,Ср,Чт,Пт') ;
+
+insert into shift_detail (shift_id,day_id,bell_id)
+select 16 ,a.day_no,b.bell_id from day_list a,bell_list b
+where  not a.day_no in (6,7);
+
+
+-- Преподаватели
+
+-- русский и лит.        
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) 
+    values (1,'Ежёва','Ирина','Ивановна',1,10);
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) 
+    values (2,'Белкина','Людмила','Олеговна',1,11);
+
+-- алг и геометрия
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
+    values (3,'Сорокина','Лариса','Петровна',2,12);
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
+    values (4,'Орлова','Татьяна','Игоревна',2,14);
+
+-- физика
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
+    values (5,'Медведева','Клавдия','Николоаевна',3,15);
+
+-- химия
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
+    values (6,'Волкова','Марфа','Сидоровна',4,16);
+
+-- иностранный
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
+    values (7,'Птичкина','Раиса','Григорьевна',5,12);
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
+    values (8,'Рыбкина','Софья','Петровна',5,12);
+
+-- физкультура
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
+    values (9,'Ужёва','Тамра','Сидоровна',6,14);
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
+    values (10,'Синицина','Ирина','Олеговна',6,14);
+
+-- информатика
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
+    values (11,'Карпова','Вероника','Маврикиевна',7,15);
+
+
+
+
+
+
 
 
 

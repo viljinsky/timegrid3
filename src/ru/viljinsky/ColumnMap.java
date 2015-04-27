@@ -46,8 +46,8 @@ public class ColumnMap extends HashMap<String, String[]> {
         {"building.building_name",""},
 
         // room
-        {"room.id",""},
-        {"room.room_name","Номер"},
+        {"room.id",",false"},
+        {"room.room_name","Номер(Назавние)"},
         {"room.capacity","Вместимость(чел.)"},
         {"room.building_id","Здание"},
         {"room.profile_id","Профиль"},
@@ -92,7 +92,7 @@ public class ColumnMap extends HashMap<String, String[]> {
         {"shift_detail.enable",""},
 
         // teacher
-        {"teacher.id",""},
+        {"teacher.id",",false"},
         {"teacher.last_name","Фамилия"},
         {"teacher.first_name","Имя"},
         {"teacher.patronymic","Отчество"},
@@ -107,13 +107,13 @@ public class ColumnMap extends HashMap<String, String[]> {
         {"skill.caption",""},
 
         // depart
-        {"depart.id",""},
+        {"depart.id",",false"},
         {"depart.label","Метка"},
-        {"depart.skill_id","Уровень"},
+        {"depart.skill_id","Уровень,false"},
         {"depart.shift_id","График"},
-        {"depart.curriculum_id","Уч.план"},
-        {"depart.class_room","Кл.руководитель"},
-        {"depart.class_former","Кл.помещение"},
+        {"depart.curriculum_id","Уч.план,false"},
+        {"depart.class_room","Кл.помещение"},
+        {"depart.class_former","Кл.руководитель"},
         {"depart.boy_count","Кол.мальчиков"},
         {"depart.gerl_count","Кол.девочек"},
 
@@ -121,11 +121,11 @@ public class ColumnMap extends HashMap<String, String[]> {
         {"subject_group.group_id",""},
         {"subject_group.depart_id",""},
         {"subject_group.subject_id",""},
-        {"subject_group.default_teacher_id",""},
-        {"subject_group.default_room_id",""},
-        {"subject_group.week_id",""},
-        {"subject_group.stream_id",""},
-        {"subject_group.pupil_count",""},
+        {"subject_group.default_teacher_id","Преподаватель"},
+        {"subject_group.default_room_id","Кабинет"},
+        {"subject_group.week_id","Неделя"},
+        {"subject_group.stream_id","Поток"},
+        {"subject_group.pupil_count","Кол.учащихся"},
 
         // curriculum
         {"curriculum.id",""},
@@ -177,21 +177,23 @@ public class ColumnMap extends HashMap<String, String[]> {
         {"v_room_profile.profile_id",""},
 
         // v_subject_group
-        {"v_subject_group.week_id",""},
-        {"v_subject_group.subject_name","Предмет"},
-        {"v_subject_group.group_label","Группа"},
-        {"v_subject_group.week_caption","Неделя"},
-        {"v_subject_group.group_id",",false"},
-        {"v_subject_group.depart_id",",false"},
-        {"v_subject_group.subject_id",",false"},
-        {"v_subject_group.group_type_id",",false"},
-        {"v_subject_group.stream_id",",false"},
-        {"v_subject_group.hour_per_week","Час./нед."},
-        {"v_subject_group.hour_per_day","Час./день"},
-        {"v_subject_group.group_sequence_id",""},
+        {"v_subject_group.week_id",         ",false"},
+        {"v_subject_group.subject_name",    "Предмет"},
+        {"v_subject_group.group_label",     "Группа"},
+        {"v_subject_group.week_caption",    "Неделя"},
+        {"v_subject_group.group_id",        ",false"},
+        {"v_subject_group.depart_id",       ",false"},
+        {"v_subject_group.subject_id",      ",false"},
+        {"v_subject_group.group_type_id",   ",false"},
+        {"v_subject_group.stream_id",       ",false"},
+        {"v_subject_group.hour_per_week",   "Час./нед."},
+        {"v_subject_group.hour_per_day",    "Час./день"},
+        {"v_subject_group.group_sequence_id",",false"},
         {"v_subject_group.default_teacher_id",",false"},
-        {"v_subject_group.default_room_id",",false"},
-        {"v_subject_group.pupil_count","Кол.чел."},
+        {"v_subject_group.default_room_id", ",false"},
+        {"v_subject_group.pupil_count",     "Кол.чел."},
+        {"v_subject_group.teacher",         "Преподаватель"},
+        {"v_subject_group.room",            "Кабинет"},
 
         // v_subject_group_on_schedule
         {"v_subject_group_on_schedule.group_label",""},

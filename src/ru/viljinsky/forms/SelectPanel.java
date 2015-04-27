@@ -10,8 +10,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
-import java.util.Map;
+import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -20,23 +19,69 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
+import ru.viljinsky.CommandMngr;
+import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
 
 /**
  *
  * @author вадик
  */
-abstract class SelectPanel extends JPanel implements ActionListener {
+abstract class SelectPanel extends JPanel {
+    protected static final String INCLUDE = "INCLUDE";
+    protected static final String EXCLUDE = "EXCLUDE";
+    protected static final String INCLUDE_ALL = "INCLUDE_ALL";
+    protected static final String EXCLUDE_ALL = "EXCLUDE_ALL";
+    
     Grid sourceGrid;
     Grid destanationGrid;
+    
+    class MyGrid extends Grid{
+
+        @Override
+        public void gridSelectionChange() {
+            SelectPanel.this.updateActionList();
+        }
+
+    }
+    
+    CommandMngr commands = new CommandMngr() {
+
+        @Override
+        public void updateAction(Action a) {
+            String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
+            switch (command){
+                case INCLUDE:
+                    a.setEnabled(sourceGrid.getSelectedRow()>=0);
+                    break;
+                case EXCLUDE:
+                    a.setEnabled(destanationGrid.getSelectedRow()>=0);
+                    break;
+                case INCLUDE_ALL:
+                    a.setEnabled(sourceGrid.getRowCount()>0);
+                    break;
+                case EXCLUDE_ALL:
+                    a.setEnabled(destanationGrid.getRowCount()>0);
+                    break;
+            }
+        }
+
+        @Override
+        public void doCommand(String command) {
+            SelectPanel.this.doCommand(command);
+        }
+    };
+    
     protected JCheckBox chProfileOnly;
 
     public SelectPanel() {
         setPreferredSize(new Dimension(500, 200));
         setLayout(new BorderLayout());
-        sourceGrid = new Grid();
+        sourceGrid = new MyGrid();
+        
         sourceGrid.setAutoCreateRowSorter(true);
-        destanationGrid = new Grid();
+        destanationGrid = new MyGrid();
+        
         destanationGrid.setAutoCreateRowSorter(true);
         chProfileOnly = new JCheckBox("Только по профилю",null,true);
         chProfileOnly.addActionListener(new ActionListener() {
@@ -50,33 +95,29 @@ abstract class SelectPanel extends JPanel implements ActionListener {
                 }
             }
         });
-        Map<String, String> btns = new HashMap<>();
-        btns.put("INCLUDE", ">");
-        btns.put("EXCLUDE", "<");
-        btns.put("INCLUDE_ALL", ">>");
-        btns.put("EXCLUDE_ALL", "<<");
-        JButton btn;
+        
+        String[] buttons = {INCLUDE,EXCLUDE,INCLUDE_ALL,EXCLUDE_ALL};
+        commands.setCommandList(buttons);
+        
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
         Box box;
-        //            setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         box = Box.createVerticalBox();
         box.add(new JScrollPane(sourceGrid));
-//        box.add(chProfileOnly);
         panel.add(box);
         add(Box.createHorizontalStrut(6));
         box = Box.createVerticalBox();
-        for (String btnName : btns.keySet()) {
-            btn = new JButton(btns.get(btnName));
-            btn.setActionCommand(btnName);
-            //                btn.setMinimumSize(new Dimension(60,25));
-            btn.addActionListener(this);
-            Box box1 = Box.createVerticalBox();
+        Box box1;
+        JButton btn;
+        for (String sButton:buttons){
+            btn = new JButton(commands.getAction(sButton));
+            box1 = Box.createVerticalBox();
             box1.setAlignmentX(CENTER_ALIGNMENT);
             box1.add(btn);
             box.add(box1);
             box.add(Box.createVerticalStrut(12));
         }
+            
         panel.add(box);
         panel.add(Box.createHorizontalStrut(6));
         box = Box.createHorizontalBox();
@@ -85,26 +126,26 @@ abstract class SelectPanel extends JPanel implements ActionListener {
         panel.setBorder(new EmptyBorder(12,6,12,6));
         add(panel);
         add(chProfileOnly,BorderLayout.PAGE_END);
+        updateActionList();
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        doCommand(e.getActionCommand());
+    public void updateActionList(){
+        commands.updateActionList();
     }
-
+    
     public void doCommand(String command) {
         try {
             switch (command) {
-                case "INCLUDE":
+                case INCLUDE:
                     include();
                     break;
-                case "EXCLUDE":
+                case EXCLUDE:
                     exclude();
                     break;
-                case "INCLUDE_ALL":
+                case INCLUDE_ALL:
                     includeAll();
                     break;
-                case "EXCLUDE_ALL":
+                case EXCLUDE_ALL:
                     excludeAll();
                     break;
                 default:

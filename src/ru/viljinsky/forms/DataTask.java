@@ -34,6 +34,13 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         return r.getInteger(0);
     }
     
+    public static Integer getDefaultBuildingId() throws Exception{
+        
+        Recordset r=DataModule.getRecordet("select id from building limit 1");
+        return r.getInteger(0);
+        
+    }
+    
     public static Integer getDefaultProfileId(String tableName) throws Exception{
         Recordset r;
         String sql ;

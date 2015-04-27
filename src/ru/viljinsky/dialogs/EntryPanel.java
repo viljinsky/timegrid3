@@ -336,13 +336,20 @@ public class EntryPanel extends JPanel {
         Box box;
         String[] params;
         String columnLabel;
+        Boolean columnVisible;
         for (int i = 0; i < controls.length; i++) {
             column = dataset.getColumn(i);
             params = ColumnMap.getParams(new String(column.getTableName()+"."+column.getColumnName()));
-            if (params==null)
+            if (params==null){
                 columnLabel=column.getColumnName();
-            else
+                columnVisible=true;
+            }  else {
                 columnLabel=params[0].isEmpty()?column.getColumnName():params[0];
+                if (params.length>1 && params[1].equals("false"))
+                    columnVisible=false;
+                else
+                    columnVisible=true;
+            }
             
             try {
                 lookupValues = dataset.getLookup(column.getColumnName());
@@ -373,23 +380,25 @@ public class EntryPanel extends JPanel {
                 }
             }
             controls[i] = cntr;
-            if (!column.getColumTypeName().equals("BLOB")) {
-                box = Box.createHorizontalBox();
-                box.add(new JLabel(columnLabel));//params[0].isEmpty()?column.getColumnName():params[0]));//dataset.getColumn(i).getColumnName()));
-                box.add(Box.createHorizontalStrut(6));
-                box.add(cntr.getComponent());
-                box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
-                add(box);
-            } else {
-                box = Box.createHorizontalBox();
-                box.add(new JLabel(cntr.getColumnName()));
-                box.add(Box.createHorizontalGlue());
-                add(box);
-                box = Box.createHorizontalBox();
-                box.add(cntr.getComponent());
-                add(box);
+            if (columnVisible){
+                if (!column.getColumTypeName().equals("BLOB")) {
+                    box = Box.createHorizontalBox();
+                    box.add(new JLabel(columnLabel));//params[0].isEmpty()?column.getColumnName():params[0]));//dataset.getColumn(i).getColumnName()));
+                    box.add(Box.createHorizontalStrut(6));
+                    box.add(cntr.getComponent());
+                    box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+                    add(box);
+                } else {
+                    box = Box.createHorizontalBox();
+                    box.add(new JLabel(columnLabel));
+                    box.add(Box.createHorizontalGlue());
+                    add(box);
+                    box = Box.createHorizontalBox();
+                    box.add(cntr.getComponent());
+                    add(box);
+                }
+                add(Box.createVerticalStrut(12));
             }
-            add(Box.createVerticalStrut(12));
         }
         setBorder(new EmptyBorder(10, 10, 10, 10));
     }

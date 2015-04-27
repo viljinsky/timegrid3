@@ -536,12 +536,10 @@ public class Dialogs {
     
     /////////////////////// TEACHER ////////////////////////////////////////////
 
-  
+    private static final String TEACHER_DLG_CAPTION = "Преподаватель";
     
     public static Integer createTeacher(JComponent owner) throws Exception{
-         Dataset dataset = DataModule.getDataset("teacher");
-         dataset.test();
-         EntryDialog entryDialog = new EntryDialog() {
+         EntryDialog dlg = new EntryDialog() {
 
             @Override
             public void doOnEntry() throws Exception {
@@ -554,21 +552,23 @@ public class Dialogs {
                 }
             }
         };
+        Dataset dataset = DataModule.getDataset("teacher");
+        dataset.test();
         Values values = new Values();
         values.put("shift_id",DataTask.getDefaultShiftId("teacher"));
         values.put("profile_id", DataTask.getDefaultProfileId("teacher"));
-        entryDialog.setDataset(dataset);
-        entryDialog.setValues(values);
+        dlg.setDataset(dataset);
+        dlg.setValues(values);
+        dlg.setTitle(TEACHER_DLG_CAPTION);
         
-        if (entryDialog.showModal(owner)==BaseDialog.RESULT_OK)
+        if (dlg.showModal(owner)==BaseDialog.RESULT_OK)
             return DataTask.getLastId("teacher") ;
         
         return null;
     }
     
     public static Boolean editTeacher(JComponent owner,Integer teacher_id) throws Exception{
-        Dataset dataset = DataModule.getDataset("teacher");
-        EntryDialog entryDialog = new EntryDialog() {
+        EntryDialog dlg = new EntryDialog() {
 
             @Override
             public void doOnEntry() throws Exception {
@@ -581,18 +581,19 @@ public class Dialogs {
                 }
             }
         };
-        Map<String,Object> filter = new HashMap<>();
-        filter.put("id", teacher_id);
-        dataset.open(filter);
-        Values values = dataset.getValues(0);
-        entryDialog.setDataset(dataset);
-        entryDialog.setValues(values);
-        return entryDialog.showModal(owner)==BaseDialog.RESULT_OK;
+        Dataset dataset = DataModule.getDataset("teacher");
+        Values values = new Values();
+        values.put("id", teacher_id);
+        dataset.open(values);
+        dlg.setDataset(dataset);
+        dlg.setValues(dataset.getValues(0));
+        dlg.setTitle(TEACHER_DLG_CAPTION);
+        return dlg.showModal(owner)==BaseDialog.RESULT_OK;
         
     }
     
     public static boolean deleteTeacher(JComponent owner,Integer teacher_id) throws Exception{
-        if (JOptionPane.showConfirmDialog(owner, "Удалить преподавателя","Внимание",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
+        if (JOptionPane.showConfirmDialog(owner, "Удалить преподавателя",TEACHER_DLG_CAPTION,JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
             try{
                 DataModule.execute("delete from teacher where id="+teacher_id+";");
                 DataModule.commit();
@@ -607,14 +608,9 @@ public class Dialogs {
     
     
     ///////////////////////    ROOM  ///////////////////////////////////////////
+    private static final String ROOM_DLG_CAPTION = "Помещение";
     
     public static Integer createRoom(JComponent owner) throws Exception{
-        Recordset r;
-        Dataset dataset = DataModule.getDataset("room");
-        dataset.test();
-        Integer building_id;
-        r=DataModule.getRecordet("select id from building limit 1");
-        building_id = r.getInteger(0);
         
         EntryDialog dlg = new EntryDialog() {
 
@@ -630,13 +626,17 @@ public class Dialogs {
             }
         };
         
+        Dataset dataset = DataModule.getDataset("room");
+        dataset.test();
+        
         Values values = new Values();
         values.put("shift_id",DataTask.getDefaultShiftId("room"));
         values.put("profile_id",DataTask.getDefaultProfileId("room"));
-        values.put("building_id",building_id);
+        values.put("building_id",DataTask.getDefaultBuildingId());
         
         dlg.setDataset(dataset);
         dlg.setValues(values);
+        dlg.setTitle(ROOM_DLG_CAPTION);
         
         if (dlg.showModal(owner)==BaseDialog.RESULT_OK)
             return DataTask.getLastId("room");
@@ -659,18 +659,20 @@ public class Dialogs {
                 }
             }
         };
-        Map<String,Object> filter = new HashMap<>();
+        Values filter = new Values();
         filter.put("id",room_id);
         dataset.open(filter);
-        Values values = dataset.getValues(0);
+//        Values values = dataset.getValues(0);
         dlg.setDataset(dataset);
-        dlg.setValues(values);
+        dlg.setValues(dataset.getValues(0));
+        dlg.setTitle(ROOM_DLG_CAPTION);
+        
         return (dlg.showModal(owner)==BaseDialog.RESULT_OK);
         
     }
     
     public static boolean deleteRoom(JComponent owner,Integer room_id) throws Exception{
-        if (JOptionPane.showConfirmDialog(owner, "Удалить помещение","Внимание",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
+        if (JOptionPane.showConfirmDialog(owner, "Удалить помещение",ROOM_DLG_CAPTION,JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
             try{
                 DataModule.execute("delete from room where id="+room_id+";");
                 DataModule.commit();
@@ -685,19 +687,16 @@ public class Dialogs {
     
     //////////////////////  DEPART /////////////////////////////////////////////
     
+    private static final String DEPART_DLG_CAPTION = "Класс";
     
     public static Integer createDepart(JComponent owner,Integer curriculum_id,Integer skill_id) throws Exception{
-        Dataset dataset = DataModule.getDataset("depart");
-        dataset.test();
         
-        EntryDialog entryDialog = new EntryDialog() {
+        EntryDialog dlg = new EntryDialog() {
 
             @Override
             public void doOnEntry() throws Exception {
                 try{
-                    Dataset dataset = DataModule.getDataset("depart");
-                    dataset.test();
-                    dataset.appned(getValues());
+                    getDataset().appned(getValues());
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
@@ -716,38 +715,31 @@ public class Dialogs {
             throw new Exception("CURRICULUM_IS_EMPTY");
         }
         
-//        r=DataModule.getRecordet("select default_shift_id from shift_type where id=1");
-//        Integer shift_id=r.getInteger(0);
-//        
+        Dataset dataset = DataModule.getDataset("depart");
+        dataset.test();
         
-        entryDialog.setDataset(dataset);
+        dlg.setTitle(DEPART_DLG_CAPTION);
+        dlg.setDataset(dataset);
         Values values = new Values();
         values.put("curriculum_id",curriculum_id);
         values.put("skill_id", skill_id);
         values.put("label", label);
         values.put("shift_id",DataTask.getDefaultShiftId("depart"));
-        entryDialog.setValues(values);
-        if (entryDialog.showModal(owner)==SelectDialog.RESULT_OK){
-            r=DataModule.getRecordet("select max(id) from depart");
-            return r.getInteger(0);
-        }
+        dlg.setValues(values);
+        
+        if (dlg.showModal(owner)==SelectDialog.RESULT_OK)
+            return DataTask.getLastId("depart");
+        
         return null;
     }
     
     public static Boolean editDepart(JComponent owner,Integer depart_id) throws Exception{
-        Dataset dataset = DataModule.getDataset("depart");
         EntryDialog dlg = new EntryDialog() {
 
             @Override
             public void doOnEntry() throws Exception {
                 try{
-                    Values values = getValues();
-                    Dataset ds = DataModule.getDataset("depart");
-                    ds.test();
-                    Map<String,Object> filter = new HashMap<>();
-                    filter.put("id",values.getInteger("id"));
-                    ds.open(filter);
-                    ds.edit(0, values);
+                    getDataset().edit(0, getValues());
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
@@ -755,18 +747,20 @@ public class Dialogs {
                 }
             }
         };
+        Dataset dataset = DataModule.getDataset("depart");
         Map<String,Object> filter = new Hashtable<>();
         filter.put("id",depart_id);
         dataset.open(filter);
         Values values = dataset.getValues(0);
         
+        dlg.setTitle(DEPART_DLG_CAPTION);
         dlg.setDataset(dataset);
         dlg.setValues(values);
         return (dlg.showModal(owner)==BaseDialog.RESULT_OK);
     }
     
     public static boolean deleteDepart(JComponent owner,Integer depart_id) throws Exception{
-        if (JOptionPane.showConfirmDialog(owner, "Удалить подразделение","Внимание",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
+        if (JOptionPane.showConfirmDialog(owner, "Удалить класс",DEPART_DLG_CAPTION,JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
             try{
                 DataModule.execute("delete from depart where id="+depart_id+";");
                 DataModule.commit();

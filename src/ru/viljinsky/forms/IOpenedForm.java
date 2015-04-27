@@ -29,6 +29,12 @@ import ru.viljinsky.Values;
  * @author вадик
  */
 public interface IOpenedForm {
+    public static final String CURRICULUM ="Учебный план";
+    public static final String DEPART ="Классы";
+    public static final String TEACHER ="Преподаватели";
+    public static final String ROOM ="Помещения";
+    public static final String SCHEDULE ="Расписание";
+    public static final String REPORTS ="Отчёты";
     
     public void open() throws Exception;
     public String getCaption();
@@ -340,29 +346,29 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
         int room_id=-1;
         String sqlSource = 
             "select s.subject_name,d.label,v.group_label,\n"+
-            "t.last_name|| ' ' || substr(t.first_name,1,1) || '. ' || substr(t.patronymic,1,1)||'.', "+
+            "v.teacher,\n"+    
             "v.hour_per_week,v.pupil_count,v.depart_id,v.subject_id,v.group_id,v.stream_id,v.group_sequence_id "+
             " from room a inner join profile_item b "+
             "on a.profile_id=b.profile_id "+
             "inner join v_subject_group v on v.subject_id=b.subject_id "+
             "inner join depart d on d.id=v.depart_id "+
             "inner join subject s on s.id=v.subject_id "+
-            "left join teacher t on t.id =v.default_teacher_id "+
-            "where v.default_room_id is null";// and a.id=3;";
+            "where v.default_room_id is null";
         
         String sqlDest =
-            "select s.subject_name,d.label,a.group_label,t.last_name || ' ' || substr(t.first_name,1,1) || '. ' || substr(t.patronymic,1,1) as teacher_name,\n"+
+            "select s.subject_name,d.label,\n"+
+            "a.teacher,\n"+    
             "a.hour_per_week,a.subject_id,a.depart_id,a.group_id\n"+
             " from v_subject_group a\n"+
             "inner join subject s on s.id=a.subject_id\n"+
             " inner join depart d on d.id=a.depart_id\n"+
-            " left join teacher t on t.id=a.default_teacher_id\n" +   
             " where a.default_room_id=";
 
         
         public void setRoomId(int room_id) throws Exception{
             this.room_id=room_id;
             requery();
+            updateActionList();
         }
         
         @Override
@@ -483,7 +489,7 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
 
     @Override
     public String getCaption() {
-        return "ROOM";
+        return ROOM;
     }
 
     @Override
@@ -647,7 +653,7 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
 
     @Override
     public String getCaption() {
-        return "DEPART";
+        return DEPART;
     }
 
     @Override
@@ -855,7 +861,7 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
 
     @Override
     public String getCaption() {
-        return "CURRICULUMN";
+        return CURRICULUM;
     }
 
     @Override
@@ -1191,6 +1197,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
             this.teacher_id = teacher_id;
             try {
                 requery();
+                updateActionList();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -1356,7 +1363,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
 
     @Override
     public String getCaption() {
-        return "TEACHER";
+        return TEACHER;
     }
 
     @Override

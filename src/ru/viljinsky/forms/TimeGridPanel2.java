@@ -696,7 +696,7 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
   
     @Override
     public String getCaption() {
-        return "TIMEGRIPPANEL";
+        return SCHEDULE;
     }
 
     @Override

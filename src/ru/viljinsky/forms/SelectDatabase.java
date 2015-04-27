@@ -271,8 +271,11 @@ class SelectDatabase extends BaseDialog {
     }
     
 
+    public static final String DATA_DLG_CAPTION = "Управление данными";
+    
     public SelectDatabase() {
         super();
+        setTitle(DATA_DLG_CAPTION);
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         Box box;

@@ -137,7 +137,7 @@ class GridCommand implements ICommand,IGridConstants{
 
 public class Grid extends JTable {
     Component owner = null;
-    GridModel model;
+    protected GridModel model;
     ICommand commands = null;
     
     
@@ -177,7 +177,7 @@ public class Grid extends JTable {
     
     
     class GridModel extends AbstractTableModel{
-        IDataset dataset;
+        Dataset dataset;
         public GridModel(Dataset dataset){
             this.dataset=dataset;
         }
@@ -341,7 +341,7 @@ public class Grid extends JTable {
         }
     }
 
-    public IDataset getDataset(){
+    public Dataset getDataset(){
         if (model!=null)
             return model.dataset;
         else 
@@ -393,7 +393,7 @@ public class Grid extends JTable {
     }
     
     public void delete() throws Exception {
-        IDataset dataset = model.dataset;
+        Dataset dataset = model.dataset;
         int row = getSelectedRow();
         if (row >= 0 && JOptionPane.showConfirmDialog(owner, "Удалить","Внимание",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION) {
             dataset.delete(row);

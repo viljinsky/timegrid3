@@ -119,7 +119,7 @@ public class ReportBuilder {
         // заголовок колонок
         for (int i=0;i<day_list.size();i++){
             values = day_list.getValues(i);
-            result.append("<th>");
+            result.append("<th colspan='2'>");
             result.append(values.getString("day_caption"));
             result.append("</th>");
         }
@@ -138,6 +138,10 @@ public class ReportBuilder {
             for (int col=0;col<day_list.size();col++){
                 result.append("<td>");
                 result.append(getScheduleCell(row, col));
+                result.append("</td>");
+                result.append("<td>");
+                result.append("&nbsp;");
+                
                 result.append("</td>");
             }
             result.append("</tr>");
@@ -223,7 +227,7 @@ public class ReportBuilder {
             result.append("</th>");
             for (int i=0;i<depart.size();i++){
                 values = depart.getValues(i);
-                result.append("<th>");
+                result.append("<th colspan='2'>");
                 result.append(values.getString("label"));
                 result.append("</th>");
             }
@@ -237,7 +241,7 @@ public class ReportBuilder {
                 
                 // заголовок  строка день
                 result.append("<tr>");
-                result.append("<td colspan='"+(Integer)(depart.size()+1)+"'>");
+                result.append("<td colspan='"+(Integer)(2*depart.size()+1)+"'>");
                 result.append(dayValues.getString("day_caption"));
                         
                 result.append("</td>");                    
@@ -256,6 +260,9 @@ public class ReportBuilder {
                         result.append("<td>");
                         result.append(getScheduleCell2(day_no+1, bell_id+1, values.getInteger("id")));
                         result.append("</td>");
+                        result.append("<td>");
+                        result.append("&nbsp;");
+                        result.append("</td>");
                         
                     }
                     result.append("</tr>");
@@ -263,7 +270,7 @@ public class ReportBuilder {
                 }
                 // пустая строка
                 result.append("<tr>");
-                result.append("<td colspan='"+(Integer)(depart.size()+1)+"'>");
+                result.append("<td colspan='"+(Integer)(2*depart.size()+1)+"'>");
                 result.append("</td>");                    
                 result.append("</tr>");
             }

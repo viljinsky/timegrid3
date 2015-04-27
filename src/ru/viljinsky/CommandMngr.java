@@ -32,9 +32,6 @@ public abstract class CommandMngr{
         for (int i=0;i<actions.length;i++){
             String[] s = list[i].split(";");
             actions[i]=new Act(s[0]);
-//            if (s.length>1){
-//                actions[i].putValue(Action., s);
-//            }
         }
     }
 

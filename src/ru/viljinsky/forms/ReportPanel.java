@@ -56,7 +56,7 @@ public class ReportPanel extends JPanel implements IOpenedForm {
 
     @Override
     public String getCaption() {
-        return "REPORTS";
+        return REPORTS;
     }
 
     @Override
