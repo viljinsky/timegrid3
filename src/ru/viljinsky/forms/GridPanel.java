@@ -56,6 +56,7 @@ class GridPanel extends JPanel {
     
     public void addAction(Action action){
         JButton button = new JButton(action);
+        button.setToolTipText((String)action.getValue(Action.LONG_DESCRIPTION));
         titlePanel.add(button);
     }
     

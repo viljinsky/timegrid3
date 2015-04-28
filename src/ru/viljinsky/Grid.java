@@ -33,15 +33,16 @@ import javax.swing.table.TableColumnModel;
  * @author вадик
  */
 
-interface IGridConstants{
-    public static String GRID_APPEND = "ADD";
-    public static String GRID_EDIT = "EDIT";
-    public static String GRID_DELETE = "DELETE";
-    public static String GRID_REFRESH = "REFRESH";
-    public static String GRID_REQUERY = "REQUERY";
-}
 
-class GridCommand implements ICommand,IGridConstants{
+
+class GridCommand implements IGridCommand{
+    
+    public static final String GRID_APPEND      = "ADD";
+    public static final String GRID_EDIT        = "EDIT";
+    public static final String GRID_DELETE      = "DELETE";
+    public static final String GRID_REFRESH     = "REFRESH";
+    public static final String GRID_REQUERY     = "REQUERY";
+    
     public Action[] actions = {
         new Act(GRID_APPEND),
         new Act(GRID_EDIT),
@@ -138,10 +139,10 @@ class GridCommand implements ICommand,IGridConstants{
 public class Grid extends JTable {
     Component owner = null;
     protected GridModel model;
-    ICommand commands = null;
+    IGridCommand commands = null;
     
     
-    public void setCommands(ICommand commands){
+    public void setCommands(IGridCommand commands){
         this.commands=commands;
     }
     

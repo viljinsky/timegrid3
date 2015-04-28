@@ -32,7 +32,6 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import ru.viljinsky.CommandMngr;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
@@ -235,17 +234,17 @@ class ScheduleTree extends JTree{
     }
 }
 
-interface TimeTableCommand {
-    public static final String TT_CLEAR     = "TT_CLEAR";
-    public static final String TT_DELETE    = "TT_DELETE";
-    public static final String TT_PLACE     = "TT_PLACE";
-    public static final String TT_PLACE_ALL = "TT_PLACE_ALL";
-    public static final String TT_FIX       = "TT_FIX";
-    public static final String TT_UNFIX     = "TT_UNFIX";
-    public static final String TT_REFRESH   = "TT_REFRESH";
-}
+//interface TimeTableCommand {
+//    public static final String TT_CLEAR     = "TT_CLEAR";
+//    public static final String TT_DELETE    = "TT_DELETE";
+//    public static final String TT_PLACE     = "TT_PLACE";
+//    public static final String TT_PLACE_ALL = "TT_PLACE_ALL";
+//    public static final String TT_FIX       = "TT_FIX";
+//    public static final String TT_UNFIX     = "TT_UNFIX";
+//    public static final String TT_REFRESH   = "TT_REFRESH";
+//}
 
-public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedForm{
+public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
     ScheduleTree tree;
     TimeTableGrid grid;
     Grid unplacedGrid;
@@ -441,15 +440,17 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         add(splitPane);
         
         
-        manager.setCommandList(new String[]{
-             TT_PLACE_ALL,
-             TT_PLACE,
-             TT_DELETE,
-             TT_FIX,
-             TT_UNFIX,
-             TT_CLEAR,
-             TT_REFRESH   
-        });
+//        manager.setCommandList(new String[]{
+//             TT_PLACE_ALL,
+//             TT_PLACE,
+//             TT_DELETE,
+//             TT_FIX,
+//             TT_UNFIX,
+//             TT_CLEAR,
+//             TT_REFRESH   
+//        });
+        
+        manager.setCommandList(SCHEDULE_COMMANDS);
         
         JPanel commands = new JPanel(new FlowLayout(FlowLayout.LEFT));
         for (Action a:manager.getActionList()){
@@ -674,14 +675,14 @@ public class TimeGridPanel2 extends JPanel  implements TimeTableCommand,IOpenedF
         );
         unplacedGrid.setDataset(dataset);
         
-        Map<Integer,String> columnHeaderCaprion = new HashMap<>();
+        Map<Integer,String> columnHeaderCaption = new HashMap<>();
         Recordset recordset = DataModule.getRecordet("select day_no,day_caption from day_list");
         Object[] r;
         for (int i=0;i<recordset.size();i++){
             r=recordset.get(i);
-            columnHeaderCaprion.put(i,(String)r[1]);
+            columnHeaderCaption.put(i,(String)r[1]);
         }
-        grid.colCaption = columnHeaderCaprion;
+        grid.colCaption = columnHeaderCaption;
         
         Map<Integer,String> rowHeaderCaption = new HashMap<>();
         recordset=DataModule.getRecordet("select bell_id,time_start || '\n' || time_end from bell_list");

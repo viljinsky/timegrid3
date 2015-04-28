@@ -191,7 +191,7 @@ create table schedule (
     day_id integer references day_list(day_no),
     bell_id integer references bell_list(bell_id),
 --     week_id integer  default 0 references week(id),
-    depart_id integer references depart(id),
+    depart_id integer references depart(id) on delete cascade,
     subject_id integer references subject(id),
     group_id integer,
     teacher_id integer references teacher(id),

@@ -62,15 +62,41 @@ abstract class MasterDetailPanel extends JPanel implements IMasterDetailConsts {
     
     public void addMasterAction(Action action){
         JButton button = new JButton(action);
+        button.setToolTipText((String)action.getValue(Action.LONG_DESCRIPTION));
         masterPanel.titlePanel.add(button);
     }
     
     public void addDetailAction(Action action){
-        detailPanel.titlePanel.add(new JButton(action));
+        JButton button = new JButton(action);
+        button.setToolTipText((String)action.getValue(Action.LONG_DESCRIPTION));
+        detailPanel.titlePanel.add(button);
     }
 
+    public abstract void edit();
+    public abstract void append();
+    public abstract void delete();
+    
+    
     class MasterGrid extends Grid {
 
+        @Override
+        public void delete() throws Exception {
+            MasterDetailPanel.this.delete();
+        }
+
+        @Override
+        public void edit() {
+            MasterDetailPanel.this.edit();
+        }
+
+        @Override
+        public void append() {
+            MasterDetailPanel.this.append();
+            
+        }
+
+        
+        
         @Override
         public void gridSelectionChange() {
             IDataset dataset = grid1.getDataset();

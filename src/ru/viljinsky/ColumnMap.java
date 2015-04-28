@@ -136,14 +136,14 @@ public class ColumnMap extends HashMap<String, String[]> {
         {"group_type.group_type_caption",""},
 
         // curriculum_detail
-        {"curriculum_detail.curriculum_id",""},
-        {"curriculum_detail.skill_id",""},
-        {"curriculum_detail.subject_id",""},
-        {"curriculum_detail.hour_per_day",""},
-        {"curriculum_detail.hour_per_week",""},
-        {"curriculum_detail.group_type_id",""},
-        {"curriculum_detail.group_sequence_id",""},
-        {"curriculum_detail.is_stream",""},
+        {"curriculum_detail.curriculum_id",",false"},
+        {"curriculum_detail.skill_id",",false"},
+        {"curriculum_detail.subject_id",",false"},
+        {"curriculum_detail.hour_per_day","Кол.часов в день"},
+        {"curriculum_detail.hour_per_week","Кол.часов в неделю"},
+        {"curriculum_detail.group_type_id","Тип группы"},
+        {"curriculum_detail.group_sequence_id","Посл.-ть"},
+        {"curriculum_detail.is_stream","Поток"},
 
         // day_list
         {"day_list.day_no",""},
@@ -196,7 +196,7 @@ public class ColumnMap extends HashMap<String, String[]> {
         {"v_subject_group.room",            "Кабинет"},
 
         // v_subject_group_on_schedule
-        {"v_subject_group_on_schedule.group_label",""},
+        {"v_subject_group_on_schedule.group_label","Группа"},
         {"v_subject_group_on_schedule.depart_id",""},
         {"v_subject_group_on_schedule.subject_id",""},
         {"v_subject_group_on_schedule.group_id",""},
@@ -206,7 +206,7 @@ public class ColumnMap extends HashMap<String, String[]> {
         {"v_subject_group_on_schedule.default_teacher_id",""},
         {"v_subject_group_on_schedule.default_room_id",""},
         {"v_subject_group_on_schedule.placed",""},
-        {"v_subject_group_on_schedule.unplaced",""},
+        {"v_subject_group_on_schedule.unplaced","Не расставлено"},
         {"v_subject_group_on_schedule.stream_id",""},
         {"v_subject_group_on_schedule.group_sequence_id",""},
         {"v_subject_group_on_schedule.pupil_count",""},

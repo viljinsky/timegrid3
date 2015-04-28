@@ -15,7 +15,6 @@ import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import ru.viljinsky.CommandMngr;
 import ru.viljinsky.reports.ReportBuilder;
 
 /**

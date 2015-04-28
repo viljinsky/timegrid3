@@ -14,7 +14,11 @@ import javax.swing.JPopupMenu;
  *
  * @author вадик
  */
-public interface ICommand{
+/**
+ * Интерфейс управления действиями таблиц (Grid)
+ * @author вадик
+ */
+public interface IGridCommand{
     public void doCommand(String command);
     public void updateAction(Action a);
     public void updateActionList();

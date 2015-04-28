@@ -17,7 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import ru.viljinsky.CommandMngr;
+import ru.viljinsky.forms.CommandMngr;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
@@ -36,14 +36,18 @@ interface ITestSchedule{
     public static final String REMOVE_STREAM = "REMOVE_STREAM";
 }
 
+abstract class ScCommand extends CommandMngr{
+
+}
+
 public class TestSchedule extends JFrame implements ITestSchedule{
     Grid grid;
     DataModule dataModule = DataModule.getInstance();
-    CommandMngr commands;
+    ScCommand commands;
    
     
     public TestSchedule() {
-        commands = new CommandMngr() {
+        commands = new ScCommand() {
 
             @Override
             public void updateAction(Action a) {

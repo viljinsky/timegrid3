@@ -14,7 +14,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import ru.viljinsky.CommandMngr;
 import ru.viljinsky.DBComboBox;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
@@ -42,59 +41,8 @@ public interface IOpenedForm {
     public void close() throws Exception;
 }
 
-interface IAppCommand{
+//interface IAppCommand{
     
-    public static final String REFRESH = "REFRESH";
-    
-    // curriculumn panel
-    
-    public static final String CREATE_CURRICULUM = "CREATE_CURRICULUM";
-    public static final String EDIT_CURRICULUM = "EDIT_CURRICULUM";
-    public static final String DELETE_CURRICULUM = "DELETE_CURRICULUM";
-    public static final String FILL_CURRICULUM = "FILL_CURRICULUM";
-    public static final String CLEAR_CURRICULUM = "CLEAR_CURRICULUM";
-    public static final String EDIT_CURRICULUM_DETAIL = "EDITCURRICULUM_DETAIL";
-    
-    // depart panel
-    
-    public static final String CREATE_DEPART = "CREATE_DEPART";
-    public static final String EDIT_DEPART = "EDIT_DEPART";
-    public static final String DELETE_DEPART = "DELETE_DEPART";
-    
-    public static final String FILL_GROUP ="FILL_GROUP";
-    public static final String CLEAR_GROUP ="CLEAR";
-//    public static final String EDIT_SHIFT ="EDIT_SHIFT";
-    public static final String ADD_GROUP = "ADD_GROUP";
-    public static final String EDIT_GROUP = "EDIT_GROUP";
-    public static final String DELETE_GROUP ="DELETE_GROUP";
-    
-    public static final String ADD_STREAM ="ADD_STREAM";
-    public static final String EDIT_STREAM ="EDIT_STREAM";
-    public static final String REMOVE_STREAM= "REMOVE_STREAM";
-
-    // teacher
-    
-    public static final String CREATE_TEACHER     = "CREATE_TEACHER";
-    public static final String EDIT_TEACHER       = "EDIT_TEACHER";
-    public static final String DELETE_TEACHER     = "DELETE_TEACHER";
-    
-    // room
-    public static final String CREATE_ROOM     = "CREATE_ROOM";
-    public static final String EDIT_ROOM       = "EDIT_ROOM";
-    public static final String DELETE_ROOM     = "DELETE_ROOM";
-    
-    // shift panel
-    public static final String CREATE_SHIFT     = "CREATE_SHIFT";
-    public static final String REMOVE_SHIFT     = "REMOVE_SHIFT";
-    public static final String EDIT_SHIFT       = "EDIT_SHIFT";
-    
-    // profile_panel
-    public static final String CREATE_PROFILE   = "CREATE_PROFILE";
-    public static final String EDIT_PROFILE     = "EDIT_PROFILE";
-    public static final String REMOVE_PROFILE   = "REMOVE_PROFILE";
-    
-    
-}
 
 
 abstract class DetailPanel extends JPanel{
@@ -120,7 +68,7 @@ abstract class DetailPanel extends JPanel{
 ////////////////////////////    ROOM PANEL /////////////////////////////////////
 
 
-class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
+class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand{
     
     
     MasterGrid grid = new MasterGrid();
@@ -143,9 +91,9 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
     public RoomPanel(){
         super(new BorderLayout());
         JTabbedPane tabs =new JTabbedPane();
-        tabs.addTab("Subject group", selectPanel);
-        tabs.addTab("Profile",profilePanel);
-        tabs.addTab("Shift",shiftPanel);
+        tabs.addTab(SUBJECT_GROUP_PANEL, selectPanel);
+        tabs.addTab(PROFILE_PANEL,profilePanel);
+        tabs.addTab(SHIFT_PANEL,shiftPanel);
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         
         GridPanel gridPanel = new GridPanel("Помещения", grid);
@@ -155,17 +103,18 @@ class RoomPanel extends JPanel implements IOpenedForm,IAppCommand{
                 
         add(splitPane);
         setPreferredSize(new Dimension(800,600));
-        commands.setCommandList(new String[]{
-            CREATE_ROOM,
-            EDIT_ROOM,
-            DELETE_ROOM,
-            CREATE_SHIFT,
-            EDIT_SHIFT,
-            REMOVE_SHIFT,
-            CREATE_PROFILE,
-            EDIT_PROFILE,
-            REMOVE_PROFILE
-        });
+//        commands.setCommandList(new String[]{
+//            CREATE_ROOM,
+//            EDIT_ROOM,
+//            DELETE_ROOM,
+//            CREATE_SHIFT,
+//            EDIT_SHIFT,
+//            REMOVE_SHIFT,
+//            CREATE_PROFILE,
+//            EDIT_PROFILE,
+//            REMOVE_PROFILE
+//        });
+        commands.setCommandList(ROOM_COMMANDS);
         
        
         gridPanel.addAction(commands.getAction(CREATE_ROOM));
@@ -662,6 +611,21 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
         return this;
     }
 
+    @Override
+    public void edit() {
+        doCommand(EDIT_DEPART);
+    }
+
+    @Override
+    public void append() {
+//        doCommand(DEPART);
+    }
+
+    @Override
+    public void delete() {
+        doCommand(DELETE_DEPART);
+    }
+
 }
 
 /////////////////////   CURRICULUM PANEL //////////////////////////////////////
@@ -790,6 +754,22 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
     @Override
     public void actionPerformed(ActionEvent e) {
         doCommand(e.getActionCommand());
+    }
+
+    @Override
+    public void edit() {
+        doCommand(EDIT_CURRICULUM);
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void append() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void delete() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     class CurriculumnDetailDialg extends SelectDialog{
@@ -988,8 +968,13 @@ class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpene
 //}
 
 ////////////////////////////////  TEACHER PANEL ////////////////////////////////
+interface ISchedulePanel {
+    public static final String SUBJECT_GROUP_PANEL = "Группы";
+    public static final String PROFILE_PANEL = "Специализация";
+    public static final String SHIFT_PANEL = "График";
 
-class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
+}
+class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCommand {
 //    DataModule dataModule = DataModule.getInstance();
     MasterGrid grid = new MasterGrid();
     JTabbedPane tabs = new JTabbedPane();
@@ -1316,12 +1301,13 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
 
     }
     
+    
     public TeacherPanel() {
         setLayout(new BorderLayout());
         
-        tabs.addTab("Subject group", selctPanel);
-        tabs.addTab("Profile", profilePanel);
-        tabs.addTab("Shift",shiftPanel);
+        tabs.addTab(SUBJECT_GROUP_PANEL, selctPanel);
+        tabs.addTab(PROFILE_PANEL, profilePanel);
+        tabs.addTab(SHIFT_PANEL,shiftPanel);
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         GridPanel gridPanel = new GridPanel("Преподаватели", grid);
         splitPane.setTopComponent(gridPanel);
@@ -1329,16 +1315,18 @@ class TeacherPanel extends JPanel implements IOpenedForm,IAppCommand {
         splitPane.setResizeWeight(0.5);
         add(splitPane);
         setPreferredSize(new Dimension(800,600));
-        commands.setCommandList(new String[]{
-            CREATE_TEACHER,
-            EDIT_TEACHER,
-            DELETE_TEACHER,
-            CREATE_PROFILE,
-            EDIT_PROFILE,
-            REMOVE_PROFILE,
-            CREATE_SHIFT,
-            EDIT_SHIFT,REMOVE_SHIFT
-        });
+//        commands.setCommandList(new String[]{
+//            CREATE_TEACHER,
+//            EDIT_TEACHER,
+//            DELETE_TEACHER,
+//            CREATE_PROFILE,
+//            EDIT_PROFILE,
+//            REMOVE_PROFILE,
+//            CREATE_SHIFT,
+//            EDIT_SHIFT,
+//            REMOVE_SHIFT
+//        });
+        commands.setCommandList(TEACHER_COMMANDS);
         
         gridPanel.addAction(commands.getAction(CREATE_TEACHER));
         gridPanel.addAction(commands.getAction(EDIT_TEACHER));

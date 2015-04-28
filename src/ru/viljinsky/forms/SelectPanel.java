@@ -19,8 +19,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
-import ru.viljinsky.CommandMngr;
-import ru.viljinsky.Dataset;
 import ru.viljinsky.Grid;
 
 /**

@@ -26,7 +26,7 @@ import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
 import ru.viljinsky.DatasetInfo;
 import ru.viljinsky.Grid;
-import ru.viljinsky.ICommand;
+import ru.viljinsky.IGridCommand;
 import ru.viljinsky.IDataset;
 
 /**
@@ -96,7 +96,7 @@ public class TestGrid  extends JPanel{
         JScrollPane scrollPane = new JScrollPane(grid);
         add(scrollPane);
         
-        grid.setCommands(new ICommand(){
+        grid.setCommands(new IGridCommand(){
 
             @Override
             public void doCommand(String command) {

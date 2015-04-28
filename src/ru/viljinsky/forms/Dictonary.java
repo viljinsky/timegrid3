@@ -128,7 +128,6 @@ public class Dictonary extends JDialog{
        
     }
     
-    private static Dictonary frame = null;
     public static Integer showDialog(JComponent owner) throws Exception{
         if (frame ==null){
             frame = new Dictonary();
@@ -147,14 +146,12 @@ public class Dictonary extends JDialog{
         return 0;
     }
     
+    private static Dictonary frame = null;
     public static void main(String[] args) throws Exception{
-        Dictonary frame = new Dictonary();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
-        
         DataModule.open();
-        frame.open();
+        showDialog(null);
+        frame.dispose();
+        frame=null; 
     }
     
 }
