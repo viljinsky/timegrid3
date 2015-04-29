@@ -1,3 +1,9 @@
+# Составитель расписания 2015
+
+<a href='http://timetabler.narod.ru'>timetabler.narod.ru</a>
+
+<img src='https://github.com/viljinsky/timegrid3/blob/master/screenshort1.png' alt='скрееншорт'/>
+
 ##Порядок составления расписания.
 
 ###Создание новой базы данных.
@@ -33,4 +39,3 @@
 	
 Получение отчётов для дальнейшего использования	
 
-<img src='https://github.com/viljinsky/timegrid3/blob/master/screenshort1.png' alt='скрееншорт'>
