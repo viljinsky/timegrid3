@@ -18,7 +18,36 @@ import ru.viljinsky.Values;
  */
 
 
-public class ReportBuilder {
+
+public class ReportBuilder implements IReportBuilder{
+    
+    
+    public String getReport(String reportName) throws Exception{
+//        ReportBuilder builder = new ReportBuilder();
+        switch(reportName){
+            case RP_SCHEDULE_VAR_1:
+                return getScheduleReport();
+            case RP_SCHEDULE_VAR_2:
+                return getSchedueReport2();
+            case RP_SCHEDULE_TEACHER:
+                return getTeacherSchedule();
+            case RP_SCHEDULE_ERRORS:
+                return getScheduleError();
+            case RP_INDEX:
+                return getIndexPage();
+            default:
+                throw new Exception("UNKNOW_REPORT_NAME\n"+reportName);
+        }
+    }
+    
+    public static String[] getReportList(){
+        return  new String[]{
+            RP_SCHEDULE_VAR_1,
+            RP_SCHEDULE_VAR_2,
+            RP_SCHEDULE_TEACHER,
+            RP_SCHEDULE_ERRORS
+        };
+    }
     
     private static final String ERROR_NOT_DETECTED = "<p>Ошибок не обнаружено</p>";
     
@@ -76,9 +105,12 @@ public class ReportBuilder {
         "[style]"+
         "</head>"+
         "<body>"+
+        
+        "[navigator]"+    
        
         "[body]"+   
         
+        "<div font='small' align='center'><a href='http://www.timetabler.narod.ru'>Составитель расписания</a> &copy; 2015</div>"+    
         "</body>"+
         "</html>";
     
@@ -86,6 +118,11 @@ public class ReportBuilder {
          "<style> table{width:90%;border:solid 1px silver;border-collapse:collapse;}"+
          "td, th{border: solid 1px silver;}\n" +
          "th{color:#707070; background:#eeeeee;}"+
+           
+//        ".navigator li{display:inline;}"+
+//        ".navigator li A{font-weight:bold;color:#00f;text-decoration:none;}"+
+//        ".navigator li A:hover{text-decoration:underline;}"+           
+           
          "</style>";
 
    /**
@@ -599,6 +636,38 @@ public class ReportBuilder {
     }
     
     public static String createPage(String reportContent){
-        return HTML_PATTERN.replace("[body]", reportContent).replace("[style]", STYLE);
+        return HTML_PATTERN.replace("[body]", reportContent).replace("[style]", STYLE).replace("[navigator]", HTML_NAVIGATOR);
+    }
+    
+    public static String HTML_NAVIGATOR =
+                "<ul class='navigator'>"
+
+                + "<li>"
+                + "<a href='./'>Начальная страница</a>"
+                + "</li>"
+            
+            
+                + "<li>"
+                + "<a href='./page1.html'>Расписание (вариант1)</a>"
+                + "</li>"
+                
+                + "<li>"
+                + "<a href='./page2.html'>Расписание (вариант2)</a>"
+                + "</li>"
+                
+                + "<li>"                
+                + "<a href='./page3.html'>Расписание преподователей</a>"
+                + "</li>"
+                
+                + "<li>"
+                + "<a href='./page4.html'>Расписание ошибки</a>"
+                + "</li>"
+                
+                + "</ul>";
+
+    
+    
+    public String getIndexPage(){
+        return "<h1>Пример расписания</h1>";
     }
 }

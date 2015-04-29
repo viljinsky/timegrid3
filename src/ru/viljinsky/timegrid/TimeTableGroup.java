@@ -22,8 +22,8 @@ public class TimeTableGroup extends CellElement {
     public Integer subject_id;
     public Integer group_id;
 
-    Integer teacher_id;
-    Integer room_id;
+    public Integer teacher_id;
+    public Integer room_id;
     
     public Boolean checked = false;
     Integer group_type_id;

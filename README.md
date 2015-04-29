@@ -32,3 +32,5 @@
 *	Ручная расстановка
 	
 Получение отчётов для дальнейшего использования	
+
+<img src='https://github.com/viljinsky/timegrid3/blob/master/screenshort1.png' alt='скрееншорт'>

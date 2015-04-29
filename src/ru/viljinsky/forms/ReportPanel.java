@@ -11,9 +11,9 @@ import java.awt.FlowLayout;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.FilterWriter;
 import java.io.IOException;
-import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -21,19 +21,14 @@ import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import ru.viljinsky.reports.IReportBuilder;
 import ru.viljinsky.reports.ReportBuilder;
-import static ru.viljinsky.reports.ReportBuilder.HTML_PATTERN;
-import static ru.viljinsky.reports.ReportBuilder.STYLE;
 
 /**
  *
  * @author вадик
  */
-public class ReportPanel extends JPanel implements IOpenedForm {
-    public static final String RP_SCHEDULE_VAR_1 = "RP_SCHEDULE_VAR_1";
-    public static final String RP_SCHEDULE_VAR_2 = "RP_SCHEDULE_VAR_2";
-    public static final String RP_SCHEDULE_TEACHER = "RP_SCHEDULE_TEACHER";
-    public static final String RP_SCHEDULE_ERRORS = "RP_SCHEDULE_ERRORS";
+public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
     public static final String RP_PUBLISH = "RP_PUBLISH";
     
     JEditorPane text = new JEditorPane();
@@ -55,7 +50,17 @@ public class ReportPanel extends JPanel implements IOpenedForm {
         setLayout(new BorderLayout());
         add(new JScrollPane(text));
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        commands.setCommandList(new String[]{RP_SCHEDULE_VAR_1,RP_SCHEDULE_VAR_2,RP_SCHEDULE_TEACHER,RP_SCHEDULE_ERRORS,RP_PUBLISH});
+        commands.setCommandList(new String[]{
+            RP_INDEX,
+            RP_SCHEDULE_VAR_1,
+            RP_SCHEDULE_VAR_2,
+            RP_SCHEDULE_TEACHER,
+            RP_SCHEDULE_ERRORS,
+            RP_PUBLISH
+            }
+        );
+       
+        
         for (Action a :commands.getActionList()){
             panel.add(new JButton(a));
         }
@@ -84,16 +89,11 @@ public class ReportPanel extends JPanel implements IOpenedForm {
         try{
             switch(command){
                 case RP_SCHEDULE_VAR_1:
-                    showReport(new ReportBuilder().getScheduleReport());
-                    break;
                 case RP_SCHEDULE_VAR_2:
-                    showReport(new ReportBuilder().getSchedueReport2());
-                    break;
                 case RP_SCHEDULE_TEACHER:
-                    showReport(new ReportBuilder().getTeacherSchedule());
-                    break;
                 case RP_SCHEDULE_ERRORS:
-                    showReport(new ReportBuilder().getScheduleError());
+                case RP_INDEX:    
+                    showReport(command);
                     break;
                 case RP_PUBLISH:
                     publichReport();
@@ -107,28 +107,59 @@ public class ReportPanel extends JPanel implements IOpenedForm {
         }
     }
     
-    public void showReport(String reportText){
+    public void showReport(String command) throws Exception{
+        text.setEditable(false);
+        String reportText = new ReportBuilder().getReport(command);
         text.setContentType("text/html");
         String html = ReportBuilder.createPage(reportText);
         text.setText(html);
+        
+    }
+    
+    
+    protected void printReport(String path,String html) throws Exception{
+        BufferedWriter bw = null;
+        try{
+            File file = new File(path);
+            bw = new BufferedWriter(new FileWriter(file)); 
+            bw.write(html);
+        } catch (IOException e){
+            throw new Exception("Ошибка записи\n"+e.getMessage());
+        } finally {
+            if (bw!=null)
+                bw.close();
+        }
     }
     
     public void publichReport() throws Exception{
+        
+        if (JOptionPane.showConfirmDialog(this,"Export HTML","Export",JOptionPane.YES_NO_OPTION)!=JOptionPane.YES_OPTION)
+            return;
+        Map<String,String> reportMap = new HashMap<>();
+        reportMap.put(RP_INDEX  , "index.html");        
+        reportMap.put(RP_SCHEDULE_VAR_1  , "page1.html");
+        reportMap.put(RP_SCHEDULE_VAR_2  , "page2.html");
+        reportMap.put(RP_SCHEDULE_TEACHER, "page3.html");
+        reportMap.put(RP_SCHEDULE_ERRORS , "page4.html");
+        
         text.setContentType("text/plain");
         
         ReportBuilder repopBuilder = new ReportBuilder();
-        
-        String txt = repopBuilder.getScheduleReport();
-        String html = ReportBuilder.createPage(txt);
-        
+        String txt,html,path;
         try{
-            File file = new File(".//site//html1.html");
-            BufferedWriter bw = new BufferedWriter(new FileWriter(file)); 
-            bw.write(html);
-            bw.close();
-        } catch (IOException e){
-            throw new Exception("Ошибка записи\n"+e.getMessage());
+            for (String reportName:reportMap.keySet()){
+
+                txt = repopBuilder.getReport(reportName);
+                html = ReportBuilder.createPage(txt);
+                path = ".//site//"+reportMap.get(reportName);
+
+                printReport(path, html);
+            }
+            JOptionPane.showMessageDialog(this, "OK");
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
+        
         
     }
     

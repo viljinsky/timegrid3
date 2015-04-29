@@ -27,6 +27,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -248,6 +250,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
     ScheduleTree tree;
     TimeTableGrid grid;
     Grid unplacedGrid;
+    JTextArea hintPane;
     
     public void waitCursor(boolean b){
     if (b)
@@ -344,9 +347,32 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
         }
         
     }
+    
+    protected void analizCell(TimeTableGroup group,Point pos){
+        hintPane.setText("");
+        hintPane.append(group.toString()+"\n");
+        hintPane.append(pos.toString()+"\n");
+        hintPane.append("----------------------\n");
+
+        try{
+        Dataset dataset = DataModule.getSQLDataset(String.format("select * from v_schedule where day_id=%d and bell_id=%d  and ((teacher_id=%d) or (room_id=%d))",pos.x,pos.y,group.teacher_id,group.room_id));
+        dataset.open();
+        Values values;
+        for (int i=0;i<dataset.size();i++){
+            values = dataset.getValues(i);
+            hintPane.append(values.getString("depart_label")+" " +values.getString("group_label")+ " "+ values.getString("teacher")+ " "+values.getString("room")+"\n" );
+        }
+        } catch (Exception e){
+        }
+        
+        System.out.println("----------------------");
+        
+    }
+    
     public TimeGridPanel2(){
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(800, 600));
+        
         tree = new ScheduleTree(){
 
             @Override
@@ -395,7 +421,17 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
                 try{
                     super.stopDrag(col, row);
                 } catch (Exception e){
-                    JOptionPane.showMessageDialog(this,e.getMessage());                    
+                    Set<CellElement> set = getSelectedElements();
+                    TimeTableGroup group = null;
+                    for (CellElement ce:set){
+                         group = (TimeTableGroup)ce;
+                         analizCell(group, new Point(col+1,row+1));
+                         break;
+                    }        
+//                    if (group!=null){
+//                        System.out.println(group);
+//                    }
+                    JOptionPane.showMessageDialog(this,"Тут подсказка\n"+e.getMessage());                    
                 } finally {
                     waitCursor(false);
                 }
@@ -425,6 +461,9 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
             }
 
         };
+        
+        hintPane = new JTextArea();
+        
         JSplitPane splitPane2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         splitPane2.setTopComponent(new JScrollPane(tree));
         splitPane2.setBottomComponent(new JScrollPane(unplacedGrid));
@@ -434,11 +473,19 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
         splitPane.setLeftComponent(splitPane2);
         JScrollPane scrollPane = new JScrollPane(grid);
         scrollPane.setColumnHeaderView(grid.getColumnHeader());
-        scrollPane.setRowHeaderView(grid.getRowHeader());;
-        splitPane.setRightComponent(scrollPane);
+        scrollPane.setRowHeaderView(grid.getRowHeader());
+        
+        JSplitPane hitSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        hitSplit.setTopComponent(scrollPane);
+        hitSplit.setBottomComponent(new JScrollPane(hintPane));
+        hitSplit.setResizeWeight(0.9);
+        
+        splitPane.setRightComponent(hitSplit);
+        
         splitPane.setDividerLocation(200);
         add(splitPane);
         
+//        add(hintPane,BorderLayout.PAGE_END);
         
 //        manager.setCommandList(new String[]{
 //             TT_PLACE_ALL,
