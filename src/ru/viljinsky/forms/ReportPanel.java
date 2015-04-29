@@ -42,7 +42,7 @@ public class ReportPanel extends JPanel implements IOpenedForm {
 //        text = new JTextArea();
         add(new JScrollPane(text));
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        commands.setCommandList(new String[]{"COMMAND1","COMMAND2","COMMAND3"});
+        commands.setCommandList(new String[]{"COMMAND1","COMMAND2","COMMAND3","COMMAND4"});
         for (Action a :commands.getActionList()){
             panel.add(new JButton(a));
         }
@@ -79,7 +79,9 @@ public class ReportPanel extends JPanel implements IOpenedForm {
                     break;
                 case "COMMAND3":
                     text.setText(new ReportBuilder().getScheduleError());
-                    
+                    break;
+                case "COMMAND4":
+                    text.setText(new ReportBuilder().getTeacherSchedule());
                     break;
                 default:    
                     throw new Exception("UNKNOW_COMMAND ");    

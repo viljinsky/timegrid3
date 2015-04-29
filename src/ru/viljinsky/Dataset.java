@@ -580,22 +580,31 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
 
     @Override
     public Integer locate(Values values) throws Exception {
-        Object[] rowset;
-        Integer columnIndex;
-        Integer rowIndex;
-        boolean mach = false;
-        for (rowIndex=0;rowIndex<size();rowIndex++){
-            rowset = get(rowIndex);
-            mach = true;
-            for(String key:values.keySet()){
-                columnIndex = getColumnIndex(key);
-                mach = rowset[columnIndex].equals(values.getObject(key));
-                if (!mach)
-                    break;
+        try{
+            Object[] rowset;
+            Object v;
+            Integer columnIndex;
+            Integer rowIndex;
+            boolean mach = false;
+            for (rowIndex=0;rowIndex<size();rowIndex++){
+                rowset = get(rowIndex);
+                mach = true;
+                for(String key:values.keySet()){
+                    columnIndex = getColumnIndex(key);
+                    v= rowset[columnIndex];
+                    if (v==null)
+                        mach= values.getObject(key)==null;
+                    else
+                        mach = rowset[columnIndex].equals(values.getObject(key));
+                    if (!mach)
+                        break;
+                }
+                if (mach)
+                    return rowIndex;
             }
-            if (mach)
-                return rowIndex;
+            return -1;
+        } catch (Exception e){
+            throw new Exception("LOCATE_ERROR\n"+e.getMessage());
         }
-        return -1;
     }
 }
