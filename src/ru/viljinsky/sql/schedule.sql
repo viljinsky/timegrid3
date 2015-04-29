@@ -317,9 +317,24 @@ group by a.default_teacher_id,c.group_sequence_id;
 
 
 
+-- drop view if exists v_teacher;
+-- create view v_teacher as
+-- select a.last_name,a.first_name,a.patronymic,b.profile_name,c.room_name,d.building_name,s.shift_name,
+-- th.total_hour,a.id,a.profile_id,a.teacher_room_id,a.shift_id
+--  from teacher a
+-- left join profile b
+-- 	on a.profile_id=b.id
+-- left join shift s on s.id=a.shift_id
+-- left join room c
+-- 	on a.teacher_room_id=c.id
+-- left join building d on d.id=c.building_id
+-- left join v_teacher_hour th on th.default_teacher_id=a.id;
+
 drop view if exists v_teacher;
 create view v_teacher as
-select a.last_name,a.first_name,a.patronymic,b.profile_name,c.room_name,d.building_name,s.shift_name,
+select 
+a.last_name || ' ' || substr(a.first_name,1,1) || '. ' || substr(a.patronymic,1,1) || '.' as teacher_fio,
+a.last_name,a.first_name,a.patronymic,b.profile_name,c.room_name,d.building_name,s.shift_name,
 th.total_hour,a.id,a.profile_id,a.teacher_room_id,a.shift_id
  from teacher a
 left join profile b
@@ -330,15 +345,6 @@ left join room c
 left join building d on d.id=c.building_id
 left join v_teacher_hour th on th.default_teacher_id=a.id;
 
--- select a.last_name,a.first_name,a.patronymic,b.profile_name,c.room_name,d.building_name,s.shift_name,
--- a.id,a.profile_id,a.teacher_room_id,a.shift_id
---  from teacher a
--- left join profile b
--- 	on a.profile_id=b.id
--- left join shift s on s.id=a.shift_id
--- left join room c
--- 	on a.teacher_room_id=c.id
--- left join building d on d.id=c.building_id;
 
 -- v_room
 

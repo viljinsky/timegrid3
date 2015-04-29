@@ -304,6 +304,7 @@ public class ColumnMap extends HashMap<String, String[]> {
         {"users.user_role_id",""},
 
         // v_teacher
+        {"v_teacher.teacher_fio","Фамилия И.О."},
         {"v_teacher.last_name","Фамилия"},
         {"v_teacher.first_name","Имя"},
         {"v_teacher.patronymic","Отчество"},

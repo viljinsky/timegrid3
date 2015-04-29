@@ -9,6 +9,7 @@ package ru.viljinsky.reports;
 import ru.viljinsky.Column;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.Dataset;
+import ru.viljinsky.Recordset;
 import ru.viljinsky.Values;
 
 /**
@@ -19,9 +20,9 @@ import ru.viljinsky.Values;
 
 public class ReportBuilder {
     
-    public static final String ERROR_NOT_DETECTED = "<p>Ошибок не обнаружено</p>";
+    private static final String ERROR_NOT_DETECTED = "<p>Ошибок не обнаружено</p>";
     
-    public static final String SQL_ERROR_HALL_IN_SCHEDULE =
+    private static final String SQL_ERROR_HALL_IN_SCHEDULE =
             "select d.day_caption,l.time_start || ' ' || l.time_end as lesson_tyme,\n"+
             "                           b.label,a.day_id,a.bell_id,b.id as depart_id \n" +
             "from shift_detail a inner join depart b	on a.shift_id=b.shift_id\n" +
@@ -31,32 +32,32 @@ public class ReportBuilder {
             "   and not exists (select * \n" +
             "	from schedule where day_id=a.day_id and bell_id=a.bell_id and depart_id=b.id);";
     
-    public static final String SQL_ERROR_DEPART_TIME_CONFLICT =
+    private static final String SQL_ERROR_DEPART_TIME_CONFLICT =
             "select a.depart_label,a.group_label,a.day_caption,a.lesson_time,a.subject_name,a.teacher,a.room from v_schedule a where not exists(\n"+
             "	select * from shift_detail b inner join depart d on d.shift_id=b.shift_id\n" +
             "        where b.bell_id=a.bell_id and b.day_id=a.day_id and a.depart_id=d.id\n" +
             ")\n" +
             "order by a.depart_id,a.day_id,a.bell_id;";
     
-    public static final String SQL_ERROR_TEACHER_TIME_CONFLICT =
+    private static final String SQL_ERROR_TEACHER_TIME_CONFLICT =
             "select a.day_caption,a.lesson_time,a.subject_name,a.depart_label,a.group_label,a.teacher,a.room\n" +
             " from v_schedule a where not exists(\n" +
             "select * from shift_detail b inner join teacher c on b.shift_id=c.shift_id and c.id=a.teacher_id\n" +
             "where b.day_id=a.day_id and b.bell_id=a.bell_id\n" +
             ");";
             
-    public static final String SQL_ERROR_ROOM_TIME_CONFLICT =
+    private static final String SQL_ERROR_ROOM_TIME_CONFLICT =
             "select a.day_caption,a.lesson_time,a.depart_label,a.group_label,a.subject_name,a.teacher,a.room\n" +
             " from v_schedule a where not exists(\n" +
             "select * from shift_detail b inner join room c on b.shift_id=c.shift_id and c.id=a.room_id\n" +
             "where b.day_id=a.day_id and b.bell_id=a.bell_id\n" +
             ");";
     
-   public static final String SQL_ERROR_EMPTY_ROOM_OR_TEACHER = 
+   private static final String SQL_ERROR_EMPTY_ROOM_OR_TEACHER = 
             "select day_caption,lesson_time,subject_name,depart_label,group_label,teacher,room \n"
             + "from v_schedule where teacher_id is null or room_id is null;";        
 
-    public static final String SQL_ERROR_UNPLACED_GROUP = 
+    private static final String SQL_ERROR_UNPLACED_GROUP = 
             "select a.subject_name,c.label,a.group_label,t.last_name as teacher,r.room_name as room, b.placed,b.hour_per_week\n"+
             " from v_subject_group a\n" +
             "inner join v_subject_group_on_schedule b\n" +
@@ -84,7 +85,7 @@ public class ReportBuilder {
    public static final String STYLE = 
          "<style> table{width:90%;border:solid 1px silver;border-collapse:collapse;}"+
          "td, th{border: solid 1px silver;}\n" +
-         "th{background:#eeeeee;}"+
+         "th{color:#707070; background:#eeeeee;}"+
          "</style>";
 
    /**
@@ -104,9 +105,9 @@ public class ReportBuilder {
         result.append("<tr>");
         
         for (Column column:dataset.getColumns()){
-            result.append("<th>");
-            result.append(column.getColumnName());
-            result.append("</th>");
+            result.append("<th>")
+            .append(column.getColumnName())
+            .append("</th>");
         }
         
         result.append("</tr>");
@@ -115,9 +116,9 @@ public class ReportBuilder {
             result.append("<tr>");
             values=dataset.getValues(i);
             for (Column column:dataset.getColumns()){
-                result.append("<td>");
-                result.append(values.getString(column.getColumnName()));
-                result.append("</td>");
+                result.append("<td>")
+                    .append(values.getString(column.getColumnName()))
+                    .append("</td>");
             }
             
             result.append("</tr>");
@@ -133,23 +134,35 @@ public class ReportBuilder {
     Dataset depart;
     Dataset hall_list;
     
-    public String getScheduleCell(int bell_id,int day_id) throws Exception{
+    private String getScheduleCell(int depart_id,int bell_id,int day_id) throws Exception{
+        Recordset r = DataModule.getRecordet("select distinct room_name from room a inner join schedule b on a.id=b.room_id where day_id="+day_id+" and bell_id="+bell_id+" and depart_id="+depart_id);
+        String room_label="";
+        if (r.isEmpty())
+            room_label="?";
+        else
+            for (int i=0;i<r.size();i++){
+                if (!room_label.isEmpty())
+                    room_label+="&nbsp;";
+                room_label+=r.get(i)[0].toString();
+            }
+                    
+            
         Values values = new Values();
         values.put("day_id",day_id);
         values.put("bell_id",bell_id);
         if (hall_list.locate(values)>=0){
-            return "<div align='center'>****</div>";
+            return "<td colspan='2' align='center'>****</td>";
         }
                 
         
         for (int i=0;i<schedule.size();i++){
             values = schedule.getValues(i);
             if (values.getInteger("day_id")==day_id && values.getInteger("bell_id")==bell_id){
-                return values.getString("subject_name");
+                return "<td nowrap>"+values.getString("subject_name")+"</td><td nowrap>"+room_label+"</td>";
             }
         }
         
-        return "&nbsp;";
+        return "<td colspan='2'>&nbsp;</td>";
     }
 
     /**
@@ -158,18 +171,30 @@ public class ReportBuilder {
      * @return
      * @throws Exception 
      */
-    public String getScheduleGrid() throws Exception{
+    public String getScheduleReport(Integer depart_id) throws Exception{
+        StringBuilder result = new StringBuilder();
+        Recordset r = DataModule.getRecordet("select label from depart where id="+depart_id);
+        
+        Values filter = new Values();
+        filter.put("depart_id", depart_id);
+        schedule.open(filter);
+        hall_list.open(filter);
+
+        result.append("<h3>");
+        result.append(r.getString(0));
+        result.append("</h3>");
+        
+        
         day_list = DataModule.getDataset("day_list");
         day_list.open();
         bell_list = DataModule.getDataset("bell_list");
         bell_list.open();
         Integer day_id,bell_id;
-        StringBuilder result = new StringBuilder();
+        Values values;
+        
 
         result.append("<table>");
-        Values values;
         result.append("<tr>");
-        
         result.append("<td>");
         result.append("&nbsp;");
         result.append("</td>");
@@ -195,13 +220,7 @@ public class ReportBuilder {
             // значения
             for (int col=0;col<day_list.size();col++){
                 day_id=day_list.getValues(col).getInteger("day_no");
-                result.append("<td>");
-                result.append(getScheduleCell(bell_id, day_id));
-                result.append("</td>");
-                result.append("<td>");
-                result.append("&nbsp;");
-                
-                result.append("</td>");
+                result.append(getScheduleCell(depart_id,bell_id, day_id));
             }
             result.append("</tr>");
         }
@@ -221,35 +240,25 @@ public class ReportBuilder {
         hall_list.open();
         
         schedule = DataModule.getSQLDataset("select a.day_id,a.bell_id,b.subject_name,a.depart_id from schedule a inner join subject b on a.subject_id=b.id");
-        StringBuilder resultText = new StringBuilder();
-        resultText.append("<h1>Расписание занятий по классам</h1>");
+        StringBuilder result = new StringBuilder();
+        result.append("<h1>Расписание занятий по классам</h1>");
         
-        Values values,filter;
+        Values values;
         
-        filter = new Values();
         depart = DataModule.getDataset("depart");
         depart.open();
                 
         for (int i=0;i<depart.size();i++){
             values = depart.getValues(i);
-            filter.put("depart_id", values.getInteger("id"));
-            schedule.open(filter);
-            hall_list.open(filter);
-
-            resultText.append("<h3>");
-            resultText.append(values.getString("label"));
-            resultText.append("</h3>");
             
-            
-            resultText.append(getScheduleGrid());
-            resultText.append("<br>");
-        
+            result.append(getScheduleReport(values.getInteger("id")));
+            result.append("<br>");
         }
         
-        return  HTML_PATTERN.replace("[body]", resultText).replace("[style]", STYLE) ;//resultText.toString();
+        return  result.toString() ;
     }
     
-    public String getScheduleCell2(int day_no,int bell_id,int depart_id) throws Exception{
+    private String getScheduleCell2(int day_no,int bell_id,int depart_id) throws Exception{
         Values filter = new Values();
         filter.put("day_id", day_no);
         filter.put("bell_id", bell_id);
@@ -348,14 +357,14 @@ public class ReportBuilder {
         result.append("</table>");
         
         
-        return HTML_PATTERN.replace("[body]", result).replace("[style]", STYLE);
+        return result.toString();
     }
  
     
     
     
     /**  HTML талица НЕ ВСЕ ЧАСЫ РАССТАВЛЕНЫ  */ 
-    public String getUnplacedGroupTable() throws Exception{
+    private String getUnplacedGroupTable() throws Exception{
         StringBuilder result = new StringBuilder();
         Dataset dataset = DataModule.getSQLDataset(SQL_ERROR_UNPLACED_GROUP);
         dataset.open();
@@ -372,7 +381,7 @@ public class ReportBuilder {
      * @return
      * @throws Exception 
      */
-    public String getEmptyTeacherOrRoomTable() throws Exception{
+    private String getEmptyTeacherOrRoomTable() throws Exception{
 
         StringBuilder result = new StringBuilder();
         Dataset errors =  DataModule.getSQLDataset(SQL_ERROR_EMPTY_ROOM_OR_TEACHER);
@@ -391,7 +400,7 @@ public class ReportBuilder {
      * HTML таблица Нарушение графиков Занятия проходя не по графику
      * @return 
      */
-    public String getTimeConflict() throws Exception{
+    private String getTimeConflict() throws Exception{
         
         StringBuilder result = new StringBuilder();
         result.append("<b>Нарушение графиков классов</b>");
@@ -445,14 +454,40 @@ public class ReportBuilder {
         result.append(getUnplacedGroupTable());
         result.append(getTimeConflict());
         
-        return HTML_PATTERN.replace("[body]", result).replace("[style]", STYLE);
+        return result.toString();
     }
-    
-    protected String getTeacherTable(Integer teacher_id) throws Exception{
+
+    /**
+     * Таблица расписания преподавателя
+     * @param teacher_id
+     * @return
+     * @throws Exception 
+     */
+    public String getTeacherTable(Integer teacher_id) throws Exception{
+        int min_bell_id,
+            max_bell_id,
+            recNo;
+        
         StringBuilder result = new StringBuilder();
+
+        Recordset r;
+        
+        r = DataModule.getRecordet("select teacher_fio,profile_name from v_teacher where id="+teacher_id+";");
+        
+        result.append("<h2>").append(r.getString(0)).append("</h2>");
+        result.append("<div>").append(r.getString(1)).append("</div>");
+        
+        
+        
         result.append("<table border='1' width='90%' align='center'>");
+        
+        result.append("<tr><th>Время</th><th>Предмет</th><th>Класс</th><th>Група</th><th>Кабинет</th><th>Здание</th></tr>");
         // заголовок
        
+        day_list = DataModule.getSQLDataset("select * from day_list where exists (select * from schedule where day_id=day_list.day_no and teacher_id="+teacher_id+");");
+        day_list.open();
+                
+        
         String day_caption;
         Integer day_id;
         String bell_caption;
@@ -462,84 +497,89 @@ public class ReportBuilder {
         Values map = new Values();
         
         for (int row=0;row<day_list.size();row++){
+            
             day_caption = day_list.getValues(row).getString("day_caption");
             day_id= day_list.getValues(row).getInteger("day_no");
+            r = DataModule.getRecordet("select min(bell_id),max(bell_id) from schedule where day_id="+day_id+" and teacher_id="+teacher_id+";");
+            min_bell_id = r.getInteger(0);
+            max_bell_id = r.getInteger(1);
+            bell_list = DataModule.getSQLDataset("select * from bell_list where bell_id between "+min_bell_id+" and "+max_bell_id+";");
+            bell_list.open();
             
-            result.append("<tr>");
-            result.append("<td colspan='2'>");
-            result.append(day_caption);
-            result.append("</td>");
-            result.append("</tr>");
+            result.append("<tr>")
+                  .append("<td colspan='6'>")
+                  .append(day_caption)
+                  .append("</td>")
+                  .append("</tr>");
             
             for (int col=0;col<bell_list.size();col++){
                 bell_caption=bell_list.getValues(col).getString("time_start");
                 bell_id = bell_list.getValues(col).getInteger("bell_id");
 
-                result.append("<tr>");
-                result.append("<td>");
-                
-                result.append(bell_caption);
-                
-                result.append("</td>");
-                result.append("<td>");
+                result.append("<tr>")
+                    .append("<td>")                
+                    .append(bell_caption)                
+                    .append("</td>");
 
-                Integer i;
                 map.put("teacher_id",teacher_id);
                 map.put("day_id", day_id);
                 map.put("bell_id",bell_id);
-                i = schedule.locate(map);
-                if (i>=0){
+                recNo = schedule.locate(map);
+                if (recNo>=0){
                     Values v = null;
-                    v= schedule.getValues(i);
-                    result.append(v.getString("subject_name")+" "+
-                            v.getString("depart_label")+" "+
-                            v.getString("group_label")+" "+
-                            v.getString("room")+" "+
-                            v.getString("building")+" "+
-                            "<br>");
+                    v= schedule.getValues(recNo);
+                    result.append("<td>")
+                        .append(v.getString("subject_name"))
+                        .append("</td><td>")
+                        .append(v.getString("depart_label"))
+                        .append("</td><td>")
+                        .append(v.getString("group_label"))
+                        .append("</td><td>")        
+                        .append(v.getString("room"))
+                        .append("</td><td>")
+                        .append(v.getString("building"))
+                        .append("</td>");
                 } else {
-                    result.append("&nbsp;");
+                    result.append("<td colspan='5' align='center'>****</td>");
                 }
-                
-                result.append("</td>");               
                 result.append("</tr>");
-                
             }
         }
         
+        result.append("<tr>")
+            .append("<td colspan='6'>")
+            .append("&nbsp")
+            .append("</dt>")
+            .append("</tr>")        
+            .append("</table>");
         
-        
-        
-        result.append("<tr>");
-        result.append("<td>");
-        result.append("&nbsp");
-        result.append("</dt>");
-        result.append("</tr>");        
-        result.append("</table>");
         return result.toString();
     }
     
+    /**
+     * Ощий отчёт по преподавателям
+     * @return
+     * @throws Exception 
+     */
     public String getTeacherSchedule() throws Exception{
         StringBuilder result = new StringBuilder();
         result.append("<h1>Расписание занятий по преподавателям</h1>");
         
         schedule = DataModule.getDataset("v_schedule");
         schedule.open();
-        day_list = DataModule.getDataset("day_list");
-        day_list.open();
-        bell_list = DataModule.getDataset("bell_list");
-        bell_list.open();
+        
         Dataset teacher = DataModule.getDataset("v_teacher");
         teacher.open();
         Values values ;
         for (int i=0;i<teacher.size();i++){
             values = teacher.getValues(i);
-            result.append("<p>"+values.getString("last_name")+"</p>");
             result.append(getTeacherTable(values.getInteger("id")));
         }
         
-        
-        
         return result.toString();
+    }
+    
+    public static String createPage(String reportContent){
+        return HTML_PATTERN.replace("[body]", reportContent).replace("[style]", STYLE);
     }
 }

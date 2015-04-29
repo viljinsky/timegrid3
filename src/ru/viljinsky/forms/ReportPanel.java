@@ -8,6 +8,12 @@ package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.FilterWriter;
+import java.io.IOException;
+import java.io.Writer;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -16,12 +22,20 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import ru.viljinsky.reports.ReportBuilder;
+import static ru.viljinsky.reports.ReportBuilder.HTML_PATTERN;
+import static ru.viljinsky.reports.ReportBuilder.STYLE;
 
 /**
  *
  * @author вадик
  */
 public class ReportPanel extends JPanel implements IOpenedForm {
+    public static final String RP_SCHEDULE_VAR_1 = "RP_SCHEDULE_VAR_1";
+    public static final String RP_SCHEDULE_VAR_2 = "RP_SCHEDULE_VAR_2";
+    public static final String RP_SCHEDULE_TEACHER = "RP_SCHEDULE_TEACHER";
+    public static final String RP_SCHEDULE_ERRORS = "RP_SCHEDULE_ERRORS";
+    public static final String RP_PUBLISH = "RP_PUBLISH";
+    
     JEditorPane text = new JEditorPane();
 
     CommandMngr commands = new CommandMngr() {
@@ -39,10 +53,9 @@ public class ReportPanel extends JPanel implements IOpenedForm {
     
     public ReportPanel(){
         setLayout(new BorderLayout());
-//        text = new JTextArea();
         add(new JScrollPane(text));
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        commands.setCommandList(new String[]{"COMMAND1","COMMAND2","COMMAND3","COMMAND4"});
+        commands.setCommandList(new String[]{RP_SCHEDULE_VAR_1,RP_SCHEDULE_VAR_2,RP_SCHEDULE_TEACHER,RP_SCHEDULE_ERRORS,RP_PUBLISH});
         for (Action a :commands.getActionList()){
             panel.add(new JButton(a));
         }
@@ -68,20 +81,22 @@ public class ReportPanel extends JPanel implements IOpenedForm {
     }
  
     public void doCommand(String command){
-        text.setContentType("text/html");
         try{
             switch(command){
-                case "COMMAND1":
-                    text.setText(new ReportBuilder().getScheduleReport());
+                case RP_SCHEDULE_VAR_1:
+                    showReport(new ReportBuilder().getScheduleReport());
                     break;
-                case "COMMAND2":
-                    text.setText(new ReportBuilder().getSchedueReport2());
+                case RP_SCHEDULE_VAR_2:
+                    showReport(new ReportBuilder().getSchedueReport2());
                     break;
-                case "COMMAND3":
-                    text.setText(new ReportBuilder().getScheduleError());
+                case RP_SCHEDULE_TEACHER:
+                    showReport(new ReportBuilder().getTeacherSchedule());
                     break;
-                case "COMMAND4":
-                    text.setText(new ReportBuilder().getTeacherSchedule());
+                case RP_SCHEDULE_ERRORS:
+                    showReport(new ReportBuilder().getScheduleError());
+                    break;
+                case RP_PUBLISH:
+                    publichReport();
                     break;
                 default:    
                     throw new Exception("UNKNOW_COMMAND ");    
@@ -92,18 +107,32 @@ public class ReportPanel extends JPanel implements IOpenedForm {
         }
     }
     
+    public void showReport(String reportText){
+        text.setContentType("text/html");
+        String html = ReportBuilder.createPage(reportText);
+        text.setText(html);
+    }
+    
+    public void publichReport() throws Exception{
+        text.setContentType("text/plain");
+        
+        ReportBuilder repopBuilder = new ReportBuilder();
+        
+        String txt = repopBuilder.getScheduleReport();
+        String html = ReportBuilder.createPage(txt);
+        
+        try{
+            File file = new File(".//site//html1.html");
+            BufferedWriter bw = new BufferedWriter(new FileWriter(file)); 
+            bw.write(html);
+            bw.close();
+        } catch (IOException e){
+            throw new Exception("Ошибка записи\n"+e.getMessage());
+        }
+        
+    }
+    
     public void updateAction(Action action){
     }
     
-    
-//    public void command1() throws Exception{
-//        text.setContentType("text/html");
-//        text.setCaretPosition(0);
-//        
-//    }
-//    
-//    public void command2() throws Exception{
-//        text.setContentType("text/html");
-//        text.setCaretPosition(0);
-//    }
 }
