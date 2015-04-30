@@ -264,7 +264,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
         @Override
         public void updateAction(Action a) {
             String command =getActionCommand(a);
-            System.out.println(command);
+//            System.out.println(command);
             boolean b;
             switch (command){
                 case TT_DELETE:
@@ -631,7 +631,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
         
         List<Point> emptyCells = new ArrayList<>();
         Set<Integer> avalableDays = getAvalableDay(values);
-        System.out.println(avalableDays);
+//        System.out.println(avalableDays);
         
         String sql;
         switch (group_type_id){
@@ -653,7 +653,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
                         .replace("%group_type_a", "1")
                         .replace("%group_type_b", "2")
                         ;
-                System.out.println(sql);
+//                System.out.println(sql);
                 break;
             default:
                 throw new Exception ("UNKNOW_GROUP_TYPE");
@@ -664,7 +664,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
         for (int i=0;i<recordset.size();i++){
             r = recordset.get(i);
             p= new Point((Integer)r[0]-1,(Integer)r[1]-1);
-            System.out.println(p);
+//            System.out.println(p);
             if (avalableDays.contains(p.x+1))
                 emptyCells.add(p);
         }
@@ -696,7 +696,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
     }
     
     public void treeElementChange(TreeElement element){
-        System.out.println(element.getFilter());
+//        System.out.println(element.getFilter());
         try{
             grid.avalableCells = new HashSet(element.getAvalabelCells());
 //            System.out.println(element.getAvalabelCells());
@@ -754,7 +754,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
 
     @Override
     public void close() throws Exception {
-        System.out.println("close");
+//        System.out.println("close");
         tree.clear();
         unplacedGrid.getDataset().close();
         grid.close();

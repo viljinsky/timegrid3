@@ -643,24 +643,24 @@ public class ReportBuilder implements IReportBuilder{
                 "<ul class='navigator'>"
 
                 + "<li>"
-                + "<a href='./'>Начальная страница</a>"
+                + "<a href='.'>Начальная страница</a>"
                 + "</li>"
             
             
                 + "<li>"
-                + "<a href='./page1.html'>Расписание (вариант1)</a>"
+                + "<a href='page1.html'>Расписание (вариант1)</a>"
                 + "</li>"
                 
                 + "<li>"
-                + "<a href='./page2.html'>Расписание (вариант2)</a>"
+                + "<a href='page2.html'>Расписание (вариант2)</a>"
                 + "</li>"
                 
                 + "<li>"                
-                + "<a href='./page3.html'>Расписание преподователей</a>"
+                + "<a href='page3.html'>Расписание преподователей</a>"
                 + "</li>"
                 
                 + "<li>"
-                + "<a href='./page4.html'>Расписание ошибки</a>"
+                + "<a href='page4.html'>Расписание ошибки</a>"
                 + "</li>"
                 
                 + "</ul>";
