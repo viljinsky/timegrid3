@@ -8,7 +8,13 @@ package ru.viljinsky.test;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -26,7 +32,22 @@ import ru.viljinsky.Values;
 
 class PageGenerator{
     
+    
+    private static final String PAGE1 = "page1";
+    private static final String PAGE2 = "page2";
+    private static final String PAGE3 = "page3";
+    private static final String PAGE4 = "page4";
+    private static final String PAGE5 = "page5";
+    private static final String PAGE6 = "page6";
+    private static final String PAGE7 = "page7";
+    Date currentDate = new Date();
+    SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY MMMM dd EEEE");
+    Calendar calendar = Calendar.getInstance();
+    
     public PageGenerator(){
+        calendar.setTime(currentDate);
+        calendar.setFirstDayOfWeek(Calendar.MONDAY);
+       
     }
     
     private String getDepartLabel(int depart_id) throws Exception{
@@ -48,6 +69,19 @@ class PageGenerator{
         return DataModule.getSQLDataset("select bell_id,time_start from bell_list");
     }
     
+    public String getIndexPage(){
+        
+        
+        
+        return "<h1>Расписание</h1>"+
+                 dateFormat.format(currentDate)+
+                "<ul>"+
+                "<li><a href='"+PAGE1+"'>Расписание классов</a></li>"+
+                "<li><a href='"+PAGE4+"'>Расписание перподавателей</a></li>"+
+                "</ul>";
+    }
+    
+    
     public String getDepartList() throws Exception{
         Dataset dataset = DataModule.getSQLDataset("select id,label from depart");
         Values values;
@@ -57,7 +91,7 @@ class PageGenerator{
                "<ul>");
         for (int i=0;i<dataset.size();i++){
            values=dataset.getValues(i);
-            result.append("<li><a href='page2.html?depart_id=")
+            result.append("<li><a href='"+PAGE2+"?depart_id=")
                     .append(values.getInteger("id"))
                     .append("'>")
                     .append(values.getString("label"))
@@ -67,8 +101,13 @@ class PageGenerator{
         return result.toString();
     }
     
+    private static final String SQL_DEPART_DAY_LIST = "select a.* from day_list a where exists (select * from schedule where day_id=a.day_no)";
+    private Dataset getDepartDayList() throws Exception{
+        return DataModule.getSQLDataset(SQL_DEPART_DAY_LIST);
+    };
+    
     public String getDepartLessons(Integer depart_id) throws Exception{
-        Dataset dataset = DataModule.getSQLDataset("select * from day_list");
+        Dataset dataset = getDepartDayList();
         dataset.open();
         Values values;
         StringBuilder result = new StringBuilder();
@@ -76,7 +115,7 @@ class PageGenerator{
                 "<ul>");
         for (int i=0;i<dataset.size();i++){    
             values = dataset.getValues(i);
-            result.append("<li><a href='page3.html?depart_id=").append(depart_id)
+            result.append("<li><a href='"+PAGE3+"?depart_id=").append(depart_id)
                     .append("&day_id=")
                     .append(values.getInteger("day_no"))
                     .append("'>")
@@ -85,68 +124,92 @@ class PageGenerator{
                     .append("</li>");
         }
         result.append("<ul>")
-                .append("<a href='page1.html'>Назада</a>")
-                ;
+                .append("<a href='"+PAGE1+"'>Назада</a>")   ;
         return result.toString();
     }
     
     public String getDepartSchedule(Integer depart_id,Integer day_id) throws Exception{
+        String day_of_schedule = dateFormat.format(calendar.getTime());
         Dataset schedule = DataModule.getSQLDataset("select * from v_schedule where depart_id="+depart_id+" and day_id="+day_id);
         schedule.open();
         Dataset bell_list = DataModule.getDataset("bell_list");
         bell_list.open();
         Values bells,v,filter;
         filter = new Values();
+        
                     
         StringBuilder result = new StringBuilder();
                 result.append("<h2>Расписание</h2>");
                 
                 result.append("<b>класс ")
                         .append(getDepartLabel(depart_id))
-                        .append(" день ")
-                        .append(getDayCaption(day_id))
                         .append("</b>"+
+                                
                 "<table border='1' width='90%' align='center'>");
+                
+                result.append("<tr><th colspan='5'>"+day_of_schedule+"</th></tr>");
                 
                 for (int count=0;count<bell_list.size();count++){
                     bells = bell_list.getValues(count);
                     filter.put("bell_id",bells.getInteger("bell_id"));
                     schedule.open(filter);
-                    
                    
+                    result.append("<tr><td>")
+                          .append(bells.getString("time_start"))
+                          .append("</td>");
                     if (schedule.size()==0){
-                        result.append(
-                        "<tr>"
-                            + "<td>"+bells.getString("time_start")+"</td><td>&nbsp</td><td>&nbsp</td><td>&nbsp</td>"
-                        + "</tr>");
+                        result.append("<td>&nbsp</td><td>&nbsp</td><td>&nbsp</td><td>&nbsp</td>");
+                        result.append("</tr>");
                     } else {
-                        v=schedule.getValues(0);
-                        result.append(
-                        "<tr>"
-                            + "<td>"+bells.getString("time_start")+"</td><td>"+v.getString("subject_name")+"</td><td>"+v.getString("teacher")+"</td><td>"+v.getString("room")+"</td>"
-                        + "</tr>");
+                        for (int row=0;row<schedule.size();row++){
+                            if (row>0){
+                                result.append("<tr><td>&nbsp;</td>");
+                            }
+                            v=schedule.getValues(row);
+                            result.append("<td>")
+                                  .append(v.getString("subject_name"))
+                                  .append("</td><td>")
+                                  .append(v.getString("group_label"))
+                                  .append("</td><td>")
+                                  .append(v.getString("teacher"))
+                                  .append("</td><td>")
+                                  .append(v.getString("room"))
+                                  .append("</td>");
+                            result.append("</tr>");
+                        }
                     }
                 }
-                result.append( "</table>"
-                + "<a href='page2.html?depart_id="+depart_id+"'>Список дней</a>&nbsp;")
-                ;
+                result.append( "</table>");
+                        
+                result.append("<a href='"+PAGE2+"?depart_id=")
+                      .append(depart_id)
+                      .append("'>Список дней</a>&nbsp;");
                 int prior_day,next_day;
                 prior_day = day_id-1;
                 next_day = day_id+1;
-                result.append("<a href='page3.html?depart_id=")
-                        .append(depart_id)
-                        .append("&day_id=")
-                        .append(prior_day)
-                        .append("'>&lt;Назад</a>&nbsp<a href='page3.html?depart_id=")
-                        .append(depart_id)
-                        .append("&day_id=")
-                        .append(next_day)
-                        .append("'>Вперёд&gt;</a>");
+                result.append("<div align='center'>");
+                result.append("<a href='"+PAGE3+"?depart_id=")
+                      .append(depart_id)
+                      .append("&day_id=")
+                      .append(prior_day)
+                      .append("&day=prior")  
+                      .append("'>&lt;Назад</a>&nbsp;<a href='"+PAGE3+"?depart_id=")
+                      .append(depart_id)
+                      .append("&day_id=")
+                      .append(next_day)
+                      .append("&day=next")
+                      .append("'>Вперёд&gt;</a>");
+                result.append("</div>");
         return result.toString();
     }
     
+    private static final String SQL_TEACHER_LIST =
+            "select a.id,a.last_name || ' ' || a.first_name ||' ' || a.patronymic as teacher_fio \n"
+            + "from teacher a where exists(select * from schedule where teacher_id=a.id)\n"
+            + "order by a.last_name || ' ' || a.first_name ||' ' || a.patronymic";
+            
     public String getTeacherList() throws Exception{
-        Dataset dataset = DataModule.getSQLDataset("select id,last_name || ' ' || first_name ||' ' || patronymic as teacher_fio from teacher");
+        Dataset dataset = DataModule.getSQLDataset(SQL_TEACHER_LIST);
         dataset.open();
         Values values;
         StringBuilder result = new StringBuilder();
@@ -154,7 +217,7 @@ class PageGenerator{
                 result.append("<ul>");
                 for (int i=0;i<dataset.size();i++){
                     values=dataset.getValues(i);
-                    result.append("<li><a href='page5.html?teacher_id=")
+                    result.append("<li><a href='"+PAGE5+"?teacher_id=")
                             .append(values.getInteger("id"))
                             .append("'>")
                             .append(values.getString("teacher_fio"))
@@ -163,16 +226,23 @@ class PageGenerator{
                 result.append("</ul>");
         return result.toString();
     }
+    
+    /**
+     * Список дней преподавателей
+     * @param teacher_id
+     * @return
+     * @throws Exception 
+     */        
     private String getTeacherLessons(Integer teacher_id) throws Exception{
         Dataset dataset = DataModule.getSQLDataset("select distinct a.* from day_list a inner join shift_detail b on a.day_no=b.day_id inner join teacher t on t.shift_id=b.shift_id where t.id="+teacher_id);
         dataset.open();
         Values values;
         StringBuilder result = new StringBuilder();
-        result.append("<h2>Дни занятий для перподавателя"+getTeacherFio(teacher_id)+"</h2>"
+        result.append("<h2>"+getTeacherFio(teacher_id)+"</h2>"
                 +"<ul>");
         for (int i=0;i<dataset.size();i++){
             values = dataset.getValues(i);
-               result.append("<li><a href='page6.html?teacher_id=")
+               result.append("<li><a href='"+PAGE6+"?teacher_id=")
                        .append(teacher_id)
                        .append("&day_id=")
                        .append(values.getInteger("day_no"))
@@ -185,15 +255,23 @@ class PageGenerator{
         return result.toString();
     }
 
+    /**
+     * Расписание преподавателя
+     * @param teacher_id
+     * @param day_id
+     * @return
+     * @throws Exception 
+     */
     private String getTeacherSchedule(Integer teacher_id, Integer day_id) throws Exception{
+        String dateString = dateFormat.format(calendar.getTime());
         StringBuilder result = new StringBuilder();
-        result.append("<h2>Распиание  ")
+        result.append("<h2>")
                 .append(getTeacherFio(teacher_id))
                 .append("</h2>");
         
         result.append("<table border='1' width='90%' align='center'>");
        
-        result.append("<tr><th colspan='5'>"+getDayCaption(day_id)+"</th></tr>");
+        result.append("<tr><th colspan='5'>"+dateString+"</th></tr>");
         
         Dataset schedule = DataModule.getSQLDataset("select * from v_schedule where teacher_id="+teacher_id+" and day_id="+day_id);
         Values filter = new Values();
@@ -226,79 +304,107 @@ class PageGenerator{
             }
         }
         result.append("</table>");
-        
-        result.append("<a href='page6.html?teacher_id="
+        result.append("<div align='center'>");
+        result.append("<a href='"+PAGE7+"?teacher_id="
                 +teacher_id
-                +"&day_id="
-                +(Integer)(day_id-1)
-                +"'>Назад</a>&nbsp;<a href='page6.html?teacher_id="
+                +"&day=prior"
+                +"'>Назад</a>&nbsp;<a href='"+PAGE7+"?teacher_id="
                 +teacher_id
-                +"&day_id="
-                +(Integer)(day_id+1)
+                +"&day=next"
                 +"'>Верёд</a>");
-        
+        result.append("</div>");
         return result.toString();
     }
     
     
-    public String getParam(String request,String paramName){
+    public Map<String,String> getRequestParams(String request){
+        Map<String,String> result = new HashMap<>();
         String[] s = request.split("\\?");
+        result.put("path", s[0]);
         if (s.length>1){
-            for (String s1:s[1].split("&")){
-                String[] s2 = s1.split("=");
-                if (s2[0].equals(paramName))
-                    return s2[1];
+            for (String s1 :s[1].split("&")){
+                String[] ss= s1.split("=");
+                result.put(ss[0],ss[1]);
             }
         }
-        return null;
+        return result;
     }
-    
+
+    // генерация тела страницы
     public String service(String request){
-        String[] part = request.split("\\?");
-        String path = part[0];
+        Map<String,String> params = getRequestParams(request);
+        String nextOrPrior;
+        String path = params.get("path");
         String responce;
         
         Integer depart_id,teacher_id;
+        
         Integer day_id;
+        nextOrPrior = params.get("day");
+        if (nextOrPrior!=null){
+            switch (nextOrPrior){
+                case "next":
+                    calendar.add(Calendar.DATE, 1);
+                    break;
+                case "prior":
+                    calendar.add(Calendar.DATE, -1);
+                    break;
+            }
+        }
+        
         try{
             switch(path){
                 
                 // Список классов
-                case "page1.html":
+                case PAGE1:
                     responce = getDepartList();
                     break;
                 // Выбор дня для класса    
-                case "page2.html":
-                    depart_id = Integer.valueOf(getParam(request, "depart_id"));
+                case PAGE2:
+                    depart_id = Integer.valueOf(params.get("depart_id"));
                     responce = getDepartLessons(depart_id);
                     break;
                     
                 // Расписание на день для класса   
-                case "page3.html":
-                    depart_id = Integer.valueOf(getParam(request, "depart_id"));
-                    day_id = Integer.valueOf(getParam(request,"day_id"));
+                case PAGE3:
+                    
+                    depart_id = Integer.valueOf(params.get("depart_id"));
+                    day_id = calendar.get(Calendar.DAY_OF_WEEK)-1; 
+                    if (day_id==0) day_id=7;
                     responce = getDepartSchedule(depart_id, day_id);
                     break;
 
                 // Список преподавателей    
-                case "page4.html":
+                case PAGE4:
                     responce = getTeacherList();
                     break;
 
-                case "page5.html":
-                    teacher_id = Integer.valueOf(getParam(request, "teacher_id"));
+                // Список дней преподавателя    
+                case PAGE5:
+                    teacher_id = Integer.valueOf(params.get("teacher_id"));
                     responce = getTeacherLessons(teacher_id);
-
                     break;
-                case "page6.html":
-                    teacher_id = Integer.valueOf(getParam(request, "teacher_id"));
-                    day_id = Integer.valueOf(getParam(request, "day_id"));
+                    
+                case PAGE6:
+                    calendar.setTime(new Date());
+                    day_id = Integer.valueOf(params.get("day_id"));
+                    while ((calendar.get(Calendar.DAY_OF_WEEK)-1)!=day_id)
+                        calendar.add(Calendar.DATE, 1);
+                    teacher_id = Integer.valueOf(params.get("teacher_id"));
+                    responce = getTeacherSchedule(teacher_id,day_id);
+                    break;
+                    
+                // Расписание преподавателя   
+                case PAGE7:
+                    teacher_id = Integer.valueOf(params.get("teacher_id"));
+                    day_id = calendar.get(Calendar.DAY_OF_WEEK)-1;
+                    if (day_id==0) day_id=7;
                     responce = getTeacherSchedule(teacher_id,day_id);
                     break;
 
 
                 default:
-                    responce = "<b>Немивестная команда "+path+"</b>";
+                    responce = "<b>Неизвестная команда "+path+"</b>";
             }
         } catch (Exception e){
             responce = "Ошибка\n"+e.getMessage();
@@ -307,23 +413,18 @@ class PageGenerator{
     }
     
     
-    public String getIndexPage(){
-        return "<h1>Привет генератор страниц</h1>"+
-                "<ul>"+
-                "<li><a href='page1.html'>Расписание классов</a></li>"+
-                "<li><a href='page4.html'>Расписание перподавателей</a></li>"+
-                "</ul>";
-    }
 
 }
 
 public class TestHTML extends JPanel{
     JTextPane textPane = new JTextPane();
+    JLabel label = new JLabel(">");
     PageGenerator generator = new PageGenerator();
     public TestHTML(){
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(800,600));
         add(new JScrollPane(textPane),BorderLayout.CENTER);
+        add(label,BorderLayout.PAGE_END);
         textPane.setEditable(false);
         textPane.addHyperlinkListener(new HyperlinkListener() {
 
@@ -332,6 +433,10 @@ public class TestHTML extends JPanel{
                 if (e.getEventType()==HyperlinkEvent.EventType.ACTIVATED){
                     System.out.println(e.getDescription());
                     doCommand(e.getDescription());
+                } else if(e.getEventType()==HyperlinkEvent.EventType.ENTERED){
+                    label.setText(e.getDescription());
+                } else if (e.getEventType()==HyperlinkEvent.EventType.EXITED){
+                    label.setText("");
                 }
             }
         });
