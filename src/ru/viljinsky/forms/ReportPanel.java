@@ -19,6 +19,7 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -32,10 +33,75 @@ import ru.viljinsky.reports.ReportBuilder;
  *
  * @author вадик
  */
+class Browser extends JEditorPane{
+    public Browser(){
+        setEditable(false);
+        setContentType("text/html");
+        addHyperlinkListener(new HyperlinkListener() {
+
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                URL link = null;
+                try{
+                    if (e.getURL()==null)
+                        link= new URL("http://localhost:8080/"+e.getDescription());
+                    else 
+                        link= e.getURL();
+                } catch (Exception ee){
+                    ee.printStackTrace();
+                }
+                HyperlinkEvent.EventType t= e.getEventType();
+                
+                if(t==HyperlinkEvent.EventType.ACTIVATED){
+                    hyperlinkClick(link);
+                } else if (t==HyperlinkEvent.EventType.ENTERED){
+                    hyperlinkEnter(link);
+                }
+            }
+        });
+    }
+    
+    public void hyperlinkClick(URL link){
+    }
+    public void hyperlinkEnter(URL link){
+    }
+}
+
+
 public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
     public static final String RP_PUBLISH = "RP_PUBLISH";
     
-    JEditorPane text = new JEditorPane();
+//    JEditorPane text = new JEditorPane();
+    Browser text = new Browser(){
+
+        @Override
+        public void hyperlinkEnter(URL link) {
+            statusLabel.setText(link.toString());
+        }
+
+        @Override
+        public void hyperlinkClick(URL link) {
+            Map<String,String> linkMap = new HashMap<>();
+            linkMap.put("/.", RP_INDEX);
+            linkMap.put("/page1.html", RP_SCHEDULE_VAR_1);
+            linkMap.put("/page2.html", RP_SCHEDULE_VAR_2);
+            linkMap.put("/page3.html", RP_SCHEDULE_TEACHER);
+            linkMap.put("/page4.html", RP_SCHEDULE_ERRORS);
+            
+            String path = link.getPath();
+            String reportName = linkMap.get(path);
+            System.out.println("-->"+reportName);
+            try{
+                showReport(reportName);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            
+            
+        }
+
+    };
+    
     JLabel statusLabel = new JLabel();
 
     CommandMngr commands = new CommandMngr() {
@@ -65,45 +131,6 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
             RP_PUBLISH
             }
         );
-       
-        text.addHyperlinkListener(new HyperlinkListener() {
-
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                String link = "";
-                if (e.getURL()==null)
-                    link = e.getDescription();
-                else
-                    link = e.getURL().toString();
-                
-                if (!link.startsWith("http:")){
-                    link = "http://localhost:8080/"+link;
-                }
-                
-                URL url =null;
-                try{
-                    url=new URL(link);
-                } catch (Exception ee){
-                    ee.printStackTrace();
-                }
-                
-                if (e.getEventType()==HyperlinkEvent.EventType.ACTIVATED){
-                    System.out.println(link);
-                    if (url!=null){
-                        System.out.println("protocol : "+url.getProtocol());
-                        System.out.println("host     : "+url.getHost());
-                        System.out.println("port     : "+url.getPort());
-                        System.out.println("path     : "+url.getPath());
-                        System.out.println("file     : "+url.getFile());
-                        System.out.println("query    : "+url.getQuery());
-                        
-                        
-                    }
-                } else if (e.getEventType()==HyperlinkEvent.EventType.ENTERED){
-                    statusLabel.setText(link);
-                };
-            }
-        });
         
         for (Action a :commands.getActionList()){
             panel.add(new JButton(a));
@@ -140,6 +167,9 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
                     showReport(command);
                     break;
                 case RP_PUBLISH:
+//                        URI uri = new URI("http://www.timetabler.narod.ru");
+//                        Desktop desktop = Desktop.getDesktop();
+//                        desktop.browse(uri);                    
                     publichReport();
                     break;
                 default:    
@@ -152,11 +182,10 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
     }
     
     public void showReport(String command) throws Exception{
-        text.setEditable(false);
         String reportText = new ReportBuilder().getReport(command);
-        text.setContentType("text/html");
         String html = ReportBuilder.createPage(reportText);
         text.setText(html);
+        text.setCaretPosition(0);
         
     }
     
@@ -176,34 +205,44 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
     }
     
     public void publichReport() throws Exception{
-        
-        if (JOptionPane.showConfirmDialog(this,"Export HTML","Export",JOptionPane.YES_NO_OPTION)!=JOptionPane.YES_OPTION)
-            return;
-        Map<String,String> reportMap = new HashMap<>();
-        reportMap.put(RP_INDEX  , "index.html");        
-        reportMap.put(RP_SCHEDULE_VAR_1  , "page1.html");
-        reportMap.put(RP_SCHEDULE_VAR_2  , "page2.html");
-        reportMap.put(RP_SCHEDULE_TEACHER, "page3.html");
-        reportMap.put(RP_SCHEDULE_ERRORS , "page4.html");
-        
-        text.setContentType("text/plain");
-        
-        ReportBuilder repopBuilder = new ReportBuilder();
-        String txt,html,path;
-        try{
-            for (String reportName:reportMap.keySet()){
-
-                txt = repopBuilder.getReport(reportName);
-                html = ReportBuilder.createPage(txt);
-                path = ".//site//"+reportMap.get(reportName);
-
-                printReport(path, html);
+        String path = System.getProperty("user.dir");
+        File file = new File(path);
+        JFileChooser fc = new JFileChooser(file);
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int retValue = fc.showSaveDialog(this);
+        if (retValue == JFileChooser.APPROVE_OPTION){
+            file=fc.getSelectedFile();
+            if (!file.exists()){
+                if (!file.mkdir())
+                    throw new Exception("CAN_NOT_CREATE_DIR");
             }
-            JOptionPane.showMessageDialog(this, "OK");
-        } catch (Exception e){
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }
+            
         
+            Map<String,String> reportMap = new HashMap<>();
+            reportMap.put(RP_INDEX  , "/index.html");        
+            reportMap.put(RP_SCHEDULE_VAR_1  , "/page1.html");
+            reportMap.put(RP_SCHEDULE_VAR_2  , "/page2.html");
+            reportMap.put(RP_SCHEDULE_TEACHER, "/page3.html");
+            reportMap.put(RP_SCHEDULE_ERRORS , "/page4.html");
+
+
+            ReportBuilder repopBuilder = new ReportBuilder();
+            String txt,html;
+            try{
+                for (String reportName:reportMap.keySet()){
+
+                    txt = repopBuilder.getReport(reportName);
+                    html = ReportBuilder.createPage(txt);
+                    path = file.getPath()+reportMap.get(reportName);
+
+                    printReport(path, html);
+                }
+                JOptionPane.showMessageDialog(this, "OK");
+            } catch (Exception e){
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            }
+        
+        }
         
     }
     
