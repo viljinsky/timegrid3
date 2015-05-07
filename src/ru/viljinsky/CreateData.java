@@ -12,8 +12,8 @@ package ru.viljinsky;
  */
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.net.URL;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.*;
 
 abstract class SQLReader{
@@ -24,14 +24,16 @@ abstract class SQLReader{
         String line;
         StringBuilder sql;
         BufferedReader reader = null;
-        File file=null;
+        
+        InputStream str = null;
+        
+        str = CreateData.class.getResourceAsStream(fileName);
+        if (str==null){
+            throw new Exception("SCRIPT_NOT_FOUND "+fileName);
+        }
 
-        URL url = CreateData.class.getResource(fileName);
-        if (url==null)
-            throw new Exception ("Не найден файл '"+fileName+"'");
         try{
-            file = new File(url.getFile());
-            reader = new BufferedReader(new FileReader(file));
+            reader = new BufferedReader(new InputStreamReader(str, "UTF-8"));
             sql = new StringBuilder();
             while ((line=reader.readLine())!=null){
                 if (!line.isEmpty()){
@@ -55,8 +57,8 @@ abstract class SQLReader{
 public class CreateData {
     
     Connection con = null;
-    Statement stmt = null;
-    SQLReader reader;
+    Statement  stmt = null;
+    SQLReader  reader;
     
     public void run(String fileName,boolean force,String[] SQLscript) throws Exception {
         
@@ -129,11 +131,11 @@ public class CreateData {
     }
     
     public static void execute(String fileName) throws Exception{
-        String[] script = {"sql//schedule.sql","sql//data.sql"};
+        String[] scriptList = {"sql/schedule.sql","sql/data.sql"};
         CreateData cd = new CreateData();
         System.out.println("Создаётся новая база данных...");
         try{
-            cd.run(fileName,false,script);
+            cd.run(fileName,false,scriptList);
             System.out.println("База данных создана '"+fileName+"'");
         } catch (Exception e){
             throw new Exception("Ошибка при создании базы данных:\n"+e.getMessage());
@@ -142,7 +144,7 @@ public class CreateData {
     
     public static void main(String[] args){
         String fileName = DataModule.DEFAULT_DATA;//  "example.db";
-        String[] script = {"sql//schedule.sql","sql//data.sql"};
+        String[] script = {"sql/schedule.sql","sql/data.sql"};
         CreateData cd = new CreateData();
         System.out.println("Создаётся новая база данных...");
         try{

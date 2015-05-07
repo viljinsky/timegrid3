@@ -639,6 +639,7 @@ public class ReportBuilder implements IReportBuilder{
         return HTML_PATTERN.replace("[body]", reportContent).replace("[style]", STYLE).replace("[navigator]", HTML_NAVIGATOR);
     }
     
+    
     public static String HTML_NAVIGATOR =
                 "<ul class='navigator'>"
 

@@ -12,15 +12,19 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import ru.viljinsky.reports.IReportBuilder;
 import ru.viljinsky.reports.ReportBuilder;
 
@@ -32,6 +36,7 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
     public static final String RP_PUBLISH = "RP_PUBLISH";
     
     JEditorPane text = new JEditorPane();
+    JLabel statusLabel = new JLabel();
 
     CommandMngr commands = new CommandMngr() {
 
@@ -49,6 +54,7 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
     public ReportPanel(){
         setLayout(new BorderLayout());
         add(new JScrollPane(text));
+        add(statusLabel,BorderLayout.PAGE_END);
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         commands.setCommandList(new String[]{
             RP_INDEX,
@@ -60,6 +66,44 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
             }
         );
        
+        text.addHyperlinkListener(new HyperlinkListener() {
+
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                String link = "";
+                if (e.getURL()==null)
+                    link = e.getDescription();
+                else
+                    link = e.getURL().toString();
+                
+                if (!link.startsWith("http:")){
+                    link = "http://localhost:8080/"+link;
+                }
+                
+                URL url =null;
+                try{
+                    url=new URL(link);
+                } catch (Exception ee){
+                    ee.printStackTrace();
+                }
+                
+                if (e.getEventType()==HyperlinkEvent.EventType.ACTIVATED){
+                    System.out.println(link);
+                    if (url!=null){
+                        System.out.println("protocol : "+url.getProtocol());
+                        System.out.println("host     : "+url.getHost());
+                        System.out.println("port     : "+url.getPort());
+                        System.out.println("path     : "+url.getPath());
+                        System.out.println("file     : "+url.getFile());
+                        System.out.println("query    : "+url.getQuery());
+                        
+                        
+                    }
+                } else if (e.getEventType()==HyperlinkEvent.EventType.ENTERED){
+                    statusLabel.setText(link);
+                };
+            }
+        });
         
         for (Action a :commands.getActionList()){
             panel.add(new JButton(a));
