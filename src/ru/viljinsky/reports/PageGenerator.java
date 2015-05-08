@@ -6,6 +6,7 @@
 
 package ru.viljinsky.reports;
 
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -321,5 +322,17 @@ public class PageGenerator {
         }
         return responce;
     }
+
+    public String getPage(URL url) {
+        String request = url.getPath()+(url.getQuery()==null?"":"?"+url.getQuery());
+        if (request.startsWith("/")){
+            request = request.substring(1, request.length());
+        }
+        System.out.println(request);
+        return getDefaultPage() + getResponce(request);
+        
+//        return url.toString()+"<br>"+url.getQuery()+"<br>"+url.getPath()+"<br>"+url.getPath()+(url.getQuery()==null?"":url.getQuery());
+    }
+
     
 }

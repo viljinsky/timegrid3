@@ -33,7 +33,7 @@ public class ReportBuilder implements IReportBuilder{
                 return getTeacherSchedule();
             case RP_SCHEDULE_ERRORS:
                 return getScheduleError();
-            case RP_INDEX:
+            case RP_HOME:
                 return getIndexPage();
             default:
                 throw new Exception("UNKNOW_REPORT_NAME\n"+reportName);

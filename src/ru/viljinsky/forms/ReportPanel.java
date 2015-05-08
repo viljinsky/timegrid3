@@ -19,100 +19,25 @@ import java.util.Map;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import ru.viljinsky.reports.IReportBuilder;
 import ru.viljinsky.reports.ReportBuilder;
+import ru.viljinsky.reports.Browser;
 
-/**
- *
- * @author вадик
- */
-class Browser extends JEditorPane{
-    public String host = "localhost";
-    public String protocol = "http";
-    public int port = 8080;
-    
-    public Browser(){
-        setEditable(false);
-        setContentType("text/html");
-        addHyperlinkListener(new HyperlinkListener() {
-
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                URL link = null;
-                String path;
-                try{
-                    if (e.getURL()==null){
-                        path = e.getDescription();
-                        if (!path.startsWith("/")){
-                            path = "/"+path;
-                        }
-                        link = new URL(protocol, host, port, path);
-                    }
-                    else 
-                        link= e.getURL();
-                } catch (Exception ee){
-                    ee.printStackTrace();
-                }
-                HyperlinkEvent.EventType t= e.getEventType();
-                
-                if(t==HyperlinkEvent.EventType.ACTIVATED){
-                    try{
-                        setAddress(link);
-                    } catch (Exception ee){
-                        ee.printStackTrace();
-                    }
-//                    hyperlinkClick(link);
-                } else if (t==HyperlinkEvent.EventType.ENTERED){
-                    hyperlinkEnter(link);
-                }
-            }
-        });
-    }
-    
-    public void setAddress(URL address) throws Exception{
-        setText(getContentHtml(address));
-        setCaretPosition(0);
-    }
-    
-    public void setAddress(String address) throws Exception{
-        URL url = new URL(address);
-        setText(getContentHtml(url));
-        setCaretPosition(0);
-    }
-    
-    public void hyperlinkEnter(URL link){
-    }
-    
-    public String getContentHtml(URL url) throws Exception{
-        return "<h1>Привет генератор</h1>";
-    }
-}
 
 
 public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
     public static final String RP_PUBLISH = "RP_PUBLISH";
+    public static final String RP_RELOAD = "RP_RELOAD";
     
-//    JEditorPane text = new JEditorPane();
-    Browser text = new Browser(){
-
-        @Override
-        public void hyperlinkEnter(URL link) {
-            statusLabel.setText(link.toString());
-        }
-
+    Browser browser = new Browser(){
 
         @Override
         public String getContentHtml(URL url) throws Exception{
             Map<String,String> linkMap = new HashMap<>();
-            linkMap.put("/.", RP_INDEX);
+            linkMap.put("/.", RP_HOME);
             linkMap.put("/page1.html", RP_SCHEDULE_VAR_1);
             linkMap.put("/page2.html", RP_SCHEDULE_VAR_2);
             linkMap.put("/page3.html", RP_SCHEDULE_TEACHER);
@@ -129,13 +54,9 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
                 throw new Exception("GET_HTML_ERROR"+e.getMessage());
             }
         }
-        
-        
 
     };
     
-    JLabel statusLabel = new JLabel();
-
     CommandMngr commands = new CommandMngr() {
 
         @Override
@@ -151,27 +72,18 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
     
     public ReportPanel(){
         setLayout(new BorderLayout());
-        add(new JScrollPane(text));
-        add(statusLabel,BorderLayout.PAGE_END);
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        add(browser);
         commands.setCommandList(new String[]{
-            RP_INDEX,
-//            RP_SCHEDULE_VAR_1,
-//            RP_SCHEDULE_VAR_2,
-//            RP_SCHEDULE_TEACHER,
-//            RP_SCHEDULE_ERRORS,
             RP_PUBLISH
             }
         );
+        browser.addControl(new JButton(commands.getAction(RP_PUBLISH)));
         
-        for (Action a :commands.getActionList()){
-            panel.add(new JButton(a));
-        }
-        add(panel,BorderLayout.PAGE_START);
     }
 
     @Override
     public void open() throws Exception {
+        browser.home();
     }
 
     @Override
@@ -191,10 +103,12 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
     public void doCommand(String command){
         try{
             switch(command){
-                case RP_INDEX:    
-                    text.setAddress("http://loaclhost:8080/.");
-//                    showReport(command);
-                    break;
+//                case RP_RELOAD:
+//                    browser.reload();
+//                    break;
+//                case RP_HOME:    
+//                    browser.home();//setAddress("http://loaclhost:8080/.");
+//                    break;
                 case RP_PUBLISH:
 //                        URI uri = new URI("http://www.timetabler.narod.ru");
 //                        Desktop desktop = Desktop.getDesktop();
@@ -204,7 +118,7 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
                 default:    
                     throw new Exception("UNKNOW_COMMAND ");    
             }
-            text.setCaretPosition(0);
+//            text.setCaretPosition(0);
         } catch (Exception e){
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
@@ -240,7 +154,7 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
             
         
             Map<String,String> reportMap = new HashMap<>();
-            reportMap.put(RP_INDEX  , "/index.html");        
+            reportMap.put(RP_HOME  , "/index.html");        
             reportMap.put(RP_SCHEDULE_VAR_1  , "/page1.html");
             reportMap.put(RP_SCHEDULE_VAR_2  , "/page2.html");
             reportMap.put(RP_SCHEDULE_TEACHER, "/page3.html");
@@ -262,9 +176,7 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
             } catch (Exception e){
                 JOptionPane.showMessageDialog(this, e.getMessage());
             }
-        
         }
-        
     }
     
     public void updateAction(Action action){

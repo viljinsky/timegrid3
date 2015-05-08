@@ -6,64 +6,49 @@
 
 package ru.viljinsky.test;
 
-import ru.viljinsky.reports.PageGenerator;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.net.URL;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import ru.viljinsky.DataModule;
+import ru.viljinsky.reports.Browser;
+import ru.viljinsky.reports.PageGenerator;
 
-
+/**
+ *
+ * @author вадик
+ */
 public class TestHTML extends JPanel{
-    JTextPane textPane = new JTextPane();
-    JLabel label = new JLabel(">");
     PageGenerator generator = new PageGenerator();
-    public TestHTML(){
-        setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(800,600));
-        add(new JScrollPane(textPane),BorderLayout.CENTER);
-        add(label,BorderLayout.PAGE_END);
-        textPane.setEditable(false);
-        textPane.addHyperlinkListener(new HyperlinkListener() {
+    Browser browser = new Browser() {
 
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (e.getEventType()==HyperlinkEvent.EventType.ACTIVATED){
-                    System.out.println(e.getDescription());
-                    doCommand(e.getDescription());
-                } else if(e.getEventType()==HyperlinkEvent.EventType.ENTERED){
-                    label.setText(e.getDescription());
-                } else if (e.getEventType()==HyperlinkEvent.EventType.EXITED){
-                    label.setText("");
-                }
-            }
-        });
-        
-        textPane.setContentType("text/html");
-        textPane.setText(generator.getResponce());
-        try{
-            DataModule.open();
-        } catch (Exception e){
-            e.printStackTrace();
+        @Override
+        public String getContentHtml(URL url) throws Exception {
+            System.out.println(url.toString());
+            return generator.getPage(url);
         }
-    }
+
+        @Override
+        public void home() {
+            setHtml(generator.getDefaultPage());
+        }
+    };
     
-    public void doCommand(String request){
-        String responce = generator.getResponce(request);
-        textPane.setText(generator.getDefaultPage()+responce);
+    public TestHTML(){
+        setPreferredSize(new Dimension(800,600));
+        setLayout(new BorderLayout());
+        add(browser);
+        browser.home();
+        
     }
-    
-    public static void main(String[] args){
+    public static void main(String[] args) throws Exception{
+        DataModule.open();
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(new TestHTML());
         frame.pack();
         frame.setVisible(true);
-    }
+    } 
     
 }
