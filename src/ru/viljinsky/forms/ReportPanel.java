@@ -1,3 +1,4 @@
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -34,6 +35,10 @@ import ru.viljinsky.reports.ReportBuilder;
  * @author вадик
  */
 class Browser extends JEditorPane{
+    public String host = "localhost";
+    public String protocol = "http";
+    public int port = 8080;
+    
     public Browser(){
         setEditable(false);
         setContentType("text/html");
@@ -42,9 +47,15 @@ class Browser extends JEditorPane{
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
                 URL link = null;
+                String path;
                 try{
-                    if (e.getURL()==null)
-                        link= new URL("http://localhost:8080/"+e.getDescription());
+                    if (e.getURL()==null){
+                        path = e.getDescription();
+                        if (!path.startsWith("/")){
+                            path = "/"+path;
+                        }
+                        link = new URL(protocol, host, port, path);
+                    }
                     else 
                         link= e.getURL();
                 } catch (Exception ee){
@@ -53,7 +64,12 @@ class Browser extends JEditorPane{
                 HyperlinkEvent.EventType t= e.getEventType();
                 
                 if(t==HyperlinkEvent.EventType.ACTIVATED){
-                    hyperlinkClick(link);
+                    try{
+                        setAddress(link);
+                    } catch (Exception ee){
+                        ee.printStackTrace();
+                    }
+//                    hyperlinkClick(link);
                 } else if (t==HyperlinkEvent.EventType.ENTERED){
                     hyperlinkEnter(link);
                 }
@@ -61,9 +77,22 @@ class Browser extends JEditorPane{
         });
     }
     
-    public void hyperlinkClick(URL link){
+    public void setAddress(URL address) throws Exception{
+        setText(getContentHtml(address));
+        setCaretPosition(0);
     }
+    
+    public void setAddress(String address) throws Exception{
+        URL url = new URL(address);
+        setText(getContentHtml(url));
+        setCaretPosition(0);
+    }
+    
     public void hyperlinkEnter(URL link){
+    }
+    
+    public String getContentHtml(URL url) throws Exception{
+        return "<h1>Привет генератор</h1>";
     }
 }
 
@@ -79,8 +108,9 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
             statusLabel.setText(link.toString());
         }
 
+
         @Override
-        public void hyperlinkClick(URL link) {
+        public String getContentHtml(URL url) throws Exception{
             Map<String,String> linkMap = new HashMap<>();
             linkMap.put("/.", RP_INDEX);
             linkMap.put("/page1.html", RP_SCHEDULE_VAR_1);
@@ -88,17 +118,19 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
             linkMap.put("/page3.html", RP_SCHEDULE_TEACHER);
             linkMap.put("/page4.html", RP_SCHEDULE_ERRORS);
             
-            String path = link.getPath();
+            String path = url.getPath();
             String reportName = linkMap.get(path);
             System.out.println("-->"+reportName);
             try{
-                showReport(reportName);
+                String reportText = new ReportBuilder().getReport(linkMap.get(path));
+                return ReportBuilder.createPage(reportText);
             } catch (Exception e){
                 e.printStackTrace();
+                throw new Exception("GET_HTML_ERROR"+e.getMessage());
             }
-            
-            
         }
+        
+        
 
     };
     
@@ -124,10 +156,10 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         commands.setCommandList(new String[]{
             RP_INDEX,
-            RP_SCHEDULE_VAR_1,
-            RP_SCHEDULE_VAR_2,
-            RP_SCHEDULE_TEACHER,
-            RP_SCHEDULE_ERRORS,
+//            RP_SCHEDULE_VAR_1,
+//            RP_SCHEDULE_VAR_2,
+//            RP_SCHEDULE_TEACHER,
+//            RP_SCHEDULE_ERRORS,
             RP_PUBLISH
             }
         );
@@ -159,12 +191,9 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
     public void doCommand(String command){
         try{
             switch(command){
-                case RP_SCHEDULE_VAR_1:
-                case RP_SCHEDULE_VAR_2:
-                case RP_SCHEDULE_TEACHER:
-                case RP_SCHEDULE_ERRORS:
                 case RP_INDEX:    
-                    showReport(command);
+                    text.setAddress("http://loaclhost:8080/.");
+//                    showReport(command);
                     break;
                 case RP_PUBLISH:
 //                        URI uri = new URI("http://www.timetabler.narod.ru");
@@ -179,14 +208,6 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
         } catch (Exception e){
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
-    }
-    
-    public void showReport(String command) throws Exception{
-        String reportText = new ReportBuilder().getReport(command);
-        String html = ReportBuilder.createPage(reportText);
-        text.setText(html);
-        text.setCaretPosition(0);
-        
     }
     
     
