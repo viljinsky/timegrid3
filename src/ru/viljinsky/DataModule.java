@@ -65,6 +65,12 @@ public class DataModule implements IDataModuleConsts {
         return active;
     }
     
+    public static void createData(String path) throws Exception{
+//        con.close();
+        con = DriverManager.getConnection("jdbc:sqlite:"+path);
+        con.close();
+    }
+    
     public static void open() throws Exception{
         open(DEFAULT_DATA);
     }

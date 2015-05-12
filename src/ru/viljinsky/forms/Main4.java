@@ -21,6 +21,7 @@ import javax.swing.JTabbedPane;
 import ru.viljinsky.CreateData;
 import ru.viljinsky.DataModule;
 import ru.viljinsky.util.SQLMonitor;
+import ru.viljinsky.util.SQLMonitor2;
 
 
 
@@ -154,7 +155,8 @@ public class Main4 extends JFrame{
                     break;
                     
                 case "sqlMonitor":
-                    SQLMonitor.showFrame(rootPane);
+//                    SQLMonitor.showFrame(rootPane);
+                    SQLMonitor2.showSQLMonitor(rootPane);
                     break;
                     
                 case "testShift":

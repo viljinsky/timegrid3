@@ -206,7 +206,7 @@ select s.subject_name,a.subject_id,b.id as teacher_id,a.profile_id
  from profile_item a inner join teacher b on a.profile_id=b.profile_id
 inner join subject s on s.id=a.subject_id;
 
-select * from v_teacher_profile;
+-- select * from v_teacher_profile;
 
 ---------- Профили помещений
 create view v_room_profile as
@@ -214,7 +214,7 @@ select s.subject_name,a.subject_id,b.id as room_id,a.profile_id
  from profile_item a inner join room b on a.profile_id=b.profile_id
 inner join subject s on s.id=a.subject_id;
 
-select * from v_room_profile;
+-- select * from v_room_profile;
 
 
 -- v_subject_group
@@ -247,7 +247,7 @@ a.week_id
         left join room r on r.id = a.default_room_id
         order by a.depart_id,s.subject_name,a.group_id;
 
-select * from v_subject_group;
+-- select * from v_subject_group;
 --                          v_subject_group_on_schedule
 
 drop view if exists v_subject_group_on_schedule;
@@ -260,7 +260,7 @@ a.stream_id,a.group_sequence_id,a.pupil_count
 left join schedule b on a.depart_id=b.depart_id and a.subject_id=b.subject_id and a.group_id=b.group_id
 group by a.depart_id,a.subject_id,a.group_id,a.hour_per_week,a.hour_per_day,a.group_id,a.group_type_id,a.pupil_count;
 
-select * from v_subject_group_on_schedule;
+-- select * from v_subject_group_on_schedule;
 
 -- v_schedule
 
@@ -296,7 +296,7 @@ from v_subject_group a
     inner join bell_list bl on bl.bell_id=b.bell_id
     inner join depart f on f.id=a.depart_id;
 
-select * from v_schedule;
+-- select * from v_schedule;
 
 
 --   v_teacher
@@ -356,7 +356,7 @@ inner join profile p on p.id =a.profile_id
 inner join shift s on s.id=a.shift_id
 inner join building b on b.id=a.building_id;
 
-select * from v_room;
+-- select * from v_room;
 
 
 -- v_depart_on_schedule
@@ -390,7 +390,7 @@ select a.id as curriculum_id,a.caption as curriculum,
 b.id as skill_id,b.caption as skill from
 curriculum a,skill b;
 
-select * from v_curriculum;
+-- select * from v_curriculum;
 
 
 --- Для расчётов всободных часов
@@ -404,7 +404,7 @@ inner join curriculum_detail c
 	and c.subject_id=a.subject_id
 order by a.day_id,a.bell_id;
 
-select * from v_schedule_calc where depart_id=1;
+-- select * from v_schedule_calc where depart_id=1;
 
 -----------------------  v_depart ----------------------------------------------
 create view v_depart as
@@ -428,7 +428,7 @@ from depart a
 	left join teacher t on a.class_former=t.id
 	left join room r on r.id=a.class_room
 	left join building g on g.id=r.building_id;
-select * from v_depart;
+-- select * from v_depart;
 
 ------------------------security--------------------------
 
@@ -450,3 +450,10 @@ insert into user_role (id,role_name) values (2,'teacher');
 insert into user_role (id,role_name) values (3,'guest');
 
 insert into users (user_name,nick_name,user_role_id) values ('admin','Администратор',1);
+
+
+create table attr (param_name varchar(40) not null unique,
+param_value varchar(40)
+);
+insert into attr(param_name,param_value) values ('date_begin','1/1/2015');
+insert into attr(param_name,param_value) values ('date_end','1/1/2015');

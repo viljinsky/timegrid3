@@ -24,6 +24,7 @@ import ru.viljinsky.Values;
  * @author вадик
  */
 public class PageGenerator {
+    private static final String SERVLET = "test";
     private static final String PAGE1 = "page1";
     private static final String PAGE2 = "page2";
     private static final String PAGE3 = "page3";
@@ -32,7 +33,7 @@ public class PageGenerator {
     private static final String PAGE6 = "page6";
     private static final String PAGE7 = "page7";
     Date currentDate = new Date();
-    SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY MMMM dd EEEE");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM YYYY EEEE");
     Calendar calendar = Calendar.getInstance();
 
     public PageGenerator() {
@@ -64,10 +65,10 @@ public class PageGenerator {
                 + dateFormat.format(currentDate)
                 + "<ul>"
                 + "<li><a href='"
-                + PAGE1 
+                + SERVLET+"?page="+PAGE1 
                 + "'>Расписание классов</a></li>"
                 + "<li><a href='"
-                + PAGE4
+                + SERVLET+"?page="+PAGE4
                 + "'>Расписание перподавателей</a></li>"
                 + "</ul>";
     }
@@ -80,7 +81,11 @@ public class PageGenerator {
         result.append("<h2>Список классов</h2>" + "<ul>");
         for (int i = 0; i < dataset.size(); i++) {
             values = dataset.getValues(i);
-            result.append("<li><a href='" + PAGE2 + "?depart_id=").append(values.getInteger("id")).append("'>").append(values.getString("label")).append("</li>");
+            result.append("<li><a href='" + SERVLET+"?page="+ PAGE2 + "&depart_id=")
+                  .append(values.getInteger("id"))
+                  .append("'>")
+                  .append(values.getString("label"))
+                  .append("</li>");
         }
         result.append("</ul>");
         return result.toString();
@@ -91,6 +96,12 @@ public class PageGenerator {
         return DataModule.getSQLDataset(SQL_DEPART_DAY_LIST);
     }
 
+    /**
+     * Дни класса
+     * @param depart_id
+     * @return
+     * @throws Exception 
+     */
     public String getDepartLessons(Integer depart_id) throws Exception {
         Dataset dataset = getDepartDayList();
         dataset.open();
@@ -99,7 +110,14 @@ public class PageGenerator {
         result.append("<h2>Список дней для класса " + getDepartLabel(depart_id) + "</h2>" + "<ul>");
         for (int i = 0; i < dataset.size(); i++) {
             values = dataset.getValues(i);
-            result.append("<li><a href='" + PAGE3 + "?depart_id=").append(depart_id).append("&day_id=").append(values.getInteger("day_no")).append("'>").append(values.getString("day_caption")).append("</a>").append("</li>");
+            result.append("<li><a href='" + SERVLET+"?page="+PAGE3 + "&depart_id=")
+                  .append(depart_id)
+                  .append("&day_id=")
+                  .append(values.getInteger("day_no"))
+                  .append("'>")
+                  .append(values.getString("day_caption"))
+                  .append("</a>")
+                  .append("</li>");
         }
         result.append("<ul>").append("<a href='" + PAGE1 + "'>Назада</a>");
         return result.toString();
@@ -147,7 +165,18 @@ public class PageGenerator {
             }
         }
         result.append("</table>");
-        result.append("<a href='" + PAGE2 + "?depart_id=").append(depart_id).append("'>Список дней</a>&nbsp;").append("<div align='center'>").append("<a href='" + PAGE3 + "?depart_id=").append(depart_id).append("&day=prior").append("'>&lt;Назад</a>&nbsp;<a href='" + PAGE3 + "?depart_id=").append(depart_id).append("&day=next").append("'>Вперёд&gt;</a>").append("</div>");
+        result.append("<a href='" + PAGE2 + "?depart_id=")
+                .append(depart_id)
+                .append("'>Список дней</a>&nbsp;")
+                .append("<div align='center'>")
+                .append("<a href='" + SERVLET+"?page="+PAGE3 + "&depart_id=")
+                .append(depart_id)
+                .append("&day=prior")
+                .append("'>&lt;Назад</a>&nbsp;<a href='" + SERVLET+"?page="+PAGE3 + "&depart_id=")
+                .append(depart_id).append("&day=next")
+                .append("'>Вперёд&gt;</a>")
+                .append("</div>");
+        
         return result.toString();
     }
     private static final String SQL_TEACHER_LIST = "select a.id,a.last_name || ' ' || a.first_name ||' ' || a.patronymic as teacher_fio \n" + "from teacher a where exists(select * from schedule where teacher_id=a.id)\n" + "order by a.last_name || ' ' || a.first_name ||' ' || a.patronymic";
@@ -161,7 +190,7 @@ public class PageGenerator {
         result.append("<ul>");
         for (int i = 0; i < dataset.size(); i++) {
             values = dataset.getValues(i);
-            result.append("<li><a href='" + PAGE5 + "?teacher_id=").append(values.getInteger("id")).append("'>").append(values.getString("teacher_fio")).append("</a></li>");
+            result.append("<li><a href='" + SERVLET +"?page="+ PAGE5 + "&teacher_id=").append(values.getInteger("id")).append("'>").append(values.getString("teacher_fio")).append("</a></li>");
         }
         result.append("</ul>");
         return result.toString();
@@ -181,7 +210,7 @@ public class PageGenerator {
         result.append("<h2>" + getTeacherFio(teacher_id) + "</h2>" + "<ul>");
         for (int i = 0; i < dataset.size(); i++) {
             values = dataset.getValues(i);
-            result.append("<li><a href='" + PAGE6 + "?teacher_id=").append(teacher_id).append("&day_id=").append(values.getInteger("day_no")).append("'>").append(values.getString("day_caption")).append("</a></li>");
+            result.append("<li><a href='" + SERVLET+"?page="+PAGE6 + "&teacher_id=").append(teacher_id).append("&day_id=").append(values.getInteger("day_no")).append("'>").append(values.getString("day_caption")).append("</a></li>");
         }
         result.append("<ul>");
         return result.toString();
@@ -221,22 +250,34 @@ public class PageGenerator {
             }
         }
         result.append("</table>");
+        
         result.append("<div align='center'>");
-        result.append("<a href='" + PAGE7 + "?teacher_id=" + teacher_id + "&day=prior" + "'>Назад</a>&nbsp;<a href='" + PAGE7 + "?teacher_id=" + teacher_id + "&day=next" + "'>Верёд</a>");
+        
+        result.append("<a href='" + SERVLET + "?page=" + PAGE7 + "&teacher_id=")
+                .append(teacher_id)
+                .append("&day=prior'>Назад</a>&nbsp;<a href='" + SERVLET+"?page="+PAGE7 + "&teacher_id=")
+                .append(teacher_id)
+                .append("&day=next" + "'>Верёд</a>");
+        
         result.append("</div>");
         return result.toString();
     }
 
     public Map<String, String> getRequestParams(String request) {
-        Map<String, String> result = new HashMap<>();
-        String[] s = request.split("\\?");
-        result.put("path", s[0]);
-        if (s.length > 1) {
-            for (String s1 : s[1].split("&")) {
-                String[] ss = s1.split("=");
-                result.put(ss[0], ss[1]);
-            }
+        Map<String,String> result = new HashMap<>();
+        String[] s= request.split("&");
+        for (String k:s){
+            result.put(k.split("=")[0], k.split("=")[1]);
         }
+//        Map<String, String> result = new HashMap<>();
+//        String[] s = request.split("\\?");
+//        result.put("path", s[0]);
+//        if (s.length > 1) {
+//            for (String s1 : s[1].split("&")) {
+//                String[] ss = s1.split("=");
+//                result.put(ss[0], ss[1]);
+//            }
+//        }
         return result;
     }
 
@@ -251,7 +292,8 @@ public class PageGenerator {
     public String getResponce(String request) {
         Map<String, String> params = getRequestParams(request);
         String nextOrPrior;
-        String path = params.get("path");
+//        String path = params.get("path");
+        String path = params.get("page");
         String responce;
         Integer depart_id;
         Integer teacher_id;
@@ -324,10 +366,11 @@ public class PageGenerator {
     }
 
     public String getPage(URL url) {
-        String request = url.getPath()+(url.getQuery()==null?"":"?"+url.getQuery());
-        if (request.startsWith("/")){
-            request = request.substring(1, request.length());
-        }
+//        String request = url.getPath()+(url.getQuery()==null?"":"?"+url.getQuery());
+//        if (request.startsWith("/")){
+//            request = request.substring(1, request.length());
+//        }
+        String request = url.getQuery();
         System.out.println(request);
         return getDefaultPage() + getResponce(request);
         

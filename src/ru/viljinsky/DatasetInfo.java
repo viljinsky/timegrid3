@@ -17,7 +17,7 @@ import java.util.Map;
  *
  * @author вадик
  */
-public class DatasetInfo {
+public class DatasetInfo implements Comparable {
 
     String tableType; // TABLE or VIEW
     String tableName;
@@ -128,6 +128,15 @@ public class DatasetInfo {
             columns.get(i).print();
         
        
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if (o instanceof DatasetInfo){
+            DatasetInfo info = (DatasetInfo)o;
+            return tableName.compareTo(info.tableName);
+        }
+        return 0;
     }
     
 }
