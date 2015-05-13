@@ -20,7 +20,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import ru.viljinsky.CreateData;
 import ru.viljinsky.DataModule;
-import ru.viljinsky.util.SQLMonitor;
 import ru.viljinsky.util.SQLMonitor2;
 
 

@@ -20,7 +20,7 @@ import java.util.List;
 
 
 interface IDataModuleConsts {
-    public static final String  DATABASE_NOT_ACTIVE = "База данных не открыта";
+    public static final String  DATABASE_IS_NOT_ACTIVE = "База данных не открыта";
     public static final String  DATABASE_IS_ACTIVE  = "База открыта";
     public static final String  FILE_NOT_FOUND = "Файл \"%s\" не найден";
     public static final String  TABLE_NOT_FOUND = "TABLE_NOT_FOUND";
@@ -66,7 +66,9 @@ public class DataModule implements IDataModuleConsts {
     }
     
     public static void createData(String path) throws Exception{
-//        con.close();
+        if (active){
+            throw new Exception(DATABASE_IS_ACTIVE);
+        }
         con = DriverManager.getConnection("jdbc:sqlite:"+path);
         con.close();
     }
@@ -77,7 +79,7 @@ public class DataModule implements IDataModuleConsts {
     
     public static void reopen() throws Exception{
         if (!active)
-            throw new Exception(DATABASE_NOT_ACTIVE);
+            throw new Exception(DATABASE_IS_NOT_ACTIVE);
         for (Dataset dataset:datasetList)
             dataset.close();
         datasetList.clear();
@@ -135,7 +137,7 @@ public class DataModule implements IDataModuleConsts {
     
     public static void close() throws Exception{
         if (!active)
-            throw new Exception(DATABASE_NOT_ACTIVE);
+            throw new Exception(DATABASE_IS_NOT_ACTIVE);
         for (Dataset dataset:datasetList){
             dataset.close();
         }
@@ -149,7 +151,7 @@ public class DataModule implements IDataModuleConsts {
 
     public static String[] getTableNames() throws Exception{
         if (!active)
-            throw new Exception(DATABASE_NOT_ACTIVE);
+            throw new Exception(DATABASE_IS_NOT_ACTIVE);
         String[] result = new String[infoList.size()];
         int i=0;
         for (DatasetInfo info:infoList){
@@ -160,7 +162,7 @@ public class DataModule implements IDataModuleConsts {
     
     public static Dataset getDataset(String tableName) throws Exception{
         if (!active)
-            throw new Exception(DATABASE_NOT_ACTIVE);
+            throw new Exception(DATABASE_IS_NOT_ACTIVE);
         Dataset dataset;
         for (DatasetInfo info:infoList){
             if (info.tableName.equals(tableName)){
@@ -333,6 +335,21 @@ public class DataModule implements IDataModuleConsts {
             }
         }
         return result;
+    }
+    /**
+     * Поиск запроса создания таблицы или представления 
+     * только для SQLite
+     * @param tableName имя таблицы или представления
+     * @return запрос типа CREATE TABLE table_name (field1,..,field2)
+     * @throws Exception 
+     */
+    public static String getCreateSql(String tableName) throws Exception{
+        Recordset r =  DataModule.getRecordet("select sql from sqlite_master\n" +
+              "where (type = 'table' or type='view') and tbl_name='"+tableName+"';");
+        if (r.isEmpty())
+            throw new Exception("ERROR_TABLE_OR_VIEW_NOT_FOUND\n"+tableName);
+        return r.getString(0);
+        
     }
     
 }

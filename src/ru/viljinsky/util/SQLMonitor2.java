@@ -1,7 +1,13 @@
+/**
+ *   SQLite Monitor
+ * 
+ * @author v.iljinsky  
+ */
 
 package ru.viljinsky.util;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -10,8 +16,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +28,7 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
@@ -32,6 +41,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import ru.viljinsky.Column;
@@ -51,6 +61,7 @@ abstract class SQLEditor extends JPanel{
     JTextArea text = new JTextArea();
     JTabbedPane tabbs = new JTabbedPane();
     Action[] actions = {};
+    File sourceFile=null;
     
     public JPopupMenu getPopupMenu(){
         JPopupMenu popupMenu = new JPopupMenu();
@@ -74,12 +85,36 @@ abstract class SQLEditor extends JPanel{
             while ((line=br.readLine())!=null){
                 text.append(line+"\n");
             }
+            sourceFile = file;
         } finally{
             if (br!=null)
                 br.close();
         }
     };
     
+    public void saveFile() throws Exception{
+        BufferedWriter bw = null;
+        if (sourceFile!=null)
+        try{
+            bw=new BufferedWriter(new FileWriter(sourceFile));
+            bw.write(text.getText());
+        } finally{
+            if (bw!=null)
+                bw.close();
+        }
+    }
+    
+    public void saveFileAs(File file) throws Exception{
+        BufferedWriter bw = null;
+        try{
+            bw=new BufferedWriter(new FileWriter(file));
+            bw.write(text.getText());
+            sourceFile=file;
+        } finally{
+            if (bw!=null)
+                bw.close();
+        }
+    }
     public SQLEditor(){
         setLayout(new BorderLayout());
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -125,7 +160,7 @@ abstract class SQLEditor extends JPanel{
                     try{
                         switch (e.getKeyCode()){
                             case KeyEvent.VK_ENTER:
-                                doEnter();
+                                doExecuteAll();
                                 break;
                             case KeyEvent.VK_E:
                                 doExecute();
@@ -185,9 +220,9 @@ abstract class SQLEditor extends JPanel{
         for (int i=0;i<lineCount;i++){
             try{
                 lineStart = text.getLineStartOffset(i);
-                lineEnd = text.getLineEndOffset(i);
-                String s = text.getText(lineStart,lineEnd-lineStart);
-                if (!s.isEmpty() && !s.trim().startsWith("--")){
+                lineEnd   = text.getLineEndOffset(i);
+                String s  = text.getText(lineStart,lineEnd-lineStart);
+                if (!s.trim().isEmpty() && !s.trim().startsWith("--")){
                     sql+=s;
                     if (s.trim().endsWith(";")){
                         result.add(sql);
@@ -212,7 +247,7 @@ abstract class SQLEditor extends JPanel{
         grid.setDataset(dataset);
         tabbs.add(gridName,new JScrollPane(grid));        
     }    
-    public abstract void doEnter() throws Exception;
+    public abstract void doExecuteAll() throws Exception;
     
     public abstract void doExecute() throws Exception;
     
@@ -336,39 +371,86 @@ abstract class DBTree extends JTree{
 
 
 public class SQLMonitor2 extends JPanel{
-    public static final String MN_CREATE_DATA= "New database";
-    public static final String MN_CONNECT = "Connect";
-    public static final String MN_EXIT="Exit";
+    JLabel statusLabel = new JLabel("status");
+    Cursor waitCursor = new Cursor(Cursor.WAIT_CURSOR);
+    Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
     
-    public static final String MN_CRATE_SQL="CreateSQL";
-    public static final String MN_SELECT_SQL="SelectSQL";
-    public static final String MN_INSER_SQL="InsertSQL";
-    public static final String MN_UPDATE_SQL="UpdateSQL";
-    public static final String MN_SELECT = "Select";
-    public static final String MN_REFRESH_TREE = "RefreshTree";
+    FileFilter sqlFileFilter = new FileFilter() {
+
+        @Override
+        public boolean accept(File f) {
+            return f.isDirectory() || f.getPath().endsWith(".sql");
+        }
+
+        @Override
+        public String getDescription() {
+            return "Запроы SQL";
+        }
+    };
     
-    public static final String MN_EXECUTE_ALL="ExecuteAll";
-    public static final String MN_EXECUTE = "Execute";
+    FileFilter dataFilter = new FileFilter() {
+
+        @Override
+        public boolean accept(File f) {
+            return f.isDirectory() || f.getPath().endsWith(".db");
+        }
+
+        @Override
+        public String getDescription() {
+            return "База данных";
+        }
+    };
     
-    public static final String MN_NEW_EDITOR = "New editor";
-    public static final String MN_CLOSE_EDITOR = "Close";
-    public static final String MN_LOAD_SCRIPT = "Load";
-    public static final String MN_SAVE_SCRIPT ="Save";
+    public static final String APP_TITLE = "SQLite Monitor";
     
-    public static final String MN_COPY ="Copy";
-    public static final String MN_PASTE ="Paste";
-    public static final String MN_CUT ="Cut";
+    public static final String ERROR_FILE_EXISTS ="FILE EXISTS";
+    
+    public static final String MN_NEW_DATA    = "New";
+    public static final String MN_OPEN_DATA   = "Open";
+    public static final String MN_EXIT        = "Exit";
+    
+    public static final String MN_CRATE_SQL     = "CreateSQL";
+    public static final String MN_SELECT_SQL    = "SelectSQL";
+    public static final String MN_INSER_SQL     = "InsertSQL";
+    public static final String MN_UPDATE_SQL    = "UpdateSQL";
+    public static final String MN_SELECT        = "Select";
+    public static final String MN_REFRESH_TREE  = "RefreshTree";
+    
+    public static final String MN_EXECUTE_ALL   = "ExecuteAll";
+    public static final String MN_EXECUTE       = "Execute";
+    
+    public static final String MN_NEW_EDITOR    = "New editor";
+    public static final String MN_CLOSE_EDITOR  = "Close";
+    public static final String MN_LOAD_SCRIPT   = "Load";
+    public static final String MN_SAVE_AS_SCRIPT = "Save as";
+    public static final String MN_SAVE_SCRIPT   = "Save";
+    
+    public static final String MN_COPY          = "Copy";
+    public static final String MN_PASTE         = "Paste";
+    public static final String MN_CUT           = "Cut";
     
     
-    Action[] dataActions = {new Act(MN_CREATE_DATA),new Act(MN_CONNECT),null,new Act(MN_EXIT)};
-    Action[] treeActions = {new Act(MN_SELECT), new Act(MN_CRATE_SQL),new Act(MN_SELECT_SQL),new Act(MN_INSER_SQL),new Act(MN_UPDATE_SQL),null,new Act(MN_REFRESH_TREE)};
-    Action[] textAction = {new Act(MN_LOAD_SCRIPT),
+    Action[] dataActions = {
+        new Act(MN_NEW_DATA),
+        new Act(MN_OPEN_DATA),
         null,
-//        new DefaultEditorKit.CopyAction(),
-//        new DefaultEditorKit.CutAction(),
-//        new DefaultEditorKit.PasteAction(),
-//        null,
-        new Act(MN_EXECUTE),new Act(MN_EXECUTE_ALL),null,new Act(MN_SAVE_SCRIPT), new Act(MN_CLOSE_EDITOR)};
+        new Act(MN_EXIT)};
+    Action[] treeActions = {
+        new Act(MN_SELECT),
+        new Act(MN_CRATE_SQL),
+        new Act(MN_SELECT_SQL),
+        new Act(MN_INSER_SQL),
+        new Act(MN_UPDATE_SQL),
+        null,
+        new Act(MN_REFRESH_TREE)};
+    Action[] textAction = {
+        new Act(MN_LOAD_SCRIPT),
+        null,
+        new Act(MN_EXECUTE),
+        new Act(MN_EXECUTE_ALL),
+        null,
+        new Act(MN_SAVE_AS_SCRIPT),
+        new Act(MN_CLOSE_EDITOR)};
     
     
     DBTree tree;
@@ -382,7 +464,6 @@ public class SQLMonitor2 extends JPanel{
             super(name);
             putValue(ACTION_COMMAND_KEY, name);
         }
-
        
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -390,10 +471,17 @@ public class SQLMonitor2 extends JPanel{
         }
     }
     
+    public void wait(Boolean showWaint){
+        if (showWaint)
+            setCursor(waitCursor);
+        else
+            setCursor(defaultCursor);
+    }
     
     public void doCommand(String command){
         int retVal;
         String fileName;
+        File file;
         DatasetInfo info = tree.getSelectedInfo();
         SQLEditor editor = null;
         if (tabbed.getSelectedIndex()>=0){
@@ -403,9 +491,15 @@ public class SQLMonitor2 extends JPanel{
         try{
             switch(command){
                 
-                case MN_CREATE_DATA:
+                case MN_NEW_DATA:
+                    fileChooser.setSelectedFile(null);
+                    fileChooser.setFileFilter(dataFilter);
                     retVal = fileChooser.showOpenDialog(this);
                     if (retVal==JFileChooser.APPROVE_OPTION){
+                        file = fileChooser.getSelectedFile();
+                        if (file.exists()){
+                            throw new Exception(ERROR_FILE_EXISTS+"\n"+file.getName());
+                        }
                         fileName = fileChooser.getSelectedFile().getPath();
                         DataModule.close();
                         DataModule.createData(fileName);
@@ -414,30 +508,55 @@ public class SQLMonitor2 extends JPanel{
                         frame.setTitle(fileName);
                     }
                     break;
-                case MN_CONNECT:
+                    
+                case MN_OPEN_DATA:
+                    fileChooser.setSelectedFile(null);
+                    fileChooser.setFileFilter(dataFilter); 
                     retVal = fileChooser.showOpenDialog(this);
                     if (retVal==JFileChooser.APPROVE_OPTION){
                         fileName = fileChooser.getSelectedFile().getPath();
                         DataModule.close();
                         DataModule.open(fileName);
                         tree.open();
-                        frame.setTitle(fileName);
+                        frame.setTitle(APP_TITLE+"["+ fileName+"]");
                     }
                     break;
+                    
                 case MN_EXIT:
                     System.exit(0);
                     break;
-
+                ///////////////////////////////
                 case MN_REFRESH_TREE:
                     tree.open();
                     break;
+                    
                 case MN_LOAD_SCRIPT:
+                    fileChooser.setFileFilter(sqlFileFilter);
                     retVal = fileChooser.showOpenDialog(this);
                     if (retVal == JFileChooser.APPROVE_OPTION){
+                        file=fileChooser.getSelectedFile();
                         editor = new Editor();
-                        editor.loadFromFile(fileChooser.getSelectedFile());
-                        tabbed.addTab(fileChooser.getSelectedFile().getName(), editor);
+                        editor.loadFromFile(file);
+                        tabbed.addTab(file.getName(), editor);
                         tabbed.setSelectedComponent(editor);
+                    }
+                    break;
+                    
+                case MN_SAVE_SCRIPT:
+                    if (editor!=null && editor.sourceFile!=null){
+                        editor.saveFile();
+                    }
+                    break;
+                    
+                case MN_SAVE_AS_SCRIPT:
+                    fileChooser.setFileFilter(sqlFileFilter);
+                    retVal = fileChooser.showSaveDialog(this);
+                    if (retVal==JFileChooser.APPROVE_OPTION){
+                        file = fileChooser.getSelectedFile();
+                        if (file.exists())
+                            throw new Exception(ERROR_FILE_EXISTS+"\n"+file.getPath());                        
+                        editor.saveFileAs(file);
+                        tabbed.setTitleAt(tabbed.indexOfComponent(editor),file.getName());
                     }
                     break;
                     
@@ -449,21 +568,18 @@ public class SQLMonitor2 extends JPanel{
                         } else
                             dataset = DataModule.getSQLDataset("select * from "+info.getTableName());
                     
-                    dataset.open();
-                    editor = new Editor();
-                    editor.addGrid(info.getTableName(),dataset);
-                    tabbed.addTab(info.getTableName(), editor);
-                    tabbed.setSelectedComponent(editor);
+                        dataset.open();
+                        editor = new Editor();
+                        editor.addGrid(info.getTableName(),dataset);
+                        tabbed.addTab(info.getTableName(), editor);
+                        tabbed.setSelectedComponent(editor);
                     }
                     break;
+                    
                 case MN_CRATE_SQL:
                     if (info!=null && editor!=null){
-                        Recordset r =  DataModule.getRecordet("select sql from sqlite_master\n" +
-                              "where (type = 'table' or type='view') and tbl_name='"+info.getTableName()+"'\n" +
-                               ";");
-                        if (!r.isEmpty()){
-                            editor.text.append(r.getString(0)+";\n");
-                        }
+                        String sql = DataModule.getCreateSql(info.getTableName());
+                        editor.text.append(sql+";\n");
                     }
                     break;
                     
@@ -479,6 +595,7 @@ public class SQLMonitor2 extends JPanel{
                         editor.text.append(sql);
                     }
                     break;
+                    
                 case MN_INSER_SQL:
                     if (info!=null && editor!=null && info.isTable()){
                         editor.text.append(info.insertSQL+"\n");
@@ -492,14 +609,29 @@ public class SQLMonitor2 extends JPanel{
                     
                 case MN_EXECUTE:
                     if (editor!=null){
-                        editor.doExecute();
+                        try{
+                            wait(true);
+                            statusLabel.setText("work...");
+                            editor.doExecute();
+                        } finally{
+                            wait(false);
+                            statusLabel.setText("redy");
+                        }
                     }
                     break;
                     
                 case MN_EXECUTE_ALL:
                     if (editor!=null)
-                        editor.doEnter();
+                        try{
+                            wait(true);
+                            statusLabel.setText("work...");
+                            editor.doExecuteAll();
+                        } finally {
+                            wait(false);
+                            statusLabel.setText("redy");
+                        }
                     break;
+                    
                 case MN_CLOSE_EDITOR:
                     break;
             }
@@ -514,8 +646,6 @@ public class SQLMonitor2 extends JPanel{
             super();
             actions = textAction;
         }
-
-        
         
         @Override
         public void doSave() {
@@ -544,7 +674,7 @@ public class SQLMonitor2 extends JPanel{
         
 
         @Override
-        public void doEnter() throws Exception{
+        public void doExecuteAll() throws Exception{
             tabbs.removeAll();
             String[] sqls = getSQLList();
             try{
@@ -570,11 +700,12 @@ public class SQLMonitor2 extends JPanel{
         public void doExecute() throws Exception{
             Dataset dataset ;
             String sql = getSelectedSQL();
-            if (sql.isEmpty()){
+            if (sql.isEmpty())
                 return;
-            }
             tabbs.removeAll();
+            
             try{
+                
                 if (sql.startsWith("select")){
                     dataset = DataModule.getSQLDataset(sql);
                     dataset.open();
@@ -582,8 +713,8 @@ public class SQLMonitor2 extends JPanel{
                 } else {
                     DataModule.execute(sql);
                 }
-                
                 DataModule.commit();
+                
             } catch (Exception e) {
                 DataModule.rollback();
                 throw new Exception(e.getMessage());
@@ -603,6 +734,7 @@ public class SQLMonitor2 extends JPanel{
         splitPane.setRightComponent(tabbed);
         splitPane.setDividerLocation(200);
         add(splitPane);
+        add(statusLabel,BorderLayout.PAGE_END);
     }
     
     public void open() throws Exception{
@@ -640,12 +772,12 @@ public class SQLMonitor2 extends JPanel{
         return menu;
     }
     
-    public static  JFrame frame;
+    public static JFrame frame;
     
     public static void showSQLMonitor(JComponent owner) throws Exception{
         SQLMonitor2 sqlMonitor = new SQLMonitor2();
         try{
-            frame  = new JFrame();
+            frame  = new JFrame(APP_TITLE);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setContentPane(sqlMonitor);
             
