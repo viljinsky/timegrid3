@@ -28,10 +28,10 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListDataListener;
-import ru.viljinsky.Column;
-import ru.viljinsky.ColumnMap;
-import ru.viljinsky.IDataset;
-import ru.viljinsky.Values;
+import ru.viljinsky.sqlite.Column;
+import ru.viljinsky.sqlite.ColumnMap;
+import ru.viljinsky.sqlite.IDataset;
+import ru.viljinsky.sqlite.Values;
 
 /**
  *

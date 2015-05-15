@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JOptionPane;
-import ru.viljinsky.DataModule;
-import ru.viljinsky.Dataset;
-import ru.viljinsky.Values;
+import ru.viljinsky.sqlite.DataModule;
+import ru.viljinsky.sqlite.Dataset;
+import ru.viljinsky.sqlite.Values;
 
 /**
  *

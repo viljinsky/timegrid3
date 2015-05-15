@@ -22,9 +22,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
-import ru.viljinsky.DataModule;
-import ru.viljinsky.Dataset;
-import ru.viljinsky.Grid;
+import ru.viljinsky.sqlite.DataModule;
+import ru.viljinsky.sqlite.Dataset;
+import ru.viljinsky.sqlite.Grid;
 
 /**
  *

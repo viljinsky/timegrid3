@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import ru.viljinsky.Grid;
+import ru.viljinsky.sqlite.Grid;
 
 /**
  *

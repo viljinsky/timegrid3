@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Set;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import ru.viljinsky.Dataset;
-import ru.viljinsky.Values;
+import ru.viljinsky.sqlite.Dataset;
+import ru.viljinsky.sqlite.Values;
 import ru.viljinsky.dialogs.BaseDialog;
 
 /**

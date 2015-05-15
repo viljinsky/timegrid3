@@ -14,14 +14,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import ru.viljinsky.DBComboBox;
-import ru.viljinsky.DataModule;
-import ru.viljinsky.Dataset;
-import ru.viljinsky.Grid;
-import ru.viljinsky.IDataset;
-import ru.viljinsky.Recordset;
-import ru.viljinsky.SelectDialog;
-import ru.viljinsky.Values;
+import ru.viljinsky.sqlite.DBComboBox;
+import ru.viljinsky.sqlite.DataModule;
+import ru.viljinsky.sqlite.Dataset;
+import ru.viljinsky.sqlite.Grid;
+import ru.viljinsky.sqlite.IDataset;
+import ru.viljinsky.sqlite.Recordset;
+import ru.viljinsky.sqlite.SelectDialog;
+import ru.viljinsky.sqlite.Values;
 
 /**
  *

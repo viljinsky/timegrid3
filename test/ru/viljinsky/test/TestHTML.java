@@ -11,7 +11,7 @@ import java.awt.Dimension;
 import java.net.URL;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import ru.viljinsky.DataModule;
+import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.reports.Browser;
 import ru.viljinsky.reports.PageGenerator;
 

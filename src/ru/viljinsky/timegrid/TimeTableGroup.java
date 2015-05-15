@@ -9,7 +9,7 @@ package ru.viljinsky.timegrid;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import ru.viljinsky.Values;
+import ru.viljinsky.sqlite.Values;
 
 /**
  *

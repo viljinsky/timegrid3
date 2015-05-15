@@ -44,11 +44,11 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import ru.viljinsky.Column;
-import ru.viljinsky.DataModule;
-import ru.viljinsky.Dataset;
-import ru.viljinsky.DatasetInfo;
-import ru.viljinsky.Grid;
+import ru.viljinsky.sqlite.Column;
+import ru.viljinsky.sqlite.DataModule;
+import ru.viljinsky.sqlite.Dataset;
+import ru.viljinsky.sqlite.DatasetInfo;
+import ru.viljinsky.sqlite.Grid;
 
 /**
  *

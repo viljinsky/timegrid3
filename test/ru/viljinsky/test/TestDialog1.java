@@ -23,12 +23,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import ru.viljinsky.dialogs.BaseDialog;
-import ru.viljinsky.DataModule;
-import ru.viljinsky.Dataset;
-import ru.viljinsky.IDataset;
-import ru.viljinsky.Recordset;
+import ru.viljinsky.sqlite.DataModule;
+import ru.viljinsky.sqlite.Dataset;
+import ru.viljinsky.sqlite.IDataset;
+import ru.viljinsky.sqlite.Recordset;
 import ru.viljinsky.forms.ShiftDialog;
-import ru.viljinsky.SelectDialog;
+import ru.viljinsky.sqlite.SelectDialog;
 
 
 

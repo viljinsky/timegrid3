@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package ru.viljinsky;
+package ru.viljinsky.sqlite;
 
 import ru.viljinsky.dialogs.BaseDialog;
 import ru.viljinsky.dialogs.EntryDialog;

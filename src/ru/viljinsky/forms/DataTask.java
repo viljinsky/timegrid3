@@ -10,10 +10,10 @@ import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import ru.viljinsky.DataModule;
-import ru.viljinsky.Dataset;
-import ru.viljinsky.KeyMap;
-import ru.viljinsky.Recordset;
+import ru.viljinsky.sqlite.DataModule;
+import ru.viljinsky.sqlite.Dataset;
+import ru.viljinsky.sqlite.KeyMap;
+import ru.viljinsky.sqlite.Recordset;
 
 /**
  *

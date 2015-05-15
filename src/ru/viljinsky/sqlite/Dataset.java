@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package ru.viljinsky;
+package ru.viljinsky.sqlite;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

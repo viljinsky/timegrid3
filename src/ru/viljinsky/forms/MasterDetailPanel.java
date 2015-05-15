@@ -16,11 +16,11 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import ru.viljinsky.DataModule;
-import ru.viljinsky.Dataset;
-import ru.viljinsky.Grid;
-import ru.viljinsky.IDataset;
-import ru.viljinsky.Values;
+import ru.viljinsky.sqlite.DataModule;
+import ru.viljinsky.sqlite.Dataset;
+import ru.viljinsky.sqlite.Grid;
+import ru.viljinsky.sqlite.IDataset;
+import ru.viljinsky.sqlite.Values;
 
 /**
  *

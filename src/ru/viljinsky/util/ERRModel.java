@@ -23,9 +23,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import ru.viljinsky.Column;
-import ru.viljinsky.DataModule;
-import ru.viljinsky.Dataset;
+import ru.viljinsky.sqlite.Column;
+import ru.viljinsky.sqlite.DataModule;
+import ru.viljinsky.sqlite.Dataset;
 
 /**
  *

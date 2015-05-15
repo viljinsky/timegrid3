@@ -1,4 +1,4 @@
-package ru.viljinsky;
+package ru.viljinsky.sqlite;
 
 /*
  * To change this license header, choose License Headers in Project Properties.

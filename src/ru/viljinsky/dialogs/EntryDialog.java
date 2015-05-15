@@ -8,8 +8,8 @@ package ru.viljinsky.dialogs;
 
 import java.awt.Container;
 import java.util.Map;
-import ru.viljinsky.IDataset;
-import ru.viljinsky.Values;
+import ru.viljinsky.sqlite.IDataset;
+import ru.viljinsky.sqlite.Values;
 
 /**
  *

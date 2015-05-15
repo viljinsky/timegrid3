@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package ru.viljinsky;
+package ru.viljinsky.sqlite;
 
 import javax.swing.Action;
 import javax.swing.JMenu;

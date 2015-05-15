@@ -93,6 +93,11 @@ public interface IAppCommand {
              TT_REFRESH   
     };
     
+    public static final String[] CURRICULUM_COMMANDS = {
+        CREATE_CURRICULUM,EDIT_CURRICULUM,DELETE_CURRICULUM,
+        FILL_CURRICULUM,CREATE_DEPART,EDIT_CURRICULUM_DETAIL        
+    };
+    
     
 }
     

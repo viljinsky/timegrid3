@@ -20,14 +20,14 @@ import javax.swing.JTextField;
 
 import ru.viljinsky.dialogs.BaseDialog;
 import ru.viljinsky.dialogs.EntryDialog;
-import ru.viljinsky.DataModule;
-import ru.viljinsky.Dataset;
+import ru.viljinsky.sqlite.DataModule;
+import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.dialogs.EntryPanel;
-import ru.viljinsky.IDataset;
-import ru.viljinsky.KeyMap;
-import ru.viljinsky.Recordset;
-import ru.viljinsky.SelectDialog;
-import ru.viljinsky.Values;
+import ru.viljinsky.sqlite.IDataset;
+import ru.viljinsky.sqlite.KeyMap;
+import ru.viljinsky.sqlite.Recordset;
+import ru.viljinsky.sqlite.SelectDialog;
+import ru.viljinsky.sqlite.Values;
 
 /**
  *

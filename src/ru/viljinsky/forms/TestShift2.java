@@ -14,7 +14,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
-import ru.viljinsky.DataModule;
+import ru.viljinsky.sqlite.DataModule;
 
 /**
  *

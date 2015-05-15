@@ -6,10 +6,10 @@
 
 package ru.viljinsky.test;
 
+import ru.viljinsky.sqlite.DataModule;
 import java.awt.Container;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import ru.viljinsky.*;
 import ru.viljinsky.forms.*;
 /**
  *

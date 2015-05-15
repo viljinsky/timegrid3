@@ -6,7 +6,7 @@
 
 package ru.viljinsky.test;
 
-import ru.viljinsky.ColumnMap;
+import ru.viljinsky.sqlite.ColumnMap;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -21,13 +21,13 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import ru.viljinsky.Column;
-import ru.viljinsky.DataModule;
-import ru.viljinsky.Dataset;
-import ru.viljinsky.DatasetInfo;
-import ru.viljinsky.Grid;
-import ru.viljinsky.IGridCommand;
-import ru.viljinsky.IDataset;
+import ru.viljinsky.sqlite.Column;
+import ru.viljinsky.sqlite.DataModule;
+import ru.viljinsky.sqlite.Dataset;
+import ru.viljinsky.sqlite.DatasetInfo;
+import ru.viljinsky.sqlite.Grid;
+import ru.viljinsky.sqlite.IGridCommand;
+import ru.viljinsky.sqlite.IDataset;
 
 /**
  *

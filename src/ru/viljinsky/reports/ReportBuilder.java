@@ -6,11 +6,11 @@
 
 package ru.viljinsky.reports;
 
-import ru.viljinsky.Column;
-import ru.viljinsky.DataModule;
-import ru.viljinsky.Dataset;
-import ru.viljinsky.Recordset;
-import ru.viljinsky.Values;
+import ru.viljinsky.sqlite.Column;
+import ru.viljinsky.sqlite.DataModule;
+import ru.viljinsky.sqlite.Dataset;
+import ru.viljinsky.sqlite.Recordset;
+import ru.viljinsky.sqlite.Values;
 
 /**
  *

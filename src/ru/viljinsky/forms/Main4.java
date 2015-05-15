@@ -18,8 +18,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
-import ru.viljinsky.CreateData;
-import ru.viljinsky.DataModule;
+import ru.viljinsky.sqlite.CreateData;
+import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.util.SQLMonitor2;
 
 
@@ -43,7 +43,8 @@ public class Main4 extends JFrame{
     
     JFileChooser fileChooser = new JFileChooser(new File("."));
     IOpenedForm[] forms = {
-        new CurriculumPanel(),
+        new CurriculumPanel2(),
+//        new CurriculumPanel(),
         new DepartPanel(),
         new TeacherPanel(),
         new RoomPanel(),

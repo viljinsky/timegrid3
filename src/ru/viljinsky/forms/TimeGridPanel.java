@@ -20,11 +20,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import ru.viljinsky.DBComboBox;
-import ru.viljinsky.DataModule;
-import ru.viljinsky.Dataset;
-import ru.viljinsky.Grid;
-import ru.viljinsky.Values;
+import ru.viljinsky.sqlite.DBComboBox;
+import ru.viljinsky.sqlite.DataModule;
+import ru.viljinsky.sqlite.Dataset;
+import ru.viljinsky.sqlite.Grid;
+import ru.viljinsky.sqlite.Values;
 import ru.viljinsky.timegrid.*;
 
 
