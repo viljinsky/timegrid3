@@ -35,6 +35,8 @@ public class TimeTableGroup extends CellElement {
     String depart_label;
     Color color= Color.CYAN;
     Boolean ready;
+    
+    Rectangle checkRectState=null;
 
     @Override
     public void draw(Graphics g, Rectangle b) {
@@ -70,10 +72,17 @@ public class TimeTableGroup extends CellElement {
             g.drawRect(b.x+b.width-10, b.y, 10, 10);
         }
         // checked
-        g.setColor(Color.WHITE);
-        g.fillRect(b.x+b.width-20, b.y, 10, 10);
+        checkRectState = new Rectangle(b.x+b.width-20, b.y, 10, 10);
+        if (checked)
+            g.setColor(Color.GREEN);
+        else
+            g.setColor(Color.WHITE);
+//        g.fillRect(b.x+b.width-20, b.y, 10, 10);
+        g.fillRect(checkRectState.x, checkRectState.y, checkRectState.width, checkRectState.height);
+        
         g.setColor(Color.BLACK);
-        g.drawRect(b.x+b.width-20, b.y, 10, 10);
+//        g.drawRect(b.x+b.width-20, b.y, 10, 10);
+        g.drawRect(checkRectState.x, checkRectState.y, checkRectState.width, checkRectState.height);
     }
 
     public Values getValues(){
@@ -125,5 +134,25 @@ public class TimeTableGroup extends CellElement {
     public String toString() {
         return "day_no:" + day_no + " bell_id:" + bell_id + " depart_id:" + depart_id + " subject_id:" + subject_id + " group_id:" + group_id;
     }
+
+    @Override
+    public boolean hitTest(int x, int y) {
+        if (!super.hitTest(x, y))
+            return false;
+        
+        if (checkRectState!=null && checkRectState.contains(x, y)){
+            checkClick(this);
+            return false;
+        }
+        return true;
+        
+    }
+    /**
+     * Клик по чекбоксу
+     */     
+    public void checkClick(TimeTableGroup group){
+        System.out.println("CheckRectangle CLICK!!");        
+    }
+    
     
 }

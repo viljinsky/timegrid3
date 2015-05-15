@@ -103,7 +103,15 @@ public class TimeTableGrid extends TimeGrid {
         TimeTableGroup ttGroup;
         for (int i = 0; i < dataset.getRowCount(); i++) {
             values = dataset.getValues(i);
-            ttGroup = new TimeTableGroup(values);
+            ttGroup = new TimeTableGroup(values){
+
+                @Override
+                public void checkClick(TimeTableGroup group) {
+                    System.out.println(group.toString()+" CLICKED!!!");
+                    group.checked = (group.checked==Boolean.FALSE);
+                }
+                
+            };
             addElement(ttGroup);
         }
         realign();

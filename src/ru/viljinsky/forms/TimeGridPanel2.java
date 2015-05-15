@@ -236,15 +236,6 @@ class ScheduleTree extends JTree{
     }
 }
 
-//interface TimeTableCommand {
-//    public static final String TT_CLEAR     = "TT_CLEAR";
-//    public static final String TT_DELETE    = "TT_DELETE";
-//    public static final String TT_PLACE     = "TT_PLACE";
-//    public static final String TT_PLACE_ALL = "TT_PLACE_ALL";
-//    public static final String TT_FIX       = "TT_FIX";
-//    public static final String TT_UNFIX     = "TT_UNFIX";
-//    public static final String TT_REFRESH   = "TT_REFRESH";
-//}
 
 public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
     ScheduleTree tree;
@@ -252,6 +243,144 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
     Grid unplacedGrid;
     JTextArea hintPane;
     
+    public void initComponents(){
+        tree = new ScheduleTree(){
+
+            @Override
+            public void ElementChange() {
+                treeElementChange(selectedElement);
+            }
+        };
+        grid = new TimeTableGrid(){
+
+            @Override
+            public void cellElementClick(CellElement ce) {
+                TimeTableGroup group = (TimeTableGroup)ce;
+                Values values = group.getValues();
+                try{
+                    emptyCells=getEmptyDepartCells(values);
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+
+
+            @Override
+            public void cellClick(int col, int row) {
+                super.cellClick(col, row);
+                emptyCells.clear();
+                manager.updateActionList();
+            }
+
+            @Override
+            public void columnHeaderClick(int col) {
+                super.columnHeaderClick(col);
+                manager.updateActionList();
+            }
+
+            @Override
+            public void rowHeaderClick(int row) {
+                super.rowHeaderClick(row);
+                manager.updateActionList();
+            }
+
+            @Override
+            public void stopDrag(int col, int row) throws Exception {
+                waitCursor(true);
+                try{
+                    super.stopDrag(col, row);
+                } catch (Exception e){
+                    Set<CellElement> set = getSelectedElements();
+                    TimeTableGroup group = null;
+                    for (CellElement ce:set){
+                         group = (TimeTableGroup)ce;
+                         analizCell(group, new Point(col+1,row+1));
+                         break;
+                    }        
+//                    if (group!=null){
+//                        System.out.println(group);
+//                    }
+                    JOptionPane.showMessageDialog(this,"Тут подсказка\n"+e.getMessage());                    
+                } finally {
+                    waitCursor(false);
+                }
+            }
+            
+        };
+        
+        unplacedGrid = new Grid(){
+
+            @Override
+            public void gridSelectionChange() {
+                Values values = unplacedGrid.getValues();
+                if (values!=null) 
+                    try{
+                        grid.selectValues(values);
+                        if (values.getInteger("unplaced")==0)
+                            grid.emptyCells.clear();
+                        else                                    
+                            grid.emptyCells = getEmptyDepartCells(values);
+                        grid.repaint();
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                manager.updateActionList();
+            }
+
+        };
+        
+        hintPane = new JTextArea();
+        
+    }
+    
+    public TimeGridPanel2(){
+        JSplitPane  splitPane,
+                    leftSplit,
+                    rightSplit;
+        
+        initComponents();
+        
+        setLayout(new BorderLayout());
+        setPreferredSize(new Dimension(800, 600));
+        
+        // Пристёгиваются заголовки строк и колонок к сетке
+        JScrollPane gridScroll = new JScrollPane(grid);
+        gridScroll.setColumnHeaderView(grid.getColumnHeader());
+        gridScroll.setRowHeaderView(grid.getRowHeader());
+        
+        
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        rightSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        
+        splitPane.setLeftComponent(leftSplit);
+        splitPane.setRightComponent(rightSplit);
+        
+        // левая сплит-панел распологает дерево и неразмещённые
+        leftSplit.setTopComponent(new JScrollPane(tree));
+        leftSplit.setBottomComponent(new JScrollPane(unplacedGrid));
+        leftSplit.setResizeWeight(0.5);
+        
+        // правый сплит размещает сетку и подсказки
+        rightSplit.setTopComponent(gridScroll);
+        rightSplit.setBottomComponent(new JScrollPane(hintPane));
+        rightSplit.setResizeWeight(0.9);
+        
+        splitPane.setDividerLocation(200);
+        add(splitPane);
+        
+        
+        manager.setCommandList(SCHEDULE_COMMANDS);
+        
+        JPanel commands = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        for (Action a:manager.getActionList()){
+            commands.add(new JButton(a));
+        }
+        add(commands,BorderLayout.PAGE_START);
+        
+    
+    }
+
     public void waitCursor(boolean b){
     if (b)
         setCursor(new Cursor(Cursor.WAIT_CURSOR));
@@ -369,145 +498,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
         
     }
     
-    public TimeGridPanel2(){
-        setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(800, 600));
-        
-        tree = new ScheduleTree(){
-
-            @Override
-            public void ElementChange() {
-                treeElementChange(selectedElement);
-            }
-        };
-        grid = new TimeTableGrid(){
-
-            @Override
-            public void cellElementClick(CellElement ce) {
-                TimeTableGroup group = (TimeTableGroup)ce;
-                Values values = group.getValues();
-                try{
-                    emptyCells=getEmptyDepartCells(values);
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-
-
-            @Override
-            public void cellClick(int col, int row) {
-                super.cellClick(col, row);
-                emptyCells.clear();
-                manager.updateActionList();
-                
-                
-            }
-
-            @Override
-            public void columnHeaderClick(int col) {
-                super.columnHeaderClick(col);
-                manager.updateActionList();
-            }
-
-            @Override
-            public void rowHeaderClick(int row) {
-                super.rowHeaderClick(row);
-                manager.updateActionList();
-            }
-
-            @Override
-            public void stopDrag(int col, int row) throws Exception {
-                waitCursor(true);
-                try{
-                    super.stopDrag(col, row);
-                } catch (Exception e){
-                    Set<CellElement> set = getSelectedElements();
-                    TimeTableGroup group = null;
-                    for (CellElement ce:set){
-                         group = (TimeTableGroup)ce;
-                         analizCell(group, new Point(col+1,row+1));
-                         break;
-                    }        
-//                    if (group!=null){
-//                        System.out.println(group);
-//                    }
-                    JOptionPane.showMessageDialog(this,"Тут подсказка\n"+e.getMessage());                    
-                } finally {
-                    waitCursor(false);
-                }
-            }
-            
-            
-            
-        };
-        
-        unplacedGrid = new Grid(){
-
-            @Override
-            public void gridSelectionChange() {
-                Values values = unplacedGrid.getValues();
-                if (values!=null) 
-                    try{
-                        grid.selectValues(values);
-                        if (values.getInteger("unplaced")==0)
-                            grid.emptyCells.clear();
-                        else                                    
-                            grid.emptyCells = getEmptyDepartCells(values);
-                        grid.repaint();
-                    } catch (Exception e){
-                        e.printStackTrace();
-                    }
-                manager.updateActionList();
-            }
-
-        };
-        
-        hintPane = new JTextArea();
-        
-        JSplitPane splitPane2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        splitPane2.setTopComponent(new JScrollPane(tree));
-        splitPane2.setBottomComponent(new JScrollPane(unplacedGrid));
-        splitPane2.setResizeWeight(0.5);
-        
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setLeftComponent(splitPane2);
-        JScrollPane scrollPane = new JScrollPane(grid);
-        scrollPane.setColumnHeaderView(grid.getColumnHeader());
-        scrollPane.setRowHeaderView(grid.getRowHeader());
-        
-        JSplitPane hitSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        hitSplit.setTopComponent(scrollPane);
-        hitSplit.setBottomComponent(new JScrollPane(hintPane));
-        hitSplit.setResizeWeight(0.9);
-        
-        splitPane.setRightComponent(hitSplit);
-        
-        splitPane.setDividerLocation(200);
-        add(splitPane);
-        
-//        add(hintPane,BorderLayout.PAGE_END);
-        
-//        manager.setCommandList(new String[]{
-//             TT_PLACE_ALL,
-//             TT_PLACE,
-//             TT_DELETE,
-//             TT_FIX,
-//             TT_UNFIX,
-//             TT_CLEAR,
-//             TT_REFRESH   
-//        });
-        
-        manager.setCommandList(SCHEDULE_COMMANDS);
-        
-        JPanel commands = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        for (Action a:manager.getActionList()){
-            commands.add(new JButton(a));
-        }
-        add(commands,BorderLayout.PAGE_START);
-        
     
-    }
-
     /**
      * Нужно определить допустимое количество занятий в день по указанному предмету
      * @param values depert_id,subject_id
