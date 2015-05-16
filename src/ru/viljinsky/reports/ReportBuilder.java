@@ -6,6 +6,8 @@
 
 package ru.viljinsky.reports;
 
+import java.util.HashMap;
+import java.util.Map;
 import ru.viljinsky.sqlite.Column;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
@@ -17,6 +19,51 @@ import ru.viljinsky.sqlite.Values;
  * @author вадик
  */
 
+class ScheduleParams{
+    private static ScheduleParams instance = null;
+    public static final String DATE_BEGIN="date_begin";
+    public static final String DATE_END="date_end";
+    public static final String SCHEDULE_SPAN = "schedule_span";
+    public static final String SCHEDULE_TITLE = "schedule_title";
+    public static final String EDUCATIONAL_INSTITUTION="educational_institution";
+
+    private Map<String,Object> map;
+
+    protected ScheduleParams() throws Exception{
+        Dataset dataset = DataModule.getDataset("attr");
+        dataset.open();
+        Values v;
+        map = new HashMap<>();
+        for (int i=0;i<dataset.size();i++){
+            v=dataset.getValues(i);
+            map.put(v.getString("param_name"), v.get("param_value"));
+        }
+    }
+    
+    public static ScheduleParams getInstance() throws Exception{
+        if (instance==null){
+            instance=new ScheduleParams();
+        }
+        return instance;
+    }
+    
+    public static Object getParamByName(String paramName) throws Exception{
+        Object result = null ;
+        try{
+            result = getInstance().map.get(paramName);
+        } catch (Exception e){
+        }
+        return result;
+    }
+    
+    public static String getStringParamByName(String paramName) throws Exception{
+        Object p=getParamByName(paramName);
+        if (p!=null){
+            return p.toString();
+        }
+        return "null" ;
+    }
+}
 
 
 public class ReportBuilder implements IReportBuilder{
@@ -175,7 +222,9 @@ public class ReportBuilder implements IReportBuilder{
     Dataset hall_list;
     
     private String getRoomLabel(int depart_id,int day_id,int bell_id) throws Exception{
-        Recordset r = DataModule.getRecordet("select distinct room_name from room a inner join schedule b on a.id=b.room_id where day_id="+day_id+" and bell_id="+bell_id+" and depart_id="+depart_id);
+        Recordset r = DataModule.getRecordet(
+                "select distinct room_name from room a inner join schedule b on a.id=b.room_id\n"
+              + "where day_id="+day_id+" and bell_id="+bell_id+" and depart_id="+depart_id);
         String room_label="";
         if (r.isEmpty())
             room_label="?";
@@ -677,8 +726,106 @@ public class ReportBuilder implements IReportBuilder{
     public String getIndexPage(){
         return "<h1>Пример расписания</h1>";
     }
+    
+    /////////////////////////////////////////////////////////////////////////
+    
+    
+    Dataset curriculumDetails;
 
-    private String getCurriculumReport() {
-        return "<h1>Учебный план</h1>";
+    private String getCurriculumDetails(Values vCurriculum) throws Exception{
+        StringBuilder result = new StringBuilder();
+        Values v,v2,v3,filter;
+        filter = new Values();
+        filter.put("curriculum_id",vCurriculum.getInteger("id"));
+        
+        Dataset skillList = DataModule.getSQLDataset("select * from skill");
+        skillList.open();
+        Dataset subjectList = DataModule.getSQLDataset("select * from subject");
+        subjectList.open();;
+        
+        result.append("<table>");
+        result.append("<tr>");
+        result.append("<td>&nbsp;</td>");
+        for (int i=0;i<skillList.size();i++){
+            v=skillList.getValues(i);
+            result.append("<td>"+v.getString("caption")+"</td>");
+        }
+        result.append("</tr>");
+        
+        for (int i=0;i<subjectList.size();i++){
+            v=subjectList.getValues(i);
+            filter.put("subject_id", v.getInteger("id"));
+            result.append("<tr>");
+            result.append("<td>"+v.getString("subject_name")+"</td>");
+            for (int j=0;j<skillList.size();j++){
+                v2=skillList.getValues(j);
+                filter.put("skill_id",v2.getInteger("id"));
+                int row = (curriculumDetails.locate(filter));
+                if (row >= 0){
+                    v3 = curriculumDetails.getValues(row);
+                    result.append("<td>&nbsp;"+v3.getInteger("hour_per_week")+"&nbsp;</td>");
+                }  else
+                    result.append("<td>&nbsp;</td>");
+                    
+            }
+            result.append("</tr>");
+        }
+        
+        result.append("</table>");
+        
+        return result.toString();
+    };
+    private String getCurriculumReport() throws Exception{
+        StringBuilder result = new StringBuilder();
+        Values v;
+        
+        curriculumDetails = DataModule.getDataset("curriculum_detail");
+        curriculumDetails.open();
+        
+        
+        
+        result.append("<h1>Учебный план</h1>");
+        
+        result.append(
+        ScheduleParams.getStringParamByName(ScheduleParams.DATE_BEGIN)+"&nbsp;"+
+        ScheduleParams.getStringParamByName(ScheduleParams.DATE_END)
+        );
+        
+        
+        Dataset curriculumList = DataModule.getSQLDataset("select * from curriculum");
+        curriculumList.open();
+        for (int i=0;i<curriculumList.size();i++){
+            v= curriculumList.getValues(i);
+            result.append("<b>"+v.getString("caption")+"</b>");
+            result.append(getCurriculumDetails(v));
+        }
+        
+//        Dataset skillList = DataModule.getSQLDataset("select * from skill");
+//        skillList.open();
+//        Dataset subjectList = DataModule.getSQLDataset("select * from subject");
+//        subjectList.open();;
+//        
+//        result.append("<table>");
+//        result.append("<tr>");
+//        result.append("<td>&nbsp;</td>");
+//        for (int i=0;i<skillList.size();i++){
+//            v=skillList.getValues(i);
+//            result.append("<td>"+v.getString("caption")+"</td>");
+//        }
+//        result.append("</tr>");
+//        
+//        for (int i=0;i<subjectList.size();i++){
+//            v=subjectList.getValues(i);
+//            result.append("<tr>");
+//            result.append("<td>"+v.getString("subject_name")+"</td>");
+//            for (int j=0;j<skillList.size();j++){
+//                result.append("<td>&nbsp;</td>");
+//            }
+//            result.append("</tr>");
+//        }
+//        
+//        result.append("</table>");
+        
+        return result.toString();
     }
 }
