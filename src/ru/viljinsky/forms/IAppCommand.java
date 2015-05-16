@@ -20,7 +20,7 @@ public interface IAppCommand {
     public static final String EDIT_CURRICULUM      = "EDIT_CURRICULUM";
     public static final String DELETE_CURRICULUM    = "DELETE_CURRICULUM";
     public static final String FILL_CURRICULUM      = "FILL_CURRICULUM";
-    public static final String CLEAR_CURRICULUM     = "CLEAR_CURRICULUM";
+//    public static final String CLEAR_CURRICULUM     = "CLEAR_CURRICULUM";
     public static final String EDIT_CURRICULUM_DETAIL = "EDITCURRICULUM_DETAIL";
     
     // depart panel

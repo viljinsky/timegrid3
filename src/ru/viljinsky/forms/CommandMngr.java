@@ -26,7 +26,7 @@ class CommandDictionary extends HashMap<String, String> implements IAppCommand{
     put(DELETE_CURRICULUM,      "Удалить");
     
     put(FILL_CURRICULUM,        "Заполнить");
-    put(CLEAR_CURRICULUM,       "Очистить");
+//    put(CLEAR_CURRICULUM,       "Очистить");
     put(EDIT_CURRICULUM_DETAIL, "Редактировать");
     
     // depart panel

@@ -2,11 +2,8 @@ package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -14,13 +11,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import ru.viljinsky.sqlite.DBComboBox;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.Grid;
 import ru.viljinsky.sqlite.IDataset;
-import ru.viljinsky.sqlite.Recordset;
-import ru.viljinsky.sqlite.SelectDialog;
 import ru.viljinsky.sqlite.Values;
 
 /**
@@ -40,10 +34,6 @@ public interface IOpenedForm {
     public JComponent getPanel();
     public void close() throws Exception;
 }
-
-//interface IAppCommand{
-    
-
 
 abstract class DetailPanel extends JPanel{
     Grid grid;
@@ -103,17 +93,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
                 
         add(splitPane);
         setPreferredSize(new Dimension(800,600));
-//        commands.setCommandList(new String[]{
-//            CREATE_ROOM,
-//            EDIT_ROOM,
-//            DELETE_ROOM,
-//            CREATE_SHIFT,
-//            EDIT_SHIFT,
-//            REMOVE_SHIFT,
-//            CREATE_PROFILE,
-//            EDIT_PROFILE,
-//            REMOVE_PROFILE
-//        });
+
         commands.setCommandList(ROOM_COMMANDS);
         
        
@@ -512,13 +492,7 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
                 case REFRESH:
                     grid1.requery();
                     break;
-//                case CREATE_DEPART:
-//                    throw new UnsupportedOperationException();
-////                    depart_id = Dialogs.createDepart(this);
-////                    if (depart_id!=null)
-////                        grid1.requery();
-////                    break;
-//                    
+                    
                 case EDIT_DEPART:
                     depart_id = grid1.getIntegerValue("depart_id");
                     if (Dialogs.editDepart(this, depart_id))
@@ -631,241 +605,241 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
 /////////////////////   CURRICULUM PANEL //////////////////////////////////////
 
 
-class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpenedForm,IAppCommand{
-
-    DBComboBox curriculumComboBox = new DBComboBox(){
-
-        @Override
-        public void onValueChange() {
-            System.out.println("Выбран учебный план : "+getValue().toString());
-            Map<String,Object> map = new HashMap<>();
-            map.put("curriculum_id", getValue());
-            try{
-                masterPanel.grid.setFilter(map);
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-    };
-    
-    CommandMngr commands = new CommandMngr() {
-
-        @Override
-        public void updateAction(Action a) {
-//            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public void doCommand(String command) {
-            CurriculumPanel.this.doCommand(command);
-        }
-
-    };
-    
-    @Override
-    public Map<String, String> getParams() {
-        Map<String,String> map = new HashMap<>();
-        map.put(MASTER_DATASET,"v_curriculum");
-        map.put(SLAVE_DATASET, "v_curriculum_detail");
-        map.put(REFERENCES, "curriculum_id=curriculum_id;skill_id=skill_id");
-        return map;
-    }
-
-    
-    public CurriculumPanel() {
-        super();
-        commands.setCommandList(new String[]{
-            CREATE_CURRICULUM,EDIT_CURRICULUM,DELETE_CURRICULUM,
-            FILL_CURRICULUM,CREATE_DEPART,EDIT_CURRICULUM_DETAIL});
-
-        addMasterControl(curriculumComboBox);
-
-        
-        addMasterAction(commands.getAction(CREATE_CURRICULUM));
-        addMasterAction(commands.getAction(EDIT_CURRICULUM));
-        addMasterAction(commands.getAction(DELETE_CURRICULUM));
-//        addMasterAction(commands.getAction(CLEAR_CURRICULUM));
-        addMasterAction(commands.getAction(CREATE_DEPART));
-        
-        addDetailAction(commands.getAction(FILL_CURRICULUM));
-        addDetailAction(commands.getAction(EDIT_CURRICULUM_DETAIL));
-        
-        
-    }
-    
-    public void doCommand(String command){
-        Integer curriculum_id,subject_id,skill_id;
-        try{
-            switch (command){
-                case CREATE_CURRICULUM:
-                    curriculum_id =  Dialogs.createCurriculum(this);
-                    if (curriculum_id!=null){
-                        curriculumComboBox.requery();
-                        curriculumComboBox.setValue(curriculum_id);
-                    }
-                    break;
-                    
-                case EDIT_CURRICULUM:
-                    curriculum_id=(Integer)curriculumComboBox.getValue();
-                    if (Dialogs.editCurriculum(this,curriculum_id)){
-                        curriculumComboBox.requery();
-                        curriculumComboBox.setValue(curriculum_id);
-                    };
-                    break;
-                    
-                case DELETE_CURRICULUM:
-                    curriculum_id=(Integer)curriculumComboBox.getValue();
-//                    curriculum_id=grid1.getIntegerValue("curriculum_id");
-                    if (Dialogs.deleteCurriculum(this,curriculum_id)){
-                        curriculumComboBox.requery();
-//                        curriculumComboBox.setValue(curriculum_id);
-//                          grid1.requery();
-                    }
-                    break;
-                    
-                case FILL_CURRICULUM:
-                    fillCurriculumnDetail();
-                    break;
-                    
-                case EDIT_CURRICULUM_DETAIL:
-                    curriculum_id = grid2.getIntegerValue("curriculum_id");
-                    subject_id = grid2.getIntegerValue("subject_id");
-                    skill_id=grid2.getIntegerValue("skill_id");
-                    if (Dialogs.editCurriculumDetail(this,curriculum_id,skill_id,subject_id))
-                        grid2.requery();
-                    break;
-                    
-//                case CLEAR_CURRICULUM:
-//                    clearCurriculumDetail();
-//                    break;
-                    
-                case CREATE_DEPART:
-                    createDepart();
-                    break;
-//                case EDIT_CURRICULUM:
-//                    editDetails();
-//                    break;
-            }
-        } catch (Exception e){
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        doCommand(e.getActionCommand());
-    }
-
-    @Override
-    public void edit() {
-        doCommand(EDIT_CURRICULUM);
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void append() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void delete() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    class CurriculumnDetailDialg extends SelectDialog{
-        public Integer skill_id;
-        public Integer curriculum_id;
-
-        @Override
-        public void doOnEntry() throws Exception {
-            Integer subject_id;
-            try{
-                for (Object n:getAdded()){
-                    subject_id=(Integer)n;
-                    DataTask.includeSubjectToCurriculumn(curriculum_id, skill_id,subject_id);
-                }
-
-                for (Object n:getRemoved()){
-                    subject_id=(Integer)n;
-                    DataTask.excludeSubjectFromCurriculumn(curriculum_id, skill_id, subject_id);
-                }
-                DataModule.commit();
-            } catch (Exception e){
-                DataModule.rollback();
-                throw new Exception("FILL_CURRICULUM_ERROR\n"+e.getMessage());
-            }
-        }
-    }
-    
-    protected void fillCurriculumnDetail() throws Exception {
-        CurriculumnDetailDialg dlg = new CurriculumnDetailDialg();
-        dlg.curriculum_id=grid1.getIntegerValue("curriculum_id");
-        dlg.skill_id=grid1.getIntegerValue("skill_id");
-        
-        IDataset ds = grid2.getDataset();
-        Set<Object> set= ds.getColumnSet("subject_id");
-        Dataset dataDataset = DataModule.getSQLDataset("select id,subject_name from subject");
-        dlg.setDataset(dataDataset, "id", "subject_name");
-        dlg.setSelected(set);
-        if (dlg.showModal(this)==SelectDialog.RESULT_OK){
-            grid2.requery();
-        }
-    }
-    
-    public static final String MSG_GREATE_DEPART_OK = "Класс \"%s\" успешно создан";
-    public void createDepart() throws Exception{
-        Integer skill_id,curriculum_id;
-        skill_id=grid1.getIntegerValue("skill_id");
-        curriculum_id = grid1.getIntegerValue("curriculum_id");
-        Integer depart_id = Dialogs.createDepart(this, curriculum_id, skill_id);
-        if (depart_id!=null){
-            try {
-                DataTask.fillSubjectGroup2(depart_id);
-                DataModule.commit();
-                Recordset r=DataModule.getRecordet("select label from depart where id="+depart_id);
-                JOptionPane.showMessageDialog(this,String.format(MSG_GREATE_DEPART_OK,r.getString(0)));
-            } catch (Exception e){
-                DataModule.rollback();
-                throw new Exception("CREATE_DEPART_ERROR\n"+e.getMessage());
-            }
-        }
-        
-    }
-    
-//    protected void clearCurriculumDetail() throws Exception{
-//        Integer curriculum_id = grid1.getIntegerValue("curriculum_id");
-//        Integer skill_id = grid1.getIntegerValue("skill_id");
-//        DataTask.removeCurriculum(curriculum_id,skill_id);
-//        grid2.requery();
+//class CurriculumPanel extends MasterDetailPanel implements ActionListener,IOpenedForm,IAppCommand{
+//
+//    DBComboBox curriculumComboBox = new DBComboBox(){
+//
+//        @Override
+//        public void onValueChange() {
+//            System.out.println("Выбран учебный план : "+getValue().toString());
+//            Map<String,Object> map = new HashMap<>();
+//            map.put("curriculum_id", getValue());
+//            try{
+//                masterPanel.grid.setFilter(map);
+//            } catch (Exception e){
+//                e.printStackTrace();
+//            }
+//        }
+//    };
+//    
+//    CommandMngr commands = new CommandMngr() {
+//
+//        @Override
+//        public void updateAction(Action a) {
+////            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//        }
+//
+//        @Override
+//        public void doCommand(String command) {
+//            CurriculumPanel.this.doCommand(command);
+//        }
+//
+//    };
+//    
+//    @Override
+//    public Map<String, String> getParams() {
+//        Map<String,String> map = new HashMap<>();
+//        map.put(MASTER_DATASET,"v_curriculum");
+//        map.put(SLAVE_DATASET, "v_curriculum_detail");
+//        map.put(REFERENCES, "curriculum_id=curriculum_id;skill_id=skill_id");
+//        return map;
 //    }
-    
-
-    @Override
-    public String getCaption() {
-        return CURRICULUM;
-    }
-
-    @Override
-    public JComponent getPanel() {
-        return this;
-    }
-
-    @Override
-    public void open() {
-        super.open(); 
-        try{
-            Dataset ds = DataModule.getDataset("curriculum");
-            curriculumComboBox.setDataset(ds, "id", "caption");
-            if (!ds.isEmpty()){
-                curriculumComboBox.setValue(ds.getValues(0).getInteger("id"));
-            }
-        } catch (Exception e){
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }
-    }
-
-    
-}
+//
+//    
+//    public CurriculumPanel() {
+//        super();
+//        commands.setCommandList(new String[]{
+//            CREATE_CURRICULUM,EDIT_CURRICULUM,DELETE_CURRICULUM,
+//            FILL_CURRICULUM,CREATE_DEPART,EDIT_CURRICULUM_DETAIL});
+//
+//        addMasterControl(curriculumComboBox);
+//
+//        
+//        addMasterAction(commands.getAction(CREATE_CURRICULUM));
+//        addMasterAction(commands.getAction(EDIT_CURRICULUM));
+//        addMasterAction(commands.getAction(DELETE_CURRICULUM));
+////        addMasterAction(commands.getAction(CLEAR_CURRICULUM));
+//        addMasterAction(commands.getAction(CREATE_DEPART));
+//        
+//        addDetailAction(commands.getAction(FILL_CURRICULUM));
+//        addDetailAction(commands.getAction(EDIT_CURRICULUM_DETAIL));
+//        
+//        
+//    }
+//    
+//    public void doCommand(String command){
+//        Integer curriculum_id,subject_id,skill_id;
+//        try{
+//            switch (command){
+//                case CREATE_CURRICULUM:
+//                    curriculum_id =  Dialogs.createCurriculum(this);
+//                    if (curriculum_id!=null){
+//                        curriculumComboBox.requery();
+//                        curriculumComboBox.setValue(curriculum_id);
+//                    }
+//                    break;
+//                    
+//                case EDIT_CURRICULUM:
+//                    curriculum_id=(Integer)curriculumComboBox.getValue();
+//                    if (Dialogs.editCurriculum(this,curriculum_id)){
+//                        curriculumComboBox.requery();
+//                        curriculumComboBox.setValue(curriculum_id);
+//                    };
+//                    break;
+//                    
+//                case DELETE_CURRICULUM:
+//                    curriculum_id=(Integer)curriculumComboBox.getValue();
+////                    curriculum_id=grid1.getIntegerValue("curriculum_id");
+//                    if (Dialogs.deleteCurriculum(this,curriculum_id)){
+//                        curriculumComboBox.requery();
+////                        curriculumComboBox.setValue(curriculum_id);
+////                          grid1.requery();
+//                    }
+//                    break;
+//                    
+//                case FILL_CURRICULUM:
+//                    fillCurriculumnDetail();
+//                    break;
+//                    
+//                case EDIT_CURRICULUM_DETAIL:
+//                    curriculum_id = grid2.getIntegerValue("curriculum_id");
+//                    subject_id = grid2.getIntegerValue("subject_id");
+//                    skill_id=grid2.getIntegerValue("skill_id");
+//                    if (Dialogs.editCurriculumDetail(this,curriculum_id,skill_id,subject_id))
+//                        grid2.requery();
+//                    break;
+//                    
+////                case CLEAR_CURRICULUM:
+////                    clearCurriculumDetail();
+////                    break;
+//                    
+//                case CREATE_DEPART:
+//                    createDepart();
+//                    break;
+////                case EDIT_CURRICULUM:
+////                    editDetails();
+////                    break;
+//            }
+//        } catch (Exception e){
+//            JOptionPane.showMessageDialog(this, e.getMessage());
+//        }
+//    }
+//
+//    @Override
+//    public void actionPerformed(ActionEvent e) {
+//        doCommand(e.getActionCommand());
+//    }
+//
+//    @Override
+//    public void edit() {
+//        doCommand(EDIT_CURRICULUM);
+////        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
+//
+//    @Override
+//    public void append() {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
+//
+//    @Override
+//    public void delete() {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
+//    
+//    class CurriculumnDetailDialg extends SelectDialog{
+//        public Integer skill_id;
+//        public Integer curriculum_id;
+//
+//        @Override
+//        public void doOnEntry() throws Exception {
+//            Integer subject_id;
+//            try{
+//                for (Object n:getAdded()){
+//                    subject_id=(Integer)n;
+//                    DataTask.includeSubjectToCurriculumn(curriculum_id, skill_id,subject_id);
+//                }
+//
+//                for (Object n:getRemoved()){
+//                    subject_id=(Integer)n;
+//                    DataTask.excludeSubjectFromCurriculumn(curriculum_id, skill_id, subject_id);
+//                }
+//                DataModule.commit();
+//            } catch (Exception e){
+//                DataModule.rollback();
+//                throw new Exception("FILL_CURRICULUM_ERROR\n"+e.getMessage());
+//            }
+//        }
+//    }
+//    
+//    protected void fillCurriculumnDetail() throws Exception {
+//        CurriculumnDetailDialg dlg = new CurriculumnDetailDialg();
+//        dlg.curriculum_id=grid1.getIntegerValue("curriculum_id");
+//        dlg.skill_id=grid1.getIntegerValue("skill_id");
+//        
+//        IDataset ds = grid2.getDataset();
+//        Set<Object> set= ds.getColumnSet("subject_id");
+//        Dataset dataDataset = DataModule.getSQLDataset("select id,subject_name from subject");
+//        dlg.setDataset(dataDataset, "id", "subject_name");
+//        dlg.setSelected(set);
+//        if (dlg.showModal(this)==SelectDialog.RESULT_OK){
+//            grid2.requery();
+//        }
+//    }
+//    
+//    public static final String MSG_GREATE_DEPART_OK = "Класс \"%s\" успешно создан";
+//    public void createDepart() throws Exception{
+//        Integer skill_id,curriculum_id;
+//        skill_id=grid1.getIntegerValue("skill_id");
+//        curriculum_id = grid1.getIntegerValue("curriculum_id");
+//        Integer depart_id = Dialogs.createDepart(this, curriculum_id, skill_id);
+//        if (depart_id!=null){
+//            try {
+//                DataTask.fillSubjectGroup2(depart_id);
+//                DataModule.commit();
+//                Recordset r=DataModule.getRecordet("select label from depart where id="+depart_id);
+//                JOptionPane.showMessageDialog(this,String.format(MSG_GREATE_DEPART_OK,r.getString(0)));
+//            } catch (Exception e){
+//                DataModule.rollback();
+//                throw new Exception("CREATE_DEPART_ERROR\n"+e.getMessage());
+//            }
+//        }
+//        
+//    }
+//    
+////    protected void clearCurriculumDetail() throws Exception{
+////        Integer curriculum_id = grid1.getIntegerValue("curriculum_id");
+////        Integer skill_id = grid1.getIntegerValue("skill_id");
+////        DataTask.removeCurriculum(curriculum_id,skill_id);
+////        grid2.requery();
+////    }
+//    
+//
+//    @Override
+//    public String getCaption() {
+//        return CURRICULUM;
+//    }
+//
+//    @Override
+//    public JComponent getPanel() {
+//        return this;
+//    }
+//
+//    @Override
+//    public void open() {
+//        super.open(); 
+//        try{
+//            Dataset ds = DataModule.getDataset("curriculum");
+//            curriculumComboBox.setDataset(ds, "id", "caption");
+//            if (!ds.isEmpty()){
+//                curriculumComboBox.setValue(ds.getValues(0).getInteger("id"));
+//            }
+//        } catch (Exception e){
+//            JOptionPane.showMessageDialog(this, e.getMessage());
+//        }
+//    }
+//
+//    
+//}
 
 ///////////////////////////  SCHEDULE PANEL ///////////////////////////////////
 
@@ -1315,17 +1289,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
         splitPane.setResizeWeight(0.5);
         add(splitPane);
         setPreferredSize(new Dimension(800,600));
-//        commands.setCommandList(new String[]{
-//            CREATE_TEACHER,
-//            EDIT_TEACHER,
-//            DELETE_TEACHER,
-//            CREATE_PROFILE,
-//            EDIT_PROFILE,
-//            REMOVE_PROFILE,
-//            CREATE_SHIFT,
-//            EDIT_SHIFT,
-//            REMOVE_SHIFT
-//        });
+        
         commands.setCommandList(TEACHER_COMMANDS);
         
         gridPanel.addAction(commands.getAction(CREATE_TEACHER));

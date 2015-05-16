@@ -43,7 +43,7 @@ import ru.viljinsky.sqlite.Values;
 
 
 
-public class CurriculumPanel2 extends JPanel implements IAppCommand,IOpenedForm{
+public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
 
     @Override
     public String getCaption() {
@@ -105,7 +105,6 @@ public class CurriculumPanel2 extends JPanel implements IAppCommand,IOpenedForm{
                     break;
                     
                 case EDIT_CURRICULUM:
-//                    curriculum_id=(Integer)curriculumComboBox.getValue();
                     if (Dialogs.editCurriculum(this,curriculum_id)){
 //                        curriculumComboBox.requery();
 //                        curriculumComboBox.setValue(curriculum_id);
@@ -140,7 +139,7 @@ public class CurriculumPanel2 extends JPanel implements IAppCommand,IOpenedForm{
                     break;
                     
 //                case CLEAR_CURRICULUM:
-//                    clearCurriculumDetail();
+////                    clearCurriculumDetail();
 //                    break;
                     
                 case CREATE_DEPART:
@@ -216,7 +215,7 @@ public class CurriculumPanel2 extends JPanel implements IAppCommand,IOpenedForm{
 
         @Override
         public void doCommand(String command) {
-            CurriculumPanel2.this.doCommand(command);
+            CurriculumPanel.this.doCommand(command);
         }
     };
     
@@ -411,7 +410,7 @@ public class CurriculumPanel2 extends JPanel implements IAppCommand,IOpenedForm{
         }
     };
 
-    public CurriculumPanel2() {
+    public CurriculumPanel() {
         
         commandMng.setCommandList(CURRICULUM_COMMANDS);
         
@@ -451,7 +450,7 @@ public class CurriculumPanel2 extends JPanel implements IAppCommand,IOpenedForm{
     
     public static void main(String[] args){
         
-        CurriculumPanel2 panel = new CurriculumPanel2();
+        CurriculumPanel panel = new CurriculumPanel();
         
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

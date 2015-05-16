@@ -43,7 +43,7 @@ public class Main4 extends JFrame{
     
     JFileChooser fileChooser = new JFileChooser(new File("."));
     IOpenedForm[] forms = {
-        new CurriculumPanel2(),
+        new CurriculumPanel(),
 //        new CurriculumPanel(),
         new DepartPanel(),
         new TeacherPanel(),
