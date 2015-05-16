@@ -62,13 +62,13 @@ abstract class MasterDetailPanel extends JPanel implements IMasterDetailConsts {
     
     public void addMasterAction(Action action){
         JButton button = new JButton(action);
-        button.setToolTipText((String)action.getValue(Action.LONG_DESCRIPTION));
+        button.setToolTipText((String)action.getValue(Action.SHORT_DESCRIPTION));
         masterPanel.titlePanel.add(button);
     }
     
     public void addDetailAction(Action action){
         JButton button = new JButton(action);
-        button.setToolTipText((String)action.getValue(Action.LONG_DESCRIPTION));
+        button.setToolTipText((String)action.getValue(Action.SHORT_DESCRIPTION));
         detailPanel.titlePanel.add(button);
     }
 

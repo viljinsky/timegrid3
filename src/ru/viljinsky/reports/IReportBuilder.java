@@ -12,6 +12,7 @@ package ru.viljinsky.reports;
  */
 public interface IReportBuilder{
     public static final String RP_HOME = "RP_HOME";
+    public static final String RP_CURRICULUM ="RP_CURRICULUM";
     public static final String RP_SCHEDULE_VAR_1 = "RP_SCHEDULE_VAR_1";
     public static final String RP_SCHEDULE_VAR_2 = "RP_SCHEDULE_VAR_2";
     public static final String RP_SCHEDULE_TEACHER = "RP_SCHEDULE_TEACHER";

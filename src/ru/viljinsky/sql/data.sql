@@ -110,7 +110,7 @@ insert into skill(id,caption) values(2,'9-класс');
 insert into skill(id,caption) values(3,'10-класс');
 
 
-insert into curriculum (id,caption) values (1,'Уч. план 1');
+insert into curriculum (id,caption) values (1,'Учебный план (1)');
 -- insert into curriculum (id,skill_id,caption) values (2,2,'Уч. план 9-го класса');
 -- insert into curriculum (id,skill_id,caption) values (3,3,'Уч. план 10-го класса');
 

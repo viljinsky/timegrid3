@@ -7,6 +7,7 @@
 package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,13 +17,17 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 
 import ru.viljinsky.dialogs.BaseDialog;
 import ru.viljinsky.dialogs.EntryDialog;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.dialogs.EntryPanel;
+import ru.viljinsky.sqlite.Grid;
 import ru.viljinsky.sqlite.IDataset;
 import ru.viljinsky.sqlite.KeyMap;
 import ru.viljinsky.sqlite.Recordset;
@@ -32,7 +37,50 @@ import ru.viljinsky.sqlite.Values;
 /**
  *
  * @author вадик
- */
+*/
+
+abstract class CopyCurriculumDialog extends BaseDialog{
+    public static final String sql = "select distinct a.id as curriculum_id,c.id as skill_id,a.caption as cur_caption,c.caption from curriculum a inner join curriculum_detail b\n" +
+                    "on a.id=b.curriculum_id, skill c;";
+    Grid grid ;
+    Dataset dataset;
+    int src_curriculum_id;
+    int src_skill_id;
+    
+    public CopyCurriculumDialog(Integer src_curriculum_id,Integer src_skill_id){
+        super();
+        this.src_curriculum_id=src_curriculum_id;
+        this.src_skill_id=src_skill_id;
+    }
+    
+    public Integer getSkillId() throws Exception{
+        Values v = grid.getValues();
+        return v.getInteger("skill_id");
+    }
+    
+    public Integer getCurriculumId() throws Exception{
+        Values v = grid.getValues();
+        return v.getInteger("curriculum_id");
+    }
+    
+    @Override
+    public Container getPanel() {
+        grid = new Grid();
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JScrollPane(grid));
+        panel.setBorder(new EmptyBorder(10,10,10, 10));
+        try{
+            dataset = DataModule.getSQLDataset(sql);
+            grid.setDataset(dataset);
+            dataset.open();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return panel;
+    }
+
+}
+
 abstract class AbstractShiftDialog extends ShiftDialog{
     Integer shift_id ;
     EntryPanel entryPanel = new EntryPanel();
@@ -528,6 +576,39 @@ public class Dialogs {
         }
         return null;
     }
+    
+    
+    public static boolean copyCurriculum(JComponent owner,Integer curriculum_id,Integer skill_id){
+        CopyCurriculumDialog dlg = new CopyCurriculumDialog(curriculum_id,skill_id) {
+
+            @Override
+            public void doOnEntry() throws Exception {
+                int curriculum_id=getCurriculumId();
+                int skill_id = getSkillId();
+                System.out.println(String.format("%d %d --> %d %d",src_curriculum_id,src_skill_id,curriculum_id,skill_id ));
+                String sql2 = String.format(
+                        "insert into curriculum_detail(curriculum_id,skill_id,subject_id,\n" +
+                        "hour_per_day,hour_per_week,group_type_id,group_sequence_id,is_stream) \n" +
+                        "select %d,%d,subject_id,hour_per_day,\n" +
+                        "hour_per_week,group_type_id,group_sequence_id,is_stream\n" +
+                        "from curriculum_detail\n"+        
+                        "where curriculum_id=%d and skill_id=%d",src_curriculum_id,src_skill_id,curriculum_id,skill_id );
+//                System.out.println(sql2);
+                try{
+                    DataModule.execute(sql2);
+                    DataModule.commit();
+                    modalResult=RESULT_OK;
+                } catch (Exception e){
+                    DataModule.rollback();
+                    throw new Exception("COPY_CURRICULUM_ERROR\n"+e.getMessage());
+                }
+                
+//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        };
+        
+        return dlg.showModal(owner)==BaseDialog.RESULT_OK;
+    }
 
     public static Boolean editCurriculum(JComponent owner, Integer curriculum_id) throws Exception {
         String caption ;
@@ -731,8 +812,6 @@ public class Dialogs {
                 }
             }
         };
-    
-        
         
         Recordset r = DataModule.getRecordet("select caption,(select count(*) from depart where skill_id=a.id)+1 as count from skill a where a.id="+skill_id+";");
         String label = r.getString(0)+" ("+r.getString(1)+")";
@@ -752,6 +831,7 @@ public class Dialogs {
         values.put("skill_id", skill_id);
         values.put("label", label);
         values.put("shift_id",DataTask.getDefaultShiftId("depart"));
+        values.put("schedule_state_id",0);
         dlg.setValues(values);
         
         if (dlg.showModal(owner)==SelectDialog.RESULT_OK)

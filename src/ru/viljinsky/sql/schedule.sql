@@ -9,6 +9,10 @@ insert into schedule_state (id,state_description) values (4,'Действует'
 
 select * from schedule_state;
 
+create table subject_domain(
+    id innteger primary key not null,
+    domain_caption varchr(40) not null
+);
 
 drop table if exists stream;
 create table stream (
@@ -60,6 +64,7 @@ create table subject(
     default_hour_per_week integer ,
     default_group_type_id integer references group_type(id),
     default_hour_per_day integer ,
+    subject_domain_id integer references subject_domain(id),
     color varchar(11) default '240 240 240'
 --     color_rgb varchar(20),
 );

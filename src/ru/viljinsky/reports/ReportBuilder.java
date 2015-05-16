@@ -25,6 +25,8 @@ public class ReportBuilder implements IReportBuilder{
     public String getReport(String reportName) throws Exception{
 //        ReportBuilder builder = new ReportBuilder();
         switch(reportName){
+            case RP_CURRICULUM:
+                return getCurriculumReport();
             case RP_SCHEDULE_VAR_1:
                 return getScheduleReport();
             case RP_SCHEDULE_VAR_2:
@@ -42,6 +44,7 @@ public class ReportBuilder implements IReportBuilder{
     
     public static String[] getReportList(){
         return  new String[]{
+            RP_CURRICULUM,
             RP_SCHEDULE_VAR_1,
             RP_SCHEDULE_VAR_2,
             RP_SCHEDULE_TEACHER,
@@ -647,6 +650,9 @@ public class ReportBuilder implements IReportBuilder{
                 + "<a href='.'>Начальная страница</a>"
                 + "</li>"
             
+                + "<li>"
+                + "<a href='page5.html'>Учебный план</a>"
+                + "</li>"
             
                 + "<li>"
                 + "<a href='page1.html'>Расписание (вариант1)</a>"
@@ -670,5 +676,9 @@ public class ReportBuilder implements IReportBuilder{
     
     public String getIndexPage(){
         return "<h1>Пример расписания</h1>";
+    }
+
+    private String getCurriculumReport() {
+        return "<h1>Учебный план</h1>";
     }
 }

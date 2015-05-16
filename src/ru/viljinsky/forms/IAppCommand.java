@@ -17,6 +17,7 @@ public interface IAppCommand {
     // curriculumn panel
     
     public static final String CREATE_CURRICULUM    = "CREATE_CURRICULUM";
+    public static final String COPY_CURRICULUM      = "COPY_CURRICUUM";
     public static final String EDIT_CURRICULUM      = "EDIT_CURRICULUM";
     public static final String DELETE_CURRICULUM    = "DELETE_CURRICULUM";
     public static final String FILL_CURRICULUM      = "FILL_CURRICULUM";
@@ -95,7 +96,7 @@ public interface IAppCommand {
     
     public static final String[] CURRICULUM_COMMANDS = {
         CREATE_CURRICULUM,EDIT_CURRICULUM,DELETE_CURRICULUM,
-        FILL_CURRICULUM,CREATE_DEPART,EDIT_CURRICULUM_DETAIL        
+        COPY_CURRICULUM,FILL_CURRICULUM,CREATE_DEPART,DELETE_DEPART,EDIT_CURRICULUM_DETAIL        
     };
     
     

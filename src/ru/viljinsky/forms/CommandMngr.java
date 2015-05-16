@@ -21,9 +21,10 @@ class CommandDictionary extends HashMap<String, String> implements IAppCommand{
     private CommandDictionary(){
 
         
-    put(CREATE_CURRICULUM,      "Создать");
-    put(EDIT_CURRICULUM,        "Изменить");
-    put(DELETE_CURRICULUM,      "Удалить");
+    put(CREATE_CURRICULUM,      "Создать;Создать новый учебный план");
+    put(COPY_CURRICULUM,        "Копировать;Копировать учебный план из ранее созданного");
+    put(EDIT_CURRICULUM,        "Изменить;Изменить содержание учебного плана");
+    put(DELETE_CURRICULUM,      "Удалить;Удалить учебный план");
     
     put(FILL_CURRICULUM,        "Заполнить");
 //    put(CLEAR_CURRICULUM,       "Очистить");
@@ -137,7 +138,7 @@ public abstract class CommandMngr implements IAppCommand{
             super(name);
             putValue(ACTION_COMMAND_KEY, name);
             putValue(NAME,CommandDictionary.getCommandTranslate(name));
-            putValue(LONG_DESCRIPTION,CommandDictionary.getToolTipText(name));
+            putValue(SHORT_DESCRIPTION,CommandDictionary.getToolTipText(name));
             
         }
 

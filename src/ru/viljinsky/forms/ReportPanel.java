@@ -38,6 +38,7 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
         public String getContentHtml(URL url) throws Exception{
             Map<String,String> linkMap = new HashMap<>();
             linkMap.put("/.", RP_HOME);
+            linkMap.put("/page5.html", RP_CURRICULUM);            
             linkMap.put("/page1.html", RP_SCHEDULE_VAR_1);
             linkMap.put("/page2.html", RP_SCHEDULE_VAR_2);
             linkMap.put("/page3.html", RP_SCHEDULE_TEACHER);

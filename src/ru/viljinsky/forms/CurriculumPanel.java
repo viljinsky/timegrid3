@@ -16,11 +16,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
 import javax.swing.JTree;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import static ru.viljinsky.forms.IAppCommand.CREATE_CURRICULUM;
 import static ru.viljinsky.forms.IAppCommand.CREATE_DEPART;
 import static ru.viljinsky.forms.IAppCommand.DELETE_CURRICULUM;
@@ -92,6 +95,7 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
     Integer skill_id = null;
     Integer curriculum_id = null;
     Integer subject_id = null;
+    Integer depart_id = null;
     
     CommandPanel commandPanel = new CommandPanel();
     
@@ -102,6 +106,10 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
             switch (command){
                 case CREATE_CURRICULUM:
                       curriculum_id = tree.addCurriculim(new Curriculum());
+                    break;
+                case COPY_CURRICULUM:
+                    if (Dialogs.copyCurriculum(this,curriculum_id,skill_id))
+                        grid.requery();
                     break;
                     
                 case EDIT_CURRICULUM:
@@ -143,12 +151,15 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
 //                    break;
                     
                 case CREATE_DEPART:
-                    Integer depart_id = Dialogs.createDepart(this, curriculum_id, skill_id);
+                    depart_id = Dialogs.createDepart(this, curriculum_id, skill_id);
                     if (depart_id!=null){
                         try {
                             DataTask.fillSubjectGroup2(depart_id);
                             DataModule.commit();
                             Recordset r=DataModule.getRecordet("select label from depart where id="+depart_id);
+                            Depart depart  = new Depart(depart_id, r.getString(0));
+                            tree.addDepart(depart);
+                            
                             JOptionPane.showMessageDialog(this,String.format(MSG_GREATE_DEPART_OK,r.getString(0)));
                         } catch (Exception e){
                             DataModule.rollback();
@@ -157,6 +168,11 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
                     }
                     
 //                    createDepart();
+                    break;
+                case DELETE_DEPART:
+                    if (Dialogs.deleteDepart(this, depart_id)==true){
+                        tree.deleteDepart();
+                    }
                     break;
 //                case EDIT_CURRICULUM:
 //                    editDetails();
@@ -180,6 +196,7 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
         
         public void addCommand(Action action){
             JButton button = new JButton(action);
+            button.setToolTipText((String)action.getValue(Action.SHORT_DESCRIPTION));
             add(button);
         }
         
@@ -202,8 +219,14 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
                 case FILL_CURRICULUM:
                     a.setEnabled(skill_id!=null && curriculum_id!=null);
                     break;
+                case COPY_CURRICULUM:
+                    a.setEnabled(skill_id!=null && curriculum_id!=null);
+                    break;
                 case CREATE_DEPART:
                     a.setEnabled(skill_id!=null && curriculum_id!=null);
+                    break;
+                case DELETE_DEPART:
+                    a.setEnabled(depart_id!=null);
                     break;
                 case EDIT_CURRICULUM_DETAIL:
                     a.setEnabled(subject_id!=null);
@@ -218,7 +241,7 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
             CurriculumPanel.this.doCommand(command);
         }
     };
-    
+    //            классы дерева  
     class Curriculum{
         Integer curriculum_id;
         String caption;
@@ -227,7 +250,7 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
             try{
                 Recordset r = DataModule.getRecordet("select max(id)+1 from curriculum");
                 curriculum_id=r.getInteger(0);
-                caption = "Учебнвый план "+curriculum_id;
+                caption = "Учебный план ("+curriculum_id+")";
                 
                 DataModule.execute("insert into curriculum (caption) values ('"+caption+"')");
                 DataModule.commit();
@@ -257,18 +280,63 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
             this.caption=caption;
         }
         
+        @Override
         public String toString(){
             return caption;
         }
     }
     
+    class Depart{
+        Integer depart_id;
+        String label;
+        public Depart(Integer depart_id,String label){
+            this.depart_id=depart_id;
+            this.label=label;
+        }
+        
+        @Override
+        public String toString(){
+          return label;  
+        }
+    }
+    
+    class MyTreeModelListener implements TreeModelListener{
+
+        @Override
+        public void treeNodesChanged(TreeModelEvent e) {
+            DefaultMutableTreeNode node;
+            TreePath path = e.getTreePath();
+            if (path!=null){
+                node = (DefaultMutableTreeNode)path.getLastPathComponent();
+                System.out.println("Editing "+node.toString());
+            }
+        }
+
+        @Override
+        public void treeNodesInserted(TreeModelEvent e) {
+//            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void treeNodesRemoved(TreeModelEvent e) {
+//            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void treeStructureChanged(TreeModelEvent e) {
+//            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+    }
     abstract class CurriculumTree extends JTree{
         
         DefaultTreeModel model;
         DefaultMutableTreeNode root;
         Dataset skillList;
+        Dataset departList;
         
         public CurriculumTree(){
+            setEditable(true);
+            getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
             addTreeSelectionListener(new TreeSelectionListener() {
 
                 @Override
@@ -276,6 +344,7 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
                     DefaultMutableTreeNode node = (DefaultMutableTreeNode)getLastSelectedPathComponent();
                     curriculum_id=null;
                     skill_id=null;
+                    depart_id = null;
                     if (node!=null){
                         Object data = node.getUserObject();
                         if (data instanceof Skill){
@@ -283,6 +352,8 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
                             skill_id=((Skill)data).skill_id;
                         } else if (data instanceof Curriculum){
                             curriculum_id=((Curriculum)data).curriculum_id;
+                        } else if (data instanceof Depart){
+                            depart_id=((Depart)data).depart_id;
                         }
                     }
                     skillChange();
@@ -332,20 +403,50 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
             throw new Exception("CURRICULUM_IS_NULL");
         }
         
+        public Integer addDepart(Depart depart) throws Exception{
+            TreePath path = getSelectionPath();
+            if (path==null)
+                throw new Exception("NODE_PATH_IS_NULL");
+            DefaultMutableTreeNode parent = (DefaultMutableTreeNode)path.getLastPathComponent();
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(depart);
+            model.insertNodeInto(node,parent, parent.getChildCount());
+            path = new TreePath(node.getPath());
+            setSelectionPath(path);
+            scrollPathToVisible(path);
+            return null;
+        }
+        
+        public Boolean deleteDepart() throws Exception{
+            DefaultMutableTreeNode node,parent;
+            TreePath path = getSelectionPath();
+            if (path!=null){
+                node = (DefaultMutableTreeNode)path.getLastPathComponent();
+                parent = (DefaultMutableTreeNode)node.getParent();
+                if (parent!=null){
+                    model.removeNodeFromParent(node);
+                }
+                
+            }
+            return false;
+        }
+        
         public void open() throws Exception{
-            DefaultMutableTreeNode node,skillNode;
+            DefaultMutableTreeNode node,skillNode,departNode;
             root = new DefaultMutableTreeNode("Учебный план");
             
             skillList = DataModule.getDataset("skill");
             skillList.open();
             
-            Dataset dataset2 = DataModule.getDataset("curriculum");
-            dataset2.open();
-            Values v1,v2;
+            departList = DataModule.getDataset("depart");
+            
+            Dataset curriculumList = DataModule.getDataset("curriculum");
+            curriculumList.open();
+            Values v1,v2,v3,filter;
             Skill skill;
             Curriculum curriculum;
-            for (int i=0;i<dataset2.size();i++){
-                v2 = dataset2.getValues(i);
+            filter = new Values();
+            for (int i=0;i<curriculumList.size();i++){
+                v2 = curriculumList.getValues(i);
                 curriculum=new Curriculum(v2.getInteger("id"), v2.getString("caption"));
                 node = new DefaultMutableTreeNode(curriculum);
                 
@@ -354,11 +455,20 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
                     skill = new Skill(curriculum.curriculum_id, v1.getInteger("id"),v1.getString("caption"));
                     skillNode = new DefaultMutableTreeNode(skill);
                     node.add(skillNode);
+                    filter.put("skill_id",v1.getInteger("id") );
+                    filter.put("curriculum_id",v2.getInteger("id"));
+                    departList.open(filter);
+                    for (int k=0;k<departList.size();k++){
+                        v3=departList.getValues(k);
+                        departNode = new DefaultMutableTreeNode(new Depart(v3.getInteger("id"),v3.getString("label")));
+                        skillNode.add(departNode);
+                    }
                 }
                 
                 root.add(node);
             }
             model = new DefaultTreeModel(root);
+            model.addTreeModelListener(new MyTreeModelListener());
             setModel(model);
         }
 
