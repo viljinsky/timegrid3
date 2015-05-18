@@ -106,16 +106,21 @@ abstract class SelectPanel extends JPanel {
         add(Box.createHorizontalStrut(6));
         box = Box.createVerticalBox();
         Box box1;
+        
         JButton btn;
         for (String sButton:buttons){
             btn = new JButton(commands.getAction(sButton));
+            btn.setMaximumSize(new Dimension(120,24));
+            btn.setMinimumSize(new Dimension(120,24));
             box1 = Box.createVerticalBox();
             box1.setAlignmentX(CENTER_ALIGNMENT);
             box1.add(btn);
             box.add(box1);
             box.add(Box.createVerticalStrut(12));
         }
+        box.add(Box.createVerticalGlue());
             
+        panel.add(Box.createHorizontalStrut(6));
         panel.add(box);
         panel.add(Box.createHorizontalStrut(6));
         box = Box.createHorizontalBox();

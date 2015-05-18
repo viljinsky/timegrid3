@@ -26,15 +26,15 @@ class CommandDictionary extends HashMap<String, String> implements IAppCommand{
     put(EDIT_CURRICULUM,        "Изменить;Изменить содержание учебного плана");
     put(DELETE_CURRICULUM,      "Удалить;Удалить учебный план");
     
-    put(FILL_CURRICULUM,        "Заполнить");
+    put(FILL_CURRICULUM,        "Заполнить;Добавить/Удалить предметы в учебный план");
 //    put(CLEAR_CURRICULUM,       "Очистить");
-    put(EDIT_CURRICULUM_DETAIL, "Редактировать");
+    put(EDIT_CURRICULUM_DETAIL, "Редактировать;Изменить свойства учебной дисциплины");
     
     // depart panel
     
-    put(CREATE_DEPART,          "Создать класс");
-    put(EDIT_DEPART,            "Изменить");
-    put(DELETE_DEPART,          "Удалить");
+    put(CREATE_DEPART,          "Создать класс;Добавить класс в учебный процесс");
+    put(EDIT_DEPART,            "Изменить;Свойства учебного класса");
+    put(DELETE_DEPART,          "Удалить;Удалить класс из учебного процесса");
     
     put(FILL_GROUP,             "Заполнить");
     put(CLEAR_GROUP,            "CLEAR");

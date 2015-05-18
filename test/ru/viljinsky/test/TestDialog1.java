@@ -28,7 +28,7 @@ import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.IDataset;
 import ru.viljinsky.sqlite.Recordset;
 import ru.viljinsky.forms.ShiftDialog;
-import ru.viljinsky.sqlite.SelectDialog;
+import ru.viljinsky.dialogs.SelectDialog;
 
 
 

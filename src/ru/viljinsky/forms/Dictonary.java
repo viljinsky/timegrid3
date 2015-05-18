@@ -62,8 +62,9 @@ public class Dictonary extends JDialog{
             Box box;
             for (String btnName:buttons){
                 box=Box.createVerticalBox();
-                
                 button= new JButton(btnName);
+                button.setMaximumSize(new Dimension(100,24));
+                button.setMinimumSize(new Dimension(100,24));
                 button.addActionListener(this);
                 box.add(button);
                 add(box);
@@ -104,7 +105,7 @@ public class Dictonary extends JDialog{
         setModal(true);
         JPanel content = new JPanel(new BorderLayout());
         
-        content.setPreferredSize(new Dimension(500,400));
+        content.setPreferredSize(new Dimension(600,400));
         content.add(tabbedPane);
         content.add(controls,BorderLayout.EAST);
                 

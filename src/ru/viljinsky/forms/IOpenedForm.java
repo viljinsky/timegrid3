@@ -22,12 +22,12 @@ import ru.viljinsky.sqlite.Values;
  * @author вадик
  */
 public interface IOpenedForm {
-    public static final String CURRICULUM ="Учебный план";
-    public static final String DEPART ="Классы";
-    public static final String TEACHER ="Преподаватели";
-    public static final String ROOM ="Помещения";
-    public static final String SCHEDULE ="Расписание";
-    public static final String REPORTS ="Отчёты";
+    public static final String CURRICULUM   = "Учебный план";
+    public static final String DEPART       = "Классы";
+    public static final String TEACHER      = "Преподаватели";
+    public static final String ROOM         = "Помещения";
+    public static final String SCHEDULE     = "Расписание";
+    public static final String REPORTS      = "Отчёты";
     
     public void open() throws Exception;
     public String getCaption();

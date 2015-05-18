@@ -1,4 +1,4 @@
-package ru.viljinsky.sqlite;
+package ru.viljinsky.dialogs;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -8,7 +8,6 @@ package ru.viljinsky.sqlite;
 
 
 
-import ru.viljinsky.dialogs.BaseDialog;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -23,6 +22,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
+import ru.viljinsky.sqlite.IDataset;
 
 /**
  *

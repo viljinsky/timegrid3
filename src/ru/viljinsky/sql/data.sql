@@ -99,8 +99,8 @@ insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,d
      values (8,'Физ.культура',  1,1,2,'200 255 200');
 insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
      values (9,'Информатика',   1,2,1,'255 200 200');
--- insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
---     values (10,'Информатика (лекц)',   1,0,1,'255 255 170');
+
+
 
 
 
@@ -266,6 +266,14 @@ insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
 -- информатика
 insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
     values (11,'Карпова','Вероника','Маврикиевна',7,15);
+
+insert into subject_domain(id,domain_caption) values (1,'Математические');
+insert into subject_domain(id,domain_caption) values (2,'Естественно-научные');
+insert into subject_domain(id,domain_caption) values (3,'Гуманитарные');
+insert into subject_domain(id,domain_caption) values (4,'Филолагические');
+insert into subject_domain(id,domain_caption) values (5,'Трудовое обучение');
+insert into subject_domain(id,domain_caption) values (6,'Физкультурв');
+insert into subject_domain(id,domain_caption) values (7,'Искуство');
 
 
 

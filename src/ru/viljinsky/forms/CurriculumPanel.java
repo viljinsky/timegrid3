@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -24,7 +23,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import ru.viljinsky.dialogs.BaseDialog;
 import static ru.viljinsky.forms.IAppCommand.CREATE_CURRICULUM;
 import static ru.viljinsky.forms.IAppCommand.CREATE_DEPART;
 import static ru.viljinsky.forms.IAppCommand.DELETE_CURRICULUM;
@@ -34,9 +32,7 @@ import static ru.viljinsky.forms.IAppCommand.FILL_CURRICULUM;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.Grid;
-import ru.viljinsky.sqlite.IDataset;
 import ru.viljinsky.sqlite.Recordset;
-import ru.viljinsky.sqlite.SelectDialog;
 import ru.viljinsky.sqlite.Values;
 
 /**
@@ -64,47 +60,6 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    /**
-     * Перенесено и IOpenForm
-     */
-        
-    class CurriculumDetailDialg extends SelectDialog{
-        public Integer skill_id;
-        public Integer curriculum_id;
-
-        public CurriculumDetailDialg(Integer curriculum_id,Integer skill_id) throws Exception{
-            super();
-            this.skill_id = skill_id;
-            this.curriculum_id = curriculum_id;
-            IDataset ds = grid.getDataset();
-            Set<Object> set= ds.getColumnSet("subject_id");
-            Dataset dataDataset = DataModule.getSQLDataset("select id,subject_name from subject");
-            setDataset(dataDataset, "id", "subject_name");
-            setSelected(set);
-        }
-
-
-        @Override
-        public void doOnEntry() throws Exception {
-            Integer subject_id;
-            try{
-                for (Object n:getAdded()){
-                    subject_id=(Integer)n;
-                    DataTask.includeSubjectToCurriculumn(curriculum_id, skill_id,subject_id);
-                }
-
-                for (Object n:getRemoved()){
-                    subject_id=(Integer)n;
-                    DataTask.excludeSubjectFromCurriculumn(curriculum_id, skill_id, subject_id);
-                }
-                DataModule.commit();
-            } catch (Exception e){
-                DataModule.rollback();
-                throw new Exception("FILL_CURRICULUM_ERROR\n"+e.getMessage());
-            }
-        }
-    }
-    
     
     Integer skill_id = null;
     Integer curriculum_id = null;
@@ -137,8 +92,7 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
                     break;
                     
                 case FILL_CURRICULUM:
-                    BaseDialog dlg = new CurriculumDetailDialg(curriculum_id,skill_id);
-                    if (dlg.showModal(this)==SelectDialog.RESULT_OK)
+                    if (Dialogs.fillCurriculumDetails(this, curriculum_id, skill_id))
                         grid.requery();
                     break;
                     
@@ -418,7 +372,7 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(depart);
             model.insertNodeInto(node,parent, parent.getChildCount());
             path = new TreePath(node.getPath());
-            setSelectionPath(path);
+//            setSelectionPath(path);
             scrollPathToVisible(path);
             return null;
         }

@@ -31,7 +31,7 @@ import ru.viljinsky.sqlite.Grid;
 import ru.viljinsky.sqlite.IDataset;
 import ru.viljinsky.sqlite.KeyMap;
 import ru.viljinsky.sqlite.Recordset;
-import ru.viljinsky.sqlite.SelectDialog;
+import ru.viljinsky.dialogs.SelectDialog;
 import ru.viljinsky.sqlite.Values;
 
 /**
@@ -39,9 +39,51 @@ import ru.viljinsky.sqlite.Values;
  * @author вадик
 */
 
+class CurriculumDetailDialg extends SelectDialog{
+    public Integer skill_id;
+    public Integer curriculum_id;
+
+    public CurriculumDetailDialg(Integer curriculum_id,Integer skill_id) throws Exception{
+        super();
+        this.skill_id = skill_id;
+        this.curriculum_id = curriculum_id;
+//        IDataset ds = grid.getDataset();
+        Dataset ds = DataModule.getSQLDataset("select subject_id from curriculum_detail where skill_id="+skill_id+" and curriculum_id="+curriculum_id);
+        ds.open();
+        Set<Object> set= ds.getColumnSet("subject_id");
+        Dataset dataDataset = DataModule.getSQLDataset("select id,subject_name from subject");
+        setDataset(dataDataset, "id", "subject_name");
+        setSelected(set);
+    }
+
+
+    @Override
+    public void doOnEntry() throws Exception {
+        Integer subject_id;
+        try{
+            for (Object n:getAdded()){
+                subject_id=(Integer)n;
+                DataTask.includeSubjectToCurriculumn(curriculum_id, skill_id,subject_id);
+            }
+
+            for (Object n:getRemoved()){
+                subject_id=(Integer)n;
+                DataTask.excludeSubjectFromCurriculumn(curriculum_id, skill_id, subject_id);
+            }
+            DataModule.commit();
+        } catch (Exception e){
+            DataModule.rollback();
+            throw new Exception("FILL_CURRICULUM_ERROR\n"+e.getMessage());
+        }
+    }
+}
+
+
 abstract class CopyCurriculumDialog extends BaseDialog{
-    public static final String sql = "select distinct a.id as curriculum_id,c.id as skill_id,a.caption as cur_caption,c.caption from curriculum a inner join curriculum_detail b\n" +
-                    "on a.id=b.curriculum_id, skill c;";
+    public static final String sql = 
+            "select a.id as skill_id,b.id as curriculum_id,\n" +
+"b.caption || ' ' || a.caption as caption from skill a,curriculum b\n" +
+"where exists (select * from curriculum_detail where skill_id=a.id and curriculum_id=b.id);";
     Grid grid ;
     Dataset dataset;
     int src_curriculum_id;
@@ -936,6 +978,12 @@ public class Dialogs {
                     .replace("%curriculum_id", values.getString("curriculum_id"))
                     .replace("%group_id", "0"));
         }
+    }
+
+    public static boolean fillCurriculumDetails(JComponent owner,Integer curriculum_id,Integer skill_id) throws Exception{
+        CurriculumDetailDialg dlg = new CurriculumDetailDialg(curriculum_id, skill_id);
+        return dlg.showModal(owner)==BaseDialog.RESULT_OK;
+//        return false;
     }
     
     public static boolean editCurriculumDetail(JComponent owner, Integer curriculum_id, Integer skill_id, Integer subject_id) throws Exception{

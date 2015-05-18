@@ -155,6 +155,7 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
         
             Map<String,String> reportMap = new HashMap<>();
             reportMap.put(RP_HOME  , "/index.html");        
+            reportMap.put(RP_CURRICULUM  , "/page5.html");
             reportMap.put(RP_SCHEDULE_VAR_1  , "/page1.html");
             reportMap.put(RP_SCHEDULE_VAR_2  , "/page2.html");
             reportMap.put(RP_SCHEDULE_TEACHER, "/page3.html");
