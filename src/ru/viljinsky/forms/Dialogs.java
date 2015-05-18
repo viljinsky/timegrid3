@@ -579,7 +579,7 @@ public class Dialogs {
     
     
     public static boolean copyCurriculum(JComponent owner,Integer curriculum_id,Integer skill_id){
-        CopyCurriculumDialog dlg = new CopyCurriculumDialog(curriculum_id,skill_id) {
+        BaseDialog dlg = new CopyCurriculumDialog(curriculum_id,skill_id) {
 
             @Override
             public void doOnEntry() throws Exception {
@@ -593,7 +593,6 @@ public class Dialogs {
                         "hour_per_week,group_type_id,group_sequence_id,is_stream\n" +
                         "from curriculum_detail\n"+        
                         "where curriculum_id=%d and skill_id=%d",src_curriculum_id,src_skill_id,curriculum_id,skill_id );
-//                System.out.println(sql2);
                 try{
                     DataModule.execute(sql2);
                     DataModule.commit();
@@ -603,7 +602,6 @@ public class Dialogs {
                     throw new Exception("COPY_CURRICULUM_ERROR\n"+e.getMessage());
                 }
                 
-//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         };
         

@@ -8,7 +8,6 @@
 package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;

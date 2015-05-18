@@ -775,6 +775,7 @@ public class ReportBuilder implements IReportBuilder{
         
         return result.toString();
     };
+    
     private String getCurriculumReport() throws Exception{
         StringBuilder result = new StringBuilder();
         Values v;
@@ -782,13 +783,18 @@ public class ReportBuilder implements IReportBuilder{
         curriculumDetails = DataModule.getDataset("curriculum_detail");
         curriculumDetails.open();
         
-        
-        
         result.append("<h1>Учебный план</h1>");
         
-        result.append(
+        result.append("<div font-style='bold'>"+
+                
+        ScheduleParams.getStringParamByName(ScheduleParams.SCHEDULE_SPAN)+
+        ScheduleParams.getStringParamByName(ScheduleParams.SCHEDULE_TITLE)+
+        ScheduleParams.getStringParamByName(ScheduleParams.EDUCATIONAL_INSTITUTION)+
+        
         ScheduleParams.getStringParamByName(ScheduleParams.DATE_BEGIN)+"&nbsp;"+
-        ScheduleParams.getStringParamByName(ScheduleParams.DATE_END)
+        ScheduleParams.getStringParamByName(ScheduleParams.DATE_END)+
+                "</div>"
+                
         );
         
         
@@ -799,33 +805,6 @@ public class ReportBuilder implements IReportBuilder{
             result.append("<b>"+v.getString("caption")+"</b>");
             result.append(getCurriculumDetails(v));
         }
-        
-//        Dataset skillList = DataModule.getSQLDataset("select * from skill");
-//        skillList.open();
-//        Dataset subjectList = DataModule.getSQLDataset("select * from subject");
-//        subjectList.open();;
-//        
-//        result.append("<table>");
-//        result.append("<tr>");
-//        result.append("<td>&nbsp;</td>");
-//        for (int i=0;i<skillList.size();i++){
-//            v=skillList.getValues(i);
-//            result.append("<td>"+v.getString("caption")+"</td>");
-//        }
-//        result.append("</tr>");
-//        
-//        for (int i=0;i<subjectList.size();i++){
-//            v=subjectList.getValues(i);
-//            result.append("<tr>");
-//            result.append("<td>"+v.getString("subject_name")+"</td>");
-//            for (int j=0;j<skillList.size();j++){
-//                result.append("<td>&nbsp;</td>");
-//            }
-//            result.append("</tr>");
-//        }
-//        
-//        result.append("</table>");
-        
         return result.toString();
     }
 }

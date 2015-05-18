@@ -24,6 +24,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import ru.viljinsky.dialogs.BaseDialog;
 import static ru.viljinsky.forms.IAppCommand.CREATE_CURRICULUM;
 import static ru.viljinsky.forms.IAppCommand.CREATE_DEPART;
 import static ru.viljinsky.forms.IAppCommand.DELETE_CURRICULUM;
@@ -66,9 +67,22 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
     /**
      * Перенесено и IOpenForm
      */
-    class CurriculumnDetailDialg extends SelectDialog{
+        
+    class CurriculumDetailDialg extends SelectDialog{
         public Integer skill_id;
         public Integer curriculum_id;
+
+        public CurriculumDetailDialg(Integer curriculum_id,Integer skill_id) throws Exception{
+            super();
+            this.skill_id = skill_id;
+            this.curriculum_id = curriculum_id;
+            IDataset ds = grid.getDataset();
+            Set<Object> set= ds.getColumnSet("subject_id");
+            Dataset dataDataset = DataModule.getSQLDataset("select id,subject_name from subject");
+            setDataset(dataDataset, "id", "subject_name");
+            setSelected(set);
+        }
+
 
         @Override
         public void doOnEntry() throws Exception {
@@ -107,10 +121,6 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
                 case CREATE_CURRICULUM:
                       curriculum_id = tree.addCurriculim(new Curriculum());
                     break;
-                case COPY_CURRICULUM:
-                    if (Dialogs.copyCurriculum(this,curriculum_id,skill_id))
-                        grid.requery();
-                    break;
                     
                 case EDIT_CURRICULUM:
                     if (Dialogs.editCurriculum(this,curriculum_id)){
@@ -127,19 +137,16 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
                     break;
                     
                 case FILL_CURRICULUM:
-                        CurriculumnDetailDialg dlg = new CurriculumnDetailDialg();
-                        dlg.curriculum_id=curriculum_id;
-                        dlg.skill_id=skill_id;
-
-                        IDataset ds = grid.getDataset();
-                        Set<Object> set= ds.getColumnSet("subject_id");
-                        Dataset dataDataset = DataModule.getSQLDataset("select id,subject_name from subject");
-                        dlg.setDataset(dataDataset, "id", "subject_name");
-                        dlg.setSelected(set);
-                        if (dlg.showModal(this)==SelectDialog.RESULT_OK){
-                            grid.requery();
-                        }
+                    BaseDialog dlg = new CurriculumDetailDialg(curriculum_id,skill_id);
+                    if (dlg.showModal(this)==SelectDialog.RESULT_OK)
+                        grid.requery();
                     break;
+                    
+                case COPY_CURRICULUM:
+                    if (Dialogs.copyCurriculum(this,curriculum_id,skill_id))
+                        grid.requery();
+                    break;
+                    
                     
                 case EDIT_CURRICULUM_DETAIL:
                     if (Dialogs.editCurriculumDetail(this,curriculum_id,skill_id,subject_id))

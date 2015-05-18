@@ -504,6 +504,6 @@ insert into attr(param_name,param_value) values ('date_begin','1/1/2015');
 insert into attr(param_name,param_value) values ('date_end','1/1/2015');
 insert into attr(param_name,param_value) values ('schedule_span','2015/2016 учебный год');
 insert into attr(param_name,param_value) values ('schedule_title','Первая четверть');
-insert into attr(param_name,param_value) values ('educational_institution','Среднее школа № 212');
+insert into attr(param_name,param_value) values ('educational_institutional','Среднее школа № 212');
 
 
