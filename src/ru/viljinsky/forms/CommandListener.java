@@ -8,7 +8,7 @@ import javax.swing.Action;
  */
 
 
-public interface ICommandListener {
+public interface CommandListener {
     public void doCommand(String command);
     public void updateAction(Action action);
     

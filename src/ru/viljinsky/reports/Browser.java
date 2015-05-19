@@ -28,7 +28,7 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import ru.viljinsky.forms.CommandMngr2;
 import ru.viljinsky.forms.IAppCommand;
-import ru.viljinsky.forms.ICommandListener;
+import ru.viljinsky.forms.CommandListener;
 
 /**
  *
@@ -88,7 +88,7 @@ import ru.viljinsky.forms.ICommandListener;
 //    }
 //    
 //}
-public abstract class Browser extends JPanel implements IAppCommand,ICommandListener {
+public abstract class Browser extends JPanel implements IAppCommand,CommandListener {
     Cursor waitCursor = new Cursor(Cursor.WAIT_CURSOR);
     Cursor defaultCursor = Cursor.getDefaultCursor();
     List<URL> stack = new ArrayList<>();

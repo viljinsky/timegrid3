@@ -58,25 +58,19 @@ abstract class DetailPanel extends JPanel{
 ////////////////////////////    ROOM PANEL /////////////////////////////////////
 
 
-class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand{
+class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand,CommandListener{
     
+    Integer shift_id   = null,
+            profile_id = null,
+            room_id    = null;
     
     MasterGrid grid = new MasterGrid();
-    SelectRoomPanel selectPanel = new SelectRoomPanel();
     
+    SelectRoomPanel selectPanel = new SelectRoomPanel();    
     DetailPanel shiftPanel = new ShiftRoomPanel();
     DetailPanel profilePanel = new ProfileRoomPanel();
-    CommandMngr commands = new CommandMngr() {
-
-        @Override
-        public void updateAction(Action a) {
-        }
-
-        @Override
-        public void doCommand(String command) {
-            RoomPanel.this.doCommand(command);
-        }
-    };
+    
+    CommandMngr2 commands = new CommandMngr2(ROOM_COMMANDS);
     
     public RoomPanel(){
         super(new BorderLayout());
@@ -94,8 +88,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
         add(splitPane);
         setPreferredSize(new Dimension(800,600));
 
-        commands.setCommandList(ROOM_COMMANDS);
-        
+        commands.addCommandListener(this);
        
         gridPanel.addAction(commands.getAction(CREATE_ROOM));
         gridPanel.addAction(commands.getAction(EDIT_ROOM));
@@ -108,12 +101,12 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
         profilePanel.addAction(commands.getAction(CREATE_PROFILE));
         profilePanel.addAction(commands.getAction(EDIT_PROFILE));
         profilePanel.addAction(commands.getAction(REMOVE_PROFILE));
+        
+        commands.updateActionList();
     }
     
+    @Override
     public void doCommand(String command){
-        Integer shift_id,profile_id;
-        Integer new_profile_id;
-        Integer room_id;
         Values values;
         try{
             switch(command){
@@ -128,24 +121,21 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
                     break;
                     
                 case EDIT_ROOM:
-                    room_id = grid.getIntegerValue("id");
                     if (Dialogs.editRoom(this, room_id))
                         grid.requery();
                     break;
                     
                 case DELETE_ROOM:
-                    room_id = grid.getIntegerValue("id");
                     if (Dialogs.deleteRoom(this, room_id))
                         grid.requery();
                     break;
                     
                 case CREATE_PROFILE:
-                    profile_id = grid.getIntegerValue("profile_id");
-                    new_profile_id=Dialogs.createProfile(this, profile_id);
-                    if (new_profile_id!=null){
+                    profile_id=Dialogs.createProfile(this, profile_id);
+                    if (profile_id!=null){
                         try{
                             room_id=grid.getIntegerValue("id");
-                            DataModule.execute("update room set profile_id="+new_profile_id+" where id="+room_id);
+                            DataModule.execute("update room set profile_id="+profile_id+" where id="+room_id);
                             DataModule.commit();
                         } catch (Exception p){
                             DataModule.rollback();
@@ -156,21 +146,16 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
                     break;
                     
                 case EDIT_PROFILE:
-                    profile_id=grid.getIntegerValue("profile_id");
-                    if (Dialogs.editProfile(this, profile_id)){
+                    if (Dialogs.editProfile(this, profile_id))
                         grid.requery();
-                    }
                     break;
                     
                 case REMOVE_PROFILE:
-                    profile_id = grid.getIntegerValue("profile_id");
                     if (Dialogs.removeProfile(this, profile_id)==true)
                         grid.requery();
                     break;
                     
                 case CREATE_SHIFT:
-                    room_id=grid.getIntegerValue("id");
-                    shift_id=grid.getIntegerValue("shift_id");
                     shift_id=Dialogs.createShift(this, shift_id);
                     if (shift_id!=null){
                         try{
@@ -185,20 +170,57 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
                     break;
                     
                 case EDIT_SHIFT:
-                    shift_id= grid.getIntegerValue("shift_id");
+//                    shift_id= grid.getIntegerValue("shift_id");
                     if (Dialogs.editShift(this, shift_id)){
                         shiftPanel.grid.requery();
                     }
                     break;
                     
                 case REMOVE_SHIFT:
-                    shift_id=grid.getIntegerValue("shift_id");
                     if (Dialogs.removeShift(this,shift_id))
                         grid.requery();
                     break;
             }
         } catch (Exception e){
             JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateAction(Action action) {
+        String command = (String)action.getValue(Action.ACTION_COMMAND_KEY);
+    
+        switch (command){
+            case (EDIT_ROOM):
+                action.setEnabled(room_id!=null);
+                break;
+            case (DELETE_ROOM):
+                action.setEnabled(room_id!=null);
+                break;
+                
+            case (EDIT_PROFILE):
+                action.setEnabled(room_id!=null && profile_id!=null);
+                break;
+            case (CREATE_PROFILE):
+                action.setEnabled(room_id!=null);
+                break;
+                
+            case (REMOVE_PROFILE):
+                action.setEnabled(room_id!=null && profile_id!=null);
+                break;
+                        
+            case (EDIT_SHIFT):
+                action.setEnabled(room_id!=null && shift_id!=null);
+                break;
+                
+            case (CREATE_SHIFT):
+                action.setEnabled(room_id!=null);
+                break;
+                
+            case (REMOVE_SHIFT):
+                action.setEnabled(room_id!=null && shift_id!=null);
+                break;
+                
         }
     }
     
@@ -239,17 +261,21 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
 
         @Override
         public void gridSelectionChange() {
-            int row = getSelectedRow();
-            if (row>=0){
-                try{
-                    int room_id= grid.getIntegerValue("id");
-                    selectPanel.setRoomId(room_id);
-                    shiftPanel.reopen(room_id);
-                    profilePanel.reopen(room_id);
-                } catch (Exception e){
-                    e.printStackTrace();
+            try{
+                profile_id=getSelectedRow()>=0? getIntegerValue("profile_id"):null;
+                shift_id=getSelectedRow()>=0? getIntegerValue("shift_id"): null;
+                room_id = getSelectedRow()>=0? getIntegerValue("id"):null;
+                if (room_id!=null){
+                        selectPanel.setRoomId(room_id);
+                        shiftPanel.reopen(room_id);
+                        profilePanel.reopen(room_id);
                 }
+                
+                commands.updateActionList();
+            } catch (Exception e){
+                e.printStackTrace();
             }
+            
         }
 
         @Override
@@ -435,20 +461,9 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
 ////////////////////////   DEPART PANEL ////////////////////////////////////////
 
 
-class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
+class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand,CommandListener{
 
-    CommandMngr commands = new CommandMngr() {
-
-        @Override
-        public void updateAction(Action a) {
-        }
-
-        @Override
-        public void doCommand(String command) {
-            DepartPanel.this.doCommand(command);
-        }
-            
-    };
+    CommandMngr2 commands = new CommandMngr2(DEPART_COMMANDS);
 
 
     @Override
@@ -463,7 +478,7 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
 
     public DepartPanel() {
         super();
-        commands.setCommandList(DEPART_COMMANDS);
+        commands.addCommandListener(this);
         
         addMasterAction(commands.getAction(EDIT_DEPART));
         addMasterAction(commands.getAction(DELETE_DEPART));
@@ -481,6 +496,7 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
         addDetailAction(commands.getAction(REMOVE_STREAM));
 }
     
+    @Override
     public void doCommand(String commad){
         Integer stream_id=-1,depart_id=-1,subject_id=-1,group_id=-1,skill_id=-1;
         try{
@@ -570,6 +586,10 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
         }
     }
     
+    @Override
+    public void updateAction(Action action) {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
     @Override
     public String getCaption() {
@@ -596,6 +616,7 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand{
         doCommand(DELETE_DEPART);
     }
 
+
 }
 
 
@@ -606,35 +627,55 @@ interface ISchedulePanel {
     public static final String SHIFT_PANEL = "График";
 
 }
-class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCommand {
-//    DataModule dataModule = DataModule.getInstance();
+class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCommand,CommandListener {
+    Integer shift_id=null,profile_id=null,
+    newProfileId,newShiftId,
+    teacher_id=null;
+    
     MasterGrid grid = new MasterGrid();
     JTabbedPane tabs = new JTabbedPane();
     
     TeacherSelectPanel selctPanel = new TeacherSelectPanel();
     DetailPanel profilePanel = new ProfileTeacherPanel();
     DetailPanel shiftPanel = new ShiftTeacherPanel();
-    CommandMngr commands = new CommandMngr() {
-
-        @Override
-        public void updateAction(Action a) {
-        }
-
-        @Override
-        public void doCommand(String command) {
-            TeacherPanel.this.doCommand(command);
-        }
-    };
+    CommandMngr2 commands = new CommandMngr2();
     
    
+    @Override
+    public void updateAction(Action action){
+        String command = (String)action.getValue(Action.ACTION_COMMAND_KEY);
+        switch (command){
+            case EDIT_TEACHER:
+                action.setEnabled(teacher_id!=null);
+                break;
+            case DELETE_TEACHER:
+                action.setEnabled(teacher_id!=null);
+                break;
+            case CREATE_PROFILE:
+                action.setEnabled(teacher_id!=null && profile_id!=null);
+                break;
+            case EDIT_PROFILE:
+                action.setEnabled(teacher_id!=null && profile_id!=null);
+                break;
+            case REMOVE_PROFILE:
+                action.setEnabled(teacher_id!=null && profile_id!=null);
+                break;
+            case CREATE_SHIFT:
+                action.setEnabled(teacher_id!=null && shift_id!=null);
+                break;
+            case EDIT_SHIFT:
+                action.setEnabled(teacher_id!=null && shift_id!=null);
+                break;
+            case REMOVE_SHIFT:
+                action.setEnabled(teacher_id!=null && shift_id!=null);
+                break;
+        }
+    }
+    
+    @Override
     public void doCommand(String command){
-        Integer shift_id,profile_id;
-        Integer newProfileId,newShiftId;
-        Integer teacher_id;
         Values values;
         try{
-//            profile_id=grid.getIntegerValue("profile_id");
-//            shift_id=grid.getIntegerValue("shift_id");
             switch (command){
                 
                 case CREATE_TEACHER:
@@ -647,20 +688,16 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
                     break;
                     
                 case EDIT_TEACHER:
-                    teacher_id = grid.getIntegerValue("id");
                     if (Dialogs.editTeacher(this, teacher_id)==true)
                         grid.requery();
                     break;
                     
                 case DELETE_TEACHER:
-                    teacher_id = grid.getIntegerValue("id");
                     if (Dialogs.deleteTeacher(this, teacher_id))
                         grid.requery();
                     break;
                     
                 case CREATE_PROFILE:
-                    profile_id=grid.getIntegerValue("profile_id");
-//            shift_id=grid.getIntegerValue("shift_id");
                     newProfileId = Dialogs.createProfile(this, profile_id);
                     if (newProfileId!=null){
                         try{
@@ -675,19 +712,16 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
                     break;
                     
                 case EDIT_PROFILE:
-                    profile_id=grid.getIntegerValue("profile_id");
                     Dialogs.editProfile(this,profile_id);
                     grid.requery();
                     break;
                     
                 case REMOVE_PROFILE:
-                    profile_id=grid.getIntegerValue("profile_id");
                     Dialogs.removeProfile(this, profile_id);
                     grid.requery();
                     break;
                  
                 case CREATE_SHIFT:
-                    shift_id=grid.getIntegerValue("shift_id");
                     newShiftId = Dialogs.createShift(this, shift_id);
                     if (newShiftId!=null){
                         try{
@@ -702,13 +736,11 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
                     break;
                     
                 case EDIT_SHIFT:
-                    shift_id=grid.getIntegerValue("shift_id");
                     Dialogs.editShift(this, shift_id);
                     grid.requery();
                     break;
                     
                 case REMOVE_SHIFT:
-                    shift_id=grid.getIntegerValue("shift_id");
                     if (Dialogs.removeShift(this,shift_id))
                         grid.requery();
                     break;
@@ -760,17 +792,21 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
 
         @Override
         public void gridSelectionChange() {
-            int row = getSelectedRow();
-            if (row >= 0) {
-                try {
-                    Integer teacher_id = getIntegerValue("id");
+            
+            try{
+                teacher_id = getSelectedRow()>=0?getIntegerValue("id"):null;
+                shift_id = getSelectedRow()>=0?getIntegerValue("shift_id"):null;
+                profile_id = getSelectedRow()>=0?getIntegerValue("profile_id"):null;
+                if (teacher_id!=null){
                     selctPanel.setTeacherId(teacher_id);
                     shiftPanel.reopen(teacher_id);
                     profilePanel.reopen(teacher_id);
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
+                commands.updateActionList();
+            } catch (Exception e){
+                e.printStackTrace();
             }
+            
         }
 
         @Override
@@ -783,10 +819,6 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
             };
             gridSelectionChange();
         }
-        
-        
-        
-        
     }
 
     class TeacherSelectPanel extends SelectPanel{
@@ -948,7 +980,9 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
         add(splitPane);
         setPreferredSize(new Dimension(800,600));
         
-        commands.setCommandList(TEACHER_COMMANDS);
+        commands.setCommands(TEACHER_COMMANDS);
+        commands.addCommandListener(this);
+        commands.updateActionList();
         
         gridPanel.addAction(commands.getAction(CREATE_TEACHER));
         gridPanel.addAction(commands.getAction(EDIT_TEACHER));

@@ -12,7 +12,7 @@ import javax.swing.Action;
 
 
 public class CommandMngr2 {
-    ICommandListener listener=null;
+    CommandListener listener=null;
     Action[] actions = {};
 
     public CommandMngr2() {
@@ -45,6 +45,9 @@ public class CommandMngr2 {
         public Act(String name) {
             super(name);
             putValue(Action.ACTION_COMMAND_KEY, name);
+            putValue(NAME,CommandDictionary.getCommandTranslate(name));
+            putValue(SHORT_DESCRIPTION,CommandDictionary.getToolTipText(name));
+            
         }
 
         @Override
@@ -64,7 +67,7 @@ public class CommandMngr2 {
         }
     }
     
-    public void addCommandListener(ICommandListener listener){
+    public void addCommandListener(CommandListener listener){
         this.listener = listener;
     }
     
