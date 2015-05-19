@@ -92,11 +92,9 @@ public class ShiftDialog extends BaseDialog{
         String command = e.getActionCommand();
         switch (command){
             case "SELECT_ALL":
-//                System.out.println(command);
                 drawPanel.selectAll();
                 break;
             case "UNSELECT_ALL":
-//                System.out.println(command);
                 drawPanel.unSelectAll();
                 break;
             default:
@@ -269,18 +267,15 @@ class ShiftPanel extends JPanel {
     }
 
     public void clickCell(int day, int bell) {
-//        System.out.println(String.format("day:%d bell:%d", day, bell));
         Point cell = new Point(day, bell);
         if (cells.contains(cell)) {
             cells.remove(cell);
         } else {
             cells.add(cell);
         }
-//        System.out.println(cells);
     }
 
     public void columnClick(int day) {
-//        System.out.println("day =" + day);
         boolean b = cells.contains(new Point(day, 0));
         Point cell;
         for (int bell = 0; bell < bellCount; bell++) {
@@ -294,7 +289,6 @@ class ShiftPanel extends JPanel {
     }
 
     public void rowClick(int bell) {
-//        System.out.println("bell=" + bell);
         Point cell;
         boolean b = cells.contains(new Point(0, bell));
         for (int day = 0; day < dayCount; day++) {

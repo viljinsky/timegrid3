@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.sql.*;
 
 abstract class SQLReader{
@@ -21,6 +22,10 @@ abstract class SQLReader{
     public abstract void sqlredy(String sql) throws Exception;
 
     public void execute(String fileName) throws Exception{
+//        URL url = SQLReader.class.getResource(fileName);
+//        String path = url.getPath();
+        
+        System.out.println("SCRIPT_EXECUTING \""+fileName +"\"");
         String line;
         StringBuilder sql;
         BufferedReader reader = null;
@@ -56,6 +61,9 @@ abstract class SQLReader{
 
 public class CreateData {
     
+    public static final String[] scriptList = {"/ru/viljinsky/sql/schedule.sql","/ru/viljinsky/sql/data.sql"};
+    
+    
     Connection con = null;
     Statement  stmt = null;
     SQLReader  reader;
@@ -65,17 +73,17 @@ public class CreateData {
         try{
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e){
-            throw new Exception("class not found");
+            throw new Exception("ERROR_CLASS_NOT_FOUND");
         }
         
         File file = new File(fileName);
         if (file.exists()){
             if (force) {
                 if (!file.delete()){
-                    throw new Exception("Не удалось удалить файл '"+fileName+"'");
+                    throw new Exception("ERROR_FILE_CAN_NOT_DELETED '"+fileName+"'");
                 }
             } else {
-                throw new Exception("База данных '"+fileName+"' уже существует");
+                throw new Exception("ERROR_FILE_EXISTS '"+fileName+"'");
             }
         }
         
@@ -94,7 +102,7 @@ public class CreateData {
                     try{
                         stmt.execute(sql);
                     } catch (SQLException e){
-                        throw new Exception("Ошибка при выполнении запроса\nSQL : '"+sql+"'\nMessage:"+e.getMessage());
+                        throw new Exception("ERROR_SQL_EXECUTING\nSQL : '"+sql+"'\nMessage:"+e.getMessage());
                     }
                 }
             };
@@ -108,7 +116,7 @@ public class CreateData {
                         con.commit();
                     } catch (Exception e){
                         con.rollback();
-                        throw new Exception("Ошибка при выполнении скрипта '"+script+"'\n"+e.getMessage());
+                        throw new Exception("ERROR_SCRIPT_EXECUTING '"+script+"'\n"+e.getMessage());
                     }
                 }
             } finally {
@@ -131,24 +139,23 @@ public class CreateData {
     }
     
     public static void execute(String fileName) throws Exception{
-        String[] scriptList = {"../sql/schedule.sql","../sql/data.sql"};
         CreateData cd = new CreateData();
         System.out.println("Создаётся новая база данных...");
         try{
             cd.run(fileName,false,scriptList);
             System.out.println("База данных создана '"+fileName+"'");
         } catch (Exception e){
-            throw new Exception("Ошибка при создании базы данных:\n"+e.getMessage());
+            throw new Exception("CREARE_DATABASE_ERROR:\n"+e.getMessage());
         }
     }
-    
+
+
     public static void main(String[] args){
         String fileName = DataModule.DEFAULT_DATA;//  "example.db";
-        String[] script = {"../sql/schedule.sql","../sql/data.sql"};
         CreateData cd = new CreateData();
         System.out.println("Создаётся новая база данных...");
         try{
-            cd.run(fileName,true,script);
+            cd.run(fileName,true,scriptList);
             System.out.println("База данных создана '"+fileName+"'");
         } catch (Exception e){
             System.err.println("Ошибка при создании базы данных:\n"+e.getMessage());

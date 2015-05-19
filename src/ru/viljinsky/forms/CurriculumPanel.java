@@ -283,6 +283,10 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
         Dataset departList;
         
         public CurriculumTree(){
+            root = new DefaultMutableTreeNode("Учебный план");
+            model = new DefaultTreeModel(root);
+            setModel(treeModel);
+            
             setEditable(true);
             getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
             addTreeSelectionListener(new TreeSelectionListener() {
@@ -380,7 +384,8 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
         
         public void open() throws Exception{
             DefaultMutableTreeNode node,skillNode,departNode;
-            root = new DefaultMutableTreeNode("Учебный план");
+//            root = new DefaultMutableTreeNode("Учебный план");
+            root.removeAllChildren();
             
             skillList = DataModule.getDataset("skill");
             skillList.open();
@@ -469,8 +474,6 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
     };
 
     public CurriculumPanel() {
-        
-        
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(800,600));
         initComponents();
