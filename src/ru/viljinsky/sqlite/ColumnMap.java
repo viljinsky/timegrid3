@@ -116,6 +116,7 @@ public class ColumnMap extends HashMap<String, String[]> {
         {"depart.class_former","Кл.руководитель"},
         {"depart.boy_count","Кол.мальчиков"},
         {"depart.gerl_count","Кол.девочек"},
+        {"depart.schedule_state_id","Статус расписания"},
 
         // subject_group
         {"subject_group.group_id",""},
@@ -291,6 +292,7 @@ public class ColumnMap extends HashMap<String, String[]> {
         {"v_depart.curriculum_id",",false"},
         {"v_depart.skill_id",",false"},
         {"v_depart.shift_id",",false"},
+        {"v_depart.state_description","Статус"},
 
         // user_role
         {"user_role.id",""},
@@ -340,7 +342,6 @@ public class ColumnMap extends HashMap<String, String[]> {
             instance = new ColumnMap();
         }
         return instance.get(str);
-//        return null;
     }
     
 }

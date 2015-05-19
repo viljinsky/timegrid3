@@ -1,56 +1,50 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package ru.viljinsky.forms;
 
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
+
 /**
- *   Манагер комманд
+ *
  * @author вадик
  */
 
 
-public abstract class CommandMngr{ // implements IAppCommand{
-    private Action[] actions;
-    
-    public CommandMngr(){
+public class CommandMngr {
+    CommandListener listener=null;
+    Action[] actions = {};
+
+    public CommandMngr() {
     }
     
-    public CommandMngr(String[] commands){
-        setCommandList(commands);
+    public CommandMngr(String[] commands) {
+        setCommands(commands);
     }
     
-    public void setCommandList(String[] list){
-        actions=new Action[list.length];
-        for (int i=0;i<actions.length;i++){
-            String[] s = list[i].split(";");
-            actions[i]=new Act(s[0]);
-        }
-    }
-    
-    public Action[] getActionList(){
+    public Action[] getActions(){
         return actions;
     }
-
-    public Action getAction(String command){
-        for (Action a:actions){
-            if (a.getValue(Action.ACTION_COMMAND_KEY).equals(command))
+    
+    public Action getAction(String actionCommand){
+        for (Action a:actions)
+            if (a.getValue(Action.ACTION_COMMAND_KEY).equals(actionCommand))
                 return a;
-        }
         return null;
+    }
+    
+    public void updateActionList(){
+        if (listener!=null)
+            for (Action a:actions)
+                listener.updateAction(a);
+        
     }
     
     class Act extends AbstractAction{
 
         public Act(String name) {
             super(name);
-            putValue(ACTION_COMMAND_KEY, name);
+            putValue(Action.ACTION_COMMAND_KEY, name);
             putValue(NAME,CommandDictionary.getCommandTranslate(name));
             putValue(SHORT_DESCRIPTION,CommandDictionary.getToolTipText(name));
             
@@ -58,22 +52,24 @@ public abstract class CommandMngr{ // implements IAppCommand{
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            doCommand(e.getActionCommand());
-            updateActionList();
+            if (listener!=null){
+                listener.doCommand(e.getActionCommand());
+                for (Action a:actions)
+                    listener.updateAction(a);
+            }
         }
     }
     
-    public void updateActionList(){
-        for (Action a:actions)
-            updateAction(a);
+    public void setCommands(String[] commands){
+        actions = new Action[commands.length];
+        for (int i=0;i<commands.length;i++){
+            actions[i]=new Act(commands[i]);
+        }
     }
     
-    protected String getActionCommand(Action a){
-        return (String)a.getValue(Action.ACTION_COMMAND_KEY);
+    public void addCommandListener(CommandListener listener){
+        this.listener = listener;
     }
-    
-    public abstract void updateAction(Action a);
-    public abstract void doCommand(String command);
     
     
 }

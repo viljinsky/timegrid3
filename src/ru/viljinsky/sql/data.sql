@@ -114,14 +114,14 @@ insert into curriculum (id,caption) values (1,'Учебный план (1)');
 -- insert into curriculum (id,skill_id,caption) values (2,2,'Уч. план 9-го класса');
 -- insert into curriculum (id,skill_id,caption) values (3,3,'Уч. план 10-го класса');
 
-insert into curriculum_detail(curriculum_id,skill_id,subject_id,hour_per_day,hour_per_week,group_sequence_id)
-  values(1,1,1,1,2,0);
-    
-insert into curriculum_detail(curriculum_id,skill_id,subject_id,hour_per_day,hour_per_week,group_sequence_id)
-  values(1,1,2,1,2,0);
-
-insert into curriculum_detail(curriculum_id,skill_id,subject_id,hour_per_day,hour_per_week,group_sequence_id)
-  values(1,1,3,1,2,0);
+-- insert into curriculum_detail(curriculum_id,skill_id,subject_id,hour_per_day,hour_per_week,group_sequence_id)
+--   values(1,1,1,1,2,0);
+--     
+-- insert into curriculum_detail(curriculum_id,skill_id,subject_id,hour_per_day,hour_per_week,group_sequence_id)
+--   values(1,1,2,1,2,0);
+-- 
+-- insert into curriculum_detail(curriculum_id,skill_id,subject_id,hour_per_day,hour_per_week,group_sequence_id)
+--   values(1,1,3,1,2,0);
 
 -- insert into depart(id,label,skill_id,shift_id,curriculum_id) values (1,'8-a',1,1,1);
 -- insert into depart(id,label,skill_id,shift_id,curriculum_id) values (2,'8-б',1,1,1);

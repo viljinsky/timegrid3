@@ -12,6 +12,7 @@ public class CommandDictionary extends HashMap<String, String> implements IAppCo
     private static CommandDictionary instance = null;
     private CommandDictionary(){
 
+    put(REFRESH,                "Обновить");   
         
     put(CREATE_CURRICULUM,      "Создать;Создать новый учебный план");
     put(COPY_CURRICULUM,        "Копировать;Копировать учебный план из ранее созданного");
@@ -71,10 +72,10 @@ public class CommandDictionary extends HashMap<String, String> implements IAppCo
     
 
     // select panel
-    put("INCLUDE","Включить>");
-    put("EXCLUDE","<Исключить");
-    put("INCLUDE_ALL","Вкл.всё>>");
-    put("EXCLUDE_ALL","<<Искл.всё");
+    put(INCLUDE,"Включить>");
+    put(EXCLUDE,"<Исключить");
+    put(INCLUDE_ALL,"Вкл.всё>>");
+    put(EXCLUDE_ALL,"<<Искл.всё");
     
     // broser
     

@@ -79,6 +79,13 @@ public interface IAppCommand {
     public static final String BTN_NEXT     = "NEXT";
     public static final String BTN_RELOAD   = "RELOAD";
     
+    // select_panel
+    static final String INCLUDE = "INCLUDE";
+    static final String EXCLUDE = "EXCLUDE";
+    static final String INCLUDE_ALL = "INCLUDE_ALL";
+    static final String EXCLUDE_ALL = "EXCLUDE_ALL";
+    
+    
     
     
     public static final String[] DEPART_COMMANDS ={

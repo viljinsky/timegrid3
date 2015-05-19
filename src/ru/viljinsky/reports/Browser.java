@@ -10,12 +10,10 @@ import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -26,7 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import ru.viljinsky.forms.CommandMngr2;
+import ru.viljinsky.forms.CommandMngr;
 import ru.viljinsky.forms.IAppCommand;
 import ru.viljinsky.forms.CommandListener;
 
@@ -35,66 +33,13 @@ import ru.viljinsky.forms.CommandListener;
  * @author вадик
  */
 
-//interface ICommandMngr2{
-//    public void doCommand(String command);
-//    public void updateAction(Action action);
-//}
-//
-//
-//class CommandMngr2{
-//    ICommandMngr2 manager=null;
-//    Action[] actions = {};
-//
-//    public CommandMngr2() {
-//    }
-//    
-//    public CommandMngr2(String[] commands) {
-//        setCommands(commands);
-//    }
-//    
-//    public Action[] getActions(){
-//        return actions;
-//    }
-//    
-//    public void updateActionList(){
-//        if (manager!=null)
-//            for (Action a:actions)
-//                manager.updateAction(a);
-//        
-//    }
-//    
-//    class Act extends AbstractAction{
-//
-//        public Act(String name) {
-//            super(name);
-//            putValue(Action.ACTION_COMMAND_KEY, name);
-//        }
-//
-//        @Override
-//        public void actionPerformed(ActionEvent e) {
-//            if (manager!=null){
-//                manager.doCommand(e.getActionCommand());
-//                for (Action a:actions)
-//                    manager.updateAction(a);
-//            }
-//        }
-//    }
-//    
-//    public void setCommands(String[] commands){
-//        actions = new Action[commands.length];
-//        for (int i=0;i<commands.length;i++){
-//            actions[i]=new Act(commands[i]);
-//        }
-//    }
-//    
-//}
 public abstract class Browser extends JPanel implements IAppCommand,CommandListener {
     Cursor waitCursor = new Cursor(Cursor.WAIT_CURSOR);
     Cursor defaultCursor = Cursor.getDefaultCursor();
     List<URL> stack = new ArrayList<>();
     int pageIndex = -1;
     
-    CommandMngr2 maneger;
+    CommandMngr maneger;
     JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
     @Override
@@ -158,7 +103,7 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
     public Browser() {
         setLayout(new BorderLayout());
         
-        maneger = new CommandMngr2(new String[]{BTN_HOME,BTN_PRIOR,BTN_NEXT,BTN_RELOAD});
+        maneger = new CommandMngr(new String[]{BTN_HOME,BTN_PRIOR,BTN_NEXT,BTN_RELOAD});
         maneger.addCommandListener(this);
         for (Action a:maneger.getActions()){
             controls.add(new JButton(a));

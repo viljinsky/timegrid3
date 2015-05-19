@@ -43,7 +43,7 @@ import ru.viljinsky.sqlite.Values;
 
 
 
-public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
+public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,CommandListener{
 
     @Override
     public String getCaption() {
@@ -70,7 +70,40 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
     
     public static final String MSG_GREATE_DEPART_OK = "Класс \"%s\" успешно создан";    
 
-    private void doCommand(String command) {
+    @Override
+    public void updateAction(Action a){
+            String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
+            switch (command){
+                case CREATE_CURRICULUM:
+                    break;
+                case EDIT_CURRICULUM:
+                    a.setEnabled(curriculum_id!=null && skill_id==null);
+                    break;
+                case DELETE_CURRICULUM:
+                    a.setEnabled(curriculum_id!=null && skill_id==null);
+                    break;
+                case FILL_CURRICULUM:
+                    a.setEnabled(skill_id!=null && curriculum_id!=null);
+                    break;
+                case COPY_CURRICULUM:
+                    a.setEnabled(skill_id!=null && curriculum_id!=null);
+                    break;
+                case CREATE_DEPART:
+                    a.setEnabled(skill_id!=null && curriculum_id!=null);
+                    break;
+                case DELETE_DEPART:
+                    a.setEnabled(depart_id!=null);
+                    break;
+                case EDIT_CURRICULUM_DETAIL:
+                    a.setEnabled(subject_id!=null);
+                    break;
+                default:
+                    System.out.println("ANKNOW_COMMAND:\n"+command);
+            }
+    }
+    
+    @Override
+    public void doCommand(String command) {
         try{
             switch (command){
                 case CREATE_CURRICULUM:
@@ -107,10 +140,6 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
                       grid.requery();
                     break;
                     
-//                case CLEAR_CURRICULUM:
-////                    clearCurriculumDetail();
-//                    break;
-                    
                 case CREATE_DEPART:
                     depart_id = Dialogs.createDepart(this, curriculum_id, skill_id);
                     if (depart_id!=null){
@@ -127,32 +156,27 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
                             throw new Exception("CREATE_DEPART_ERROR\n"+e.getMessage());
                         }
                     }
-                    
-//                    createDepart();
                     break;
+                    
                 case DELETE_DEPART:
                     if (Dialogs.deleteDepart(this, depart_id)==true){
                         tree.deleteDepart();
                     }
                     break;
-//                case EDIT_CURRICULUM:
-//                    editDetails();
-//                    break;
+                    
                 default:
                     System.out.println("ANKNOW_COMMAND:\n"+command);
             }  
-            commandMng.updateActionList();
+            
         } catch (Exception e){
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
-//        System.out.println("DoCommand '"+command+"'");
     }
     
     class CommandPanel extends JPanel{
 
         public CommandPanel() {
             setLayout(new FlowLayout(FlowLayout.LEFT));
-//            setPreferredSize(new Dimension(100, 20));
         }
         
         public void addCommand(Action action){
@@ -163,45 +187,8 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
         
     }
     
-    CommandMngr commandMng = new CommandMngr() {
-
-        @Override
-        public void updateAction(Action a) {
-            String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
-            switch (command){
-                case CREATE_CURRICULUM:
-                    break;
-                case EDIT_CURRICULUM:
-                    a.setEnabled(curriculum_id!=null && skill_id==null);
-                    break;
-                case DELETE_CURRICULUM:
-                    a.setEnabled(curriculum_id!=null && skill_id==null);
-                    break;
-                case FILL_CURRICULUM:
-                    a.setEnabled(skill_id!=null && curriculum_id!=null);
-                    break;
-                case COPY_CURRICULUM:
-                    a.setEnabled(skill_id!=null && curriculum_id!=null);
-                    break;
-                case CREATE_DEPART:
-                    a.setEnabled(skill_id!=null && curriculum_id!=null);
-                    break;
-                case DELETE_DEPART:
-                    a.setEnabled(depart_id!=null);
-                    break;
-                case EDIT_CURRICULUM_DETAIL:
-                    a.setEnabled(subject_id!=null);
-                    break;
-                default:
-                    System.out.println("ANKNOW_COMMAND:\n"+command);
-            }
-        }
-
-        @Override
-        public void doCommand(String command) {
-            CurriculumPanel.this.doCommand(command);
-        }
-    };
+    CommandMngr commandMng = new CommandMngr(); 
+    
     //            классы дерева  
     class Curriculum{
         Integer curriculum_id;
@@ -483,7 +470,6 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
 
     public CurriculumPanel() {
         
-        commandMng.setCommandList(CURRICULUM_COMMANDS);
         
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(800,600));
@@ -505,7 +491,10 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm{
         
         add(splitPane);
         add(commandPanel,BorderLayout.PAGE_START);
-        for (Action a:commandMng.getActionList()){
+        
+        commandMng.setCommands(CURRICULUM_COMMANDS);
+        commandMng.addCommandListener(this);
+        for (Action a:commandMng.getActions()){
             commandPanel.addCommand(a);
         }
         commandMng.updateActionList();

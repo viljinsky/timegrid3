@@ -25,12 +25,13 @@ import ru.viljinsky.sqlite.Grid;
  *
  * @author вадик
  */
-abstract class SelectPanel extends JPanel {
-    protected static final String INCLUDE = "INCLUDE";
-    protected static final String EXCLUDE = "EXCLUDE";
-    protected static final String INCLUDE_ALL = "INCLUDE_ALL";
-    protected static final String EXCLUDE_ALL = "EXCLUDE_ALL";
+abstract class SelectPanel extends JPanel implements CommandListener,IAppCommand {
     
+//    protected static final String INCLUDE = "INCLUDE";
+//    protected static final String EXCLUDE = "EXCLUDE";
+//    protected static final String INCLUDE_ALL = "INCLUDE_ALL";
+//    protected static final String EXCLUDE_ALL = "EXCLUDE_ALL";
+    protected CommandMngr commands = new CommandMngr();
     Grid sourceGrid;
     Grid destanationGrid;
     
@@ -38,37 +39,30 @@ abstract class SelectPanel extends JPanel {
 
         @Override
         public void gridSelectionChange() {
-            SelectPanel.this.updateActionList();
+            commands.updateActionList();
         }
 
     }
     
-    CommandMngr commands = new CommandMngr() {
-
-        @Override
-        public void updateAction(Action a) {
-            String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
-            switch (command){
-                case INCLUDE:
-                    a.setEnabled(sourceGrid.getSelectedRow()>=0);
-                    break;
-                case EXCLUDE:
-                    a.setEnabled(destanationGrid.getSelectedRow()>=0);
-                    break;
-                case INCLUDE_ALL:
-                    a.setEnabled(sourceGrid.getRowCount()>0);
-                    break;
-                case EXCLUDE_ALL:
-                    a.setEnabled(destanationGrid.getRowCount()>0);
-                    break;
-            }
+    @Override
+    public void updateAction(Action a){
+        String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
+        switch (command){
+            case INCLUDE:
+                a.setEnabled(sourceGrid.getSelectedRow()>=0);
+                break;
+            case EXCLUDE:
+                a.setEnabled(destanationGrid.getSelectedRow()>=0);
+                break;
+            case INCLUDE_ALL:
+                a.setEnabled(sourceGrid.getRowCount()>0);
+                break;
+            case EXCLUDE_ALL:
+                a.setEnabled(destanationGrid.getRowCount()>0);
+                break;
         }
-
-        @Override
-        public void doCommand(String command) {
-            SelectPanel.this.doCommand(command);
-        }
-    };
+    }
+    
     
     protected JCheckBox chProfileOnly;
 
@@ -95,7 +89,9 @@ abstract class SelectPanel extends JPanel {
         });
         
         String[] buttons = {INCLUDE,EXCLUDE,INCLUDE_ALL,EXCLUDE_ALL};
-        commands.setCommandList(buttons);
+        commands.setCommands(buttons);
+        commands.addCommandListener(this);
+        commands.updateActionList();
         
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
@@ -129,13 +125,14 @@ abstract class SelectPanel extends JPanel {
         panel.setBorder(new EmptyBorder(12,6,12,6));
         add(panel);
         add(chProfileOnly,BorderLayout.PAGE_END);
-        updateActionList();
+//        updateActionList();
     }
 
-    public void updateActionList(){
-        commands.updateActionList();
-    }
+//    public void updateActionList(){
+//        commands.updateActionList();
+//    }
     
+    @Override
     public void doCommand(String command) {
         try {
             switch (command) {

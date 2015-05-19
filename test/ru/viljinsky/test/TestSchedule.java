@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import ru.viljinsky.forms.CommandListener;
 import ru.viljinsky.forms.CommandMngr;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
@@ -36,49 +37,17 @@ interface ITestSchedule{
     public static final String REMOVE_STREAM = "REMOVE_STREAM";
 }
 
-abstract class ScCommand extends CommandMngr{
 
-}
-
-public class TestSchedule extends JFrame implements ITestSchedule{
+public class TestSchedule extends JFrame implements ITestSchedule,CommandListener{
     Grid grid;
     DataModule dataModule = DataModule.getInstance();
-    ScCommand commands;
+    CommandMngr commands;
    
     
     public TestSchedule() {
-        commands = new ScCommand() {
-
-            @Override
-            public void updateAction(Action a) {
-                try{
-                boolean b1 = grid.getSelectedRow()>=0;
-                boolean b2 = b1 && (grid.getObjectValue("stream_id")!=null);
-                
-                String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
-                switch (command){
-                    case CREATE_STREAM:
-                        a.setEnabled(b1 && !b2);
-                        break;
-                    case EDIT_STREAM:
-                        a.setEnabled(b2);
-                        break;
-                    case REMOVE_STREAM:
-                        a.setEnabled(b2);
-                        break;
-                }
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void doCommand(String command) {
-                TestSchedule.this.doCommand(command);
-            }
-        };
-        
-        commands.setCommandList(new String[]{CREATE_STREAM,EDIT_STREAM,REMOVE_STREAM});
+        commands = new CommandMngr();
+        commands.setCommands(new String[]{CREATE_STREAM,EDIT_STREAM,REMOVE_STREAM});
+        commands.addCommandListener(this);
         grid = new Grid();
         grid.setAutoCreateRowSorter(true);
         grid.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -89,7 +58,7 @@ public class TestSchedule extends JFrame implements ITestSchedule{
             }
         });
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        for (Action a:commands.getActionList()){
+        for (Action a:commands.getActions()){
             panel.add(new JButton(a));
         }
         Container content = getContentPane();
@@ -153,6 +122,29 @@ public class TestSchedule extends JFrame implements ITestSchedule{
             e.printStackTrace();
         }
                 
+    }
+
+    @Override
+    public void updateAction(Action a) {
+        try{
+        boolean b1 = grid.getSelectedRow()>=0;
+        boolean b2 = b1 && (grid.getObjectValue("stream_id")!=null);
+
+        String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
+        switch (command){
+            case CREATE_STREAM:
+                a.setEnabled(b1 && !b2);
+                break;
+            case EDIT_STREAM:
+                a.setEnabled(b2);
+                break;
+            case REMOVE_STREAM:
+                a.setEnabled(b2);
+                break;
+        }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
     
 }

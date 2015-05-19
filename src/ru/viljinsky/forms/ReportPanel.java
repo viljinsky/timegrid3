@@ -27,7 +27,7 @@ import ru.viljinsky.reports.Browser;
 
 
 
-public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
+public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder,CommandListener {
     public static final String RP_PUBLISH = "RP_PUBLISH";
     public static final String RP_RELOAD = "RP_RELOAD";
     
@@ -57,26 +57,16 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
 
     };
     
-    CommandMngr commands = new CommandMngr() {
-
-        @Override
-        public void updateAction(Action a) {
-            ReportPanel.this.updateAction(a);
-        }
-
-        @Override
-        public void doCommand(String command) {
-            ReportPanel.this.doCommand(command);
-        }
-    };
+    CommandMngr commands = new CommandMngr();
     
     public ReportPanel(){
         setLayout(new BorderLayout());
         add(browser);
-        commands.setCommandList(new String[]{
+        commands.setCommands(new String[]{
             RP_PUBLISH
             }
         );
+        commands.addCommandListener(this);
         browser.addControl(new JButton(commands.getAction(RP_PUBLISH)));
         
     }
@@ -103,22 +93,12 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
     public void doCommand(String command){
         try{
             switch(command){
-//                case RP_RELOAD:
-//                    browser.reload();
-//                    break;
-//                case RP_HOME:    
-//                    browser.home();//setAddress("http://loaclhost:8080/.");
-//                    break;
                 case RP_PUBLISH:
-//                        URI uri = new URI("http://www.timetabler.narod.ru");
-//                        Desktop desktop = Desktop.getDesktop();
-//                        desktop.browse(uri);                    
                     publichReport();
                     break;
                 default:    
                     throw new Exception("UNKNOW_COMMAND ");    
             }
-//            text.setCaretPosition(0);
         } catch (Exception e){
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
@@ -180,6 +160,7 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder {
         }
     }
     
+    @Override
     public void updateAction(Action action){
     }
     

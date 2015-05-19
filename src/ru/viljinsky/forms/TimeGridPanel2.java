@@ -236,7 +236,7 @@ class ScheduleTree extends JTree{
 }
 
 
-public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
+public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,CommandListener{
     ScheduleTree tree;
     TimeTableGrid grid;
     Grid unplacedGrid;
@@ -369,12 +369,13 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
         add(splitPane);
         
         
-        manager.setCommandList(SCHEDULE_COMMANDS);
+        manager.setCommands(SCHEDULE_COMMANDS);
         
         JPanel commands = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        for (Action a:manager.getActionList()){
+        for (Action a:manager.getActions()){
             commands.add(new JButton(a));
         }
+        manager.addCommandListener(this);
         add(commands,BorderLayout.PAGE_START);
         
     
@@ -387,7 +388,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
         setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     }
 
-    CommandMngr manager = new CommandMngr() {
+    CommandMngr manager = new CommandMngr();/* {
 
         @Override
         public void updateAction(Action a) {
@@ -414,6 +415,11 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
         }
     };
 
+    public void updateAction(Action a){
+        
+    }
+    */
+    
     public void doCommand(String command){
         try{
             switch (command){
@@ -776,4 +782,22 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm{
         });
         
     }    
+
+    @Override
+    public void updateAction(Action a) {
+        String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
+        boolean b;
+        switch (command){
+            case TT_DELETE:
+                a.setEnabled(!grid.getSelectedElements().isEmpty());
+                break;
+            case TT_PLACE:
+                try{
+                Values v=unplacedGrid.getValues();
+                b= (v!=null && (v.getInteger("unplaced")>0));
+                a.setEnabled(b);
+                } catch (Exception e){}
+                break;
+        }
+    }
 }

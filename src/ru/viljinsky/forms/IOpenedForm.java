@@ -70,7 +70,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
     DetailPanel shiftPanel = new ShiftRoomPanel();
     DetailPanel profilePanel = new ProfileRoomPanel();
     
-    CommandMngr2 commands = new CommandMngr2(ROOM_COMMANDS);
+    CommandMngr commands = new CommandMngr(ROOM_COMMANDS);
     
     public RoomPanel(){
         super(new BorderLayout());
@@ -326,7 +326,8 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
         public void setRoomId(int room_id) throws Exception{
             this.room_id=room_id;
             requery();
-            updateActionList();
+            commands.updateActionList();
+//            updateActionList();
         }
         
         @Override
@@ -463,7 +464,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
 
 class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand,CommandListener{
 
-    CommandMngr2 commands = new CommandMngr2(DEPART_COMMANDS);
+    CommandMngr commands = new CommandMngr(DEPART_COMMANDS);
 
 
     @Override
@@ -478,6 +479,8 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand,C
 
     public DepartPanel() {
         super();
+        masterPanel.lblTitle.setText("Классы");
+        
         commands.addCommandListener(this);
         
         addMasterAction(commands.getAction(EDIT_DEPART));
@@ -638,7 +641,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
     TeacherSelectPanel selctPanel = new TeacherSelectPanel();
     DetailPanel profilePanel = new ProfileTeacherPanel();
     DetailPanel shiftPanel = new ShiftTeacherPanel();
-    CommandMngr2 commands = new CommandMngr2();
+    CommandMngr commands = new CommandMngr();
     
    
     @Override
@@ -847,7 +850,8 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
             this.teacher_id = teacher_id;
             try {
                 requery();
-                updateActionList();
+                commands.updateActionList();
+//                updateActionList();
             } catch (Exception e) {
                 e.printStackTrace();
             }
