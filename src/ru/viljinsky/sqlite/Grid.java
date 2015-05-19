@@ -147,10 +147,21 @@ public class Grid extends JTable {
     }
     
     public Values getValues(){
-        if (getSelectedRow()>=0){
-            return model.dataset.getValues(getSelectedRow());
+        int row = getSelectedRow();
+        if (row>=0){
+            return model.dataset.getValues(convertRowIndexToModel(row));
         }
         return null;
+    }
+    
+    public void setValues(Values v) throws Exception{
+        int row = getSelectedRow();
+        if (row>=0){
+            model.dataset.setVlaues(convertRowIndexToModel(row),v);
+            model.fireTableDataChanged();
+            getSelectionModel().setSelectionInterval(row, row);
+        } else
+            throw new Exception ("GRID_HAS_NOT_SELECTED_ROW");
     }
     
     public boolean isEditable(){
@@ -408,8 +419,12 @@ public class Grid extends JTable {
     }
 
     public void requery() throws Exception{
+        int row = getSelectedRow();
         model.dataset.open();
         model.fireTableDataChanged();
+        if (row>=0){
+            getSelectionModel().setSelectionInterval(row, row);
+        }
     }
     
     public void requery(Values values) throws Exception{
@@ -425,6 +440,20 @@ public class Grid extends JTable {
 
     public void refresh() {
         model.fireTableDataChanged();
+    }
+    
+    public void removeSelectedRow(){
+        int row = getSelectedRow();
+        if (row>=0){
+            model.dataset.remove(convertRowIndexToModel(row));
+            model.fireTableDataChanged();
+            if (row>getRowCount()-1){
+                row = getRowCount()-1;
+            }
+            if (row>=0){
+                getSelectionModel().setSelectionInterval(row, row);
+            }
+        }
     }
 
     public void gridSelectionChange() {

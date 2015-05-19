@@ -15,6 +15,11 @@ import java.util.HashMap;
 public class Values extends HashMap<String, Object> {
     public static final String COLUMN_NOT_FOUND = "COLUMN_NOT_FOUND";
 
+    public void setValue(String columnName,Object value) throws Exception{
+        if (containsKey(columnName)){
+            put(columnName,value==null?null:value.toString());
+        }
+    }
     
     public Object getObject(String columnName) throws Exception{
         if (containsKey(columnName))

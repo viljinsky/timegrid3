@@ -6,8 +6,6 @@
 
 package ru.viljinsky.reports;
 
-import java.util.HashMap;
-import java.util.Map;
 import ru.viljinsky.sqlite.Column;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;

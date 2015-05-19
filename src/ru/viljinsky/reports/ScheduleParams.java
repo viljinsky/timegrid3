@@ -11,13 +11,21 @@ import ru.viljinsky.sqlite.Values;
  * @author вадик
  */
 
-
+/**
+ * Статический класс хранить основные параметря учебного заведения и расписания
+ * @author вадик
+ */
 public class ScheduleParams {
     private static ScheduleParams instance = null;
-    public static final String DATE_BEGIN="date_begin";
-    public static final String DATE_END="date_end";
-    public static final String SCHEDULE_SPAN = "schedule_span";
-    public static final String SCHEDULE_TITLE = "schedule_title";
+    /** День начала занятий по расписанию 1 сен 2015*/
+    public static final String DATE_BEGIN       ="date_begin";
+    /** Последний день начала занятий по расписанию 26 окт 2015 */
+    public static final String DATE_END         ="date_end";
+    /** Период занятий по расписанию  2015-216 УЧЕБНЫЙ ГОД*/
+    public static final String SCHEDULE_SPAN    = "schedule_span";
+    /** Заголовок расписания ПЕРВАЯ ЧЕТВЕРТЬ */
+    public static final String SCHEDULE_TITLE   = "schedule_title";
+    /** Название учебного заведения  ШКОЛА №121 КАЛИНИНСКОГО Р-НА */
     public static final String EDUCATIONAL_INSTITUTION="educational_institution";
 
     private Map<String,Object> map;
@@ -54,7 +62,7 @@ public class ScheduleParams {
         if (p!=null){
             return p.toString();
         }
-        return "null" ;
+        return "*null*" ;
     }
     
     

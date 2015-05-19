@@ -72,31 +72,73 @@ public interface IAppCommand {
     public static final String TT_UNFIX     = "TT_UNFIX";
     public static final String TT_REFRESH   = "TT_REFRESH";
     
+    // report_panel
     
+    public static final String BTN_HOME     = "HOME";
+    public static final String BTN_PRIOR    = "PRIOR";
+    public static final String BTN_NEXT     = "NEXT";
+    public static final String BTN_RELOAD   = "RELOAD";
+    
+    
+    
+    public static final String[] DEPART_COMMANDS ={
+        EDIT_DEPART,
+        DELETE_DEPART,
+        FILL_GROUP,
+        CLEAR_GROUP,
+        EDIT_SHIFT,
+        ADD_GROUP,
+        DELETE_GROUP,
+        ADD_STREAM,
+        EDIT_STREAM,
+        REMOVE_STREAM,
+        REFRESH,
+        EDIT_GROUP
+    };
     
     public static final String[] TEACHER_COMMANDS ={
-        CREATE_TEACHER, EDIT_TEACHER, DELETE_TEACHER,
-        CREATE_SHIFT,EDIT_SHIFT,REMOVE_SHIFT,
-        CREATE_PROFILE,EDIT_PROFILE,REMOVE_PROFILE};
+        CREATE_TEACHER,
+        EDIT_TEACHER,
+        DELETE_TEACHER,
+        CREATE_SHIFT,
+        EDIT_SHIFT,
+        REMOVE_SHIFT,
+        CREATE_PROFILE,
+        EDIT_PROFILE,
+        REMOVE_PROFILE
+    };
     
     public static final String[] ROOM_COMMANDS ={
-        CREATE_ROOM,EDIT_ROOM,DELETE_ROOM,
-        CREATE_SHIFT,EDIT_SHIFT,REMOVE_SHIFT,
-        CREATE_PROFILE,EDIT_PROFILE,REMOVE_PROFILE};
+        CREATE_ROOM,
+        EDIT_ROOM,
+        DELETE_ROOM,
+        CREATE_SHIFT,
+        EDIT_SHIFT,
+        REMOVE_SHIFT,
+        CREATE_PROFILE,
+        EDIT_PROFILE,
+        REMOVE_PROFILE
+    };
     
     public static final String[] SCHEDULE_COMMANDS ={
-             TT_PLACE_ALL,
-             TT_PLACE,
-             TT_DELETE,
-             TT_FIX,
-             TT_UNFIX,
-             TT_CLEAR,
-             TT_REFRESH   
+        TT_PLACE_ALL,
+        TT_PLACE,
+        TT_DELETE,
+        TT_FIX,
+        TT_UNFIX,
+        TT_CLEAR,
+        TT_REFRESH   
     };
     
     public static final String[] CURRICULUM_COMMANDS = {
-        CREATE_CURRICULUM,EDIT_CURRICULUM,DELETE_CURRICULUM,
-        COPY_CURRICULUM,FILL_CURRICULUM,CREATE_DEPART,DELETE_DEPART,EDIT_CURRICULUM_DETAIL        
+        CREATE_CURRICULUM,
+        EDIT_CURRICULUM,
+        DELETE_CURRICULUM,
+        COPY_CURRICULUM,
+        FILL_CURRICULUM,
+        CREATE_DEPART,
+        DELETE_DEPART,
+        EDIT_CURRICULUM_DETAIL        
     };
     
     

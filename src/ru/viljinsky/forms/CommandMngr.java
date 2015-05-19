@@ -40,7 +40,7 @@ class CommandDictionary extends HashMap<String, String> implements IAppCommand{
     put(CLEAR_GROUP,            "CLEAR");
 //    public static final String EDIT_SHIFT ="EDIT_SHIFT";
     put(ADD_GROUP,              "Доб.группу");
-    put( EDIT_GROUP,            "Изм.группу");
+    put(EDIT_GROUP,            "Изм.группу");
     put(DELETE_GROUP,           "Уд.группу");
     
     put( ADD_STREAM,            "Доб.поток");
@@ -62,7 +62,7 @@ class CommandDictionary extends HashMap<String, String> implements IAppCommand{
     // shift panel
     put(CREATE_SHIFT,           "Создать график");
     put(REMOVE_SHIFT,           "Удалить");
-    put(EDIT_SHIFT,             "Изменить");
+    put(EDIT_SHIFT,             "Изменить график;Редактировать график");
     
     // profile_panel
     put(CREATE_PROFILE,         "Создать профиль");
@@ -76,6 +76,12 @@ class CommandDictionary extends HashMap<String, String> implements IAppCommand{
     put(TT_FIX       , "Зафиксировать");
     put(TT_UNFIX     , "Отм.фиксирование");
     put(TT_REFRESH   , "Обновить");
+    
+    
+    put("INCLUDE","Включить>");
+    put("EXCLUDE","<Исключить");
+    put("INCLUDE_ALL","Вкл.всё>>");
+    put("EXCLUDE_ALL","<<Искл.всё");
     
         
         
@@ -102,7 +108,7 @@ class CommandDictionary extends HashMap<String, String> implements IAppCommand{
     
 }
 
-public abstract class CommandMngr implements IAppCommand{
+public abstract class CommandMngr{ // implements IAppCommand{
     private Action[] actions;
     
     public CommandMngr(){
@@ -121,7 +127,7 @@ public abstract class CommandMngr implements IAppCommand{
     }
     
     public Action[] getActionList(){
-    return actions;
+        return actions;
     }
 
     public Action getAction(String command){
