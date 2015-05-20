@@ -9,15 +9,12 @@ package ru.viljinsky.sqlite;
 import ru.viljinsky.dialogs.BaseDialog;
 import ru.viljinsky.dialogs.EntryDialog;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Map;
-import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
@@ -27,6 +24,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import ru.viljinsky.forms.CommandListener;
+import ru.viljinsky.forms.CommandMngr;
 
 /**
  *
@@ -34,117 +33,17 @@ import javax.swing.table.TableColumnModel;
  */
 
 
-
-class GridCommand implements IGridCommand{
+public class Grid extends JTable implements CommandListener {
     
-    public static final String GRID_APPEND      = "ADD";
-    public static final String GRID_EDIT        = "EDIT";
-    public static final String GRID_DELETE      = "DELETE";
-    public static final String GRID_REFRESH     = "REFRESH";
-    public static final String GRID_REQUERY     = "REQUERY";
+    public static final String GRID_APPEND      = "GRID_APPEND";
+    public static final String GRID_EDIT        = "GRID_EDIT";
+    public static final String GRID_DELETE      = "GRID_DELETE";
+    public static final String GRID_REFRESH     = "GRID_REFRESH";
+    public static final String GRID_REQUERY     = "GRID_REQUERY";
     
-    public Action[] actions = {
-        new Act(GRID_APPEND),
-        new Act(GRID_EDIT),
-        new Act(GRID_DELETE),
-        new Act(GRID_REFRESH),
-        new Act(GRID_REQUERY)
-    };
-    Grid grid = null;
-    
-    class Act extends AbstractAction{
-
-        public Act(String name) {
-            super(name);
-            putValue(ACTION_COMMAND_KEY, name);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            doCommand(e.getActionCommand());
-        }
-    }
-    
-    
-    public GridCommand(Grid grid){
-        this.grid=grid;
-    }
-
-    @Override
-    public void doCommand(String command) {
-        System.out.println(command);
-        try{
-        switch(command){            
-            case GRID_APPEND:
-                grid.append();
-                break;
-            case GRID_EDIT:
-                grid.edit();
-                break;
-            case GRID_DELETE:
-                grid.delete();
-                break;
-            case GRID_REFRESH:
-                grid.refresh();
-                break;
-            case GRID_REQUERY:
-                grid.requery();
-        }
-        } catch (Exception e){
-            JOptionPane.showMessageDialog(grid, e.getMessage());
-        }
-        updateActionList();
-    }
-
-    @Override
-    public void updateAction(Action a) {
-        String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
-        switch (command){
-            case GRID_APPEND:case GRID_EDIT: case GRID_DELETE:
-                a.setEnabled(grid.isEditable());
-                break;
-        }
-        System.out.println(command);
-    }
-
-    @Override
-    public void updateActionList() {
-        for (Action a:actions){
-            updateAction(a);
-        }
-    }
-
-    @Override
-    public JPopupMenu getPopup() {
-        JPopupMenu result = new JPopupMenu();
-        for (Action a:actions)
-            if (a==null)
-                result.addSeparator();
-            else
-                result.add(a);
-        return result;
-    }
-
-    @Override
-    public void addMenu(JMenu menu) {
-        for (Action a:actions)
-            if (a==null)
-                menu.addSeparator();
-            else
-                menu.add(a);
-    }
-}
-
-
-public class Grid extends JTable {
     Component owner = null;
     protected GridModel model;
-    IGridCommand commands = null;
-    
-    
-    public void setCommands(IGridCommand commands){
-        this.commands=commands;
-    }
+    CommandMngr commands = new CommandMngr();
     
     public Values getValues(){
         int row = getSelectedRow();
@@ -173,6 +72,41 @@ public class Grid extends JTable {
             model.dataset.close();
             model.fireTableDataChanged();
             
+        }
+    }
+
+    @Override
+    public void doCommand(String command) {
+        try{
+        switch(command){            
+            case GRID_APPEND:
+                append();
+                break;
+            case GRID_EDIT:
+                edit();
+                break;
+            case GRID_DELETE:
+                delete();
+                break;
+            case GRID_REFRESH:
+                refresh();
+                break;
+            case GRID_REQUERY:
+                requery();
+        }
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+        
+    }
+
+    @Override
+    public void updateAction(Action action) {
+        String command = (String)action.getValue(Action.ACTION_COMMAND_KEY);
+        switch (command){
+            case GRID_APPEND:case GRID_EDIT: case GRID_DELETE:
+                action.setEnabled(isEditable());
+                break;
         }
     }
     
@@ -257,7 +191,10 @@ public class Grid extends JTable {
 
     public Grid() {
         super();
-        commands = new GridCommand(this);
+        commands.setCommands(new String[]{GRID_APPEND,GRID_EDIT,GRID_DELETE,GRID_REFRESH,GRID_REQUERY});
+        commands.addCommandListener(this);
+        commands.updateActionList();
+        
         setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
@@ -307,13 +244,20 @@ public class Grid extends JTable {
             public void showPopup(MouseEvent e) {
                 if (e.isPopupTrigger() && commands != null) {
                     commands.updateActionList();
-                    JPopupMenu popupMenu = commands.getPopup();
+                    JPopupMenu popupMenu = getPopupMenu();
                     popupMenu.show(Grid.this, e.getX(), e.getY());
                 }
             }
         });
     }
     
+    public JPopupMenu getPopupMenu(){
+        JPopupMenu result = new JPopupMenu();
+        for (Action a:commands.getActions()){
+            result.add(a);
+        }
+        return result;
+    }
 
     public void doublClick(){
         edit();

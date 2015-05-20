@@ -3,10 +3,8 @@
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import ru.viljinsky.dialogs.BaseDialog;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
@@ -23,12 +21,13 @@ public class TestDialog extends BaseDialog {
     
     @Override
     public Container getPanel() {
-        String sql ="select distinct a.id as curriculum_id,c.id as skill_id,a.caption as cur_caption,c.caption from curriculum a inner join curriculum_detail b\n" +
-                    "on a.id=b.curriculum_id, skill c;";
+//        String sql ="select distinct a.id as curriculum_id,c.id as skill_id,a.caption as cur_caption,c.caption from curriculum a inner join curriculum_detail b\n" +
+//                    "on a.id=b.curriculum_id, skill c;";
+        String sql="select * from teacher";
         grid = new Grid();
         Dataset dataset;
         try{
-            dataset = DataModule.getSQLDataset(sql);
+            dataset = DataModule.getDataset("teacher");// getSQLDataset(sql);
             dataset.open();
             grid.setDataset(dataset);
         } catch (Exception e){

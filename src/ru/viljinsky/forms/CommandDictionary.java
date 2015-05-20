@@ -84,6 +84,15 @@ public class CommandDictionary extends HashMap<String, String> implements IAppCo
     put(BTN_NEXT,"След.-я;Перейти на следующую страницу ");
     put(BTN_RELOAD,"Обновить;Перезагрузить текущую страницу");
     
+    // grid
+    
+    put("GRID_APPEND","Добавить");
+    put("GRID_EDIT","Изменить");
+    put("GRID_DELETE","Удалить");
+    put("GRID_REFRESH","Обновить");
+    put("GRID_REQUERY","Перезагрузить");
+    
+    
         
         
     }
