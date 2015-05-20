@@ -777,7 +777,7 @@ public class SQLMonitor2 extends JPanel{
         SQLMonitor2 sqlMonitor = new SQLMonitor2();
         try{
             frame  = new JFrame(APP_TITLE);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             frame.setContentPane(sqlMonitor);
             
             JMenuBar menuBar = new JMenuBar();
@@ -800,6 +800,7 @@ public class SQLMonitor2 extends JPanel{
             e.printStackTrace();
         }
     }
+    
     
     public static void main(String[] args){
         try{

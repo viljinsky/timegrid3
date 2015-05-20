@@ -9,9 +9,8 @@ package ru.viljinsky.forms;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 import java.io.File;
-import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -25,52 +24,114 @@ import ru.viljinsky.util.SQLMonitor2;
 
 
 ////////////////////////    MAIN 4 ////////////////////////////////////////////
-interface IMenu{
-    public static final int FILE_OPEN   = 1;
-    public static final int FILE_NEW    = 2;
-    public static final int FILE_CLOSE  = 3;
-    public static final int FILE_EXIT   = 4;
-    
-    public static final int DICTIONARY  = 5;
-    public static final int SHIFT       = 6;
-    public static final int TIMEGRID    = 7;
-    public static final int MONITOR     = 8;
-}
 
-public class Main4 extends JFrame{
+
+public class Main4 extends JFrame implements CommandListener{
+    
+    public static final String FILE_OPEN   = "FILE_OPEN";
+    public static final String FILE_NEW    = "FILE_NEW";
+    public static final String FILE_CLOSE  = "FILE_CLOSE";
+    public static final String FILE_EXIT   = "FILE_EXIT";
+    
+    public static final String DICTIONARY  = "DICTIONARY";
+    public static final String SHIFT       = "SHIFT";
+    public static final String TIMEGRID    = "TIME_GRID";
+    public static final String MONITOR     = "MONITOR";
+    
     public static String APP_NAME = "TimeTable2015";
-//    private static DataModule dataModule = DataModule.getInstance(); 
+    
+    CommandMngr commands = new CommandMngr(new String[]{FILE_CLOSE,FILE_EXIT,FILE_NEW,FILE_OPEN,
+        DICTIONARY,SHIFT,TIMEGRID,MONITOR
+    });
     
     JFileChooser fileChooser = new JFileChooser(new File("."));
+    
     IOpenedForm[] forms = {
         new CurriculumPanel(),
-//        new CurriculumPanel(),
         new DepartPanel(),
         new TeacherPanel(),
         new RoomPanel(),
-//        new SchedulePanel(),
         new TimeGridPanel2(),
         new ReportPanel()
     };
 
     public Main4(String title){
         super(title);
+        intComponents();
+    }
+    
+    public void intComponents(){
+        commands.addCommandListener(this);
+        commands.updateActionList();
+        setLayout(new BorderLayout());        
+        JTabbedPane tabbedPane = new JTabbedPane();
+        add(tabbedPane);
+        for (IOpenedForm form:forms){
+            tabbedPane.addTab(form.getCaption(), form.getPanel());
+        }
+        setJMenuBar(createMenuBar());
     }
     
     
 
-    class Act extends AbstractAction{
-
-        public Act(String name) {
-            super(name);
-            putValue(ACTION_COMMAND_KEY, name);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            doCommand(e.getActionCommand());
+    @Override
+    public void updateAction(Action action) {
+        String command = (String)action.getValue(Action.ACTION_COMMAND_KEY);
+        switch (command){
+            case FILE_OPEN:
+                action.setEnabled(!DataModule.isActive());
+                break;
+            case FILE_CLOSE:
+                action.setEnabled(DataModule.isActive());
+                break;
+            case DICTIONARY:
+                action.setEnabled(DataModule.isActive());
+                break;
+            case MONITOR:
+                action.setEnabled(DataModule.isActive());
+                break;
+            case SHIFT:
+                action.setEnabled(DataModule.isActive());
+                break;
         }
     }
+
+    @Override
+    public void doCommand(String command){
+        try{
+            switch(command){
+                
+                case FILE_OPEN:
+                    fileOpen();
+                    break;
+                    
+                case FILE_CLOSE:
+                    fileClose();
+                    break;
+                
+                case DICTIONARY:
+                    Dictonary.showDialog(rootPane);
+                    break;
+                    
+                case MONITOR:
+                    SQLMonitor2.showSQLMonitor(rootPane);
+                    break;
+                    
+                case SHIFT:
+                    TestShift2.showShiftDialog(rootPane);
+                    
+                    break;
+                    
+                case FILE_EXIT:
+                    System.exit(0);
+                    break;
+            }
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+    }
+    
+    
     protected void fileNew() throws Exception{
         File file;
         String path;
@@ -135,47 +196,6 @@ public class Main4 extends JFrame{
     
     }
     
-    private void doCommand(String command){
-        try{
-            switch(command){
-                
-//                case "fileNew":
-//                    fileNew();
-//                    break;
-                case "fileOpen":
-                    fileOpen();
-                    break;
-                case "fileClose":
-                    fileClose();
-                    break;
-                            
-                
-                case "DICTIONARY":
-                    Dictonary.showDialog(rootPane);
-                    break;
-                    
-                case "sqlMonitor":
-//                    SQLMonitor.showFrame(rootPane);
-                    SQLMonitor2.showSQLMonitor(rootPane);
-                    break;
-                    
-                case "testShift":
-                    TestShift2.showShiftDialog(rootPane);
-                    
-                    break;
-//                case "timegrid":
-//                    TimeGridPanel.showFrame(rootPane);
-//                    break;
-                    
-                case "exit":
-                    System.exit(0);
-                    break;
-            }
-        } catch (Exception e){
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }
-        
-    }
     public JMenuBar createMenuBar(){
         JMenuBar result = new JMenuBar();
         result.add(createFileMenu());
@@ -185,19 +205,18 @@ public class Main4 extends JFrame{
     
     public JMenu createFileMenu(){
         JMenu result = new JMenu("File");
-        result.add(new Act("fileNew"));
-        result.add(new Act("fileOpen"));
-        result.add(new Act("fileClose"));
+        result.add(commands.getAction(FILE_NEW));
+        result.add(commands.getAction(FILE_OPEN));
+        result.add(commands.getAction(FILE_CLOSE));
         result.addSeparator();
-        result.add(new Act("exit"));
+        result.add(commands.getAction(FILE_EXIT));
         return result;
     }
     public JMenu createUtilMenu(){
         JMenu result = new JMenu("Util");
-        result.add(new Act("sqlMonitor"));
-        result.add(new Act("testShift"));
-        result.add(new Act("DICTIONARY"));
-//        result.add(new Act("timegrid"));
+        result.add(commands.getAction(MONITOR));
+        result.add(commands.getAction(SHIFT));
+        result.add(commands.getAction(DICTIONARY));
         return result;
     }
 
@@ -210,16 +229,6 @@ public class Main4 extends JFrame{
     public void open() throws Exception{
         for (IOpenedForm form:forms)
             form.open();        
-    }
-    
-    public void intComponents(){
-        setLayout(new BorderLayout());        
-        JTabbedPane tabbedPane = new JTabbedPane();
-        add(tabbedPane);
-        for (IOpenedForm form:forms){
-            tabbedPane.addTab(form.getCaption(), form.getPanel());
-        }
-        setJMenuBar(createMenuBar());
     }
     
    
