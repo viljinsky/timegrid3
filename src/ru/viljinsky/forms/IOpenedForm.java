@@ -462,46 +462,94 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
 ////////////////////////   DEPART PANEL ////////////////////////////////////////
 
 
-class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand,CommandListener{
+class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListener{
 
+    Integer depart_id=null,
+            skill_id=null,
+            stream_id=null,
+            subject_id=null,
+            group_id=null;
+           
+    
+    Grid grid1 = new Grid(){
+
+        @Override
+        public void gridSelectionChange() {
+            Map<String,Object> map = new HashMap<>();
+            Values v = getValues();
+            depart_id=null;
+            skill_id=null;
+            
+            if (v!=null)
+                try{
+                    skill_id=v.getInteger("skill_id");
+                    depart_id=v.getInteger("depart_id");
+                    map.put("depart_id", depart_id);
+                    System.out.println(map);
+                    grid2.getDataset().open(map);
+                    grid2.refresh();
+
+                } catch(Exception e){
+                    e.printStackTrace();
+                }
+            commands.updateActionList();
+        }
+    };
+    Grid grid2 = new Grid(){
+
+        @Override
+        public void gridSelectionChange() {
+            Values v = getValues();
+            if (v==null){
+                subject_id=null;
+                group_id=null;
+                stream_id=null;
+            } else {
+                try{
+                subject_id=v.getInteger("subject_id");
+                group_id=v.getInteger("group_id");
+                stream_id=v.getInteger("stream_id");
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+            commands.updateActionList();
+        }
+        
+    };
     CommandMngr commands = new CommandMngr(DEPART_COMMANDS);
 
 
-    @Override
-    public Map<String, String> getParams() {
-        Map<String,String> params;
-        params = new HashMap<>();
-        params.put(MASTER_DATASET,"v_depart");
-        params.put(SLAVE_DATASET,"v_subject_group");
-        params.put(REFERENCES,"depart_id=depart_id");
-        return params;
-    }
 
     public DepartPanel() {
-        super();
-        masterPanel.lblTitle.setText("Классы");
+        setLayout(new BorderLayout());
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        GridPanel topPanel = new GridPanel("Классы", grid1);
+        GridPanel bottomPanel = new GridPanel("Группы класса", grid2);
+        splitPane.setTopComponent(topPanel);
+        splitPane.setBottomComponent(bottomPanel);
+        splitPane.setResizeWeight(0.5);
+        add(splitPane);
         
         commands.addCommandListener(this);
+        commands.updateActionList();
+  
+        topPanel.addAction(commands.getAction(EDIT_DEPART));
+        topPanel.addAction(commands.getAction(DELETE_DEPART));        
+        topPanel.addAction(commands.getAction(REFRESH));
         
-        addMasterAction(commands.getAction(EDIT_DEPART));
-        addMasterAction(commands.getAction(DELETE_DEPART));
+        bottomPanel.addAction(commands.getAction(ADD_GROUP));
+        bottomPanel.addAction(commands.getAction(EDIT_GROUP));
+        bottomPanel.addAction(commands.getAction(DELETE_GROUP));
         
-        addMasterAction(commands.getAction(EDIT_SHIFT));
+        bottomPanel.addAction(commands.getAction(ADD_STREAM));
+        bottomPanel.addAction(commands.getAction(EDIT_STREAM));
+        bottomPanel.addAction(commands.getAction(REMOVE_STREAM));
         
-        addMasterAction(commands.getAction(REFRESH));
-        
-        addDetailAction(commands.getAction(ADD_GROUP));
-        addDetailAction(commands.getAction(EDIT_GROUP));
-        addDetailAction(commands.getAction(DELETE_GROUP));
-        
-        addDetailAction(commands.getAction(ADD_STREAM));
-        addDetailAction(commands.getAction(EDIT_STREAM));
-        addDetailAction(commands.getAction(REMOVE_STREAM));
 }
     
     @Override
     public void doCommand(String commad){
-        Integer stream_id=-1,depart_id=-1,subject_id=-1,group_id=-1,skill_id=-1;
         try{
             switch(commad){
                 case REFRESH:
@@ -509,25 +557,21 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand,C
                     break;
                     
                 case EDIT_DEPART:
-                    depart_id = grid1.getIntegerValue("depart_id");
                     if (Dialogs.editDepart(this, depart_id))
                         grid1.requery();
                     break;
                     
                 case DELETE_DEPART:
-                    depart_id = grid1.getIntegerValue("depart_id");
                     if (Dialogs.deleteDepart(this, depart_id))
                         grid1.requery();
                     break;
                     
                 case FILL_GROUP:
-                    depart_id=grid1.getIntegerValue("depart_id");
                     DataTask.fillSubjectGroup2(depart_id);
                     grid2.requery();
                     break;
                     
                 case CLEAR_GROUP:
-                    depart_id=grid1.getIntegerValue("depart_id");
                     DataTask.clearSubjectGroup(depart_id);
                     grid2.requery();
                     break;
@@ -538,45 +582,45 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand,C
                     break;
                     
                 case ADD_GROUP:
-                    depart_id= grid2.getIntegerValue("depart_id");
-                    subject_id = grid2.getIntegerValue("subject_id");
+//                    depart_id= grid2.getIntegerValue("depart_id");
+//                    subject_id = grid2.getIntegerValue("subject_id");
                     DataTask.addSubjectGroup(depart_id,subject_id);
                     grid2.requery();
                     break;
                     
                 case EDIT_GROUP:
-                    depart_id = grid1.getIntegerValue("depart_id");
-                    subject_id = grid2.getIntegerValue("subject_id");
-                    group_id = grid2.getIntegerValue("group_id");
+//                    depart_id = grid1.getIntegerValue("depart_id");
+//                    subject_id = grid2.getIntegerValue("subject_id");
+//                    group_id = grid2.getIntegerValue("group_id");
                     if (Dialogs.editSubjectGroup(this,depart_id,subject_id,group_id))
                         grid2.requery();
                     break;
                     
                 case DELETE_GROUP:
-                    depart_id=grid2.getIntegerValue("depart_id");
-                    subject_id=grid2.getIntegerValue("subject_id");
-                    group_id = grid2.getIntegerValue("group_id");
+//                    depart_id=grid2.getIntegerValue("depart_id");
+//                    subject_id=grid2.getIntegerValue("subject_id");
+//                    group_id = grid2.getIntegerValue("group_id");
                     DataTask.deleteSubjectGroup(depart_id,subject_id,group_id);
                     grid2.requery();
                     break;
                     
                 case ADD_STREAM:
-                    depart_id=grid2.getIntegerValue("depart_id");
-                    subject_id=grid2.getIntegerValue("subject_id");
-                    group_id=grid2.getIntegerValue("group_id");
+//                    depart_id=grid2.getIntegerValue("depart_id");
+//                    subject_id=grid2.getIntegerValue("subject_id");
+//                    group_id=grid2.getIntegerValue("group_id");
                     if (Dialogs.createStream(this, depart_id, subject_id, group_id))
                       grid2.requery();
                     break;
                     
                 case REMOVE_STREAM:
-                    depart_id=grid2.getIntegerValue("depart_id");
-                    subject_id=grid2.getIntegerValue("subject_id");
+//                    depart_id=grid2.getIntegerValue("depart_id");
+//                    subject_id=grid2.getIntegerValue("subject_id");
                     DataTask.deleteStream(depart_id,subject_id);
                     grid2.requery();
                     break;
                     
                 case EDIT_STREAM:
-                    stream_id= grid2.getIntegerValue("stream_id");
+//                    stream_id= grid2.getIntegerValue("stream_id");
                     if (Dialogs.editStream(this, stream_id))
                         grid2.requery();
                     break;
@@ -591,7 +635,40 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand,C
     
     @Override
     public void updateAction(Action action) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String command = (String)action.getValue(Action.ACTION_COMMAND_KEY);
+        switch (command){
+            case EDIT_DEPART:
+                action.setEnabled(depart_id!=null);
+                break;
+                
+            case DELETE_DEPART:
+                action.setEnabled(depart_id!=null);
+                break;
+                
+            case ADD_GROUP:
+                action.setEnabled(depart_id!=null && subject_id!=null);
+                break;
+                
+            case EDIT_GROUP:
+                action.setEnabled(depart_id!=null && group_id!=null);
+                break;
+                
+            case DELETE_GROUP:
+                action.setEnabled(depart_id!=null && group_id!=null);
+                break;
+                
+            case ADD_STREAM:
+                action.setEnabled(depart_id!=null && subject_id!=null);
+                break;
+                
+            case EDIT_STREAM:
+                action.setEnabled(depart_id!=null && stream_id!=null);
+                break;
+                
+            case REMOVE_STREAM:
+                action.setEnabled(depart_id!=null && stream_id!=null);
+                break;
+        }
     }
 
     @Override
@@ -604,19 +681,34 @@ class DepartPanel extends MasterDetailPanel implements IOpenedForm,IAppCommand,C
         return this;
     }
 
+//    @Override
+//    public void edit() {
+//        doCommand(EDIT_DEPART);
+//    }
+
+//    @Override
+//    public void append() {
+////        doCommand(DEPART);
+//    }
+
+//    @Override
+//    public void delete() {
+//        doCommand(DELETE_DEPART);
+//    }
+
     @Override
-    public void edit() {
-        doCommand(EDIT_DEPART);
+    public void open() throws Exception {
+        Dataset dataset = DataModule.getDataset("v_depart");
+        dataset.open();
+        grid1.setDataset(dataset);
+        
+        dataset = DataModule.getDataset("v_subject_group");
+        grid2.setDataset(dataset);
     }
 
     @Override
-    public void append() {
-//        doCommand(DEPART);
-    }
-
-    @Override
-    public void delete() {
-        doCommand(DELETE_DEPART);
+    public void close() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 

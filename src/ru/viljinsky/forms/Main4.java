@@ -176,6 +176,8 @@ public class Main4 extends JFrame implements CommandListener{
                 open();
             } catch (Exception e){
                 JOptionPane.showMessageDialog(rootPane, e.getMessage());
+            } finally {
+                commands.updateActionList();
             }
     }
     
