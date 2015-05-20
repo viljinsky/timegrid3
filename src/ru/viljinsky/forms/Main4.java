@@ -71,8 +71,6 @@ public class Main4 extends JFrame implements CommandListener{
         }
         setJMenuBar(createMenuBar());
     }
-    
-    
 
     @Override
     public void updateAction(Action action) {
@@ -231,15 +229,10 @@ public class Main4 extends JFrame implements CommandListener{
             form.open();        
     }
     
-   
-    
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args){
         
         Main4 frame = new Main4(APP_NAME);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        frame.intComponents();
-        
         frame.pack();
         
         // позичионирование главного окна
