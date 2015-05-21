@@ -20,7 +20,6 @@ public class CommandDictionary extends HashMap<String, String> implements IAppCo
     put(DELETE_CURRICULUM,      "Удалить;Удалить учебный план");
     
     put(FILL_CURRICULUM,        "Заполнить;Добавить/Удалить предметы в учебный план");
-//    put(CLEAR_CURRICULUM,       "Очистить");
     put(EDIT_CURRICULUM_DETAIL, "Редактировать;Изменить свойства учебной дисциплины");
     
     // depart panel
@@ -31,6 +30,7 @@ public class CommandDictionary extends HashMap<String, String> implements IAppCo
     
     put(FILL_GROUP,             "Заполнить");
     put(CLEAR_GROUP,            "CLEAR");
+    
 //    public static final String EDIT_SHIFT ="EDIT_SHIFT";
     put(ADD_GROUP,              "Доб.группу");
     put(EDIT_GROUP,            "Изм.группу");
@@ -50,7 +50,6 @@ public class CommandDictionary extends HashMap<String, String> implements IAppCo
     put(CREATE_ROOM,            "Добавить");
     put(EDIT_ROOM,              "Изменить");
     put(DELETE_ROOM,            "Удалить");
-    
     
     // shift panel
     put(CREATE_SHIFT,           "Создать график");
@@ -72,25 +71,25 @@ public class CommandDictionary extends HashMap<String, String> implements IAppCo
     
 
     // select panel
-    put(INCLUDE,"Включить>");
-    put(EXCLUDE,"<Исключить");
-    put(INCLUDE_ALL,"Вкл.всё>>");
-    put(EXCLUDE_ALL,"<<Искл.всё");
+    put(INCLUDE,        "Включить>");
+    put(EXCLUDE,        "<Исключить");
+    put(INCLUDE_ALL,    "Вкл.всё>>");
+    put(EXCLUDE_ALL,    "<<Искл.всё");
     
     // broser
     
-    put(BTN_HOME,"Домой;Перейти на первую страницу сайта");
-    put(BTN_PRIOR,"Пред.-я;Перейти на предыдущую страницу");
-    put(BTN_NEXT,"След.-я;Перейти на следующую страницу ");
-    put(BTN_RELOAD,"Обновить;Перезагрузить текущую страницу");
+    put(PAGE_HOME,      "Домой;Перейти на первую страницу сайта");
+    put(PAGE_PRIOR,     "Пред.-я;Перейти на предыдущую страницу");
+    put(PAGE_NEXT,      "След.-я;Перейти на следующую страницу ");
+    put(PAGE_RELOAD,    "Обновить;Перезагрузить текущую страницу");
     
     // grid
     
-    put("GRID_APPEND","Добавить");
-    put("GRID_EDIT","Изменить");
-    put("GRID_DELETE","Удалить");
-    put("GRID_REFRESH","Обновить");
-    put("GRID_REQUERY","Перезагрузить");
+    put(GRID_APPEND,"Добавить");
+    put(GRID_EDIT,"Изменить");
+    put(GRID_DELETE,"Удалить");
+    put(GRID_REFRESH,"Обновить");
+    put(GRID_REQUERY,"Перезагрузить");
     
     
         

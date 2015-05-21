@@ -46,16 +46,16 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
     public void doCommand(String command) {
         try{
         switch (command){
-            case BTN_HOME:
+            case PAGE_HOME:
                 home();
                 break;
-            case BTN_NEXT:
+            case PAGE_NEXT:
                 next();
                 break;
-            case BTN_PRIOR:
+            case PAGE_PRIOR:
                 prior();
                 break;
-            case BTN_RELOAD:
+            case PAGE_RELOAD:
                 reload();
                 break;
         }
@@ -68,15 +68,15 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
     public void updateAction(Action action) {
         String command = (String)action.getValue(Action.ACTION_COMMAND_KEY);
         switch (command){
-            case BTN_HOME:
+            case PAGE_HOME:
                 break;
-            case BTN_NEXT:
+            case PAGE_NEXT:
                 action.setEnabled(pageIndex<stack.size()-1);
                 break;
-            case BTN_PRIOR:
+            case PAGE_PRIOR:
                 action.setEnabled(pageIndex>0);
                 break;
-            case BTN_RELOAD:
+            case PAGE_RELOAD:
                 break;
         }
     }
@@ -103,7 +103,7 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
     public Browser() {
         setLayout(new BorderLayout());
         
-        maneger = new CommandMngr(new String[]{BTN_HOME,BTN_PRIOR,BTN_NEXT,BTN_RELOAD});
+        maneger = new CommandMngr(REPORT_COMMANDS);
         maneger.addCommandListener(this);
         for (Action a:maneger.getActions()){
             controls.add(new JButton(a));

@@ -468,7 +468,9 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
             skill_id=null,
             stream_id=null,
             subject_id=null,
-            group_id=null;
+            group_id=null,
+            group_type_id=null;
+    Boolean is_stream = false;
            
     
     Grid grid1 = new Grid(){
@@ -504,11 +506,15 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
                 subject_id=null;
                 group_id=null;
                 stream_id=null;
+                group_type_id=null;
+                is_stream=false;
             } else {
                 try{
                 subject_id=v.getInteger("subject_id");
                 group_id=v.getInteger("group_id");
                 stream_id=v.getInteger("stream_id");
+                group_type_id=v.getInteger("group_type_id");
+                is_stream=v.getBoolean("is_stream");
                 } catch (Exception e){
                     e.printStackTrace();
                 }
@@ -646,7 +652,7 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
                 break;
                 
             case ADD_GROUP:
-                action.setEnabled(depart_id!=null && subject_id!=null);
+                action.setEnabled(depart_id!=null && subject_id!=null && group_type_id>0);
                 break;
                 
             case EDIT_GROUP:
@@ -654,15 +660,15 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
                 break;
                 
             case DELETE_GROUP:
-                action.setEnabled(depart_id!=null && group_id!=null);
+                action.setEnabled(depart_id!=null && group_id!=null && group_type_id>0);
                 break;
                 
             case ADD_STREAM:
-                action.setEnabled(depart_id!=null && subject_id!=null);
+                action.setEnabled(depart_id!=null && subject_id!=null && is_stream);
                 break;
                 
             case EDIT_STREAM:
-                action.setEnabled(depart_id!=null && stream_id!=null);
+                action.setEnabled(depart_id!=null && stream_id!=null && is_stream);
                 break;
                 
             case REMOVE_STREAM:
@@ -722,10 +728,12 @@ interface ISchedulePanel {
     public static final String SHIFT_PANEL = "График";
 
 }
+
 class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCommand,CommandListener {
-    Integer shift_id=null,profile_id=null,
-    newProfileId,newShiftId,
-    teacher_id=null;
+    Integer shift_id=null,
+            profile_id=null,
+            newProfileId,newShiftId,
+            teacher_id=null;
     
     MasterGrid grid = new MasterGrid();
     JTabbedPane tabs = new JTabbedPane();
@@ -1079,6 +1087,13 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
         commands.setCommands(TEACHER_COMMANDS);
         commands.addCommandListener(this);
         commands.updateActionList();
+        
+        grid.setAction("GRID_APPEND",commands.getAction(CREATE_TEACHER));
+        grid.setAction("GRID_EDIT", commands.getAction(EDIT_TEACHER));
+        grid.setAction("GRID_DELETE",commands.getAction(DELETE_TEACHER));
+        
+        grid.addExtAction(commands.getAction(EDIT_SHIFT));
+        grid.addExtAction(commands.getAction(EDIT_PROFILE));
         
         gridPanel.addAction(commands.getAction(CREATE_TEACHER));
         gridPanel.addAction(commands.getAction(EDIT_TEACHER));

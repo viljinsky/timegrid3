@@ -3,6 +3,8 @@ package ru.viljinsky.forms;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.Action;
@@ -11,6 +13,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
@@ -281,6 +284,7 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
         DefaultMutableTreeNode root;
         Dataset skillList;
         Dataset departList;
+        Action[] actions = {};
         
         public CurriculumTree(){
             root = new DefaultMutableTreeNode("Учебный план");
@@ -311,7 +315,40 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
                     skillChange();
                 }
             });
+            
+            addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    showPopup(e);
+                }
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    showPopup(e);
+                }
+                
+                protected void showPopup(MouseEvent e){
+                    if (e.isPopupTrigger()){
+                        getPopupMenu().show(CurriculumTree.this, e.getX(), e.getY());
+                    }
+                        
+                }
+                
+            });
        }
+        
+        
+        public JPopupMenu getPopupMenu(){
+            JPopupMenu result = new JPopupMenu();
+            for (Action a:actions){
+                if (a==null)
+                    result.addSeparator();
+                else
+                    result.add(a);
+            }
+            return result;
+        }
         
         
         public abstract void skillChange();
@@ -500,7 +537,11 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
         for (Action a:commandMng.getActions()){
             commandPanel.addCommand(a);
         }
+        grid.addExtAction(commandMng.getAction(EDIT_CURRICULUM_DETAIL));
         commandMng.updateActionList();
+        
+        tree.actions= commandMng.getActions(new String[]{
+            CREATE_CURRICULUM,EDIT_CURRICULUM,DELETE_CURRICULUM,null,FILL_CURRICULUM,CREATE_DEPART});
     }
     
     @Override

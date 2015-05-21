@@ -39,6 +39,7 @@ import ru.viljinsky.sqlite.Values;
  * @author вадик
 */
 
+
 class CurriculumDetailDialg extends SelectDialog{
     public Integer skill_id;
     public Integer curriculum_id;
@@ -73,7 +74,7 @@ class CurriculumDetailDialg extends SelectDialog{
             DataModule.commit();
         } catch (Exception e){
             DataModule.rollback();
-            throw new Exception("FILL_CURRICULUM_ERROR\n"+e.getMessage());
+            throw new Exception(FILL_CURRICULUM_ERROR +e.getMessage());
         }
     }
 }
@@ -237,21 +238,10 @@ abstract class CurriculumDialog extends SelectDialog{
 }
 
         
-public class Dialogs {
+public class Dialogs implements IAppError{
     public static final String NOT_READY_YET = "Не готово ещё";
     
-    public static final String INCLUDE_EXCLUDE_PROFILE_ERROR = "INCLUDE_EXCLUDE_PROFILE_ERROR\n";
-    public static final String CREATE_PROFILE_ERROR = "CREATE_PROFILE_ERROR\n";
-    public static final String REMOVE_PROFILE_ERROR = "REMOVE_PROFILE_ERROR\n";
-    
-    public static final String CREATE_SHIFT_ERROR = "CREATE_SHIFT_ERROR\n";
-    public static final String EDIT_SHIFT_ERROR = "EDIT_SIFT_ERROR\n";
-    public static final String REMOVE_SIFT_ERROR = "REMOVE_SIFT_ERROR\n";
-    
-    public static final String WRONG_STREAM = "WRONG_STREAM";
-    public static final String EDIT_STREAM_ERROR = "EDIT_STREAM_ERROR\n";
     public static final String CONFIRM_REMOVE_STREAM = "CONFIRM_REMOVE_STREAM";
-            
     public static final String PROFILE_DLG_CAPTION="Профиль";
     
     public static Integer createProfile(JComponent owner,Integer profile_id) throws Exception{
@@ -375,7 +365,7 @@ public class Dialogs {
             DataModule.commit();
         } catch (Exception e){
             DataModule.rollback();
-            throw new Exception("REMOVE_PROFILE_ERROR\n"+e.getMessage());
+            throw new Exception(REMOVE_PROFILE_ERROR +e.getMessage());
         }
         return true;
         
@@ -396,7 +386,7 @@ public class Dialogs {
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
-                    throw new Exception("ON_ENTRY_ERROR\n"+e.getMessage());
+                    throw new Exception(ON_ENTRY_ERROR + e.getMessage());
                 }
             }
             
@@ -613,7 +603,7 @@ public class Dialogs {
                 return (Integer)r.get(0)[0];
             } catch (Exception e){
                 DataModule.rollback();
-                throw new Exception("CREATE_CURRICULUM_ERROR\n"+e.getMessage());
+                throw new Exception(CREATE_CURRICULUM_ERROR+e.getMessage());
             }
         }
         return null;
@@ -641,7 +631,7 @@ public class Dialogs {
                     modalResult=RESULT_OK;
                 } catch (Exception e){
                     DataModule.rollback();
-                    throw new Exception("COPY_CURRICULUM_ERROR\n"+e.getMessage());
+                    throw new Exception(COPY_CURRICULUM_ERROR+e.getMessage());
                 }
                 
             }
@@ -675,7 +665,7 @@ public class Dialogs {
                 return true;
             } catch (Exception e){
                 DataModule.rollback();
-                throw new Exception("DELETE_CURRICULUM_ERROR\n"+e.getMessage());
+                throw new Exception(DELETE_CURRICULUM_ERROR + e.getMessage());
             }
         }
         return false;
@@ -696,7 +686,7 @@ public class Dialogs {
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
-                    throw new Exception("CREATE_TEACHER_ERROR\n"+e.getMessage());
+                    throw new Exception(CREATE_TEACHER_ERROR +e.getMessage());
                 }
             }
         };
@@ -725,7 +715,7 @@ public class Dialogs {
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
-                    throw new Exception("EDIT_TEACHER_ERROR\n"+e.getMessage());
+                    throw new Exception(EDIT_TEACHER_ERROR + e.getMessage());
                 }
             }
         };
@@ -748,7 +738,7 @@ public class Dialogs {
                 return true;
             } catch (Exception e){
                 DataModule.rollback();
-                throw new Exception("DELETE_TEACHER_ERROR\n"+e.getMessage());
+                throw new Exception(DELETE_TEACHER_ERROR + e.getMessage());
             }
         }
         return false;
@@ -769,7 +759,7 @@ public class Dialogs {
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
-                    throw new Exception("CREATE_ROOM_ERROR\n"+e.getMessage());
+                    throw new Exception(CREATE_ROOM_ERROR + e.getMessage());
                 }
             }
         };
@@ -803,7 +793,7 @@ public class Dialogs {
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
-                    throw new Exception("EDIT_ROOM_ERROR\n"+e.getMessage());
+                    throw new Exception(EDIT_ROOM_ERROR +e.getMessage());
                 }
             }
         };
@@ -827,7 +817,7 @@ public class Dialogs {
                 return true;
             } catch (Exception e){
                 DataModule.rollback();
-                throw new Exception("DELETE_ROOM_ERROR\n"+e.getMessage());
+                throw new Exception(DELETE_ROOM_ERROR + e.getMessage());
             }
         }
         return false;
@@ -848,7 +838,7 @@ public class Dialogs {
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
-                    throw new Exception("CREATE_DEPART_ERROR\n"+e.getMessage());
+                    throw new Exception(CREATE_DEPART_ERROR + e.getMessage());
                 }
             }
         };
@@ -858,7 +848,7 @@ public class Dialogs {
         
         r = DataModule.getRecordet(String.format("select count(*) from curriculum_detail where skill_id=%d and curriculum_id=%d",skill_id,curriculum_id));
         if (r.getInteger(0)==0){
-            throw new Exception("CURRICULUM_IS_EMPTY");
+            throw new Exception(CURRICULUM_IS_EMPTY);
         }
         
         Dataset dataset = DataModule.getDataset("depart");
@@ -890,7 +880,7 @@ public class Dialogs {
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
-                    throw new Exception("EDIT_DEPART_ERROR\n"+e.getMessage());
+                    throw new Exception(EDIT_DEPART_ERROR + e.getMessage());
                 }
             }
         };
@@ -914,7 +904,7 @@ public class Dialogs {
                 return true;
             } catch (Exception e){
                 DataModule.rollback();
-                throw new Exception("DELETE_DEPART_ERROR\n"+e.getMessage());
+                throw new Exception(DELETE_DEPART_ERROR + e.getMessage());
             }
         }
         return false;
@@ -929,18 +919,10 @@ public class Dialogs {
                     
                     Values values = getValues();
                     getDataset().edit(0, values);
-//                    Map<String,Object> filter = new HashMap<>();
-//                    filter.put("depart_id", values.getInteger("depart_id"));
-//                    filter.put("subject_id", values.getInteger("subject_id"));
-//                    filter.put("group_id", values.getInteger("group_id"));
-//                    
-//                    Dataset dataset = DataModule.getDataset("subject_group");
-//                    dataset.open(filter);
-//                    dataset.edit(0, values);
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
-                    throw new Exception("EDIT_SUBJECT_GROUP_ERROR\n"+e.getMessage());
+                    throw new Exception(EDIT_SUBJECT_GROUP_ERROR + e.getMessage());
                 }
             }
         };
@@ -950,8 +932,6 @@ public class Dialogs {
         values.put("group_id",group_id);
         Dataset dataset = DataModule.getDataset("subject_group");//  DataModule.getSQLDataset(String.format("select * from subject_group where depart_id=%d and subject_id=%d and group_id=%d",depart_id,subject_id,group_id));
         dataset.open(values);
-//        Values values= dataset.getValues(0);
-//        dlg.setDataset(DataModule.getDataset("subject_group"));
         dlg.setDataset(dataset);
         dlg.setValues(dataset.getValues(0));
         return dlg.showModal(owner)==BaseDialog.RESULT_OK;
@@ -983,7 +963,6 @@ public class Dialogs {
     public static boolean fillCurriculumDetails(JComponent owner,Integer curriculum_id,Integer skill_id) throws Exception{
         CurriculumDetailDialg dlg = new CurriculumDetailDialg(curriculum_id, skill_id);
         return dlg.showModal(owner)==BaseDialog.RESULT_OK;
-//        return false;
     }
     
     public static boolean editCurriculumDetail(JComponent owner, Integer curriculum_id, Integer skill_id, Integer subject_id) throws Exception{
@@ -1006,7 +985,7 @@ public class Dialogs {
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
-                    throw new Exception("EDIT_CURRICULUM_ERROR\n"+e.getMessage());
+                    throw new Exception(EDIT_CURRICULUM_ERROR+e.getMessage());
                 }
                 
             }

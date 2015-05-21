@@ -28,10 +28,14 @@ import ru.viljinsky.util.SQLMonitor2;
 
 public class Main4 extends JFrame implements CommandListener{
     
+    public static final String MENU_FILE   = "Файл";
+    
     public static final String FILE_OPEN   = "FILE_OPEN";
     public static final String FILE_NEW    = "FILE_NEW";
     public static final String FILE_CLOSE  = "FILE_CLOSE";
     public static final String FILE_EXIT   = "FILE_EXIT";
+    
+    public static final String MENU_UTILS   = "Утилиты";
     
     public static final String DICTIONARY  = "DICTIONARY";
     public static final String SHIFT       = "SHIFT";
@@ -204,7 +208,7 @@ public class Main4 extends JFrame implements CommandListener{
     }
     
     public JMenu createFileMenu(){
-        JMenu result = new JMenu("File");
+        JMenu result = new JMenu(MENU_FILE);
         result.add(commands.getAction(FILE_NEW));
         result.add(commands.getAction(FILE_OPEN));
         result.add(commands.getAction(FILE_CLOSE));
@@ -213,7 +217,7 @@ public class Main4 extends JFrame implements CommandListener{
         return result;
     }
     public JMenu createUtilMenu(){
-        JMenu result = new JMenu("Util");
+        JMenu result = new JMenu(MENU_UTILS);
         result.add(commands.getAction(MONITOR));
         result.add(commands.getAction(SHIFT));
         result.add(commands.getAction(DICTIONARY));

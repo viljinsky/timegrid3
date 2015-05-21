@@ -20,12 +20,14 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import ru.viljinsky.forms.IAppError;
 
 /**
  *
  * @author вадик
  */
-public abstract class BaseDialog extends JDialog implements ActionListener{
+
+public abstract class BaseDialog extends JDialog implements ActionListener,IAppError{
     private static final Cursor waitCursor = new Cursor(Cursor.WAIT_CURSOR);
     private static final Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
     public static int RESULT_NONE = 0;

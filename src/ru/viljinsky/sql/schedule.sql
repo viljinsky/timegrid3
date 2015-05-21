@@ -254,7 +254,8 @@ t.last_name || ' ' || substr(t.first_name,1,1) ||'. ' || substr(t.patronymic,1,1
 r.room_name as room,
 a.group_id,a.depart_id,a.subject_id,c.group_type_id,a.stream_id,c.hour_per_week,c.hour_per_day,c.group_sequence_id,
 a.default_teacher_id,a.default_room_id,a.pupil_count,
-a.week_id
+a.week_id,
+c.is_stream
  from subject_group a 
 	inner join depart b on a.depart_id=b.id 
 	inner join curriculum_detail c

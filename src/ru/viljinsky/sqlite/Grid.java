@@ -13,6 +13,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import javax.swing.Action;
 import javax.swing.JOptionPane;
@@ -26,6 +28,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import ru.viljinsky.forms.CommandListener;
 import ru.viljinsky.forms.CommandMngr;
+import ru.viljinsky.forms.IAppCommand;
 
 /**
  *
@@ -33,17 +36,18 @@ import ru.viljinsky.forms.CommandMngr;
  */
 
 
-public class Grid extends JTable implements CommandListener {
+public class Grid extends JTable implements CommandListener,IAppCommand {
     
-    public static final String GRID_APPEND      = "GRID_APPEND";
-    public static final String GRID_EDIT        = "GRID_EDIT";
-    public static final String GRID_DELETE      = "GRID_DELETE";
-    public static final String GRID_REFRESH     = "GRID_REFRESH";
-    public static final String GRID_REQUERY     = "GRID_REQUERY";
     
-    Component owner = null;
+    protected Component owner = null;
     protected GridModel model;
     CommandMngr commands = new CommandMngr();
+    Boolean realNames = false;
+    List<Action> extAction = new ArrayList<>();
+
+    public void setRealNames(Boolean realNames) {
+        this.realNames = realNames;
+    }
     
     public Values getValues(){
         int row = getSelectedRow();
@@ -51,6 +55,14 @@ public class Grid extends JTable implements CommandListener {
             return model.dataset.getValues(convertRowIndexToModel(row));
         }
         return null;
+    }
+    
+    public void addExtAction(Action action){
+        extAction.add(action);
+    }
+    
+    public void setAction(String actionName,Action action){
+        commands.setAction(actionName,action);
     }
     
     public void setValues(Values v) throws Exception{
@@ -210,13 +222,16 @@ public class Grid extends JTable implements CommandListener {
                 try{
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER:
-                        edit();
+//                        edit();
+                        doCommand(GRID_EDIT);
                         break;
                     case KeyEvent.VK_INSERT:
-                        append();
+                        doCommand(GRID_APPEND);
+//                        append();
                         break;
                     case KeyEvent.VK_DELETE:
-                        delete();
+                        doCommand(GRID_DELETE);
+//                        delete();
                         break;
                 }} catch (Exception ee){
                     JOptionPane.showMessageDialog(Grid.this, ee.getMessage());
@@ -253,6 +268,12 @@ public class Grid extends JTable implements CommandListener {
     
     public JPopupMenu getPopupMenu(){
         JPopupMenu result = new JPopupMenu();
+        if (extAction.size()>0){
+            for (Action a:extAction){
+                result.add(a);
+            }
+            result.addSeparator();
+        }
         for (Action a:commands.getActions()){
             result.add(a);
         }
@@ -271,9 +292,7 @@ public class Grid extends JTable implements CommandListener {
             setModel(new DefaultTableModel());
             return;
         }
-//        if (!dataset.isActive()){
-//            dataset.open();
-//        }
+        
         model = new GridModel(dataset);
         setModel(model);
         TableColumnModel cmodel = getColumnModel();
@@ -284,14 +303,15 @@ public class Grid extends JTable implements CommandListener {
             tcolumn = cmodel.getColumn(i);
             column = dataset.getColumn(i);
             tcolumn.setIdentifier(dataset.getColumn(i));
-            
-            params = ColumnMap.getParams(new String(column.tableName+"."+column.columnName));
-            if (params!=null){
-                tcolumn.setHeaderValue(params[0].isEmpty()?column.columnName:params[0]);
-                if (params.length>1 && params[1].equals("false")){
-                    tcolumn.setMinWidth(0);
-                    tcolumn.setMinWidth(0);
-                    tcolumn.setPreferredWidth(0);
+            if (!realNames){
+                params = ColumnMap.getParams(new String(column.tableName+"."+column.columnName));
+                if (params!=null){
+                    tcolumn.setHeaderValue(params[0].isEmpty()?column.columnName:params[0]);
+                    if (params.length>1 && params[1].equals("false")){
+                        tcolumn.setMinWidth(0);
+                        tcolumn.setMinWidth(0);
+                        tcolumn.setPreferredWidth(0);
+                    }
                 }
             }
         }
