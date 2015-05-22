@@ -543,6 +543,7 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
         topPanel.addAction(commands.getAction(EDIT_DEPART));
         topPanel.addAction(commands.getAction(DELETE_DEPART));        
         topPanel.addAction(commands.getAction(REFRESH));
+        topPanel.addAction(commands.getAction(TT_SCH_STATE));
         
         bottomPanel.addAction(commands.getAction(ADD_GROUP));
         bottomPanel.addAction(commands.getAction(EDIT_GROUP));
@@ -569,6 +570,11 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
                     
                 case DELETE_DEPART:
                     if (Dialogs.deleteDepart(this, depart_id))
+                        grid1.requery();
+                    break;
+                    
+                case TT_SCH_STATE:
+                    if (Dialogs.scheduleState(this,depart_id))
                         grid1.requery();
                     break;
                     

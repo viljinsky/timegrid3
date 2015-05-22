@@ -7,19 +7,27 @@
 package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.io.File;
 import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import ru.viljinsky.dialogs.BaseDialog;
 import ru.viljinsky.sqlite.CreateData;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.util.SQLMonitor2;
+import ru.viljinsky.util.ScriptEditor;
 
 
 
@@ -34,6 +42,7 @@ public class Main4 extends JFrame implements CommandListener{
     public static final String FILE_NEW    = "FILE_NEW";
     public static final String FILE_CLOSE  = "FILE_CLOSE";
     public static final String FILE_EXIT   = "FILE_EXIT";
+    public static final String LOAD_SCRIPT = "LOAD_SCRIPT";
     
     public static final String MENU_UTILS   = "Утилиты";
     
@@ -45,7 +54,7 @@ public class Main4 extends JFrame implements CommandListener{
     public static String APP_NAME = "TimeTable2015";
     
     CommandMngr commands = new CommandMngr(new String[]{FILE_CLOSE,FILE_EXIT,FILE_NEW,FILE_OPEN,
-        DICTIONARY,SHIFT,TIMEGRID,MONITOR
+        DICTIONARY,SHIFT,TIMEGRID,MONITOR,LOAD_SCRIPT
     });
     
     JFileChooser fileChooser = new JFileChooser(new File("."));
@@ -115,6 +124,9 @@ public class Main4 extends JFrame implements CommandListener{
                     Dictonary.showDialog(rootPane);
                     break;
                     
+                case LOAD_SCRIPT:
+                    loadScript();
+                    break;
                 case MONITOR:
                     SQLMonitor2.showSQLMonitor(rootPane);
                     break;
@@ -152,6 +164,32 @@ public class Main4 extends JFrame implements CommandListener{
             setTitle(APP_NAME+" ["+path+"]");
             JOptionPane.showMessageDialog(this, "База \""+path+"\" - успешно создана");
         }
+    }
+    
+    public void loadScript(){
+        BaseDialog dlg = new BaseDialog() {
+
+            @Override
+            public Container getPanel() {
+                ScriptEditor editor = new ScriptEditor("text","Редактор скрипта");
+                JPanel panel = new JPanel(new BorderLayout());
+                panel.add(new JScrollPane(editor));
+                JPanel commandPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                for (Action a:editor.getEditorActions()){
+                    commandPanel.add(new JButton(a));
+                }
+                panel.add(commandPanel,BorderLayout.PAGE_START);
+                
+                return panel;
+            }
+
+            
+            @Override
+            public void doOnEntry() throws Exception {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        };
+        dlg.showModal(this);
     }
     
     public void fileOpen(){
@@ -221,6 +259,8 @@ public class Main4 extends JFrame implements CommandListener{
         result.add(commands.getAction(MONITOR));
         result.add(commands.getAction(SHIFT));
         result.add(commands.getAction(DICTIONARY));
+        result.addSeparator();
+        result.add(commands.getAction(LOAD_SCRIPT));
         return result;
     }
 

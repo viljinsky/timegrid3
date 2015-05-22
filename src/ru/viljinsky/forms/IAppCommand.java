@@ -66,6 +66,7 @@ public interface IAppCommand {
     public static final String TT_FIX       = "TT_FIX";
     public static final String TT_UNFIX     = "TT_UNFIX";
     public static final String TT_REFRESH   = "TT_REFRESH";
+    public static final String TT_SCH_STATE = "TT_SCH_STATE";
     
     
     public static final String[] SCHEDULE_COMMANDS ={
@@ -75,7 +76,8 @@ public interface IAppCommand {
         TT_FIX,
         TT_UNFIX,
         TT_CLEAR,
-        TT_REFRESH   
+        TT_REFRESH,
+        TT_SCH_STATE
     };
     
     // depart panel
@@ -106,7 +108,8 @@ public interface IAppCommand {
         EDIT_STREAM,
         REMOVE_STREAM,
         REFRESH,
-        EDIT_GROUP
+        EDIT_GROUP,
+        TT_SCH_STATE
     };
     
     // teacher

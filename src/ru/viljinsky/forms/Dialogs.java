@@ -8,6 +8,9 @@ package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,9 +18,11 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.swing.ButtonGroup;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
@@ -1002,6 +1007,45 @@ public class Dialogs implements IAppError{
         dlg.setDataset(dataset);
         dlg.setValues(values);
         return dlg.showModal(owner)==EntryDialog.RESULT_OK;
+    }
+    
+    public static boolean scheduleState(JComponent owner,Integer depart_id){
+        BaseDialog dlg = new BaseDialog() {
+            ButtonGroup group;
+            String state;
+            
+            class Listener implements ActionListener{
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    state = e.getActionCommand();
+                }
+            }
+
+            @Override
+            public Container getPanel() {
+                Listener listener = new Listener();
+                JPanel panel = new JPanel(new GridLayout(-1,1));
+                JRadioButton rbtn;
+                group = new ButtonGroup();
+                for (String st:ScheuleState.getStateList()){
+                    rbtn= new JRadioButton(ScheuleState.getStateDescription(st));
+                    rbtn.setActionCommand(st);
+                    rbtn.addActionListener(listener);
+                    group.add(rbtn);
+                    panel.add(rbtn);
+                }
+                return panel;
+            }
+
+            @Override
+            public void doOnEntry() throws Exception {
+                System.out.println(state);
+            }
+        };
+        dlg.setTitle("Статус расписания");
+        return dlg.showModal(owner)==BaseDialog.RESULT_OK;
+        
     }
 
 }

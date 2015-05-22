@@ -47,6 +47,40 @@ import ru.viljinsky.timegrid.TimeTableGroup;
  *
  * @author вадик
  */
+
+interface IScheduleState{
+    public static final String STATE_NEW   = "STATE_NEW";
+    public static final String STATE_WORK  = "STATE_WORK";
+    public static final String STATE_ERROR = "STATE_ERROR";
+    public static final String STATE_READY = "STATE_READY";
+}
+
+class ScheuleState implements IScheduleState{
+    public static String[] getStateList(){
+        return new String[]{
+            STATE_NEW,
+            STATE_WORK,
+            STATE_ERROR,
+            STATE_READY};
+    }
+      
+    
+    public static String getStateDescription(String state){
+        switch (state){
+            case STATE_NEW:
+                return "Новое";
+            case STATE_WORK:
+                return "В работе";
+            case STATE_ERROR:
+                return "Ошибки в расписании";
+            case STATE_READY:
+                return "Готово";
+                default:
+            return "???";
+        }
+    }
+}
+
     abstract class TreeElement{
         int id;
         String label;
@@ -164,7 +198,7 @@ import ru.viljinsky.timegrid.TimeTableGroup;
         
     }
 
-class ScheduleTree extends JTree{
+abstract class ScheduleTree extends JTree{
     DefaultMutableTreeNode departNodes , teacherNodes, roomNodes;
     TreeElement selectedElement = null;
     
@@ -201,9 +235,10 @@ class ScheduleTree extends JTree{
         setModel(new DefaultTreeModel(root));
     }
     
-    public void ElementChange(){
+    public abstract void ElementChange();
+   
         
-    }
+    
     
     public void open() throws Exception{
         
@@ -241,6 +276,10 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
     TimeTableGrid grid;
     Grid unplacedGrid;
     JTextArea hintPane;
+    
+//    Integer depart_id = null,
+//            teacher_id = null,
+//            room_id = null;
     
     public void initComponents(){
         tree = new ScheduleTree(){
@@ -296,9 +335,6 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
                          analizCell(group, new Point(col+1,row+1));
                          break;
                     }        
-//                    if (group!=null){
-//                        System.out.println(group);
-//                    }
                     JOptionPane.showMessageDialog(this,"Тут подсказка\n"+e.getMessage());                    
                 } finally {
                     waitCursor(false);
@@ -376,6 +412,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
             commands.add(new JButton(a));
         }
         manager.addCommandListener(this);
+        manager.updateActionList();
         add(commands,BorderLayout.PAGE_START);
         
     
@@ -388,37 +425,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
         setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     }
 
-    CommandMngr manager = new CommandMngr();/* {
-
-        @Override
-        public void updateAction(Action a) {
-            String command =getActionCommand(a);
-//            System.out.println(command);
-            boolean b;
-            switch (command){
-                case TT_DELETE:
-                    a.setEnabled(!grid.getSelectedElements().isEmpty());
-                    break;
-                case TT_PLACE:
-                    try{
-                    Values v=unplacedGrid.getValues();
-                    b= (v!=null && (v.getInteger("unplaced")>0));
-                    a.setEnabled(b);
-                    } catch (Exception e){}
-                    break;
-            }
-        }
-
-        @Override
-        public void doCommand(String command) {
-            TimeGridPanel2.this.doCommand(command);
-        }
-    };
-
-    public void updateAction(Action a){
-        
-    }
-    */
+    CommandMngr manager = new CommandMngr();
     
     public void doCommand(String command){
         try{
@@ -474,6 +481,9 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
                     tree.clear();
                     tree.open();
                     unplacedGrid.close();
+                    break;
+                case TT_SCH_STATE:
+                    Dialogs.scheduleState(TimeGridPanel2.this,null);
                     break;
             }
         } catch (Exception e){
@@ -750,7 +760,6 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
 
     @Override
     public void close() throws Exception {
-//        System.out.println("close");
         tree.clear();
         unplacedGrid.getDataset().close();
         grid.close();
@@ -788,6 +797,9 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
         String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
         boolean b;
         switch (command){
+            case TT_SCH_STATE:
+//                a.setEnabled(depart_id!=null);
+                break;
             case TT_DELETE:
                 a.setEnabled(!grid.getSelectedElements().isEmpty());
                 break;
