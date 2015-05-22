@@ -69,6 +69,8 @@ public class CommandDictionary extends HashMap<String, String> implements IAppCo
     put(TT_UNFIX     , "Отм.фиксирование");
     put(TT_REFRESH   , "Обновить");
     
+    put(TT_SCH_STATE, "Статус;Изменить статус расписания");
+    
 
     // select panel
     put(INCLUDE,        "Включить>");

@@ -1009,10 +1009,12 @@ public class Dialogs implements IAppError{
         return dlg.showModal(owner)==EntryDialog.RESULT_OK;
     }
     
-    public static boolean scheduleState(JComponent owner,Integer depart_id){
+    public static boolean scheduleState(JComponent owner,final Integer depart_id){
+        
         BaseDialog dlg = new BaseDialog() {
             ButtonGroup group;
             String state;
+//            Integer depart_id;
             
             class Listener implements ActionListener{
 
@@ -1024,12 +1026,21 @@ public class Dialogs implements IAppError{
 
             @Override
             public Container getPanel() {
+                int code = -1;
+                try{
+                    Recordset r = DataModule.getRecordet("select schedule_state_id from depart where id="+depart_id);
+                    code = r.getInteger(0);
+                } catch  (Exception e){
+                    e.printStackTrace();
+                }
+                
                 Listener listener = new Listener();
                 JPanel panel = new JPanel(new GridLayout(-1,1));
                 JRadioButton rbtn;
                 group = new ButtonGroup();
                 for (String st:ScheuleState.getStateList()){
                     rbtn= new JRadioButton(ScheuleState.getStateDescription(st));
+                    rbtn.setSelected(code==ScheuleState.getStateKode(st));
                     rbtn.setActionCommand(st);
                     rbtn.addActionListener(listener);
                     group.add(rbtn);
@@ -1041,9 +1052,17 @@ public class Dialogs implements IAppError{
             @Override
             public void doOnEntry() throws Exception {
                 System.out.println(state);
+                try{
+                    DataModule.execute("update depart set schedule_state_id="+ScheuleState.getStateKode(state)+" where id="+depart_id);
+                    DataModule.commit();
+                } catch (Exception e){
+                    DataModule.rollback();
+                    throw new Exception("CHANGE_DEPART_ERROR\n"+e.getMessage());
+                }
             }
         };
         dlg.setTitle("Статус расписания");
+       
         return dlg.showModal(owner)==BaseDialog.RESULT_OK;
         
     }

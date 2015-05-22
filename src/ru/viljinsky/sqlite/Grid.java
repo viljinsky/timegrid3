@@ -14,8 +14,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.swing.Action;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -407,17 +410,34 @@ public class Grid extends JTable implements CommandListener,IAppCommand {
     }
     
     public void removeSelectedRow(){
-        int row = getSelectedRow();
-        if (row>=0){
-            model.dataset.remove(convertRowIndexToModel(row));
+
+        try{
+            int[] rows  = getSelectedRows();
+            Set<Object[]> values = new HashSet<>();
+            for (int r: rows){
+                values.add(model.dataset.get(convertRowIndexToModel(r)));
+            }
+
+            for (Object[] o:values){
+                model.dataset.remove(o);
+            }
             model.fireTableDataChanged();
-            if (row>getRowCount()-1){
-                row = getRowCount()-1;
-            }
-            if (row>=0){
-                getSelectionModel().setSelectionInterval(row, row);
-            }
+        } catch(Exception e){
+            e.printStackTrace();
+            
         }
+        
+//        int row = getSelectedRow();
+//        if (row>=0){
+//            model.dataset.remove(convertRowIndexToModel(row));
+//            model.fireTableDataChanged();
+//            if (row>getRowCount()-1){
+//                row = getRowCount()-1;
+//            }
+//            if (row>=0){
+//                getSelectionModel().setSelectionInterval(row, row);
+//            }
+//        }
     }
 
     public void gridSelectionChange() {

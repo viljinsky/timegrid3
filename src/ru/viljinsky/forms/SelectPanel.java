@@ -27,10 +27,6 @@ import ru.viljinsky.sqlite.Grid;
  */
 abstract class SelectPanel extends JPanel implements CommandListener,IAppCommand {
     
-//    protected static final String INCLUDE = "INCLUDE";
-//    protected static final String EXCLUDE = "EXCLUDE";
-//    protected static final String INCLUDE_ALL = "INCLUDE_ALL";
-//    protected static final String EXCLUDE_ALL = "EXCLUDE_ALL";
     protected CommandMngr commands = new CommandMngr();
     Grid sourceGrid;
     Grid destanationGrid;

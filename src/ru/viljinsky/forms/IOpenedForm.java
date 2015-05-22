@@ -300,6 +300,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
     class SelectRoomPanel extends SelectPanel{
         
         int room_id=-1;
+        
         public static final String sqlSource = 
             "select distinct s.subject_name,d.label,v.group_label,\n"+
             "v.teacher,\n"+    
@@ -311,7 +312,6 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
             "inner join subject s on s.id=v.subject_id "+
             "where v.default_room_id is null";
         
-//        public static final String sqlSourceAll = "select * from v_subject_group where default_room_id is null";
         
         public static final String sqlDest =
             "select s.subject_name,d.label,\n"+
@@ -327,7 +327,6 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
             this.room_id=room_id;
             requery();
             commands.updateActionList();
-//            updateActionList();
         }
         
         @Override
@@ -348,7 +347,10 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
                 DataModule.rollback();
                 throw new Exception("INCLUDE_ERROR\n"+e.getMessage());
             }
-            requery();
+            sourceGrid.removeSelectedRow();
+            destanationGrid.requery();
+            commands.updateActionList();
+//            requery();
         }
 
         @Override
@@ -421,7 +423,6 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
                 dataset = DataModule.getSQLDataset(sqlSource+" and a.id="+room_id);
             else
                 dataset = DataModule.getSQLDataset(sqlSource);
-//                dataset = DataModule.getSQLDataset(sqlSourceAll);
                 
             dataset.open();
             sourceGrid.setDataset(dataset);
@@ -679,6 +680,9 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
                 
             case REMOVE_STREAM:
                 action.setEnabled(depart_id!=null && stream_id!=null);
+                break;
+            case TT_SCH_STATE:
+                action.setEnabled(depart_id!=null);
                 break;
         }
     }
@@ -982,12 +986,15 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
         
         @Override
         public void include() throws Exception {
-            Map<String,Object> values;
+            Values values;
             IDataset dataset = sourceGrid.getDataset();
-            int depart_id,subject_id,group_id;
+            int depart_id,subject_id,group_id,hour=0;
             try{
                 for (int row : sourceGrid.getSelectedRows()){
+                   
                     values=dataset.getValues(sourceGrid.convertRowIndexToModel(row));
+                    hour += values.getInteger("hour_per_week");
+                    
                     depart_id=(Integer)values.get("depart_id");
                     subject_id=(Integer)values.get("subject_id");
                     group_id=(Integer)values.get("group_id");
@@ -998,17 +1005,38 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
                 DataModule.rollback();
                 throw new Exception("INCLUDE_ERROR\n"+e.getMessage());
             }
-            requery();
+            
+            sourceGrid.removeSelectedRow();
+            destanationGrid.requery();
+            commands.updateActionList();
+            
+            updateTeacherHour(hour);
+            // Изменения кол.ва часов преподавателя
+//            requery();
+        }
+        /**
+         * Изменение количества часов преподавателя после
+         *         добавления/исключения предметов 
+         * @param hour + или - в зависимости добавление удаление
+         * @throws Exception 
+         */
+        protected void updateTeacherHour(int hour) throws Exception{
+            Values values = grid.getValues();
+            Integer n = values.getInteger("total_hour");
+            n = (n==null?0:n)+hour;
+            values.setValue("total_hour", n);
+            grid.setValues(values);
         }
 
         @Override
         public void exclude() throws Exception {
-            Map<String,Object> values;
+            Values values;
             IDataset dataset = destanationGrid.getDataset();
-            int depart_id,subject_id,group_id;
+            int depart_id,subject_id,group_id,hour=0;
             try{
                 for (int row : destanationGrid.getSelectedRows()){
                     values=dataset.getValues(destanationGrid.convertRowIndexToModel(row));
+                    hour+=values.getInteger("hour_per_week");
                     depart_id=(Integer)values.get("depart_id");
                     subject_id=(Integer)values.get("subject_id");
                     group_id=(Integer)values.get("group_id");
@@ -1019,6 +1047,15 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
                 DataModule.rollback();
                 throw new Exception("EXCLUDE_ERROR\n"+e.getMessage());
             }
+            
+            // Изменение кол.ва часов преподавателя
+            updateTeacherHour(-hour);
+//            values = grid.getValues();
+//            Integer n = values.getInteger("total_hour");
+//            n=(n==null?0:n)-hour;
+//            values.setValue("total_hour", n);
+//            grid.setValues(values);
+            
             requery();
         }
 
@@ -1028,13 +1065,15 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
             Integer depart_id;
             Integer subject_id;
             Integer group_id;
-            Map<String,Object> values;
+            Values values;
+            Integer hour = 0;
             try{
                 for (int row=0;row<dataset.getRowCount();row++){
                     values=dataset.getValues(row);
-                    depart_id= (Integer)values.get("depart_id");
-                    subject_id=(Integer)values.get("subject_id");
-                    group_id=(Integer)values.get("group_id");
+                    hour+=values.getInteger("hour_per_week");
+                    depart_id= values.getInteger("depart_id");
+                    subject_id=values.getInteger("subject_id");
+                    group_id=values.getInteger("group_id");
                     DataTask.inclideGroupToTeacher(depart_id, subject_id, group_id, teacher_id);
                 }
                 DataModule.commit();
@@ -1042,6 +1081,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
                 DataModule.rollback();
                 throw new Exception("INCLUDE_ALL\n"+e.getMessage());
             }
+            updateTeacherHour(hour);
             requery();
         }
 
@@ -1051,13 +1091,15 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
             Integer depart_id;
             Integer subject_id;
             Integer group_id;
-            Map<String,Object> values;
+            Integer hour=0;
+            Values values;
             try{
                 for (int row=0;row<dataset.getRowCount();row++){
                     values=dataset.getValues(row);
-                    depart_id= (Integer)values.get("depart_id");
-                    subject_id=(Integer)values.get("subject_id");
-                    group_id=(Integer)values.get("group_id");
+                    hour+=values.getInteger("hour_per_week");
+                    depart_id= values.getInteger("depart_id");
+                    subject_id=values.getInteger("subject_id");
+                    group_id=values.getInteger("group_id");
                     DataTask.excludeGroupFromTeacher(depart_id, subject_id, group_id);
                 }
                 DataModule.commit();
@@ -1065,6 +1107,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
                 DataModule.rollback();
                 throw new Exception("EXCLUDE_ALL_ERROR\n"+e.getMessage());
             }
+            updateTeacherHour(-hour);
             requery();
         }
 

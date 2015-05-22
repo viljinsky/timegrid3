@@ -64,6 +64,21 @@ class ScheuleState implements IScheduleState{
             STATE_READY};
     }
       
+
+    public static Integer getStateKode(String state){
+        switch (state){
+            case STATE_NEW:
+                return 0;
+            case STATE_WORK:
+                return 1;
+            case STATE_ERROR:
+                return 2;
+            case STATE_READY:
+                return 3;
+                default:
+            return null;
+        }
+    };
     
     public static String getStateDescription(String state){
         switch (state){
@@ -81,195 +96,6 @@ class ScheuleState implements IScheduleState{
     }
 }
 
-    abstract class TreeElement{
-        int id;
-        String label;
-        @Override
-        public String toString(){
-            return label;
-        }
-        
-        public abstract Values getFilter();
-        public abstract Set<Point> getAvalabelCells();
-    }
-    
-    class Depart extends TreeElement{
-        public static final String sql = 
-                "select day_id-1,bell_id-1 from shift_detail a inner join "+
-                "depart b on a.shift_id=b.shift_id where b.id=%d;";
-    
-        public Depart(Values values) throws Exception{
-            id = values.getInteger("id");
-            label = values.getString("label");
-        }
-
-        @Override
-        public Values getFilter() {
-            Values result = new Values();
-            result.put("depart_id", id);
-            return result;
-        }
-
-        @Override
-        public Set<Point> getAvalabelCells() {
-            Set<Point> result = new HashSet<>();
-            Object[] p;
-            try{
-                Recordset resordset = DataModule.getRecordet(String.format(sql, id));
-
-                for (int i=0;i<resordset.size();i++){
-                    p=resordset.get(i);
-                    result.add(new Point((Integer)p[0],(Integer)p[1]));
-                }
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-            return result;
-        }
-        
-    }
-    
-    class Teacher extends TreeElement{
-        public static final String sql = 
-                "select day_id-1,bell_id-1 from shift_detail a inner join "+
-                "teacher b on a.shift_id=b.shift_id where b.id=%d;";
-                
-        public Teacher(Values values) throws Exception{
-            id = values.getInteger("id");
-            label = values.getString("teacher_name");
-        }
-        @Override
-        public Values getFilter() {
-            Values result = new Values();
-            result.put("teacher_id", id);
-            return result;
-        }
-
-        @Override
-        public Set<Point> getAvalabelCells() {
-            Set<Point> result = new HashSet<>();
-            Point p;
-            Object[] r;
-            try{
-                Recordset recordset = DataModule.getRecordet(String.format(sql,id));
-                for (int i=0;i<recordset.size();i++){
-                    r=recordset.get(i);
-                    result.add(new Point((Integer)r[0],(Integer)r[1]));
-                }
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-            
-            return result;
-        }
-    }
-    
-    class Room extends TreeElement{
-        private static final String sql =
-                "select day_id-1,bell_id-1 from shift_detail a inner join "+
-                "room b on a.shift_id=b.shift_id where b.id=%d;";
-        public Room(Values values) throws Exception{
-            id= values.getInteger("id");
-            label=values.getString("room_name");
-        }
-        @Override
-        public Values getFilter() {
-            Values result = new Values();
-            result.put("room_id", id);
-            return result;
-        }
-
-    @Override
-    public Set<Point> getAvalabelCells() {
-        Set<Point> result = new HashSet<>();
-            Point p;
-            Object[] r;
-            try{
-                Recordset recordset = DataModule.getRecordet(String.format(sql,id));
-                for (int i=0;i<recordset.size();i++){
-                    r=recordset.get(i);
-                    result.add(new Point((Integer)r[0],(Integer)r[1]));
-                }
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-        return result;
-    }
-        
-    }
-
-abstract class ScheduleTree extends JTree{
-    DefaultMutableTreeNode departNodes , teacherNodes, roomNodes;
-    TreeElement selectedElement = null;
-    
-    public ScheduleTree(){
-        clear();
-        addTreeSelectionListener(new TreeSelectionListener() {
-
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode)getLastSelectedPathComponent();
-                if (node!=null){
-                    Object userObject = node.getUserObject();
-                    if (userObject!=null){
-                        if (userObject instanceof TreeElement){
-                            selectedElement  = (TreeElement)userObject;
-                            ElementChange();
-                        }
-                    }
-                }
-            }
-        });
-        
-    }
-    
-    public void clear(){
-        selectedElement = null;
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Расписания");
-        departNodes = new DefaultMutableTreeNode("Классы");
-        teacherNodes = new DefaultMutableTreeNode("Преподаватели");
-        roomNodes = new DefaultMutableTreeNode("Помещения");
-        root.add(departNodes);
-        root.add(teacherNodes);
-        root.add(roomNodes);
-        setModel(new DefaultTreeModel(root));
-    }
-    
-    public abstract void ElementChange();
-   
-        
-    
-    
-    public void open() throws Exception{
-        
-        DefaultMutableTreeNode node;
-        Dataset dataset ;
-        dataset = DataModule.getSQLDataset("select id,label from depart order by skill_id");
-        dataset.open();
-        for (int i=0;i<dataset.getRowCount();i++){
-            node = new DefaultMutableTreeNode(new Depart(dataset.getValues(i)));
-            departNodes.add(node);
-        }
-        
-        dataset = DataModule.getSQLDataset(
-                "select id,last_name || ' ' || substr(first_name,1,1)||'.'|| substr(patronymic,1,1)||'.' as teacher_name "
-              + "from teacher order by teacher_name");
-        dataset.open();
-        for (int i=0;i<dataset.getRowCount();i++){
-            node = new DefaultMutableTreeNode(new Teacher(dataset.getValues(i)));
-            teacherNodes.add(node);
-        }
-        
-        dataset = DataModule.getSQLDataset("select id,room_name from room order by room_name");
-        dataset.open();
-        for (int i=0;i<dataset.getRowCount();i++){
-            node = new DefaultMutableTreeNode(new Room(dataset.getValues(i)));
-            roomNodes.add(node);
-        }
-        
-    }
-}
-
 
 public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,CommandListener{
     ScheduleTree tree;
@@ -277,18 +103,42 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
     Grid unplacedGrid;
     JTextArea hintPane;
     
-//    Integer depart_id = null,
-//            teacher_id = null,
-//            room_id = null;
+    Integer depart_id = null,
+            teacher_id = null,
+            room_id = null;
+    
+    class ScheduleTree extends AbstractScheduleTree{
+
+        @Override
+        public void ElementChange(TreeElement element) {
+            depart_id  = null;
+            teacher_id = null;
+            room_id    = null;
+            if (element!=null){
+                if (element instanceof Depart){
+                    depart_id=element.id;
+                } else if (element instanceof Teacher){
+                    teacher_id=element.id;
+                } else if (element instanceof Room){
+                    room_id = element.id;
+                }
+            
+                try{
+                    grid.avalableCells = new HashSet(element.getAvalabelCells());
+                    grid.SetFilter(element.getFilter());
+                    unplacedGrid.setFilter(element.getFilter());
+                } catch (Exception e){
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                }
+            } else {
+            }
+            TimeGridPanel2.this.manager.updateActionList();
+        }
+    }
+    
     
     public void initComponents(){
-        tree = new ScheduleTree(){
-
-            @Override
-            public void ElementChange() {
-                treeElementChange(selectedElement);
-            }
-        };
+        tree = new ScheduleTree();
         grid = new TimeTableGrid(){
 
             @Override
@@ -695,24 +545,24 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
             }
         }
         
-        
-        
         return result;
         
     }
     
-    public void treeElementChange(TreeElement element){
-//        System.out.println(element.getFilter());
-        try{
-            grid.avalableCells = new HashSet(element.getAvalabelCells());
-//            System.out.println(element.getAvalabelCells());
-            grid.SetFilter(element.getFilter());
-            unplacedGrid.setFilter(element.getFilter());
-            manager.updateActionList();
-        } catch (Exception e){
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }
-    }
+//    public void treeElementChange(TreeElement element){
+//        if (element!=null)
+//            if (element instanceof Depart){
+//                depart_id=element.id;
+//            }
+//            try{
+//                grid.avalableCells = new HashSet(element.getAvalabelCells());
+//                grid.SetFilter(element.getFilter());
+//                unplacedGrid.setFilter(element.getFilter());
+//            } catch (Exception e){
+//                JOptionPane.showMessageDialog(this, e.getMessage());
+//            }
+//        manager.updateActionList();
+//    }
     
     @Override
     public void open() throws Exception{
@@ -798,7 +648,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
         boolean b;
         switch (command){
             case TT_SCH_STATE:
-//                a.setEnabled(depart_id!=null);
+                a.setEnabled(depart_id!=null);
                 break;
             case TT_DELETE:
                 a.setEnabled(!grid.getSelectedElements().isEmpty());

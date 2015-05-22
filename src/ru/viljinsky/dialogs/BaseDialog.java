@@ -16,6 +16,8 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.im.InputContext;
+import java.util.Locale;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -34,6 +36,8 @@ public abstract class BaseDialog extends JDialog implements ActionListener,IAppE
     public static int RESULT_OK = 1;
     public static int RESULT_CANCEL = 2;
     public static int RESULT_IGNORE = 3;
+    
+    static Locale ru = new Locale("ru","RU");
     
     public int modalResult = RESULT_NONE;
     
@@ -66,6 +70,10 @@ public abstract class BaseDialog extends JDialog implements ActionListener,IAppE
     }
     
     public BaseDialog(){
+        InputContext iCon = getInputContext();
+        if(iCon.selectInputMethod(ru)){
+            System.out.println("Locale OK");
+        }
         setModal(true);
         Container content = getContentPane();
         content.setLayout(new BorderLayout());

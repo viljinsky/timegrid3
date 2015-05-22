@@ -187,7 +187,8 @@ create table curriculum_detail(
     group_type_id integer not null default 0 references group_type(id),
     group_sequence_id integer default 0 references group_sequence(id),
     is_stream boolean default false,
-    constraint pk_cur_det primary key (curriculum_id,skill_id,subject_id)    
+    constraint pk_cur_det primary key (curriculum_id,skill_id,subject_id),
+    constraint check_hour check (hour_per_week>=hour_per_day)    
 );
 
 
