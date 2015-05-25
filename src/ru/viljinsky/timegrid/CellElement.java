@@ -16,18 +16,33 @@ import java.awt.Rectangle;
  */
 public class CellElement {
     int col=1;
+
+    public int getCol() {
+        return col;
+    }
+
+    public int getRow() {
+        return row;
+    }
     int row=1;
     boolean moveble = true;
     protected boolean selected = false;
     Rectangle bound = null;
     public static Integer WIDTH = 100;
     public static Integer HEIGHT = 85;
-    Color color = Color.MAGENTA;// ; new Color(255, 255, 200);
+//    Color color = Color.MAGENTA;// ; new Color(255, 255, 200);
+    Color color = Color.GRAY;
+    
+    public void setSelected(Boolean value){
+        selected=value;
+    }
 
     public void setCell(Cell cell){
         col=cell.col;
         row = cell.row;
     }
+    
+    
     
     public void draw(Graphics g, Rectangle b) {
         g.setColor(color);

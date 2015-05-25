@@ -14,12 +14,14 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JOptionPane;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
+import ru.viljinsky.sqlite.Recordset;
 import ru.viljinsky.sqlite.Values;
 
 /**
@@ -31,10 +33,14 @@ public class TimeTableGrid extends TimeGrid {
     protected int StartCol;
     Dataset dataset = null;
     Values filter = null;
+    /** Доступные ячейки */
     public Set<Point> avalableCells = null;
-    public Map<Integer,String> colCaption = null;
-    public Map<Integer,String> rowCaption = null;
+    /** Ячейки незаполненные групами*/
     public List<Point> emptyCells = new ArrayList<>();
+    /** Заголовки колонок - дни */
+    public Map<Integer,String> colCaption = null;
+    /** Заголовки строк - часы  */
+    public Map<Integer,String> rowCaption = null;
 
     
     
@@ -88,17 +94,23 @@ public class TimeTableGrid extends TimeGrid {
 
     public void SetFilter(Values filter) throws Exception {
         this.filter = filter;
-        reload();
+        if (filter!=null)
+            reload();
+        else{
+            avalableCells.clear();
+            emptyCells.clear();
+            cells.clear();
+            realign();
+        } 
+            
     }
 
     public void reload() throws Exception {
         emptyCells.clear();
+        cells.clear();
                 
-        dataset = DataModule.getSQLDataset("select * from v_schedule");
-        dataset.setFilter(filter);
-        dataset.open();
-//        for ()
-        super.clear();
+        dataset = DataModule.getSQLDataset("select * from v_schedule order by depart_id,group_id");
+        dataset.open(filter);
         Values values;
         TimeTableGroup ttGroup;
         for (int i = 0; i < dataset.getRowCount(); i++) {
@@ -117,9 +129,6 @@ public class TimeTableGrid extends TimeGrid {
         realign();
     }
 
-    //        @Override
-    //        public void cellElementClick(CellElement ce) {
-    //        }
     @Override
     public void startDrag(int col, int row) throws Exception {
         super.startDrag(col, row);
@@ -288,8 +297,6 @@ public class TimeTableGrid extends TimeGrid {
             DataModule.rollback();
             throw new Exception("TIME_TABLE_GRID_INSERT_ERROR\n"+e.getMessage());
         }
-        
-        
     }
 
     @Override
@@ -317,7 +324,6 @@ public class TimeTableGrid extends TimeGrid {
                 }
             }
             DataModule.commit();
-//            super.clear();
             realign();
         } catch (Exception e){
             DataModule.rollback();
@@ -340,6 +346,32 @@ public class TimeTableGrid extends TimeGrid {
     public void afterDataChange(int dCol, int dRow) {
     }
     
+    
+    public void setVisibleCell(int col,int row){
+        Rectangle r = getBound(col, row);
+//        System.out.println(String.format("%d %d %d %d",r.x,r.y,r.width,r.height));
+        scrollRectToVisible(r);        
+    }
+    public void setSelectedGroup(Values values){
+        TimeTableGroup group;
+        int day_id,bell_id,depart_id,subject_id,group_id;
+        try{
+            day_id=values.getInteger("day_id");
+            bell_id=values.getInteger("bell_id");
+            depart_id=values.getInteger("depart_id");
+            subject_id=values.getInteger("subject_id");
+            group_id=values.getInteger("group_id");
+            for (CellElement ce:cells){
+                group=(TimeTableGroup)ce;
+                group.setSelected(group.day_no==day_id && group.bell_id==bell_id && group.depart_id==depart_id && subject_id==subject_id && group.group_id==group_id);
+            }
+            setVisibleCell(day_id-1, bell_id-1);
+            
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    
     public void selectValues(Values values){
         TimeTableGroup group;
         try{
@@ -353,6 +385,27 @@ public class TimeTableGrid extends TimeGrid {
         } catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public void open() throws Exception{
+        
+        Map<Integer,String> columnHeaderCaption = new HashMap<>();
+        Recordset recordset = DataModule.getRecordet("select day_no,day_caption from day_list");
+        Object[] r;
+        for (int i=0;i<recordset.size();i++){
+            r=recordset.get(i);
+            columnHeaderCaption.put(i,(String)r[1]);
+        }
+        colCaption = columnHeaderCaption;
+        
+        Map<Integer,String> rowHeaderCaption = new HashMap<>();
+        recordset=DataModule.getRecordet("select bell_id,time_start || '\n' || time_end from bell_list");
+        for (int i=0;i<recordset.size();i++){
+            r=recordset.get(i);
+            rowHeaderCaption.put(i, (String)r[1]);
+        }
+        rowCaption = rowHeaderCaption;
+        
     }
     
 }

@@ -137,7 +137,7 @@ interface ITimeGridColor{
 //    public static final Color GC_TIME_GRID_CELL_COLOR = new Color(255,250,250);
 }
 
-abstract class AbstractTimeGrid extends JPanel {
+public abstract class AbstractTimeGrid extends JPanel {
     Set<DragObject> dragObjects = null;
     protected Cells cells;
     int colCount = 7;
@@ -484,7 +484,8 @@ abstract class AbstractTimeGrid extends JPanel {
     }
 
     public  Color getCellBackground(int col,int row){
-        return Color.ORANGE;
+//        return Color.ORANGE;
+        return Color.LIGHT_GRAY;
     }
     
     public void drawCell(Graphics g, int col, int row) {

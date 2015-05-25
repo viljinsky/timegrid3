@@ -6,6 +6,8 @@
 
 package ru.viljinsky.forms;
 
+import ru.viljinsky.timetree.TreeElement;
+import ru.viljinsky.timetree.AbstractScheduleTree;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -14,10 +16,8 @@ import java.awt.Point;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -28,11 +28,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
-import javax.swing.JTree;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.Grid;
@@ -111,26 +106,26 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
 
         @Override
         public void ElementChange(TreeElement element) {
-            depart_id  = null;
-            teacher_id = null;
-            room_id    = null;
-            if (element!=null){
-                if (element instanceof Depart){
-                    depart_id=element.id;
-                } else if (element instanceof Teacher){
-                    teacher_id=element.id;
-                } else if (element instanceof Room){
-                    room_id = element.id;
-                }
-            
-                try{
+            Values filter = null;
+            try{
+                if (element!=null){
+                    filter = element.getFilter();
+                    depart_id = filter.containsKey("depart_id")?filter.getInteger("depart_id"):null;
+                    teacher_id = filter.containsKey("teacher_id")?filter.getInteger("teacher_id"):null;
+                    room_id = filter.containsKey("room_id")?filter.getInteger("room_id"):null;
+
                     grid.avalableCells = new HashSet(element.getAvalabelCells());
-                    grid.SetFilter(element.getFilter());
-                    unplacedGrid.setFilter(element.getFilter());
-                } catch (Exception e){
-                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    grid.SetFilter(filter);
+                    unplacedGrid.setFilter(filter);
+                } else {
+                    grid.SetFilter(null);
+                    depart_id  = null;
+                    teacher_id = null;
+                    room_id    = null;
+                    unplacedGrid.close();
                 }
-            } else {
+            } catch (Exception e){
+                JOptionPane.showMessageDialog(this, e.getMessage());
             }
             TimeGridPanel2.this.manager.updateActionList();
         }
@@ -277,6 +272,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
 
     CommandMngr manager = new CommandMngr();
     
+    @Override
     public void doCommand(String command){
         try{
             switch (command){
@@ -349,20 +345,20 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
         hintPane.append("----------------------\n");
 
         try{
-        Dataset dataset = DataModule.getSQLDataset(String.format("select * from v_schedule where day_id=%d and bell_id=%d  and ((teacher_id=%d) or (room_id=%d))",pos.x,pos.y,group.teacher_id,group.room_id));
-        dataset.open();
-        Values values;
-        for (int i=0;i<dataset.size();i++){
-            values = dataset.getValues(i);
-            hintPane.append(values.getString("depart_label")+" " +values.getString("group_label")+ " "+ values.getString("teacher")+ " "+values.getString("room")+"\n" );
-        }
+            Dataset dataset = DataModule.getSQLDataset(String.format("select * from v_schedule where day_id=%d and bell_id=%d  and ((teacher_id=%d) or (room_id=%d))",pos.x,pos.y,group.teacher_id,group.room_id));
+            dataset.open();
+            Values values;
+            for (int i=0;i<dataset.size();i++){
+                values = dataset.getValues(i);
+                hintPane.append(values.getString("depart_label")+" " +values.getString("group_label")+ " "+ values.getString("teacher")+ " "+values.getString("room")+"\n" );
+            }
         } catch (Exception e){
+            
         }
         
         System.out.println("----------------------");
         
     }
-    
     
     /**
      * Нужно определить допустимое количество занятий в день по указанному предмету
@@ -509,7 +505,6 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
                         .replace("%group_type_a", "1")
                         .replace("%group_type_b", "2")
                         ;
-//                System.out.println(sql);
                 break;
             default:
                 throw new Exception ("UNKNOW_GROUP_TYPE");
@@ -520,7 +515,6 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
         for (int i=0;i<recordset.size();i++){
             r = recordset.get(i);
             p= new Point((Integer)r[0]-1,(Integer)r[1]-1);
-//            System.out.println(p);
             if (avalableDays.contains(p.x+1))
                 emptyCells.add(p);
         }
@@ -549,20 +543,6 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
         
     }
     
-//    public void treeElementChange(TreeElement element){
-//        if (element!=null)
-//            if (element instanceof Depart){
-//                depart_id=element.id;
-//            }
-//            try{
-//                grid.avalableCells = new HashSet(element.getAvalabelCells());
-//                grid.SetFilter(element.getFilter());
-//                unplacedGrid.setFilter(element.getFilter());
-//            } catch (Exception e){
-//                JOptionPane.showMessageDialog(this, e.getMessage());
-//            }
-//        manager.updateActionList();
-//    }
     
     @Override
     public void open() throws Exception{
@@ -577,25 +557,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
                    + " inner join subject c on c.id=a.subject_id"
         );
         unplacedGrid.setDataset(dataset);
-        
-        Map<Integer,String> columnHeaderCaption = new HashMap<>();
-        Recordset recordset = DataModule.getRecordet("select day_no,day_caption from day_list");
-        Object[] r;
-        for (int i=0;i<recordset.size();i++){
-            r=recordset.get(i);
-            columnHeaderCaption.put(i,(String)r[1]);
-        }
-        grid.colCaption = columnHeaderCaption;
-        
-        Map<Integer,String> rowHeaderCaption = new HashMap<>();
-        recordset=DataModule.getRecordet("select bell_id,time_start || '\n' || time_end from bell_list");
-        for (int i=0;i<recordset.size();i++){
-            r=recordset.get(i);
-            rowHeaderCaption.put(i, (String)r[1]);
-        }
-        
-        grid.rowCaption = rowHeaderCaption;
-        
+        grid.open();
     }
   
     @Override
@@ -614,6 +576,27 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
         unplacedGrid.getDataset().close();
         grid.close();
         
+    }
+
+    @Override
+    public void updateAction(Action a) {
+        String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
+        boolean b;
+        switch (command){
+            case TT_SCH_STATE:
+                a.setEnabled(depart_id!=null);
+                break;
+            case TT_DELETE:
+                a.setEnabled(!grid.getSelectedElements().isEmpty());
+                break;
+            case TT_PLACE:
+                try{
+                Values v=unplacedGrid.getValues();
+                b= (v!=null && (v.getInteger("unplaced")>0));
+                a.setEnabled(b);
+                } catch (Exception e){}
+                break;
+        }
     }
 
     public static void main(String[] args) throws Exception{
@@ -641,25 +624,5 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
         });
         
     }    
-
-    @Override
-    public void updateAction(Action a) {
-        String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
-        boolean b;
-        switch (command){
-            case TT_SCH_STATE:
-                a.setEnabled(depart_id!=null);
-                break;
-            case TT_DELETE:
-                a.setEnabled(!grid.getSelectedElements().isEmpty());
-                break;
-            case TT_PLACE:
-                try{
-                Values v=unplacedGrid.getValues();
-                b= (v!=null && (v.getInteger("unplaced")>0));
-                a.setEnabled(b);
-                } catch (Exception e){}
-                break;
-        }
-    }
+    
 }

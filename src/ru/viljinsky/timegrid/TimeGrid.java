@@ -30,19 +30,19 @@ import javax.swing.JScrollPane;
  * @author вадик
  */
 
-interface ITimeGrid{
-    public void setRowCount(Integer rowCount);
-    public void setColCount(Integer colCount);
-    
-    public void elementClick(CellElement element);
-    public void elementStartMove(CellElement element);
-    public void elementStopMove(CellElement element);
-    
-    public void cellClick(int col,int row);
-    public void columnHeaderClick(int col);
-    public void rowHeaderClick(int row);
-    public void mouseOverCell(Cell cell);
-}
+//interface ITimeGrid{
+//    public void setRowCount(Integer rowCount);
+//    public void setColCount(Integer colCount);
+//    
+//    public void elementClick(CellElement element);
+//    public void elementStartMove(CellElement element);
+//    public void elementStopMove(CellElement element);
+//    
+//    public void cellClick(int col,int row);
+//    public void columnHeaderClick(int col);
+//    public void rowHeaderClick(int row);
+//    public void mouseOverCell(Cell cell);
+//}
 
 abstract class TimeGridHeader extends JPanel{
     public static int HOR_HEIGHT = 30;

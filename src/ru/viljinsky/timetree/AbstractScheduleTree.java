@@ -1,10 +1,7 @@
-package ru.viljinsky.forms;
+package ru.viljinsky.timetree;
 
-import java.awt.Point;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -12,134 +9,15 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
-import ru.viljinsky.sqlite.Recordset;
 import ru.viljinsky.sqlite.Values;
 
-/**
- *
- * @author вадик
- */
-
-abstract class TreeElement{
-    int id;
-    String label;
-    @Override
-    public String toString(){
-        return label;
-    }
-
-    public abstract Values getFilter();
-    public abstract Set<Point> getAvalabelCells();
-}
     
 
-    class Depart extends TreeElement{
-        public static final String sql = 
-                "select day_id-1,bell_id-1 from shift_detail a inner join "+
-                "depart b on a.shift_id=b.shift_id where b.id=%d;";
     
-        public Depart(Values values) throws Exception{
-            id = values.getInteger("id");
-            label = values.getString("label");
-        }
-
-        @Override
-        public Values getFilter() {
-            Values result = new Values();
-            result.put("depart_id", id);
-            return result;
-        }
-
-        @Override
-        public Set<Point> getAvalabelCells() {
-            Set<Point> result = new HashSet<>();
-            Object[] p;
-            try{
-                Recordset resordset = DataModule.getRecordet(String.format(sql, id));
-
-                for (int i=0;i<resordset.size();i++){
-                    p=resordset.get(i);
-                    result.add(new Point((Integer)p[0],(Integer)p[1]));
-                }
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-            return result;
-        }
-        
-    }
     
-    class Teacher extends TreeElement{
-        public static final String sql = 
-                "select day_id-1,bell_id-1 from shift_detail a inner join "+
-                "teacher b on a.shift_id=b.shift_id where b.id=%d;";
-                
-        public Teacher(Values values) throws Exception{
-            id = values.getInteger("id");
-            label = values.getString("teacher_name");
-        }
-        @Override
-        public Values getFilter() {
-            Values result = new Values();
-            result.put("teacher_id", id);
-            return result;
-        }
-
-        @Override
-        public Set<Point> getAvalabelCells() {
-            Set<Point> result = new HashSet<>();
-            Point p;
-            Object[] r;
-            try{
-                Recordset recordset = DataModule.getRecordet(String.format(sql,id));
-                for (int i=0;i<recordset.size();i++){
-                    r=recordset.get(i);
-                    result.add(new Point((Integer)r[0],(Integer)r[1]));
-                }
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-            
-            return result;
-        }
-    }
-    
-    class Room extends TreeElement{
-        private static final String sql =
-                "select day_id-1,bell_id-1 from shift_detail a inner join "+
-                "room b on a.shift_id=b.shift_id where b.id=%d;";
-        public Room(Values values) throws Exception{
-            id= values.getInteger("id");
-            label=values.getString("room_name");
-        }
-        @Override
-        public Values getFilter() {
-            Values result = new Values();
-            result.put("room_id", id);
-            return result;
-        }
-
-    @Override
-    public Set<Point> getAvalabelCells() {
-        Set<Point> result = new HashSet<>();
-            Point p;
-            Object[] r;
-            try{
-                Recordset recordset = DataModule.getRecordet(String.format(sql,id));
-                for (int i=0;i<recordset.size();i++){
-                    r=recordset.get(i);
-                    result.add(new Point((Integer)r[0],(Integer)r[1]));
-                }
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-        return result;
-    }
-        
-    }
         
 
-abstract class AbstractScheduleTree extends JTree{
+public abstract class AbstractScheduleTree extends JTree{
     DefaultMutableTreeNode departNodes , teacherNodes, roomNodes;
     TreeElement selectedElement = null;
     
