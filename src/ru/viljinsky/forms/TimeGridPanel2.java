@@ -32,6 +32,7 @@ import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.Grid;
 import ru.viljinsky.sqlite.IDataset;
+import ru.viljinsky.sqlite.Recordset;
 import ru.viljinsky.sqlite.Values;
 import ru.viljinsky.timegrid.CellElement;
 import ru.viljinsky.timegrid.TimeTableGrid;
@@ -351,6 +352,9 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
                     break;
                 case TT_SCH_STATE:
                     Dialogs.scheduleState(TimeGridPanel2.this,depart_id);
+                    Recordset r = DataModule.getRecordet("select schedule_state_id from depart where id ="+depart_id);
+                    for (CellElement ce :grid.getCells())
+                        ((TimeTableGroup)ce).schedule_state_id=r.getInteger(0);
                     
                     break;
             }

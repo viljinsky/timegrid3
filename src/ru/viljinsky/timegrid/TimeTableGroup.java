@@ -35,7 +35,7 @@ public class TimeTableGroup extends CellElement {
     String depart_label;
     Color color= Color.CYAN;
     Boolean ready;
-    Integer schedule_state_id;
+    public Integer schedule_state_id;
     
     Rectangle checkState=null;
     Rectangle checkReady = null;

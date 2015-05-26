@@ -412,13 +412,14 @@ public class TimeTableGrid extends TimeGrid {
     public void selectValues(Values values){
         TimeTableGroup group;
         try{
-        for (CellElement ce:cells){
-            group =(TimeTableGroup)ce;
-            group.selected=(group.depart_id.equals(values.getInteger("depart_id")) 
-                    && group.subject_id.equals(values.getInteger("subject_id"))
-                    && group.group_id.equals(values.getInteger("group_id")));
-            
-        }
+            for (CellElement ce:cells){
+                group =(TimeTableGroup)ce;
+                group.selected=(group.depart_id.equals(values.getInteger("depart_id")) 
+                        && group.subject_id.equals(values.getInteger("subject_id"))
+                        && group.group_id.equals(values.getInteger("group_id")));
+
+            }
+            repaint();
         } catch (Exception e){
             e.printStackTrace();
         }

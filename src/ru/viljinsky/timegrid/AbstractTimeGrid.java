@@ -23,60 +23,6 @@ import java.util.Set;
 import javax.swing.JPanel;
 
 
-class Cells extends ArrayList<CellElement>{
-    public CellElement addElement(int col,int row){
-        CellElement element = new CellElement();
-        element.col=col;
-        element.row=row;
-        this.add(element);
-        return element;
-    }
-    
-    public int elementCount(int col,int row){
-        Integer result = 0;
-        for (CellElement ce:this){
-            if (ce.col==col && ce.row==row){
-                result+=1;
-            }
-        }
-        return result;
-    }
-
-    boolean isExists(int col, int row) {
-        for (CellElement ce :this)
-            if (ce.col==col && ce.row==row)
-                return true;
-        return false;
-    }
-
-    public Set<CellElement> getCells(int col,int row){
-        Set<CellElement> list = new HashSet<>();
-        for (CellElement ce:this){
-            if (ce.col==col && ce.row==row)
-                list.add(ce);
-        }
-        return list;
-    }
-
-    public Set<CellElement> getSelected(){
-        Set<CellElement> set = new HashSet<>();
-        for (CellElement ce:this)
-            if (ce.selected)
-                set.add(ce);
-        return set;
-    }
-    
-    
-    void setSelected(CellElement[] list) {
-        for (CellElement element:this){
-            element.selected = false;
-        }
-        for (CellElement ce:list){
-            ce.selected=true;
-        }
-    }
-    
-}
 
 class DragObject{
     Rectangle bound;
@@ -111,6 +57,10 @@ public abstract class AbstractTimeGrid extends JPanel {
     
     TimeGridHeader columnHeader;
     TimeGridHeader rowHeader;
+    
+    public Cells getCells(){
+        return cells;
+    }
 
     public int getSelectedRow() {
         return selectedRow;
