@@ -27,6 +27,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
@@ -93,14 +94,18 @@ class ScheuleState implements IScheduleState{
 
 
 public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,CommandListener{
-    ScheduleTree tree;
-    TimeTableGrid grid;
-    Grid unplacedGrid;
-    JTextArea hintPane;
+    ScheduleTree tree = new ScheduleTree();
+    ScheduleGrid grid = new ScheduleGrid();
+    Grid unplacedGrid = new UnplacedGrid();
+    JTextArea hintPane = new JTextArea();
+    JTabbedPane tabbedPane = new JTabbedPane();
+    Grid whoIsThere = new Grid();
+    Grid whoComeHere =new Grid();
     
     Integer depart_id = null,
             teacher_id = null,
             room_id = null;
+    
     
     class ScheduleTree extends AbstractScheduleTree{
 
@@ -131,11 +136,8 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
         }
     }
     
-    
-    public void initComponents(){
-        tree = new ScheduleTree();
-        grid = new TimeTableGrid(){
-
+    class ScheduleGrid extends TimeTableGrid{
+        
             @Override
             public void cellElementClick(CellElement ce) {
                 TimeTableGroup group = (TimeTableGroup)ce;
@@ -152,6 +154,14 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
             public void cellClick(int col, int row) {
                 super.cellClick(col, row);
                 emptyCells.clear();
+                try{    
+                Dataset dataset = DataModule.getSQLDataset("select * from v_schedule where day_id="+(Integer)(col+1)+" and bell_id="+(Integer)(row+1));
+                dataset.open();
+                whoIsThere.setDataset(dataset);
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+                
                 manager.updateActionList();
             }
 
@@ -186,9 +196,9 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
                 }
             }
             
-        };
-        
-        unplacedGrid = new Grid(){
+    }
+    
+    class UnplacedGrid extends Grid{
 
             @Override
             public void gridSelectionChange() {
@@ -206,19 +216,18 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
                     }
                 manager.updateActionList();
             }
-
-        };
-        
-        hintPane = new JTextArea();
-        
     }
+    
+    
+//    public void initComponents(){
+//    }
     
     public TimeGridPanel2(){
         JSplitPane  splitPane,
                     leftSplit,
                     rightSplit;
         
-        initComponents();
+//        initComponents();
         
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(800, 600));
@@ -241,9 +250,13 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
         leftSplit.setBottomComponent(new JScrollPane(unplacedGrid));
         leftSplit.setResizeWeight(0.5);
         
+        tabbedPane.addTab("Hint",new JScrollPane(hintPane));
+        tabbedPane.addTab("Who is there",new JScrollPane(whoIsThere));
+        tabbedPane.addTab("Who come here",new JScrollPane(whoComeHere));
+        
         // правый сплит размещает сетку и подсказки
         rightSplit.setTopComponent(gridScroll);
-        rightSplit.setBottomComponent(new JScrollPane(hintPane));
+        rightSplit.setBottomComponent(tabbedPane);//new JScrollPane(hintPane));
         rightSplit.setResizeWeight(0.9);
         
         splitPane.setDividerLocation(200);
