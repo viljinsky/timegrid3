@@ -110,7 +110,8 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
     class ScheduleTree extends AbstractScheduleTree{
 
         @Override
-        public void ElementChange(TreeElement element) {
+        public void ElementChange() {
+            TreeElement element = getSelectedElement();
             Values filter = null;
             try{
                 if (element!=null){

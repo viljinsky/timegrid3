@@ -33,6 +33,7 @@ public abstract class AbstractScheduleTree extends JTree{
 
             @Override
             public void valueChanged(TreeSelectionEvent e) {
+                TreeElement oldElement = selectedElement;
                 selectedElement = null;
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode)getLastSelectedPathComponent();
                 if (node!=null){
@@ -43,12 +44,16 @@ public abstract class AbstractScheduleTree extends JTree{
                         }
                     }
                 }
-                ElementChange(selectedElement);
+                if (oldElement!=selectedElement)
+                    ElementChange();
             }
         });
         
     }
     
+    public TreeElement getSelectedElement(){
+        return selectedElement;
+    }
             
     public void clear(){
         selectedElement = null;
@@ -62,7 +67,8 @@ public abstract class AbstractScheduleTree extends JTree{
         setModel(new DefaultTreeModel(root));
     }
     
-    public abstract void ElementChange(TreeElement element);
+//    public abstract void ElementChange(TreeElement element);
+    public abstract void ElementChange();
    
         
     

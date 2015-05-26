@@ -113,7 +113,6 @@ class Cells extends ArrayList<CellElement>{
             ce.selected=true;
         }
     }
-
     
 }
 
@@ -129,14 +128,6 @@ class DragObject{
     }
 }
 
-interface ITimeGridColor{
-    public static final Color GC_TIME_GRID_CELL_COLOR = Color.YELLOW;
-    public static final Color GC_TIME_GRID_HIGHLIGHT_CELL_COLOR = Color.ORANGE;
-    public static final Color GC_TIME_GRID_SELECTED_CELL_COLOR = Color.PINK;
-//    public static final Color GC_TIME_GRID_CELL_COLOR = new Color(255,250,250);
-//    public static final Color GC_TIME_GRID_CELL_COLOR = new Color(255,250,250);
-}
-
 public abstract class AbstractTimeGrid extends JPanel {
     Set<DragObject> dragObjects = null;
     protected Cells cells;
@@ -147,26 +138,6 @@ public abstract class AbstractTimeGrid extends JPanel {
     int selectedRow = -1;
     protected int width=300;
     protected int height=500;
-    
-    TimeGridHeader columnHeader;
-    TimeGridHeader rowHeader;
-
-    public int getSelectedRow() {
-        return selectedRow;
-    }
-
-//    public void setSelectedRow(int selectedRow) {
-//        this.selectedRow = selectedRow;
-//    }
-
-    public int getSelectedCol() {
-        return selectedCol;
-    }
-
-//    public void setSelectedCol(int selectedCol) {
-//        this.selectedCol = selectedCol;
-//    }
-    
     int selectedCol = -1;
     int shadowCol = -1;
     int shadowRow = -1;
@@ -175,6 +146,18 @@ public abstract class AbstractTimeGrid extends JPanel {
     boolean dragged = false;
     Cell overCell = null;
     
+    
+    TimeGridHeader columnHeader;
+    TimeGridHeader rowHeader;
+
+    public int getSelectedRow() {
+        return selectedRow;
+    }
+
+
+    public int getSelectedCol() {
+        return selectedCol;
+    }
     
     public AbstractTimeGrid() {
         cells = new Cells();
@@ -243,8 +226,6 @@ public abstract class AbstractTimeGrid extends JPanel {
                     dragged = false;
                     dragObjects = null;
                 }
-//                calcRowHeight();
-//                realign();
                 repaint();
             }
 
@@ -575,8 +556,5 @@ public abstract class AbstractTimeGrid extends JPanel {
     public abstract void columnHeaderClick(int col);
     
     public abstract void rowHeaderClick(int row);
-    
-    
-    
     
 }

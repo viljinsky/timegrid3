@@ -7,7 +7,6 @@
 package ru.viljinsky.timegrid;
 
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -30,19 +29,6 @@ import javax.swing.JScrollPane;
  * @author вадик
  */
 
-//interface ITimeGrid{
-//    public void setRowCount(Integer rowCount);
-//    public void setColCount(Integer colCount);
-//    
-//    public void elementClick(CellElement element);
-//    public void elementStartMove(CellElement element);
-//    public void elementStopMove(CellElement element);
-//    
-//    public void cellClick(int col,int row);
-//    public void columnHeaderClick(int col);
-//    public void rowHeaderClick(int row);
-//    public void mouseOverCell(Cell cell);
-//}
 
 abstract class TimeGridHeader extends JPanel{
     public static int HOR_HEIGHT = 30;
@@ -67,8 +53,6 @@ abstract class TimeGridHeader extends JPanel{
     public abstract void setPrefferedWidth(int width);
     public abstract void setPrefferedHeight(int height);
     
-    
-    
 };
 
 public class TimeGrid extends AbstractTimeGrid{
@@ -82,9 +66,6 @@ public class TimeGrid extends AbstractTimeGrid{
         rowHeader = new RowHeader();
         realign();
     }
-    
-
-    
     
     /**
      * Получение текста заголовка колонок
@@ -104,8 +85,6 @@ public class TimeGrid extends AbstractTimeGrid{
         return String.format("Row%d",row);
     }
     
-    
-    
     public JComponent getColumnHeader(){
         return columnHeader;
     }
@@ -113,7 +92,6 @@ public class TimeGrid extends AbstractTimeGrid{
     public JComponent getRowHeader(){
         return rowHeader;
     }
-
     
     class ColumnHeader extends TimeGridHeader{
         public ColumnHeader(){
@@ -132,6 +110,7 @@ public class TimeGrid extends AbstractTimeGrid{
             });
         }
         
+        @Override
         public void setPrefferedWidth(int width){
             setPreferredSize(new Dimension(width,HOR_HEIGHT));
         }

@@ -59,13 +59,11 @@ public class TimeTableGrid extends TimeGrid {
             g2.drawRect(b.x, b.y, b.width, b.height);
         }
     }
-    
-    
 
     @Override
     public String getRowHeaderText(int row) {
         if (rowCaption==null)
-            return super.getRowHeaderText(row); //To change body of generated methods, choose Tools | Templates.
+            return super.getRowHeaderText(row); 
         else
             return rowCaption.get(row);
     }
@@ -73,12 +71,10 @@ public class TimeTableGrid extends TimeGrid {
     @Override
     public String getColumnHeaderText(int col) {
         if (colCaption==null)
-            return super.getColumnHeaderText(col); //To change body of generated methods, choose Tools | Templates.
+            return super.getColumnHeaderText(col);
         else
             return colCaption.get(col);
     }
-    
-    
 
     public Dataset getDataset() {
         return dataset;
@@ -92,6 +88,13 @@ public class TimeTableGrid extends TimeGrid {
         super(col, row);
     }
 
+    /**
+     * Заполнение грида в соответсвии с фильтром
+     * стандартно в фильтре только одно из depart_id,teacher_id или room_id
+     * 
+     * @param filter если null - всё стёрто
+     * @throws Exception 
+     */
     public void SetFilter(Values filter) throws Exception {
         this.filter = filter;
         if (filter!=null)
