@@ -1,7 +1,10 @@
 package ru.viljinsky.timetree;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -49,6 +52,31 @@ public abstract class AbstractScheduleTree extends JTree{
             }
         });
         
+        addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                showPopup(e);
+                
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                showPopup(e);
+            }
+            
+            public void showPopup(MouseEvent e){
+                if (e.isPopupTrigger()){
+                    getPopupMenu().show(AbstractScheduleTree.this, e.getX(),e.getY());
+                }
+            }
+        });
+    }
+    
+    public JPopupMenu getPopupMenu(){
+        JPopupMenu result = new JPopupMenu();
+        result.add("cmd1");
+        return result;
     }
     
     public TreeElement getSelectedElement(){

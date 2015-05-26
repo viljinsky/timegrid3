@@ -35,8 +35,18 @@ public class TimeTableGroup extends CellElement {
     String depart_label;
     Color color= Color.CYAN;
     Boolean ready;
+    Integer schedule_state_id;
     
-    Rectangle checkRectState=null;
+    Rectangle checkState=null;
+    Rectangle checkReady = null;
+    
+    public Boolean isRedy(){
+        return ready;
+    }
+    
+    public Boolean isUsed(){
+        return schedule_state_id==4;
+    }
 
     @Override
     public void draw(Graphics g, Rectangle b) {
@@ -63,26 +73,29 @@ public class TimeTableGroup extends CellElement {
             g.drawString((week_id==1?"I нед.":"II нед."), x+50, y);
         }
         
-//        g.setColor(Color.WHITE);
-//        g.fillRect(b.x+b.width-10, b.y, 10, 10);
-        if (ready){
+        // ready
+        checkReady = new Rectangle(b.x+b.width-10,b.y,10,10);
+        if (ready)
             g.setColor(color.YELLOW);
-            g.fillRect(b.x+b.width-10, b.y, 10, 10);
-            g.setColor(Color.BLACK);
-            g.drawRect(b.x+b.width-10, b.y, 10, 10);
-        }
+        else
+            g.setColor(color.WHITE);
+        
+        g.fillRect(checkReady.x,checkReady.y, checkReady.width, checkReady.height);
+        
+        
+        g.setColor(Color.BLACK);
+        g.drawRect(checkReady.x,checkReady.y, checkReady.width, checkReady.height);
+        
         // checked
-        checkRectState = new Rectangle(b.x+b.width-20, b.y, 10, 10);
-        if (checked)
+        checkState = new Rectangle(b.x+b.width-20, b.y, 10, 10);
+        if (schedule_state_id==4)
             g.setColor(Color.GREEN);
         else
             g.setColor(Color.WHITE);
-//        g.fillRect(b.x+b.width-20, b.y, 10, 10);
-        g.fillRect(checkRectState.x, checkRectState.y, checkRectState.width, checkRectState.height);
+        g.fillRect(checkState.x, checkState.y, checkState.width, checkState.height);
         
         g.setColor(Color.BLACK);
-//        g.drawRect(b.x+b.width-20, b.y, 10, 10);
-        g.drawRect(checkRectState.x, checkRectState.y, checkRectState.width, checkRectState.height);
+        g.drawRect(checkState.x, checkState.y, checkState.width, checkState.height);
     }
 
     public Values getValues(){
@@ -116,6 +129,7 @@ public class TimeTableGroup extends CellElement {
             teacher_id = values.getInteger("teacher_id");
             room_id = values.getInteger("room_id");
             group_type_id=values.getInteger("group_type_id");
+            schedule_state_id = values.getInteger("schedule_state_id");
             
             String color_rgb = values.getString("color");
             if (color_rgb!=null){
@@ -140,18 +154,34 @@ public class TimeTableGroup extends CellElement {
         if (!super.hitTest(x, y))
             return false;
         
-        if (checkRectState!=null && checkRectState.contains(x, y)){
+        if (checkReady!=null && checkReady.contains(x, y)){
+            readyClick(this);
+            return false;
+        }
+        
+        if (checkState!=null && checkState.contains(x, y)){
             checkClick(this);
             return false;
         }
+        
+        
         return true;
         
     }
     /**
      * Клик по чекбоксу
+     * @param group
      */     
     public void checkClick(TimeTableGroup group){
         System.out.println("CheckRectangle CLICK!!");        
+    }
+    
+    /**
+     * Клик по чекбоксу Ready
+     * @param group
+     */
+    public void readyClick(TimeTableGroup group){
+        System.out.println("READY CLICK!!!!");
     }
     
     

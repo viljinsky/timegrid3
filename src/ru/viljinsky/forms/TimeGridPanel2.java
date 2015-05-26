@@ -15,7 +15,6 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +32,6 @@ import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.Grid;
 import ru.viljinsky.sqlite.IDataset;
-import ru.viljinsky.sqlite.Recordset;
 import ru.viljinsky.sqlite.Values;
 import ru.viljinsky.timegrid.CellElement;
 import ru.viljinsky.timegrid.TimeTableGrid;
@@ -49,6 +47,7 @@ interface IScheduleState{
     public static final String STATE_WORK  = "STATE_WORK";
     public static final String STATE_ERROR = "STATE_ERROR";
     public static final String STATE_READY = "STATE_READY";
+    public static final String STATE_USED  = "STATE_USED";
 }
 
 class ScheuleState implements IScheduleState{
@@ -57,7 +56,9 @@ class ScheuleState implements IScheduleState{
             STATE_NEW,
             STATE_WORK,
             STATE_ERROR,
-            STATE_READY};
+            STATE_READY,
+            STATE_USED
+        };
     }
       
 
@@ -71,8 +72,10 @@ class ScheuleState implements IScheduleState{
                 return 2;
             case STATE_READY:
                 return 3;
-                default:
-            return null;
+            case STATE_USED:
+                return 4;
+            default:
+                return null;
         }
     };
     
@@ -86,8 +89,10 @@ class ScheuleState implements IScheduleState{
                 return "Ошибки в расписании";
             case STATE_READY:
                 return "Готово";
-                default:
-            return "???";
+            case STATE_USED:
+                return "Действует";
+            default:
+                return "???";
         }
     }
 }
@@ -138,64 +143,71 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
     }
     
     class ScheduleGrid extends TimeTableGrid{
+
+        @Override
+        public boolean allowStartDrag(CellElement element) {
+            TimeTableGroup group = (TimeTableGroup)element;
+            return (!group.isRedy() && !group.isUsed());
+            
+        }
         
-            @Override
-            public void cellElementClick(CellElement ce) {
-                TimeTableGroup group = (TimeTableGroup)ce;
-                Values values = group.getValues();
-                try{
-                    emptyCells=getEmptyDepartCells(values);
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
+        @Override
+        public void cellElementClick(CellElement ce) {
+            TimeTableGroup group = (TimeTableGroup)ce;
+            Values values = group.getValues();
+            try{
+                emptyCells=getEmptyDepartCells(values);
+            } catch (Exception e){
+                e.printStackTrace();
             }
+        }
 
 
-            @Override
-            public void cellClick(int col, int row) {
-                super.cellClick(col, row);
-                emptyCells.clear();
-                try{    
-                Dataset dataset = DataModule.getSQLDataset("select * from v_schedule where day_id="+(Integer)(col+1)+" and bell_id="+(Integer)(row+1));
-                dataset.open();
-                whoIsThere.setDataset(dataset);
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
-                
-                manager.updateActionList();
+        @Override
+        public void cellClick(int col, int row) {
+            super.cellClick(col, row);
+            emptyCells.clear();
+            try{    
+            Dataset dataset = DataModule.getSQLDataset("select * from v_schedule where day_id="+(Integer)(col+1)+" and bell_id="+(Integer)(row+1));
+            dataset.open();
+            whoIsThere.setDataset(dataset);
+            } catch (Exception e){
+                e.printStackTrace();
             }
 
-            @Override
-            public void columnHeaderClick(int col) {
-                super.columnHeaderClick(col);
-                manager.updateActionList();
-            }
+            manager.updateActionList();
+        }
 
-            @Override
-            public void rowHeaderClick(int row) {
-                super.rowHeaderClick(row);
-                manager.updateActionList();
-            }
+        @Override
+        public void columnHeaderClick(int col) {
+            super.columnHeaderClick(col);
+            manager.updateActionList();
+        }
 
-            @Override
-            public void stopDrag(int col, int row) throws Exception {
-                waitCursor(true);
-                try{
-                    super.stopDrag(col, row);
-                } catch (Exception e){
-                    Set<CellElement> set = getSelectedElements();
-                    TimeTableGroup group = null;
-                    for (CellElement ce:set){
-                         group = (TimeTableGroup)ce;
-                         analizCell(group, new Point(col+1,row+1));
-                         break;
-                    }        
-                    JOptionPane.showMessageDialog(this,"Тут подсказка\n"+e.getMessage());                    
-                } finally {
-                    waitCursor(false);
-                }
+        @Override
+        public void rowHeaderClick(int row) {
+            super.rowHeaderClick(row);
+            manager.updateActionList();
+        }
+
+        @Override
+        public void stopDrag(int col, int row) throws Exception {
+            waitCursor(true);
+            try{
+                super.stopDrag(col, row);
+            } catch (Exception e){
+                Set<CellElement> set = getSelectedElements();
+                TimeTableGroup group = null;
+                for (CellElement ce:set){
+                     group = (TimeTableGroup)ce;
+                     analizCell(group, new Point(col+1,row+1));
+                     break;
+                }        
+                JOptionPane.showMessageDialog(this,"Тут подсказка\n"+e.getMessage());                    
+            } finally {
+                waitCursor(false);
             }
+        }
             
     }
     
@@ -210,7 +222,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
                         if (values.getInteger("unplaced")==0)
                             grid.emptyCells.clear();
                         else                                    
-                            grid.emptyCells = getEmptyDepartCells(values);
+                            grid.emptyCells = grid.getEmptyDepartCells(values);
                         grid.repaint();
                     } catch (Exception e){
                         e.printStackTrace();
@@ -220,15 +232,10 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
     }
     
     
-//    public void initComponents(){
-//    }
-    
     public TimeGridPanel2(){
         JSplitPane  splitPane,
                     leftSplit,
                     rightSplit;
-        
-//        initComponents();
         
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(800, 600));
@@ -302,7 +309,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
                         count = values.getInteger("unplaced");
                         unplaced +=count;
                         for (int n=0;n<count;n++){
-                            L1 = getEmptyDepartCells(values);
+                            L1 = grid.getEmptyDepartCells(values);
                             if (L1.isEmpty())
                                 break;
                             grid.emptyCells=L1;
@@ -343,7 +350,8 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
                     unplacedGrid.close();
                     break;
                 case TT_SCH_STATE:
-                    Dialogs.scheduleState(TimeGridPanel2.this,null);
+                    Dialogs.scheduleState(TimeGridPanel2.this,depart_id);
+                    
                     break;
             }
         } catch (Exception e){
@@ -371,189 +379,6 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
         }
         
         System.out.println("----------------------");
-        
-    }
-    
-    /**
-     * Нужно определить допустимое количество занятий в день по указанному предмету
-     * @param values depert_id,subject_id
-     * @return сет допустимых ней 1,2,5,7
-     * @throws Exception 
-     */
-    public Set<Integer> getAvalableDay(Values values) throws Exception{
-        Set<Integer> result = new HashSet<>();
-//        System.out.println(values);
-        String sql;
-        sql =
-            "select distinct t.day_id,c.hour_per_day -\n" +
-            "(select count(*) \n" +
-            "     from schedule \n" +
-            "     where depart_id=d.id and day_id=t.day_id and group_id=a.group_id and subject_id=a.subject_id) as count\n" +
-            "from subject_group a inner join \n" +
-            "      depart d on a.depart_id=d.id \n" +
-            "	inner join curriculum_detail c\n" +
-            "		on c.skill_id=d.skill_id and c.curriculum_id=d.curriculum_id and c.subject_id=a.subject_id,\n" +
-            "      shift_detail t	\n" +
-            "where a.depart_id=%depart_id and a.group_id=%group_id and a.subject_id=%subject_id and t.shift_id=d.shift_id;"        ;
-        
-        Recordset r= DataModule.getRecordet(
-                sql.replace("%subject_id", values.getString("subject_id"))
-                .replace("%depart_id", values.getString("depart_id"))
-                .replace("%group_id", values.getString("group_id"))
-        );
-        Object[] obj;
-        int day_id,count;
-        for (int i=0;i<r.size();i++){
-            obj = r.get(i);
-            day_id=(Integer)obj[0];
-            if (values.containsKey("day_id"))
-                count=(values.getInteger("day_id")==day_id?(Integer)obj[1]+1:(Integer)obj[1]);
-            else 
-                count=(Integer)obj[1];
-            if (count>0)
-                result.add(day_id);
-        }
-        return result;
-    }
-    /**
-     * Поиск свободных ячеек помещения
-     * @param values
-     * @return
-     * @throws Exception 
-     */
-    public List<Point> getEmptyRoomCells(Values values) throws Exception{
-        Integer room_id=values.getInteger("room_id");
-        Integer depart_id = values.getInteger("depart_id");
-        if (room_id==null)
-            return null;
-        List<Point> result = new ArrayList<>();
-        String sql = "select day_id,bell_id from shift_detail a inner join room b on a.shift_id=b.shift_id\n"
-                + "where b.id=%room_id  and (select count(*) from schedule where day_id=a.day_id and bell_id=a.bell_id and room_id=b.id and depart_id<>%depart_id)=0";
-        Recordset recordes = DataModule.getRecordet(
-                sql.replace("%room_id", room_id.toString())
-                .replace("%depart_id", depart_id.toString())
-        );
-        Object[] p;
-        for (int i=0;i<recordes.size();i++){
-            p=recordes.get(i);
-            result.add(new Point((Integer)p[0]-1,(Integer)p[1]-1));
-        }
-        return result;
-    }
-    /**
-     * Поиск свободных ячеек преподователя
-     * @param values  teacher_id
-     * @return
-     * @throws Exception 
-     */
-    public List<Point> getEmptyTeacherCells(Values values) throws Exception{
-        Integer teacher_id;
-        teacher_id=values.getInteger("teacher_id");
-        if (teacher_id==null)
-            return null;
-        
-        String sql = "select day_id,bell_id from shift_detail a inner join teacher b on a.shift_id=b.shift_id\n"
-                + "where b.id=%teacher_id  and (select count(*) from schedule where day_id=a.day_id and bell_id=a.bell_id and teacher_id=b.id)=0";
-        List<Point> result = new ArrayList<>();
-        Recordset r = DataModule.getRecordet(sql.replace("%teacher_id", teacher_id.toString()));
-        Object[] p;
-        for (int i=0;i<r.size();i++){
-            p=r.get(i);
-            result.add(new Point((Integer)p[0]-1,(Integer)p[1]-1));
-        }
-        return result;
-    }
-    /**
-     * Поиск свободных ячеек ккласса-группы
-     * @param values depart_id,group_id,subject_id,group_type_id,teacher,room
-     * @return
-     * @throws Exception 
-     */
-    public List<Point> getEmptyDepartCells(Values values) throws Exception{
-        // для всего класса
-        String sql_depart = 
-                "select a.day_id,a.bell_id from shift_detail a inner join depart d on a.shift_id=d.shift_id\n" +
-                "  where d.id=%depart_id and not exists (select * from \n" +
-                "  v_schedule_calc where depart_id=d.id and day_id=a.day_id and bell_id=a.bell_id)\n"+
-                "order by a.bell_id,a.day_id;";
-        // для групп
-        String sql_group =
-                "select a.day_id,a.bell_id \n" +
-                "from shift_detail a inner join depart d\n" +
-                "on a.shift_id=d.shift_id\n" +
-                "where d.id=%depart_id  and ( " +
-                "	select count(*) from v_schedule_calc \n" +
-                "          where day_id=a.day_id and bell_id=a.bell_id and depart_id= d.id\n" +
-                "		and ((group_type_id in (0,%group_type_a)) or ((group_type_id=%group_type_b) and  (group_id=%group_id))) \n" +
-                
-                ")=0 \n"+
-                "order by a.bell_id,a.day_id;";
-                
-        Integer group_type_id = values.getInteger("group_type_id");
-        Integer depart_id = values.getInteger("depart_id");
-        Integer group_id= values.getInteger("group_id");
-        Point p;
-        Object[] r;
-        
-        List<Point> emptyCells = new ArrayList<>();
-        Set<Integer> avalableDays = getAvalableDay(values);
-//        System.out.println(avalableDays);
-        
-        String sql;
-        switch (group_type_id){
-            case 0:
-                sql = sql_depart.replace("%depart_id",depart_id.toString());
-                break;
-            case 1:
-                sql = sql_group.replace("%depart_id", 
-                        depart_id.toString())
-                        .replace("%group_id", group_id.toString())
-                        .replace("%group_type_a", "2")
-                        .replace("%group_type_b", "1")
-                        ;
-                break;
-            case 2:     
-                sql = sql_group.replace("%depart_id", 
-                        depart_id.toString())
-                        .replace("%group_id", group_id.toString())
-                        .replace("%group_type_a", "1")
-                        .replace("%group_type_b", "2")
-                        ;
-                break;
-            default:
-                throw new Exception ("UNKNOW_GROUP_TYPE");
-        }
-        
-        
-        Recordset recordset = DataModule.getRecordet(sql);
-        for (int i=0;i<recordset.size();i++){
-            r = recordset.get(i);
-            p= new Point((Integer)r[0]-1,(Integer)r[1]-1);
-            if (avalableDays.contains(p.x+1))
-                emptyCells.add(p);
-        }
-        
-        
-        List<Point> result = new ArrayList<>(emptyCells);
-        List<Point> L;
-        if (values.getInteger("teacher_id")!=null){
-            L = getEmptyTeacherCells(values);
-            for (Point pp:emptyCells){
-                if (!L.contains(pp)){
-                    result.remove(pp);
-                }
-            }
-        }
-        
-        if (values.getInteger("room_id")!=null){
-            L= getEmptyRoomCells(values);
-            for (Point pp:emptyCells){
-                if (!L.contains(pp))
-                    result.remove(pp);
-            }
-        }
-        
-        return result;
         
     }
     

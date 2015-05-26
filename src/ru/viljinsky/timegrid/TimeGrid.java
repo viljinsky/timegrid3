@@ -227,13 +227,12 @@ public class TimeGrid extends AbstractTimeGrid{
     
     @Override
     public void cellClick(int col,int row){
-//        System.out.println(String.format("Cell click %d %d ", col,row));
     }
     
     @Override
     public void cellElementClick(CellElement ce){
-//        System.out.println(String.format("Element click %s", ce.toString()));
     }
+    
     
     @Override
     public void startDrag(int col,int row) throws Exception{

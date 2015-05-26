@@ -22,7 +22,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import ru.viljinsky.dialogs.BaseDialog;
 import ru.viljinsky.sqlite.CreateData;
 import ru.viljinsky.sqlite.DataModule;

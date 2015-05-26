@@ -15,6 +15,7 @@ import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +36,7 @@ public class TimeTableGrid extends TimeGrid {
     Values filter = null;
     /** Доступные ячейки */
     public Set<Point> avalableCells = null;
-    /** Ячейки незаполненные групами*/
+    /** Ячейки свободные для заполненные групами*/
     public List<Point> emptyCells = new ArrayList<>();
     /** Заголовки колонок - дни */
     public Map<Integer,String> colCaption = null;
@@ -108,6 +109,15 @@ public class TimeTableGrid extends TimeGrid {
             
     }
 
+    public void groupCheckClick(TimeTableGroup group){
+        System.out.println(group.toString()+" CLICKED!!!");
+        group.checked = (group.checked==Boolean.FALSE);
+    }
+    
+    public void groupRedyCkick(TimeTableGroup group){
+//        fix(group, !group.ready);
+    }
+    
     public void reload() throws Exception {
         emptyCells.clear();
         cells.clear();
@@ -122,9 +132,19 @@ public class TimeTableGrid extends TimeGrid {
 
                 @Override
                 public void checkClick(TimeTableGroup group) {
-                    System.out.println(group.toString()+" CLICKED!!!");
-                    group.checked = (group.checked==Boolean.FALSE);
+                    groupCheckClick(group);
                 }
+
+                @Override
+                public void readyClick(TimeTableGroup group) {
+                    try{
+                        fix(group, !group.ready);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+                
+                
                 
             };
             addElement(ttGroup);
@@ -214,6 +234,20 @@ public class TimeTableGrid extends TimeGrid {
         } catch (Exception e){
             DataModule.rollback();
             throw new Exception("TIME_TABLE_DELETE_ERROR\n"+e.getMessage());
+        }
+    }
+    
+    public void fix(TimeTableGroup group,Boolean value) throws Exception{
+        String sql = "update schedule set ready='"+(value==true?"true":"false")+"' where day_id=%d and bell_id=%d and depart_id=%d and subject_id=%d and group_id=%d;";
+        try{
+            DataModule.execute(String.format(sql,group.day_no,group.bell_id,group.depart_id,group.subject_id,group.group_id));
+            group.ready=value;
+            DataModule.commit();
+            repaint();
+            
+        } catch (Exception e){
+            DataModule.rollback();
+            throw new Exception("FIX_SCHEDULE_ERROR\n"+e.getMessage());
         }
     }
     
@@ -408,6 +442,198 @@ public class TimeTableGrid extends TimeGrid {
             rowHeaderCaption.put(i, (String)r[1]);
         }
         rowCaption = rowHeaderCaption;
+        
+    }
+    
+    
+
+    /////////////////////   EMPTY  CELLS  //////////////////////////////////////
+    
+    
+    /**
+     * Нужно определить допустимое количество занятий в день по указанному предмету
+     * @param values depert_id,subject_id
+     * @return сет допустимых ней 1,2,5,7
+     * @throws Exception 
+     */
+    private Set<Integer> getAvalableDay(Values values) throws Exception{
+        Set<Integer> result = new HashSet<>();
+//        System.out.println(values);
+        String sql;
+        sql =
+            "select distinct t.day_id,c.hour_per_day -\n" +
+            "(select count(*) \n" +
+            "     from schedule \n" +
+            "     where depart_id=d.id and day_id=t.day_id and group_id=a.group_id and subject_id=a.subject_id) as count\n" +
+            "from subject_group a inner join \n" +
+            "      depart d on a.depart_id=d.id \n" +
+            "	inner join curriculum_detail c\n" +
+            "		on c.skill_id=d.skill_id and c.curriculum_id=d.curriculum_id and c.subject_id=a.subject_id,\n" +
+            "      shift_detail t	\n" +
+            "where a.depart_id=%depart_id and a.group_id=%group_id and a.subject_id=%subject_id and t.shift_id=d.shift_id;"        ;
+        
+        Recordset r= DataModule.getRecordet(
+                sql.replace("%subject_id", values.getString("subject_id"))
+                .replace("%depart_id", values.getString("depart_id"))
+                .replace("%group_id", values.getString("group_id"))
+        );
+        Object[] obj;
+        int day_id,count;
+        for (int i=0;i<r.size();i++){
+            obj = r.get(i);
+            day_id=(Integer)obj[0];
+            if (values.containsKey("day_id"))
+                count=(values.getInteger("day_id")==day_id?(Integer)obj[1]+1:(Integer)obj[1]);
+            else 
+                count=(Integer)obj[1];
+            if (count>0)
+                result.add(day_id);
+        }
+        return result;
+    }
+    
+    
+    /**
+     * Поиск свободных ячеек помещения
+     * @param values
+     * @return
+     * @throws Exception 
+     */
+    private List<Point> getEmptyRoomCells(Values values) throws Exception{
+        Integer room_id=values.getInteger("room_id");
+        Integer depart_id = values.getInteger("depart_id");
+        if (room_id==null)
+            return null;
+        List<Point> result = new ArrayList<>();
+        String sql = "select day_id,bell_id from shift_detail a inner join room b on a.shift_id=b.shift_id\n"
+                + "where b.id=%room_id  and (select count(*) from schedule where day_id=a.day_id and bell_id=a.bell_id and room_id=b.id and depart_id<>%depart_id)=0";
+        Recordset recordes = DataModule.getRecordet(
+                sql.replace("%room_id", room_id.toString())
+                .replace("%depart_id", depart_id.toString())
+        );
+        Object[] p;
+        for (int i=0;i<recordes.size();i++){
+            p=recordes.get(i);
+            result.add(new Point((Integer)p[0]-1,(Integer)p[1]-1));
+        }
+        return result;
+    }
+    
+    /**
+     * Поиск свободных ячеек преподователя
+     * @param values  teacher_id
+     * @return
+     * @throws Exception 
+     */
+    private List<Point> getEmptyTeacherCells(Values values) throws Exception{
+        Integer teacher_id;
+        teacher_id=values.getInteger("teacher_id");
+        if (teacher_id==null)
+            return null;
+        
+        String sql = "select day_id,bell_id from shift_detail a inner join teacher b on a.shift_id=b.shift_id\n"
+                + "where b.id=%teacher_id  and (select count(*) from schedule where day_id=a.day_id and bell_id=a.bell_id and teacher_id=b.id)=0";
+        List<Point> result = new ArrayList<>();
+        Recordset r = DataModule.getRecordet(sql.replace("%teacher_id", teacher_id.toString()));
+        Object[] p;
+        for (int i=0;i<r.size();i++){
+            p=r.get(i);
+            result.add(new Point((Integer)p[0]-1,(Integer)p[1]-1));
+        }
+        return result;
+    }
+    
+    /**
+     * Поиск свободных ячеек ккласса-группы
+     * @param values depart_id,group_id,subject_id,group_type_id,teacher,room
+     * @return
+     * @throws Exception 
+     */
+    public List<Point> getEmptyDepartCells(Values values) throws Exception{
+        // для всего класса
+        String sql_depart = 
+                "select a.day_id,a.bell_id from shift_detail a inner join depart d on a.shift_id=d.shift_id\n" +
+                "  where d.id=%depart_id and not exists (select * from \n" +
+                "  v_schedule_calc where depart_id=d.id and day_id=a.day_id and bell_id=a.bell_id)\n"+
+                "order by a.bell_id,a.day_id;";
+        // для групп
+        String sql_group =
+                "select a.day_id,a.bell_id \n" +
+                "from shift_detail a inner join depart d\n" +
+                "on a.shift_id=d.shift_id\n" +
+                "where d.id=%depart_id  and ( " +
+                "	select count(*) from v_schedule_calc \n" +
+                "          where day_id=a.day_id and bell_id=a.bell_id and depart_id= d.id\n" +
+                "		and ((group_type_id in (0,%group_type_a)) or ((group_type_id=%group_type_b) and  (group_id=%group_id))) \n" +
+                
+                ")=0 \n"+
+                "order by a.bell_id,a.day_id;";
+                
+        Integer group_type_id = values.getInteger("group_type_id");
+        Integer depart_id = values.getInteger("depart_id");
+        Integer group_id= values.getInteger("group_id");
+        Point p;
+        Object[] r;
+        
+        List<Point> emptyCells = new ArrayList<>();
+        Set<Integer> avalableDays = getAvalableDay(values);
+//        System.out.println(avalableDays);
+        
+        String sql;
+        switch (group_type_id){
+            case 0:
+                sql = sql_depart.replace("%depart_id",depart_id.toString());
+                break;
+            case 1:
+                sql = sql_group.replace("%depart_id", 
+                        depart_id.toString())
+                        .replace("%group_id", group_id.toString())
+                        .replace("%group_type_a", "2")
+                        .replace("%group_type_b", "1")
+                        ;
+                break;
+            case 2:     
+                sql = sql_group.replace("%depart_id", 
+                        depart_id.toString())
+                        .replace("%group_id", group_id.toString())
+                        .replace("%group_type_a", "1")
+                        .replace("%group_type_b", "2")
+                        ;
+                break;
+            default:
+                throw new Exception ("UNKNOW_GROUP_TYPE");
+        }
+        
+        
+        Recordset recordset = DataModule.getRecordet(sql);
+        for (int i=0;i<recordset.size();i++){
+            r = recordset.get(i);
+            p= new Point((Integer)r[0]-1,(Integer)r[1]-1);
+            if (avalableDays.contains(p.x+1))
+                emptyCells.add(p);
+        }
+        
+        
+        List<Point> result = new ArrayList<>(emptyCells);
+        List<Point> L;
+        if (values.getInteger("teacher_id")!=null){
+            L = getEmptyTeacherCells(values);
+            for (Point pp:emptyCells){
+                if (!L.contains(pp)){
+                    result.remove(pp);
+                }
+            }
+        }
+        
+        if (values.getInteger("room_id")!=null){
+            L= getEmptyRoomCells(values);
+            for (Point pp:emptyCells){
+                if (!L.contains(pp))
+                    result.remove(pp);
+            }
+        }
+        
+        return result;
         
     }
     

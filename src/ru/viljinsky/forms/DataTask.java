@@ -6,13 +6,17 @@
 
 package ru.viljinsky.forms;
 
+import java.awt.Point;
 import java.sql.PreparedStatement;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.KeyMap;
 import ru.viljinsky.sqlite.Recordset;
+//import static ru.viljinsky.timetree.Depart.sql;
 
 /**
  *
@@ -428,50 +432,6 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         
     }
     
-//    @Deprecated
-//    public static Integer createStream(String streamCaption,List<Integer[]> list) throws Exception{
-//        Integer stream_id;//,depart_id,subject_id,group_id;
-//        try{
-//            DataModule.execute("insert into stream (stream_caption) values ('"+streamCaption+"')");
-//            Recordset recordset = DataModule.getRecordet("select max(id) from stream;");
-//            stream_id= recordset.getInteger(0);
-//            String sql = "update subject_group set stream_id=? where depart_id=? and subject_id=? ;";
-//            KeyMap map = new KeyMap();
-//            map.put(1,stream_id);
-//                for (Integer[] data:list){
-//
-//                map.put(2, data[0]);
-//                map.put(3, data[1]);
-//                DataModule.execute(sql, map);
-//            }
-//            DataModule.commit();
-//            return stream_id;
-//        } catch (Exception e){
-//            DataModule.rollback();
-//            throw new Exception("CREATE_STREAM_ERROR:\n"+e.getMessage());
-//        }
-//    }
-//    @Deprecated
-//    public static Integer createStream(Integer depart_id,Integer subject_id) throws Exception{
-//        try{
-//            DataModule.execute("insert into stream (stream_caption) values ('новый поток')");
-//            Recordset recordset = DataModule.getRecordet("select max(id) from stream;");
-//            Integer stream_id= recordset.getInteger(0);
-//            String sql = "update subject_group set stream_id=? where subject_id=? and depart_id=?;";
-//            KeyMap map = new KeyMap();
-//            map.put(1,stream_id);
-//            map.put(2, subject_id);
-//            map.put(3, depart_id);
-//            DataModule.execute(sql, map);
-//            DataModule.commit();
-//            return stream_id;
-//        } catch (Exception e){
-//            DataModule.rollback();
-//            throw new Exception("CREATE_STREAM_ERROR:\n"+e.getMessage());
-//        }
-//        
-//        
-//    }
     
     public static void excludeFromStream(Integer stream_id,Integer depart_id,Integer subject_id) throws Exception{
         DataModule.execute(String.format("update subject_group set stream_id=null where depart_id=%d and subject_id=%d", depart_id,subject_id));
@@ -522,4 +482,54 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         }
     }
     
+    private static final String SQL_TEACHER_AVALABLE_CELLS =
+        "select day_id-1,bell_id-1 from shift_detail a inner join " +
+        "teacher b on a.shift_id=b.shift_id where b.id=%d;";
+            ;
+    public static Set<Point> getTeacherAvalableCells(Integer teacher_id) throws Exception{
+        Set<Point> result = new HashSet();
+        Point p;
+        Object[] r;
+        Recordset recordset = DataModule.getRecordet(String.format(SQL_TEACHER_AVALABLE_CELLS, teacher_id));
+        for (int i = 0; i < recordset.size(); i++) {
+            r = recordset.get(i);
+            result.add(new Point((Integer) r[0], (Integer) r[1]));
+        }
+        return result;
+    }
+    
+    private static final String SQL_ROOM_AVALABLE_CELLS =
+            "select day_id-1,bell_id-1 from shift_detail a inner join " +
+            "room b on a.shift_id=b.shift_id where b.id=%d;";
+    
+    public static Set<Point> getRoomAvalableCells(Integer room_id) throws Exception{
+        Set<Point> result = new HashSet<>();
+        Point p;
+        Object[] r;
+        Recordset recordset = DataModule.getRecordet(String.format(SQL_ROOM_AVALABLE_CELLS, room_id));
+        for (int i = 0; i < recordset.size(); i++) {
+            r = recordset.get(i);
+            result.add(new Point((Integer) r[0], (Integer) r[1]));
+        }
+        return result;
+    }
+    
+    private static final String SQL_DEPART_AVALABLE_CELLS =
+            "select day_id-1,bell_id-1 from shift_detail a inner join " +
+            "depart b on a.shift_id=b.shift_id where b.id=%d;";
+    
+    public static Set<Point> getDepartAvalableCells(Integer depart_id) throws Exception{
+        Set<Point> result = new HashSet<>();
+        Object[] p;
+        try {
+            Recordset resordset = DataModule.getRecordet(String.format(SQL_DEPART_AVALABLE_CELLS, depart_id));
+            for (int i = 0; i < resordset.size(); i++) {
+                p = resordset.get(i);
+                result.add(new Point((Integer) p[0], (Integer) p[1]));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }

@@ -22,44 +22,6 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.swing.JPanel;
 
-/**
- *
- * @author вадик
- */
-
-class Cell{
-    int col;
-    int row;
-    public Cell(int col,int row){
-        this.col=col;
-        this.row=row;
-    }
-    @Override
-    public String toString(){
-        return String.format("col %d row %d",col,row);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj==null)
-            return false;
-        if (obj==this)
-            return true;
-        if (obj instanceof Cell){
-            Cell o =(Cell)obj;
-            return o.col==col && o.row==row;
-        }
-        return  false;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 71 * hash + this.col;
-        hash = 71 * hash + this.row;
-        return hash;
-    }
-}
 
 class Cells extends ArrayList<CellElement>{
     public CellElement addElement(int col,int row){
@@ -152,6 +114,10 @@ public abstract class AbstractTimeGrid extends JPanel {
 
     public int getSelectedRow() {
         return selectedRow;
+    }
+    
+    public boolean isEmpty(int col,int row){
+        return !cells.isExists(col, row);
     }
 
 
@@ -255,8 +221,10 @@ public abstract class AbstractTimeGrid extends JPanel {
                         startDrag(selectedCol, selectedRow);
                         dragObjects = new HashSet<>();
                         for (CellElement ce:cells.getSelected()){
+                            if (allowStartDrag(ce))
                                 dragObjects.add(new DragObject(ce));
                         }
+                        
                     } catch (Exception p){
                         p.printStackTrace();
                     } finally {
@@ -364,6 +332,16 @@ public abstract class AbstractTimeGrid extends JPanel {
         calcColWidth();
     }
     
+    /**
+     * Нужно проверить закреплё или нет элемент
+     * а также не состалено ли расписания для указанного элемента
+     * @param element
+     * @return 
+     */
+    public boolean allowStartDrag(CellElement element){
+        return true;
+    }
+    
     public Integer calcRowHeight() {
         Integer result = 0;
         for (int row = 0; row < rowCount; row++) {
@@ -431,6 +409,11 @@ public abstract class AbstractTimeGrid extends JPanel {
             return null;
         else
             return new Cell(selectedCol, selectedRow);
+    }
+    
+    public void setSelectedCell(Cell cell){
+        Rectangle r = getBound(cell.col, cell.row);
+        scrollRectToVisible(r);
     }
     
 

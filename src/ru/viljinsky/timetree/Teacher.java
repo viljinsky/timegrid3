@@ -9,8 +9,7 @@ package ru.viljinsky.timetree;
 import java.awt.Point;
 import java.util.HashSet;
 import java.util.Set;
-import ru.viljinsky.sqlite.DataModule;
-import ru.viljinsky.sqlite.Recordset;
+import ru.viljinsky.forms.DataTask;
 import ru.viljinsky.sqlite.Values;
 
 /**
@@ -18,7 +17,6 @@ import ru.viljinsky.sqlite.Values;
  * @author вадик
  */
 public class Teacher extends TreeElement {
-    public static final String sql = "select day_id-1,bell_id-1 from shift_detail a inner join " + "teacher b on a.shift_id=b.shift_id where b.id=%d;";
 
     public Teacher(Values values) throws Exception {
         id = values.getInteger("id");
@@ -35,14 +33,8 @@ public class Teacher extends TreeElement {
     @Override
     public Set<Point> getAvalabelCells() {
         Set<Point> result = new HashSet<>();
-        Point p;
-        Object[] r;
         try {
-            Recordset recordset = DataModule.getRecordet(String.format(sql, id));
-            for (int i = 0; i < recordset.size(); i++) {
-                r = recordset.get(i);
-                result.add(new Point((Integer) r[0], (Integer) r[1]));
-            }
+            result=DataTask.getTeacherAvalableCells(id);
         } catch (Exception e) {
             e.printStackTrace();
         }
