@@ -93,6 +93,12 @@ public class CommandDictionary extends HashMap<String, String> implements IAppCo
     put(GRID_REFRESH,"Обновить");
     put(GRID_REQUERY,"Перезагрузить");
     
+    put(CMD_PRIOR,"Назад;Переход к предыдущему расписанию");
+    put(CMD_NEXT,"Вперёд;Переход к следующему- расписанию");
+    put(CMD_GO_TEACHER,"Преподаватель;Переход к расписанию перподавателя");
+    put(CMD_GO_DEPART,"Класс;Переход к расписанию класса");
+    put(CMD_GO_ROOM,"Помещение;Переход к расписанию помещения");
+    
     
         
         

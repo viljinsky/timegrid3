@@ -32,6 +32,8 @@ public class DataModule implements IDataModuleConsts {
     static Boolean active = false;
     static List<Dataset> datasetList = new ArrayList<>();
     static List<DatasetInfo> infoList = new ArrayList<>();
+    public static String fileName = "no file";
+    
     
     private static Connection con = null;
     
@@ -129,9 +131,10 @@ public class DataModule implements IDataModuleConsts {
             active = true;
             execute("PRAGMA foreign_keys = ON;");
             con.setAutoCommit(false);
+            DataModule.fileName=fileName;
         } catch (SQLException e){
             throw new Exception ("Ошбка приокрытии бд:\n"+e.getMessage());
-        }
+        } 
         
     }
     

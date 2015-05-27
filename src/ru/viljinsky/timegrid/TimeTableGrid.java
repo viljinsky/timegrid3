@@ -158,6 +158,9 @@ public class TimeTableGrid extends TimeGrid {
         startRow = row;
         StartCol = col;
     }
+    
+    public void onPlaceGroupError(TimeTableGroup group,Integer day_id,Integer bell_id){
+    }
 
     @Override
     public void stopDrag(int col, int row) throws Exception {
@@ -176,13 +179,17 @@ public class TimeTableGrid extends TimeGrid {
         
         
         TimeTableGroup group;
+        int day_id,bell_id;
         // проверка попадания в emptyCell
         Point testPoint;
         try{
             for (CellElement ce:getSelectedElements()){
                 group=(TimeTableGroup)ce;
+                day_id = group.day_no+col-StartCol;
+                bell_id = group.bell_id+row-startRow;
                 testPoint = new Point(group.day_no+col-StartCol-1,group.bell_id+row-startRow-1);
                 if (!emptyCells.contains(testPoint)){
+                    onPlaceGroupError(group, day_id, bell_id);
                     throw new Exception("CAN_NOT_PLACE_IN_THIS_CELL");
                 }
 
@@ -193,7 +200,7 @@ public class TimeTableGrid extends TimeGrid {
         }
         
         
-    
+        // Собственно перестановка
         try {
             for (CellElement ce : getSelectedElements()) {
                 group = (TimeTableGroup) (ce);
@@ -349,7 +356,7 @@ public class TimeTableGrid extends TimeGrid {
             List<CellElement> list = new ArrayList(cells);
             for (CellElement ce:list){
                 group=(TimeTableGroup)ce;
-                if (group.ready!=true){
+                if (!(group.isRedy() || group.isUsed())){
                     DataModule.execute(String.format(sql,
                             group.day_no,
                             group.bell_id,

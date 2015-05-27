@@ -66,8 +66,22 @@ public abstract class AbstractTimeGrid extends JPanel {
         return selectedRow;
     }
     
+    /**
+     * Определяет имеется хотябы один элемент в ячейки col row
+     * @param col колонка
+     * @param row строка
+     * @return аозвращает true если есть хотябы один элемент в ячейке col row
+     */
     public boolean isEmpty(int col,int row){
         return !cells.isExists(col, row);
+    }
+    
+    /**
+     * Определяет наличие эементов в сетке
+     * @return  true если нет ни одного элемета в противном случае false
+     */
+    public boolean isEmpty(){
+        return cells.isEmpty();
     }
 
 

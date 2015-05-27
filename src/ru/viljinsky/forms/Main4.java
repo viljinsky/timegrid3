@@ -52,8 +52,16 @@ public class Main4 extends JFrame implements CommandListener{
     
     public static String APP_NAME = "TimeTable2015";
     
-    CommandMngr commands = new CommandMngr(new String[]{FILE_CLOSE,FILE_EXIT,FILE_NEW,FILE_OPEN,
-        DICTIONARY,SHIFT,TIMEGRID,MONITOR,LOAD_SCRIPT
+    CommandMngr commands = new CommandMngr(new String[]{
+        FILE_CLOSE,
+        FILE_EXIT,
+        FILE_NEW,
+        FILE_OPEN,
+        DICTIONARY,
+        SHIFT,
+        TIMEGRID,
+        MONITOR,
+        LOAD_SCRIPT
     });
     
     JFileChooser fileChooser = new JFileChooser(new File("."));

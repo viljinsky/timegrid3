@@ -167,6 +167,18 @@ public interface IAppCommand {
         EDIT_CURRICULUM_DETAIL        
     };
     
+    //     Навтгация SchedulePanel
+    /** Переход к следующему расписанию*/
+    public static final String CMD_NEXT = "CMD_NEXT";
+    /** Переход к передыдущему расписанию */
+   public static final String CMD_PRIOR = "CMD_PRIOP";
+    /** Переход к расписанию преподавателя */
+    public static final String CMD_GO_TEACHER = "CMD_GO_TEACHER";
+    /** Переход к расписанию класса */
+    public static final String CMD_GO_DEPART = "CMD_GO_DEPART";
+    /** Переход к расписанию помещения */    
+    public static final String CMD_GO_ROOM = "CMD_GO_ROOM";
+    
     
     
 }
