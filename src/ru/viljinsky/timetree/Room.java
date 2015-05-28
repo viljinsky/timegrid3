@@ -40,5 +40,12 @@ public class Room extends TreeElement {
         }
         return result;
     }
+
+    @Override
+    public String getElementType() {
+        return "ROOM";
+    }
+    
+    
     
 }

@@ -61,12 +61,12 @@ public class CommandDictionary extends HashMap<String, String> implements IAppCo
     put(EDIT_PROFILE,           "Изменить");
     put(REMOVE_PROFILE,         "Удалить");
     
-    put(TT_CLEAR     , "Очистить");
-    put(TT_DELETE    , "Удалить");
-    put(TT_PLACE     , "Разместить");
-    put(TT_PLACE_ALL , "Разместить все");
-    put(TT_FIX       , "Зафиксировать");
-    put(TT_UNFIX     , "Отм.фиксирование");
+    put(TT_CLEAR     , "Очистить;Удалить все елементы");
+    put(TT_DELETE    , "Удалить;Удалить выделенные элементы");
+    put(TT_PLACE     , "Разместить;Разместить нераставленные выделенные группы");
+    put(TT_PLACE_ALL , "Разместить все;Разместить все нерасставленные группы ");
+    put(TT_FIX       , "Фикс-ть;Зафиксировать выделенные ячейки");
+    put(TT_UNFIX     , "Отм.фикс-ю;Снять фиксацию с выделенных ячеек");
     put(TT_REFRESH   , "Обновить");
     
     put(TT_SCH_STATE, "Статус;Изменить статус расписания");

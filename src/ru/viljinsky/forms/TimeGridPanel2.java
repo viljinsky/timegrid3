@@ -141,6 +141,7 @@ public class TimeGridPanel2 extends JPanel  implements IAppCommand,IOpenedForm,C
             }
             TimeGridPanel2.this.manager.updateActionList();
         }
+
     }
     
     class ScheduleGrid extends TimeTableGrid{

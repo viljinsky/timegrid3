@@ -49,5 +49,12 @@ public class Depart extends TreeElement {
         }
         return result;
     }
+
+    @Override
+    public String getElementType() {
+        return "DEPART";
+    }
+    
+    
     
 }

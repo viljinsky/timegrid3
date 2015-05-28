@@ -27,4 +27,8 @@ public abstract class TreeElement {
 
     public abstract Set<Point> getAvalabelCells();
     
+    public String getElementType(){
+        return "NONE";
+    }
+    
 }

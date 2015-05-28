@@ -23,9 +23,9 @@ import ru.viljinsky.sqlite.Values;
 public abstract class AbstractScheduleTree extends JTree{
     
     public static final String STR_SCHEDULE = "Расписание";
-    public static final String STR_DEPART = "Класс";
-    public static final String STR_TEACHER = "Преподаватель";
-    public static final String STR_ROOM = "Помещение";
+    public static final String STR_DEPART   = "Класс";
+    public static final String STR_TEACHER  = "Преподаватель";
+    public static final String STR_ROOM     = "Помещение";
     
     DefaultMutableTreeNode departNodes , teacherNodes, roomNodes;
     TreeElement selectedElement = null;
@@ -49,6 +49,7 @@ public abstract class AbstractScheduleTree extends JTree{
                 }
                 if (oldElement!=selectedElement)
                     ElementChange();
+                
             }
         });
         
@@ -97,7 +98,6 @@ public abstract class AbstractScheduleTree extends JTree{
     
 //    public abstract void ElementChange(TreeElement element);
     public abstract void ElementChange();
-   
         
     
     

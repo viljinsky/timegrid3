@@ -40,5 +40,11 @@ public class Teacher extends TreeElement {
         }
         return result;
     }
+
+    @Override
+    public String getElementType() {
+        return "TEACHER";
+    }
+    
     
 }

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JOptionPane;
+import ru.viljinsky.forms.DataTask;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.Recordset;
@@ -143,9 +144,7 @@ public class TimeTableGrid extends TimeGrid {
                         e.printStackTrace();
                     }
                 }
-                
-                
-                
+
             };
             addElement(ttGroup);
         }
@@ -229,8 +228,8 @@ public class TimeTableGrid extends TimeGrid {
         String sql = "delete from schedule where day_id=%d and bell_id=%d and depart_id=%d and subject_id=%d and group_id=%d";
         try{
             for (CellElement ce:getSelectedElements()){
-                if (ce.moveble==true){
-                    group = (TimeTableGroup)ce;
+                group = (TimeTableGroup)ce;
+                if (!(group.isRedy() || group.isUsed())){
                     DataModule.execute(String.format(sql,group.day_no,group.bell_id,group.depart_id,group.subject_id,group.group_id));
                     cells.remove(ce);
                 }
@@ -643,6 +642,71 @@ public class TimeTableGrid extends TimeGrid {
         
         return result;
         
+    }
+    
+    /**  Заголовок расписания 
+     *  Расписание класс "8-А"
+     *  Расписание преподавателя "Иванова Л.И."
+     *  Расписание помещения "каб 38"
+     */
+    private String scheduleTitle = "no title";
+    
+    public void setDepartSchedule(int depart_id,Cell cell) throws Exception{
+        setDepartSchedule(depart_id);
+        if (cell!=null){
+            scrollRectToVisible(getBound(cell.col,cell.row));
+        }
+    }
+    
+    public void setDepartSchedule(int depart_id) throws Exception{
+        Values values = new Values("depart_id", depart_id);
+        avalableCells=DataTask.getDepartAvalableCells(depart_id);
+        SetFilter(values);
+        Recordset r = DataModule.getRecordet("select label from depart where id="+depart_id);
+        scheduleTitle = String.format("Расписание класса \"%s\"", r.getString(0));
+    }
+
+    public void setTeacherSchedule(int teacher_id,Cell cell) throws Exception{
+        setTeacherSchedule(teacher_id);
+        if (cell!=null)
+            scrollRectToVisible(getBound(cell.col, cell.row));
+    }
+    
+    public void setTeacherSchedule(int teacher_id) throws Exception{
+        Values values = new Values("teacher_id", teacher_id);
+        avalableCells = DataTask.getTeacherAvalableCells(teacher_id);
+        SetFilter(values);
+        Recordset r = DataModule.getRecordet("select last_name || ' ' || substr(first_name,1,1)|| '. ' || substr(patronymic,1,1) ||'.' from teacher where id="+teacher_id);
+        scheduleTitle = String.format("Расписание преподавателя \"%s\"", r.getString(0));
+    }
+    
+    public void setRoomSchedule(int room_id,Cell cell) throws Exception{
+        setRoomSchedule(room_id);
+        if (cell!=null)
+            scrollRectToVisible(getBound(cell.col,cell.row));
+    }
+    public void setRoomSchedule(int room_id) throws Exception{
+        Values values = new Values("room_id", room_id);
+        avalableCells=DataTask.getRoomAvalableCells(room_id);
+        SetFilter(values);
+        Recordset r = DataModule.getRecordet("select room_name from room where id="+room_id);
+        scheduleTitle = String.format("Расписание помещения \"%s\"", r.getString(0));
+    }
+    /**
+     * Получение заголовка расписания:
+     * 
+     * @return  Заголовок расписания
+     */
+    public String getScheduleTitle(){
+        return scheduleTitle;
+    }
+    
+    /**
+     * Установка строки заголовка расписания
+     * @param title Заголовок расписания
+     */
+    public void setScheduleTitle(String title){
+        scheduleTitle = title;
     }
     
 }
