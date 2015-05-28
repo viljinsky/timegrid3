@@ -72,7 +72,7 @@ public class Main4 extends JFrame implements CommandListener{
         new TeacherPanel(),
         new RoomPanel(),
 //        new TimeGridPanel2(),
-        new SchedulePanel3(),
+        new SchedulePanel(),
         new ReportPanel(),
     };
 

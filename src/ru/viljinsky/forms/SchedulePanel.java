@@ -39,7 +39,7 @@ import ru.viljinsky.timetree.TreeElement;
  *
  * @author вадик
  */
-public class SchedulePanel3 extends JPanel implements CommandListener, IAppCommand,IOpenedForm {
+public class SchedulePanel extends JPanel implements CommandListener, IAppCommand,IOpenedForm {
     public static final String[] SCHEDULE_NAV = {CMD_PRIOR, CMD_NEXT, CMD_GO_TEACHER, CMD_GO_DEPART, CMD_GO_ROOM, TT_SCH_STATE, TT_FIX, TT_UNFIX, TT_DELETE};
     public static final String[] UNPLACED_CMD = {TT_PLACE, TT_PLACE_ALL, TT_CLEAR, TT_DELETE};
     // Дерево группы переподаватели помещения
@@ -59,7 +59,7 @@ public class SchedulePanel3 extends JPanel implements CommandListener, IAppComma
     // Вкладки таблиц
     JTabbedPane tabbedPane = new JTabbedPane();
 
-    public SchedulePanel3() {
+    public SchedulePanel() {
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(800, 600));
         initComponents();
