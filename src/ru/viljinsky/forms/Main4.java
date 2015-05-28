@@ -71,8 +71,9 @@ public class Main4 extends JFrame implements CommandListener{
         new DepartPanel(),
         new TeacherPanel(),
         new RoomPanel(),
-        new TimeGridPanel2(),
-        new ReportPanel()
+//        new TimeGridPanel2(),
+        new SchedulePanel3(),
+        new ReportPanel(),
     };
 
     public Main4(String title){
