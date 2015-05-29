@@ -10,98 +10,99 @@ import java.util.HashMap;
 
 public class CommandDictionary extends HashMap<String, String> implements IAppCommand{
     private static CommandDictionary instance = null;
-    private CommandDictionary(){
+    private static final String[][] SRC = {
+        {REFRESH,                "Обновить"},
 
-    put(REFRESH,                "Обновить");   
-        
-    put(CREATE_CURRICULUM,      "Создать;Создать новый учебный план");
-    put(COPY_CURRICULUM,        "Копировать;Копировать учебный план из ранее созданного");
-    put(EDIT_CURRICULUM,        "Изменить;Изменить содержание учебного плана");
-    put(DELETE_CURRICULUM,      "Удалить;Удалить учебный план");
-    
-    put(FILL_CURRICULUM,        "Заполнить;Добавить/Удалить предметы в учебный план");
-    put(EDIT_CURRICULUM_DETAIL, "Редактировать;Изменить свойства учебной дисциплины");
-    
+        {CREATE_CURRICULUM,      "Создать;Создать новый учебный план"},
+        {COPY_CURRICULUM,        "Копировать;Копировать учебный план из ранее созданного"},
+        {EDIT_CURRICULUM,        "Изменить;Изменить содержание учебного плана"},
+        {DELETE_CURRICULUM,      "Удалить;Удалить учебный план"},
+
+        {FILL_CURRICULUM,        "Заполнить;Добавить/Удалить предметы в учебный план"},
+        {EDIT_CURRICULUM_DETAIL, "Редактировать;Изменить свойства учебной дисциплины"},
+
     // depart panel
-    
-    put(CREATE_DEPART,          "Создать класс;Добавить класс в учебный процесс");
-    put(EDIT_DEPART,            "Изменить;Свойства учебного класса");
-    put(DELETE_DEPART,          "Удалить;Удалить класс из учебного процесса");
-    
-    put(FILL_GROUP,             "Заполнить");
-    put(CLEAR_GROUP,            "CLEAR");
-    
-//    public static final String EDIT_SHIFT ="EDIT_SHIFT";
-    put(ADD_GROUP,              "Доб.группу");
-    put(EDIT_GROUP,            "Изм.группу");
-    put(DELETE_GROUP,           "Уд.группу");
-    
-    put( ADD_STREAM,            "Доб.поток");
-    put(EDIT_STREAM,            "Изм.поток");
-    put(REMOVE_STREAM,          "Уд.поток");
+
+        {CREATE_DEPART,          "Создать класс;Добавить класс в учебный процесс"},
+        {EDIT_DEPART,            "Изменить;Свойства учебного класса"},
+        {DELETE_DEPART,          "Удалить;Удалить класс из учебного процесса"},
+
+        {FILL_GROUP,             "Заполнить"},
+        {CLEAR_GROUP,            "CLEAR"},
+
+    //    public static final String EDIT_SHIFT ="EDIT_SHIFT";
+        {ADD_GROUP,              "Доб.группу"},
+        {EDIT_GROUP,            "Изм.группу"},
+        {DELETE_GROUP,           "Уд.группу"},
+
+        { ADD_STREAM,            "Доб.поток"},
+        {EDIT_STREAM,            "Изм.поток"},
+        {REMOVE_STREAM,          "Уд.поток"},
 
     // teacher
-    
-    put(CREATE_TEACHER,         "Создать;Добавить запись о преподавателе");
-    put(EDIT_TEACHER,           "Изменить;Изменить запись о преподавателе");
-    put(DELETE_TEACHER,         "Удалить;Удалить запись о преподавателе");
-    
+
+        {CREATE_TEACHER,         "Создать;Добавить запись о преподавателе"},
+        {EDIT_TEACHER,           "Изменить;Изменить запись о преподавателе"},
+        {DELETE_TEACHER,         "Удалить;Удалить запись о преподавателе"},
+
     // room
-    put(CREATE_ROOM,            "Добавить");
-    put(EDIT_ROOM,              "Изменить");
-    put(DELETE_ROOM,            "Удалить");
-    
+        {CREATE_ROOM,            "Добавить"},
+        {EDIT_ROOM,              "Изменить"},
+        {DELETE_ROOM,            "Удалить"},
+
     // shift panel
-    put(CREATE_SHIFT,           "Создать график");
-    put(REMOVE_SHIFT,           "Удалить");
-    put(EDIT_SHIFT,             "Изменить график;Редактировать график");
-    
+        {CREATE_SHIFT,           "Создать график"},
+        {REMOVE_SHIFT,           "Удалить"},
+        {EDIT_SHIFT,             "Изменить график;Редактировать график"},
+
     // profile_panel
-    put(CREATE_PROFILE,         "Создать профиль");
-    put(EDIT_PROFILE,           "Изменить");
-    put(REMOVE_PROFILE,         "Удалить");
-    
-    put(TT_CLEAR     , "Очистить;Удалить все елементы");
-    put(TT_DELETE    , "Удалить;Удалить выделенные элементы");
-    put(TT_PLACE     , "Разместить;Разместить нераставленные выделенные группы");
-    put(TT_PLACE_ALL , "Разместить все;Разместить все нерасставленные группы ");
-    put(TT_FIX       , "Фикс-ть;Зафиксировать выделенные ячейки");
-    put(TT_UNFIX     , "Отм.фикс-ю;Снять фиксацию с выделенных ячеек");
-    put(TT_REFRESH   , "Обновить");
-    
-    put(TT_SCH_STATE, "Статус;Изменить статус расписания");
-    
+        {CREATE_PROFILE,         "Создать профиль"},
+        {EDIT_PROFILE,           "Изменить"},
+        {REMOVE_PROFILE,         "Удалить"},
+
+        {TT_CLEAR     , "Очистить;Удалить все елементы"},
+        {TT_DELETE    , "Удалить;Удалить выделенные элементы"},
+        {TT_PLACE     , "Разместить;Разместить нераставленные выделенные группы"},
+        {TT_PLACE_ALL , "Разместить все;Разместить все нерасставленные группы "},
+        {TT_FIX       , "Фикс-ть;Зафиксировать выделенные ячейки"},
+        {TT_UNFIX     , "Отм.фикс-ю;Снять фиксацию с выделенных ячеек"},
+        {TT_REFRESH   , "Обновить"},
+
+        {TT_SCH_STATE, "Статус;Изменить статус расписания"},
+
 
     // select panel
-    put(INCLUDE,        "Включить>");
-    put(EXCLUDE,        "<Исключить");
-    put(INCLUDE_ALL,    "Вкл.всё>>");
-    put(EXCLUDE_ALL,    "<<Искл.всё");
-    
+        {INCLUDE,        "Включить>"},
+        {EXCLUDE,        "<Исключить"},
+        {INCLUDE_ALL,    "Вкл.всё>>"},
+        {EXCLUDE_ALL,    "<<Искл.всё"},
+
     // broser
-    
-    put(PAGE_HOME,      "Домой;Перейти на первую страницу сайта");
-    put(PAGE_PRIOR,     "Пред.-я;Перейти на предыдущую страницу");
-    put(PAGE_NEXT,      "След.-я;Перейти на следующую страницу ");
-    put(PAGE_RELOAD,    "Обновить;Перезагрузить текущую страницу");
-    
+
+        {PAGE_HOME,      "Домой;Перейти на первую страницу сайта"},
+        {PAGE_PRIOR,     "Пред.-я;Перейти на предыдущую страницу"},
+        {PAGE_NEXT,      "След.-я;Перейти на следующую страницу "},
+        {PAGE_RELOAD,    "Обновить;Перезагрузить текущую страницу"},
+
     // grid
+
+        {GRID_APPEND,   "Добавить"},
+        {GRID_EDIT,     "Изменить"},
+        {GRID_DELETE,   "Удалить"},
+        {GRID_REFRESH,  "Обновить"},
+        {GRID_REQUERY,  "Перезагрузить"},
+
+        {CMD_PRIOR,     "Назад;Переход к предыдущему расписанию"},
+        {CMD_NEXT,      "Вперёд;Переход к следующему- расписанию"},
+        {CMD_GO_TEACHER,"Преподаватель;Переход к расписанию перподавателя"},
+        {CMD_GO_DEPART, "Класс;Переход к расписанию класса"},
+        {CMD_GO_ROOM,   "Помещение;Переход к расписанию помещения"},
+    };
     
-    put(GRID_APPEND,"Добавить");
-    put(GRID_EDIT,"Изменить");
-    put(GRID_DELETE,"Удалить");
-    put(GRID_REFRESH,"Обновить");
-    put(GRID_REQUERY,"Перезагрузить");
-    
-    put(CMD_PRIOR,"Назад;Переход к предыдущему расписанию");
-    put(CMD_NEXT,"Вперёд;Переход к следующему- расписанию");
-    put(CMD_GO_TEACHER,"Преподаватель;Переход к расписанию перподавателя");
-    put(CMD_GO_DEPART,"Класс;Переход к расписанию класса");
-    put(CMD_GO_ROOM,"Помещение;Переход к расписанию помещения");
-    
-    
-        
-        
+    private CommandDictionary(){
+        for (String[] s:SRC){
+            put(s[0], s[1]);
+        }
     }
     
     public static String getCommandTranslate(String command){

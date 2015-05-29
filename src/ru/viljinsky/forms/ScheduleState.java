@@ -19,7 +19,12 @@ public class ScheduleState implements IScheduleState {
     public Icon[] icons;
 
     public static String[] getStateList() {
-        return new String[]{STATE_NEW, STATE_WORK, STATE_ERROR, STATE_READY, STATE_USED};
+        return new String[]{
+            STATE_NEW,
+            STATE_WORK,
+            STATE_ERROR,
+            STATE_READY,
+            STATE_USED};
     }
 
     protected ScheduleState() {
@@ -53,7 +58,6 @@ public class ScheduleState implements IScheduleState {
         
         URL url = ScheduleState.class.getResource(path);
         if (url != null) {
-            System.out.println(path);
             return new ImageIcon(url);
         }
         System.err.println("PATH_NOT_FOUND" + path);

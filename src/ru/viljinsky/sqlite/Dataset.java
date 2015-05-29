@@ -387,7 +387,13 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
     public String getReferences(String columnName) {
         return info.references.get(columnName);
     }
+    
+    ///////////////////////   LOOKUP_FIELDS ////////////////////////////////////
 
+    /**
+     * Привязка имени таблицы к отображаемому полю(поля)
+     * для лукап-полей
+     */
     private static final String[] strLookupMap={
         "shift=shift_name",
         "subject=subject_name",
@@ -406,7 +412,8 @@ public class Dataset extends ArrayList<Object[]> implements IDataset {
         "depart=label",
         "stream=stream_caption",
         "group_sequence=group_sequence_name",
-        "schedule_state=state_description"
+        "schedule_state=state_description",
+        "subject_domain=domain_caption"
     } ;
     
     public Map<String,String> getLookupMap(){

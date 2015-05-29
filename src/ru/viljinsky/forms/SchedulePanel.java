@@ -11,6 +11,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Point;
 import java.util.List;
+import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -67,8 +68,10 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
     }
 
     public void initComponents() {
+        
+        
         tabbedPane.addTab("Unplaced", new UnplacedPanel(unplacedGrid));
-        tabbedPane.addTab("WhoIsThere", new JScrollPane(whoIsThereGrid));
+        tabbedPane.addTab("WhoIsThere", new WhoIsTherePanel(whoIsThereGrid));
         tabbedPane.addTab("WhoCome", new JScrollPane(whoInvateGrid));
         JScrollPane scrollPane = new JScrollPane(scheduleGrid);
         scrollPane.setColumnHeaderView(scheduleGrid.getColumnHeader());
@@ -274,6 +277,75 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
         }
     }
 
+    class WhoIsTherePanel extends JPanel implements CommandListener{
+        Grid grid;
+        JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        Action[] actions= new Action[]{};
+        CommandMngr commands = new CommandMngr();
+        Integer teacher_id = null;
+        Integer room_id=null;
+        Integer depart_id=null;
+        
+        public WhoIsTherePanel(Grid grid){
+            setLayout(new BorderLayout());
+            this.actions=actions;
+            this.grid=grid;
+            grid.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+                    commands.updateActionList();
+                }
+                
+            });
+            add(controls,BorderLayout.PAGE_START);
+            add(new JScrollPane(grid));
+            
+            commands.setCommands(new String[]{"CMD_GO_TEACHER","CMD_GO_DEPART","CMD_GO_ROOM"});
+        
+            for (Action a:commands.actions){
+                controls.add(new JButton(a));
+            }
+            commands.addCommandListener(this);
+            commands.updateActionList();
+        }
+
+        @Override
+        public void doCommand(String command) {
+            try{
+                switch (command){
+                    case "CMD_GO_TEACHER":
+                        scheduleGrid.setTeacherSchedule(grid.getIntegerValue("depart_id"));
+                        break;
+                    case "CMD_GO_ROOM":
+                        scheduleGrid.setRoomSchedule(grid.getIntegerValue("room_id"));                        
+                        break;
+                    case "CMD_GO_DEPART":
+                        scheduleGrid.setDepartSchedule(grid.getIntegerValue("depart_id"));
+                        break;
+                }
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void updateAction(Action action) {
+            String command = (String)action.getValue(Action.ACTION_COMMAND_KEY);
+            System.out.println(command);
+            switch(command){
+                case "CMD_GO_TEACHER":
+                    action.setEnabled(grid.getSelectedRow()>=0);
+                    break;
+                case "CMD_GO_ROOM":
+                    action.setEnabled(grid.getSelectedRow()>=0);
+                    break;
+                case "CMD_GO_DEPART":
+                    action.setEnabled(grid.getSelectedRow()>=0);
+                    break;
+            }
+        }
+    }
     /**
      * Сетка включает группы которые находятся в данном месте в данное время
      */
