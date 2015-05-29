@@ -22,6 +22,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.Grid;
@@ -301,12 +302,27 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
 
     public void scheduleStatus() throws Exception {
         TreeElement element = tree.getSelectedElement();
-        Dialogs.scheduleState(this, element.id);
-        Recordset r = DataModule.getRecordet("select schedule_state_id from depart where id =" + element.id);
+        Integer depart_id = element.id;
+        Dialogs.scheduleState(this, depart_id);
+        Recordset r = DataModule.getRecordet("select schedule_state_id from depart where id =" + depart_id);
+        Integer schedule_state_id= r.getInteger(0);
         for (CellElement ce : scheduleGrid.getCells()) {
-            ((TimeTableGroup) ce).schedule_state_id = r.getInteger(0);
+            ((TimeTableGroup) ce).schedule_state_id = schedule_state_id;
         }
+        setDepartScheduleState(depart_id,schedule_state_id);
         scheduleGrid.repaint();
+    }
+    
+    public void setDepartScheduleState(Integer depart_id,Integer schedule_state_id){
+        DefaultMutableTreeNode node = tree.departNodes;
+        DefaultMutableTreeNode n;
+        for (int i=0;i<node.getChildCount();i++){
+            n = (DefaultMutableTreeNode)node.getChildAt(i);
+            Depart d = (Depart)n.getUserObject();
+            if (d.id==depart_id)
+                d.schedule_status_id=schedule_state_id;
+        }
+        tree.repaint();
     }
 
     @Override

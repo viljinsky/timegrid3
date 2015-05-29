@@ -1,15 +1,19 @@
 package ru.viljinsky.timetree;
 
+import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.Icon;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import ru.viljinsky.forms.ScheduleState;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.Values;
@@ -18,7 +22,33 @@ import ru.viljinsky.sqlite.Values;
 
     
     
+class MyRenderer extends DefaultTreeCellRenderer{
+    Icon[] icons;
+
+    public MyRenderer(){
+        icons = ScheduleState.getInstance().icons;
+    }
+    @Override
+    public Component getTreeCellRendererComponent(JTree tree, Object value,
+            boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+        super.getTreeCellRendererComponent(tree, value, sel, expanded,
+                leaf, row, hasFocus);
+        if (value instanceof DefaultMutableTreeNode){
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
+            Object v = node.getUserObject();
+            if (v!=null && (v instanceof Depart) ){
+                Depart depart = (Depart)v;
+                setIcon(icons[depart.schedule_status_id]);
+                
+            }
+        }
         
+        return this;
+    }
+    
+    
+    
+}        
 
 public abstract class AbstractScheduleTree extends JTree{
     
@@ -27,7 +57,7 @@ public abstract class AbstractScheduleTree extends JTree{
     public static final String STR_TEACHER  = "Преподаватель";
     public static final String STR_ROOM     = "Помещение";
     
-    DefaultMutableTreeNode departNodes , teacherNodes, roomNodes;
+    public DefaultMutableTreeNode departNodes , teacherNodes, roomNodes;
     TreeElement selectedElement = null;
     
     public AbstractScheduleTree(){
@@ -72,6 +102,7 @@ public abstract class AbstractScheduleTree extends JTree{
                 }
             }
         });
+        setCellRenderer(new MyRenderer());
     }
     
     public JPopupMenu getPopupMenu(){
@@ -107,7 +138,7 @@ public abstract class AbstractScheduleTree extends JTree{
         
         DefaultMutableTreeNode node;
         Dataset dataset ;
-        dataset = DataModule.getSQLDataset("select id,label from depart order by skill_id");
+        dataset = DataModule.getSQLDataset("select id,label,schedule_state_id from depart order by skill_id");
         dataset.open();
         for (int i=0;i<dataset.getRowCount();i++){
             node = new DefaultMutableTreeNode(new Depart(dataset.getValues(i)));

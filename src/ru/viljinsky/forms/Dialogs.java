@@ -1038,9 +1038,9 @@ public class Dialogs implements IAppError{
                 JPanel panel = new JPanel(new GridLayout(-1,1));
                 JRadioButton rbtn;
                 group = new ButtonGroup();
-                for (String st:ScheuleState.getStateList()){
-                    rbtn= new JRadioButton(ScheuleState.getStateDescription(st));
-                    rbtn.setSelected(code==ScheuleState.getStateKode(st));
+                for (String st:ScheduleState.getStateList()){
+                    rbtn= new JRadioButton(ScheduleState.getStateDescription(st));
+                    rbtn.setSelected(code==ScheduleState.getStateKode(st));
                     rbtn.setActionCommand(st);
                     rbtn.addActionListener(listener);
                     group.add(rbtn);
@@ -1053,7 +1053,7 @@ public class Dialogs implements IAppError{
             public void doOnEntry() throws Exception {
                 System.out.println(state);
                 try{
-                    DataModule.execute("update depart set schedule_state_id="+ScheuleState.getStateKode(state)+" where id="+depart_id);
+                    DataModule.execute("update depart set schedule_state_id="+ScheduleState.getStateKode(state)+" where id="+depart_id);
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();

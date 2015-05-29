@@ -10,13 +10,16 @@ import java.awt.Point;
 import java.util.HashSet;
 import java.util.Set;
 import ru.viljinsky.forms.DataTask;
+import ru.viljinsky.forms.IScheduleState;
 import ru.viljinsky.sqlite.Values;
 
 /**
  *
  * @author вадик
  */
-public class Depart extends TreeElement {
+public class Depart extends TreeElement implements IScheduleState{
+    
+    public int schedule_status_id = 0;
     
     public static final String sql_by_group =
             "select distinct b.label,b.id as depart_id,a.group_id,c.group_type_id,g.group_type_caption\n" +
@@ -30,6 +33,7 @@ public class Depart extends TreeElement {
     public Depart(Values values) throws Exception {
         id = values.getInteger("id");
         label = values.getString("label");
+        schedule_status_id=values.getInteger("schedule_state_id");
     }
 
     @Override
