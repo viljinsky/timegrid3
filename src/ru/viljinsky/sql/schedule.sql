@@ -344,14 +344,6 @@ left join v_teacher_hour th on th.default_teacher_id=a.id;
 
 -- v_room
 
-create view v_room as
-select b.building_name,a.room_name,p.profile_name,s.shift_name,
-a.capacity,a.id,a.building_id,a.profile_id,a.shift_id
- from room a
-inner join profile p on p.id =a.profile_id
-inner join shift s on s.id=a.shift_id
-inner join building b on b.id=a.building_id;
-
 
 -- v_depart_on_schedule
 
@@ -458,4 +450,23 @@ insert into attr(param_name,param_value) values ('schedule_span','2015/2016 уч
 insert into attr(param_name,param_value) values ('schedule_title','Первая четверть');
 insert into attr(param_name,param_value) values ('educational_institution','Среднее школа № 212');
 
+
+
+create view v_room_hour as
+select g.default_room_id as room_id,sum(c.hour_per_week) as hour_per_week from depart a inner join curriculum b on a.curriculum_id=b.id
+inner join curriculum_detail c on c.curriculum_id=b.id and c.skill_id=a.skill_id 
+inner join subject_group g on g.subject_id=c.subject_id and g.depart_id=a.id
+group by g.default_room_id
+;
+
+drop view if exists v_room;
+CREATE VIEW v_room as
+select b.building_name,a.room_name,p.profile_name,s.shift_name,
+a.capacity,a.id,a.building_id,a.profile_id,a.shift_id,v.hour_per_week
+from room a
+inner join profile p on p.id =a.profile_id
+inner join shift s on s.id=a.shift_id
+inner join building b on b.id=a.building_id
+left join v_room_hour v on v.room_id=a.id;
+select * from v_room;
 

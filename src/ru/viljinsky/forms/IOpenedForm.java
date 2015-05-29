@@ -299,6 +299,13 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
     
     class SelectRoomPanel extends SelectPanel{
         
+        public void updateTotalHour(int hour) throws Exception{
+            Values values = grid.getValues();
+            Integer hour_per_week=hour+values.getInteger("hour_per_week",0);
+            values.setValue("hour_per_week", hour_per_week);
+            grid.setValues(values);
+        }
+        
         int room_id=-1;
         
         public static final String sqlSource = 
@@ -331,12 +338,14 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
         
         @Override
         public void include() throws Exception {
+            Integer hour = 0;
             Integer depart_id,subject_id,group_id;
-            Map<String,Object> values;
+            Values values;
             IDataset dataset = sourceGrid.getDataset();
             try{
                 for (int row:sourceGrid.getSelectedRows()){
                     values=dataset.getValues(sourceGrid.convertRowIndexToModel(row));
+                    hour+= values.getInteger("hour_per_week",0);
                     depart_id=(Integer)values.get("depart_id");
                     subject_id=(Integer)values.get("subject_id");
                     group_id=(Integer)values.get("group_id");
@@ -350,20 +359,23 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
             sourceGrid.removeSelectedRow();
             destanationGrid.requery();
             commands.updateActionList();
+            updateTotalHour(hour);
 //            requery();
         }
 
         @Override
         public void exclude() throws Exception {
+            int hour = 0;
             Integer depart_id,subject_id,group_id;
-            Map<String,Object> values;
+            Values values;
             IDataset dataset = destanationGrid.getDataset();
             try{
                 for (int row: destanationGrid.getSelectedRows()){
                     values=dataset.getValues(destanationGrid.convertRowIndexToModel(row));
-                    depart_id=(Integer)values.get("depart_id");
-                    subject_id=(Integer)values.get("subject_id");
-                    group_id=(Integer)values.get("group_id");
+                    hour-=values.getInteger("hour_per_week",0);
+                    depart_id=values.getInteger("depart_id");
+                    subject_id=values.getInteger("subject_id");
+                    group_id=values.getInteger("group_id");
                     DataTask.excluderGroupFromRoom(depart_id, subject_id, group_id);
                 }
                 DataModule.commit();
@@ -371,20 +383,25 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
                 DataModule.rollback();
                 throw new Exception("EXCLUDE_ERROR\n"+e.getMessage());
             }
-            requery();
+            
+            updateTotalHour(hour);
+            
+//            requery();
         }
 
         @Override
         public void includeAll() throws Exception {
+            int hour = 0;
             Integer depart_id,subject_id,group_id;
-            Map<String,Object> values;
+            Values values;
             IDataset dataset = sourceGrid.getDataset();
             try{
                 for (int row=0;row<dataset.getRowCount();row++){
                     values=dataset.getValues(row);
-                    depart_id=(Integer)values.get("depart_id");
-                    subject_id=(Integer)values.get("subject_id");
-                    group_id=(Integer)values.get("group_id");
+                    hour+=values.getInteger("hour_per_week",0);
+                    depart_id=values.getInteger("depart_id");
+                    subject_id=values.getInteger("subject_id");
+                    group_id=values.getInteger("group_id");
                     DataTask.includeGroupToRoom(depart_id, subject_id, group_id, room_id);
                 }
                 DataModule.commit();
@@ -393,16 +410,19 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
                 throw new Exception("INCLUDE_ERROR\n"+e.getMessage());
             }
             requery();
+            updateTotalHour(hour);
         }
 
         @Override
         public void excludeAll() throws Exception {
+            int hour = 0;
             Integer depart_id,subject_id,group_id;
-            Map<String,Object> values;
+            Values values;
             IDataset dataset = destanationGrid.getDataset();
             try{
                 for (int row=0;row<dataset.getRowCount();row++){
                     values=dataset.getValues(row);
+                    hour-= values.getInteger("hour_per_week",0);
                     depart_id=(Integer)values.get("depart_id");
                     subject_id=(Integer)values.get("subject_id");
                     group_id=(Integer)values.get("group_id");
@@ -414,6 +434,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
                 throw new Exception("EXCLUDE_ERROR\n"+e.getMessage());
             }
             requery();
+            updateTotalHour(hour);
         }
 
         @Override
@@ -1010,9 +1031,8 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
             destanationGrid.requery();
             commands.updateActionList();
             
-            updateTeacherHour(hour);
             // Изменения кол.ва часов преподавателя
-//            requery();
+            updateTeacherHour(hour);
         }
         /**
          * Изменение количества часов преподавателя после
@@ -1022,8 +1042,8 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
          */
         protected void updateTeacherHour(int hour) throws Exception{
             Values values = grid.getValues();
-            Integer n = values.getInteger("total_hour");
-            n = (n==null?0:n)+hour;
+            Integer n = values.getInteger("total_hour",0)+hour;
+//            n = (n==null?0:n)+hour;
             values.setValue("total_hour", n);
             grid.setValues(values);
         }
@@ -1036,10 +1056,10 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
             try{
                 for (int row : destanationGrid.getSelectedRows()){
                     values=dataset.getValues(destanationGrid.convertRowIndexToModel(row));
-                    hour+=values.getInteger("hour_per_week");
-                    depart_id=(Integer)values.get("depart_id");
-                    subject_id=(Integer)values.get("subject_id");
-                    group_id=(Integer)values.get("group_id");
+                    hour+=values.getInteger("hour_per_week",0);
+                    depart_id=values.getInteger("depart_id");
+                    subject_id=values.getInteger("subject_id");
+                    group_id=values.getInteger("group_id");
                     DataTask.excludeGroupFromTeacher(depart_id, subject_id, group_id);
                 }
                 DataModule.commit();
@@ -1050,12 +1070,6 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
             
             // Изменение кол.ва часов преподавателя
             updateTeacherHour(-hour);
-//            values = grid.getValues();
-//            Integer n = values.getInteger("total_hour");
-//            n=(n==null?0:n)-hour;
-//            values.setValue("total_hour", n);
-//            grid.setValues(values);
-            
             requery();
         }
 
@@ -1070,7 +1084,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
             try{
                 for (int row=0;row<dataset.getRowCount();row++){
                     values=dataset.getValues(row);
-                    hour+=values.getInteger("hour_per_week");
+                    hour+=values.getInteger("hour_per_week",0);
                     depart_id= values.getInteger("depart_id");
                     subject_id=values.getInteger("subject_id");
                     group_id=values.getInteger("group_id");
@@ -1096,7 +1110,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
             try{
                 for (int row=0;row<dataset.getRowCount();row++){
                     values=dataset.getValues(row);
-                    hour+=values.getInteger("hour_per_week");
+                    hour+=values.getInteger("hour_per_week",0);
                     depart_id= values.getInteger("depart_id");
                     subject_id=values.getInteger("subject_id");
                     group_id=values.getInteger("group_id");

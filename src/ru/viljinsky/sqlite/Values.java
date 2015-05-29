@@ -34,6 +34,13 @@ public class Values extends HashMap<String, Object> {
             return get(columnName);
         throw new Exception(COLUMN_NOT_FOUND + "'" + columnName + "'");        
     }
+    
+    public Integer getInteger(String columnName,Integer defValue) throws Exception{
+        Integer result = getInteger(columnName);
+        if (result==null)
+            return defValue;
+        return result;
+    } 
     public Integer getInteger(String columnName) throws Exception {
         if (containsKey(columnName)) {
             Object result = get(columnName);

@@ -11,7 +11,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Point;
 import java.util.List;
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -42,7 +41,10 @@ import ru.viljinsky.timetree.TreeElement;
  * @author вадик
  */
 public class SchedulePanel extends JPanel implements CommandListener, IAppCommand,IOpenedForm {
-    public static final String[] SCHEDULE_NAV = {CMD_PRIOR, CMD_NEXT, CMD_GO_TEACHER, CMD_GO_DEPART, CMD_GO_ROOM, TT_SCH_STATE, TT_FIX, TT_UNFIX, TT_DELETE};
+    public static final String[] SCHEDULE_NAV = {
+        CMD_PRIOR, CMD_NEXT, CMD_GO_TEACHER, CMD_GO_DEPART, CMD_GO_ROOM,
+        TT_SCH_STATE, TT_FIX, TT_UNFIX, TT_DELETE,"TREE_REFRESH"};
+    
     public static final String[] UNPLACED_CMD = {TT_PLACE, TT_PLACE_ALL, TT_CLEAR, TT_DELETE};
     // Дерево группы переподаватели помещения
     ScheduleTree tree = new ScheduleTree();
@@ -301,7 +303,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
             add(controls,BorderLayout.PAGE_START);
             add(new JScrollPane(grid));
             
-            commands.setCommands(new String[]{"CMD_GO_TEACHER","CMD_GO_DEPART","CMD_GO_ROOM"});
+            commands.setCommands(new String[]{"CMD_GO_TEACHER","CMD_GO_DEPART","CMD_GO_ROOM","CMD_DELETE"});
         
             for (Action a:commands.actions){
                 controls.add(new JButton(a));
@@ -323,6 +325,24 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
                     case "CMD_GO_DEPART":
                         scheduleGrid.setDepartSchedule(grid.getIntegerValue("depart_id"));
                         break;
+                    case "CMD_DELETE":
+                        Values values = grid.getValues();
+                        if (JOptionPane.showConfirmDialog(null, "Удалить запись","Внимание",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_NO_OPTION)
+                        try{
+                            DataModule.execute(String.format("delete from schedule where day_id=%d and bell_id=%d and depart_id=%d and group_id=%d and subject_id=%d",
+                                    values.getInteger("day_id"),
+                                    values.getInteger("bell_id"),
+                                    values.getInteger("depart_id"),
+                                    values.getInteger("group_id"),
+                                    values.getInteger("subject_id")
+                                    
+                                    ));
+                            DataModule.commit();
+                        } catch (Exception e) {
+                            DataModule.rollback();
+                            throw new Exception("DELETE ERROR\n"+e.getMessage());
+                        }
+                        break;
                 }
             } catch (Exception e){
                 e.printStackTrace();
@@ -343,6 +363,10 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
                 case "CMD_GO_DEPART":
                     action.setEnabled(grid.getSelectedRow()>=0);
                     break;
+                case "CMD_DELETE":
+                    action.setEnabled(grid.getSelectedRow()>=0);
+                    break;
+                    
             }
         }
     }
@@ -427,6 +451,9 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
                     break;
                 case TT_UNFIX:
                     scheduleGrid.unfix();
+                    break;
+                case "TREE_REFRESH":
+                    tree.requery();
                     break;
             }
             System.out.println(scheduleGrid.getScheduleTitle());

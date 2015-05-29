@@ -243,6 +243,7 @@ abstract class SQLEditor extends JPanel{
     
     public void addGrid(String gridName,Dataset dataset) throws Exception{
         Grid grid = new Grid();
+        grid.setRealNames(Boolean.TRUE);
         grid.setDataset(dataset);
         tabbs.add(gridName,new JScrollPane(grid));        
     }    

@@ -267,8 +267,18 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         
     }
     
+    public static boolean scheduleDepartIsUsed(Integer depart_id) throws Exception{
+        Recordset r = DataModule.getRecordet("select schedule_state_id from depart where id="+depart_id);
+        if (r.getInteger(0)==4){
+            throw new Exception("DEPART_SCHEDULE_IS_USED");
+        }
+        return false;
+    }
+    
     public static void excluderGroupFromRoom(int depart_id,int subject_id,int group_id) 
             throws Exception{
+        if (scheduleDepartIsUsed(depart_id))
+            return;
         String sql ="update subject_group set default_room_id=? where depart_id=? and subject_id=? and group_id=?;";
         KeyMap map = new KeyMap();
         map.put(1,null);
@@ -313,6 +323,8 @@ public class DataTask implements IDataTask, IDataTaskConstants{
 
     public static void excludeGroupFromTeacher(int depart_id,int subject_id,int group_id) 
             throws Exception{
+        if (scheduleDepartIsUsed(depart_id))
+            return;
         String sql = "update subject_group set default_teacher_id=?\n"
                    + "where depart_id=? and subject_id=? and group_id=?;";
         KeyMap map = new KeyMap();

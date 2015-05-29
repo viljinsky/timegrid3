@@ -57,7 +57,10 @@ public abstract class AbstractScheduleTree extends JTree{
     public static final String STR_TEACHER  = "Преподаватель";
     public static final String STR_ROOM     = "Помещение";
     
-    public DefaultMutableTreeNode departNodes , teacherNodes, roomNodes;
+    public DefaultMutableTreeNode 
+            departNodes ,
+            teacherNodes,
+            roomNodes;
     TreeElement selectedElement = null;
     
     public AbstractScheduleTree(){
@@ -130,6 +133,14 @@ public abstract class AbstractScheduleTree extends JTree{
 //    public abstract void ElementChange(TreeElement element);
     public abstract void ElementChange();
         
+
+    public void requery() throws Exception{
+        clear();
+        open();
+         
+        
+    }
+    
     
     
     public void open() throws Exception{
