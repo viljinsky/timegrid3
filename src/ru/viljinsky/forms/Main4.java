@@ -45,6 +45,7 @@ public class Main4 extends JFrame implements CommandListener{
     
     public static final String MENU_UTILS   = "Утилиты";
     
+    public static final String ATTRIBUTES  = "ATTRIBUTES";
     public static final String DICTIONARY  = "DICTIONARY";
     public static final String SHIFT       = "SHIFT";
     public static final String TIMEGRID    = "TIME_GRID";
@@ -61,7 +62,8 @@ public class Main4 extends JFrame implements CommandListener{
         SHIFT,
         TIMEGRID,
         MONITOR,
-        LOAD_SCRIPT
+        LOAD_SCRIPT,
+        ATTRIBUTES
     });
     
     JFileChooser fileChooser = new JFileChooser(new File("."));
@@ -112,6 +114,8 @@ public class Main4 extends JFrame implements CommandListener{
             case SHIFT:
                 action.setEnabled(DataModule.isActive());
                 break;
+            case ATTRIBUTES:
+                break;
         }
     }
 
@@ -147,6 +151,9 @@ public class Main4 extends JFrame implements CommandListener{
                 case FILE_EXIT:
                     System.exit(0);
                     break;
+                case ATTRIBUTES:
+                    BaseDialog dlg = new TestAttr();
+                    dlg.showModal(rootPane);
             }
         } catch (Exception e){
             JOptionPane.showMessageDialog(this, e.getMessage());
@@ -224,6 +231,9 @@ public class Main4 extends JFrame implements CommandListener{
                 DataModule.open(fileName);
                 setTitle(APP_NAME+"["+fileName+"]");
                 open();
+                if (dlg.isNewFile()){
+                    showAttrDlg();
+                }
             } catch (Exception e){
                 JOptionPane.showMessageDialog(rootPane, e.getMessage());
             } finally {
@@ -231,6 +241,10 @@ public class Main4 extends JFrame implements CommandListener{
             }
     }
     
+    public void showAttrDlg(){
+        BaseDialog dlg = new TestAttr();
+        dlg.showModal(rootPane);
+    }
     protected void fileClose() throws Exception{
         if (DataModule.isActive()){
             close();
@@ -269,6 +283,7 @@ public class Main4 extends JFrame implements CommandListener{
         result.add(commands.getAction(DICTIONARY));
         result.addSeparator();
         result.add(commands.getAction(LOAD_SCRIPT));
+        result.add(commands.getAction(ATTRIBUTES));
         return result;
     }
 

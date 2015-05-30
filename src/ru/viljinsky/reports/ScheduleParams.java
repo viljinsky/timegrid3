@@ -2,6 +2,7 @@ package ru.viljinsky.reports;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.Values;
@@ -46,6 +47,24 @@ public class ScheduleParams {
             instance=new ScheduleParams();
         }
         return instance;
+    }
+    
+    public static Integer getParamCount(){
+        try{
+            return getInstance().map.size();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
+    public static Set<String> getParamNames(){
+        try{
+            return getInstance().map.keySet();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
     }
     
     public static Object getParamByName(String paramName) throws Exception{

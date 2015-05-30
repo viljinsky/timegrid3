@@ -126,6 +126,30 @@ public class ReportBuilder implements IReportBuilder{
          "</style>";
 
    /**
+    * Заголовок отчётов 
+    * Название учебного заведения
+    * Учебный период
+    * Период расписания
+    * @return 
+    */
+   private String getReportHeader(){
+       String result = "Report header";
+               
+       try{
+           result = ScheduleParams.getStringParamByName(ScheduleParams.SCHEDULE_SPAN)+"<br>"+
+            ScheduleParams.getStringParamByName(ScheduleParams.SCHEDULE_TITLE)+"<br>"+
+            ScheduleParams.getStringParamByName(ScheduleParams.EDUCATIONAL_INSTITUTION)+"<br>"+
+
+            ScheduleParams.getStringParamByName(ScheduleParams.DATE_BEGIN)+"&nbsp;"+
+            ScheduleParams.getStringParamByName(ScheduleParams.DATE_END)+"<br>";
+       } catch (Exception e){
+           e.printStackTrace();
+       }
+       
+       return result;
+   }
+   
+   /**
     * Преобразование dataseta в простую HTML таблицу
     * @param dataset
     * @return
@@ -232,6 +256,9 @@ public class ReportBuilder implements IReportBuilder{
         
         
         StringBuilder result = new StringBuilder();
+        
+//        result.append(getReportHeader());
+        
         Recordset r = DataModule.getRecordet("select label from depart where id="+depart_id);
         
         filter = new Values();
@@ -292,6 +319,7 @@ public class ReportBuilder implements IReportBuilder{
         schedule = DataModule.getSQLDataset("select a.day_id,a.bell_id,b.subject_name,a.depart_id from schedule a inner join subject b on a.subject_id=b.id");
         StringBuilder result = new StringBuilder();
         result.append("<h1>Расписание занятий по классам</h1>");
+        result.append(getReportHeader());
         
         Values values;
         
@@ -355,6 +383,7 @@ public class ReportBuilder implements IReportBuilder{
         schedule = DataModule.getSQLDataset("select day_id,bell_id,depart_id,subject_name from schedule a inner join subject b on a.subject_id=b.id");
         
         StringBuilder result = new StringBuilder();
+        result.append(getReportHeader());
         result.append("<h1>Расписание занятий по классам(2)</h1>");
         
         result.append("<table>");
@@ -622,6 +651,7 @@ public class ReportBuilder implements IReportBuilder{
     public String getTeacherSchedule() throws Exception{
         StringBuilder result = new StringBuilder();
         result.append("<h1>Расписание занятий по преподавателям</h1>");
+        result.append(getReportHeader());
         
         schedule = DataModule.getDataset("v_schedule");
         schedule.open();
@@ -677,7 +707,7 @@ public class ReportBuilder implements IReportBuilder{
         return "<h1>Пример расписания</h1>";
     }
     
-    /////////////////////////////////////////////////////////////////////////
+   ////////////////////Curriculum report //////////////////////////////////////
     
     
     Dataset curriculumDetails;
@@ -734,18 +764,7 @@ public class ReportBuilder implements IReportBuilder{
         curriculumDetails.open();
         
         result.append("<h1>Учебный план</h1>");
-        
-        result.append("<div style='font:bold'"+
-                
-        ScheduleParams.getStringParamByName(ScheduleParams.SCHEDULE_SPAN)+"<br>"+
-        ScheduleParams.getStringParamByName(ScheduleParams.SCHEDULE_TITLE)+"<br>"+
-        ScheduleParams.getStringParamByName(ScheduleParams.EDUCATIONAL_INSTITUTION)+"<br>"+
-        
-        ScheduleParams.getStringParamByName(ScheduleParams.DATE_BEGIN)+"&nbsp;"+
-        ScheduleParams.getStringParamByName(ScheduleParams.DATE_END)+"<br>"+
-                "</div>"
-                
-        );
+        result.append(getReportHeader());
         
         
         Dataset curriculumList = DataModule.getSQLDataset("select * from curriculum");

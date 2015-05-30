@@ -60,7 +60,6 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
 
     @Override
     public void close() throws Exception {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     
@@ -424,7 +423,7 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
 //            root = new DefaultMutableTreeNode("Учебный план");
             root.removeAllChildren();
             
-            skillList = DataModule.getDataset("skill");
+            skillList = DataModule.getSQLDataset("select * from skill order by sort_order");
             skillList.open();
             
             departList = DataModule.getDataset("depart");

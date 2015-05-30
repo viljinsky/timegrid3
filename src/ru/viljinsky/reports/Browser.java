@@ -82,13 +82,6 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
     }
     
     
-//      class Controls extends JPanel{  
-//        public Controls(){
-//            setLayout(new FlowLayout(FlowLayout.LEFT));
-//        }
-//    }
-    
-    
     JEditorPane text = new JEditorPane();
     JLabel statusLabel = new JLabel();
     public String host = "localhost";

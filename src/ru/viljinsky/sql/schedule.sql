@@ -134,6 +134,7 @@ create table teacher(
 drop table if exists skill;
 create table skill(
     id integer primary key autoincrement,
+    sort_order integer not null default 0,
     caption varchar(18) unique
 );
 

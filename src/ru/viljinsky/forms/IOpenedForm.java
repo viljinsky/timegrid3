@@ -745,7 +745,7 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
 
     @Override
     public void close() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 

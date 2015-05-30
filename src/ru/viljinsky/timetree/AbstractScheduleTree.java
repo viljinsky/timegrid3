@@ -149,7 +149,7 @@ public abstract class AbstractScheduleTree extends JTree{
         
         DefaultMutableTreeNode node;
         Dataset dataset ;
-        dataset = DataModule.getSQLDataset("select id,label,schedule_state_id from depart order by skill_id");
+        dataset = DataModule.getSQLDataset("select a.id,a.label,a.schedule_state_id from depart a inner join skill b on a.skill_id=b.id order by b.sort_order");
         dataset.open();
         for (int i=0;i<dataset.getRowCount();i++){
             node = new DefaultMutableTreeNode(new Depart(dataset.getValues(i)));

@@ -70,8 +70,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
     }
 
     public void initComponents() {
-        
-        
+
         tabbedPane.addTab("Unplaced", new UnplacedPanel(unplacedGrid));
         tabbedPane.addTab("WhoIsThere", new WhoIsTherePanel(whoIsThereGrid));
         tabbedPane.addTab("WhoCome", new JScrollPane(whoInvateGrid));
