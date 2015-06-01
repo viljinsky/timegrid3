@@ -8,14 +8,40 @@ package ru.viljinsky.timegrid;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
+import javax.imageio.ImageIO;
 import ru.viljinsky.sqlite.Values;
 
 /**
  *
  * @author вадик
  */
+
+class GroupImages{
+    public static final Image image1 = createImage("../images/check_box.png");
+    public static final Image image2= createImage("../images/check_box_checked.png");
+    
+    public static Image createImage(String path){
+        URL url = GroupImages.class.getResource(path);
+        if (url!=null){
+            try{
+                BufferedImage image = ImageIO.read(url);
+                return image;
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+}
+
+
 public class TimeTableGroup extends CellElement {
+    
     public int day_no;
     public int bell_id;
     public Integer depart_id;
@@ -74,28 +100,20 @@ public class TimeTableGroup extends CellElement {
         }
         
         // ready
-        checkReady = new Rectangle(b.x+b.width-10,b.y,10,10);
+        if (schedule_state_id<4){
+        checkReady = new Rectangle(b.x+b.width-12,b.y,12,12);
         if (ready)
-            g.setColor(color.YELLOW);
+            g.drawImage(GroupImages.image2, checkReady.x, checkReady.y, null);
         else
-            g.setColor(color.WHITE);
+            g.drawImage(GroupImages.image1,  checkReady.x, checkReady.y, null);
         
-        g.fillRect(checkReady.x,checkReady.y, checkReady.width, checkReady.height);
-        
-        
-        g.setColor(Color.BLACK);
-        g.drawRect(checkReady.x,checkReady.y, checkReady.width, checkReady.height);
-        
-        // checked
-        checkState = new Rectangle(b.x+b.width-20, b.y, 10, 10);
-        if (schedule_state_id==4)
-            g.setColor(Color.GREEN);
-        else
-            g.setColor(Color.WHITE);
-        g.fillRect(checkState.x, checkState.y, checkState.width, checkState.height);
-        
-        g.setColor(Color.BLACK);
-        g.drawRect(checkState.x, checkState.y, checkState.width, checkState.height);
+        }
+//        // checked
+//        checkState = new Rectangle(b.x+b.width-24, b.y, 12, 12);
+//        if (schedule_state_id==4)
+//            g.drawImage(GroupImages.image2, checkState.x, checkState.y, null);
+//        else
+//            g.drawImage(GroupImages.image1, checkState.x, checkState.y, null);
     }
 
     public Values getValues(){

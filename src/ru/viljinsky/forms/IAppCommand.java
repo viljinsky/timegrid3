@@ -14,6 +14,8 @@ public interface IAppCommand {
 
     public static final String REFRESH = "REFRESH";
     
+    public static final String REFRESH_TREE    = "REFRESH_TREE";
+    
     public static final String GRID_APPEND      = "GRID_APPEND";
     public static final String GRID_EDIT        = "GRID_EDIT";
     public static final String GRID_DELETE      = "GRID_DELETE";

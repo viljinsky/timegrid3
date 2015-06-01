@@ -205,7 +205,7 @@ public class TimeTableGrid extends TimeGrid {
                 group = (TimeTableGroup) (ce);
                 sql = String.format(sql, group.day_no + col - StartCol, group.bell_id + row - startRow, 
                         group.day_no, group.bell_id, group.depart_id, group.subject_id, group.group_id);
-                System.out.println(sql);
+//                System.out.println(sql);
                 DataModule.execute(sql);
                 group.day_no += col - StartCol;
                 group.bell_id += row - startRow;
@@ -655,7 +655,9 @@ public class TimeTableGrid extends TimeGrid {
         setDepartSchedule(depart_id);
         if (cell!=null){
             scrollRectToVisible(getBound(cell.col,cell.row));
+            setSelectedCell(cell);
         }
+        onTimeGridChange(new Values("depart_id",depart_id),cell);
     }
     
     public void setDepartSchedule(int depart_id) throws Exception{
@@ -668,8 +670,11 @@ public class TimeTableGrid extends TimeGrid {
 
     public void setTeacherSchedule(int teacher_id,Cell cell) throws Exception{
         setTeacherSchedule(teacher_id);
-        if (cell!=null)
+        if (cell!=null){
             scrollRectToVisible(getBound(cell.col, cell.row));
+            setSelectedCell(cell);
+        }   
+        onTimeGridChange(new Values("teacher_id",teacher_id),cell);
     }
     
     public void setTeacherSchedule(int teacher_id) throws Exception{
@@ -682,9 +687,13 @@ public class TimeTableGrid extends TimeGrid {
     
     public void setRoomSchedule(int room_id,Cell cell) throws Exception{
         setRoomSchedule(room_id);
-        if (cell!=null)
+        if (cell!=null){
             scrollRectToVisible(getBound(cell.col,cell.row));
+            setSelectedCell(cell);
+        }
+        onTimeGridChange(new Values("room_id",room_id),cell);
     }
+    
     public void setRoomSchedule(int room_id) throws Exception{
         Values values = new Values("room_id", room_id);
         avalableCells=DataTask.getRoomAvalableCells(room_id);
@@ -692,6 +701,12 @@ public class TimeTableGrid extends TimeGrid {
         Recordset r = DataModule.getRecordet("select room_name from room where id="+room_id);
         scheduleTitle = String.format("Расписание помещения \"%s\"", r.getString(0));
     }
+    
+    public void onTimeGridChange(Values values, Cell cell){
+        System.out.println("ON_TYME_GRID_CHANGE"+(cell==null?"  -":" "+cell.toString())+" "+values);
+        
+    }
+    
     /**
      * Получение заголовка расписания:
      * 

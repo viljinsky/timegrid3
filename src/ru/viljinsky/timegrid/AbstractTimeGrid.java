@@ -424,7 +424,7 @@ public abstract class AbstractTimeGrid extends JPanel {
         if (col == selectedCol && row == selectedRow && isFocusOwner()) {
             color = Color.white;
         }
-        if (overCell != null) {
+        if (overCell != null && dragObjects!=null) {
             if (col == overCell.col && row == overCell.row) {
                 color = Color.yellow;
             }
