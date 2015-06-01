@@ -12,6 +12,7 @@ public class CommandDictionary extends HashMap<String, String> implements IAppCo
     private static CommandDictionary instance = null;
     private static final String[][] SRC = {
         {REFRESH,                "Обновить"},
+        {REFRESH_TREE,           "Обновить"},
 
         {CREATE_CURRICULUM,      "Создать;Создать новый учебный план"},
         {COPY_CURRICULUM,        "Копировать;Копировать учебный план из ранее созданного"},

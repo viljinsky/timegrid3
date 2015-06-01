@@ -26,12 +26,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import static ru.viljinsky.forms.IAppCommand.CREATE_CURRICULUM;
-import static ru.viljinsky.forms.IAppCommand.CREATE_DEPART;
-import static ru.viljinsky.forms.IAppCommand.DELETE_CURRICULUM;
-import static ru.viljinsky.forms.IAppCommand.EDIT_CURRICULUM;
-import static ru.viljinsky.forms.IAppCommand.EDIT_CURRICULUM_DETAIL;
-import static ru.viljinsky.forms.IAppCommand.FILL_CURRICULUM;
+//import static ru.viljinsky.forms.IAppCommand.CREATE_CURRICULUM;
+//import static ru.viljinsky.forms.IAppCommand.CREATE_DEPART;
+//import static ru.viljinsky.forms.IAppCommand.DELETE_CURRICULUM;
+//import static ru.viljinsky.forms.IAppCommand.EDIT_CURRICULUM;
+//import static ru.viljinsky.forms.IAppCommand.EDIT_CURRICULUM_DETAIL;
+//import static ru.viljinsky.forms.IAppCommand.FILL_CURRICULUM;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.Grid;
@@ -47,6 +47,55 @@ import ru.viljinsky.sqlite.Values;
 
 
 public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,CommandListener{
+    
+    Integer skill_id = null;
+    Integer curriculum_id = null;
+    Integer subject_id = null;
+    Integer depart_id = null;
+    
+    public static final String MSG_GREATE_DEPART_OK = "Класс \"%s\" успешно создан";    
+    
+    CurriculumTree tree = new CurriculumTree();
+
+    Grid grid = new curriculumGrid();
+
+    CommandPanel commandPanel = new CommandPanel();
+    
+    
+    public CurriculumPanel() {
+        setLayout(new BorderLayout());
+        setPreferredSize(new Dimension(800,600));
+        initComponents();
+    }
+    
+    public void initComponents(){
+        JSplitPane splitPane,topSplit;
+        splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        topSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    
+        topSplit.setLeftComponent(new JScrollPane(tree));
+        topSplit.setRightComponent(new JScrollPane(grid));
+        topSplit.setDividerLocation(200);
+        
+        splitPane.setTopComponent(topSplit);
+        splitPane.setBottomComponent(new JScrollPane(new JTextPane()));
+        splitPane.setResizeWeight(.5);
+        
+        add(splitPane);
+        add(commandPanel,BorderLayout.PAGE_START);
+        
+        commandMng.setCommands(CURRICULUM_COMMANDS);
+        commandMng.addCommandListener(this);
+        for (Action a:commandMng.getActions()){
+            commandPanel.addCommand(a);
+        }
+        grid.addExtAction(commandMng.getAction(EDIT_CURRICULUM_DETAIL));
+        commandMng.updateActionList();
+        
+        tree.actions= commandMng.getActions(new String[]{
+            CREATE_CURRICULUM,EDIT_CURRICULUM,DELETE_CURRICULUM,null,FILL_CURRICULUM,CREATE_DEPART});
+    }
+    
 
     @Override
     public String getCaption() {
@@ -60,23 +109,18 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
 
     @Override
     public void close() throws Exception {
+        tree.clear();
     }
-
-    
-    Integer skill_id = null;
-    Integer curriculum_id = null;
-    Integer subject_id = null;
-    Integer depart_id = null;
-    
-    CommandPanel commandPanel = new CommandPanel();
-    
-    public static final String MSG_GREATE_DEPART_OK = "Класс \"%s\" успешно создан";    
 
     @Override
     public void updateAction(Action a){
             String command = (String)a.getValue(Action.ACTION_COMMAND_KEY);
             switch (command){
+                case REFRESH:
+                    a.setEnabled(DataModule.isActive());
+                    break;
                 case CREATE_CURRICULUM:
+                    a.setEnabled(DataModule.isActive());
                     break;
                 case EDIT_CURRICULUM:
                     a.setEnabled(curriculum_id!=null && skill_id==null);
@@ -277,7 +321,8 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
 //            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
-    abstract class CurriculumTree extends JTree{
+    
+    class CurriculumTree extends JTree{
         
         DefaultTreeModel model;
         DefaultMutableTreeNode root;
@@ -285,10 +330,15 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
         Dataset departList;
         Action[] actions = {};
         
-        public CurriculumTree(){
+        public void clear(){
             root = new DefaultMutableTreeNode("Учебный план");
             model = new DefaultTreeModel(root);
-            setModel(treeModel);
+            setModel(model);
+        }
+        
+        
+        public CurriculumTree(){
+            clear();
             
             setEditable(true);
             getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -350,7 +400,24 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
         }
         
         
-        public abstract void skillChange();
+        public void skillChange(){
+            Map<String,Object> filter = new HashMap<>();
+            
+            if (skill_id!=null && curriculum_id!=null){
+                filter.put("curriculum_id", curriculum_id);
+                filter.put("skill_id",skill_id);
+            } else {
+                filter.put("curriculum_id", null);
+                filter.put("skill_id",null);
+            }
+            
+            try{
+                grid.setFilter(filter);            
+                commandMng.updateActionList();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
         
         
         public Integer addCurriculim(Curriculum curriculum) throws Exception{
@@ -464,34 +531,32 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
     }
 
     
-    CurriculumTree tree = new CurriculumTree(){
-
-        @Override
-        public void skillChange() {
-            System.out.println(skill_id+" "+curriculum_id);
-            Map<String,Object> filter = new HashMap<>();
-            
-            if (skill_id!=null && curriculum_id!=null){
-                filter.put("curriculum_id", curriculum_id);
-                filter.put("skill_id",skill_id);
-            } else {
-                filter.put("curriculum_id", null);
-                filter.put("skill_id",null);
-            }
-            System.out.println(filter);
-            try{
-                grid.setFilter(filter);            
-                commandMng.updateActionList();
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-            
-        }
-        
-    };
+//    {
+//
+//        @Override
+//        public void skillChange() {
+//            System.out.println(skill_id+" "+curriculum_id);
+//            Map<String,Object> filter = new HashMap<>();
+//            
+//            if (skill_id!=null && curriculum_id!=null){
+//                filter.put("curriculum_id", curriculum_id);
+//                filter.put("skill_id",skill_id);
+//            } else {
+//                filter.put("curriculum_id", null);
+//                filter.put("skill_id",null);
+//            }
+//            System.out.println(filter);
+//            try{
+//                grid.setFilter(filter);            
+//                commandMng.updateActionList();
+//            } catch (Exception e){
+//                e.printStackTrace();
+//            }
+//            
+//        }
+//};
     
-    Grid grid = new Grid(){
-
+    class curriculumGrid extends Grid{
         @Override
         public void gridSelectionChange() {
             int row = getSelectedRow();
@@ -507,47 +572,34 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
                 e.printStackTrace();
             }
         }
-    };
-
-    public CurriculumPanel() {
-        setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(800,600));
-        initComponents();
     }
     
-    public void initComponents(){
-        JSplitPane splitPane,topSplit;
-        splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        topSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        
-        topSplit.setLeftComponent(new JScrollPane(tree));
-        topSplit.setRightComponent(new JScrollPane(grid));
-        topSplit.setDividerLocation(200);
-        
-        splitPane.setTopComponent(topSplit);
-        splitPane.setBottomComponent(new JScrollPane(new JTextPane()));
-        splitPane.setResizeWeight(.5);
-        
-        add(splitPane);
-        add(commandPanel,BorderLayout.PAGE_START);
-        
-        commandMng.setCommands(CURRICULUM_COMMANDS);
-        commandMng.addCommandListener(this);
-        for (Action a:commandMng.getActions()){
-            commandPanel.addCommand(a);
-        }
-        grid.addExtAction(commandMng.getAction(EDIT_CURRICULUM_DETAIL));
-        commandMng.updateActionList();
-        
-        tree.actions= commandMng.getActions(new String[]{
-            CREATE_CURRICULUM,EDIT_CURRICULUM,DELETE_CURRICULUM,null,FILL_CURRICULUM,CREATE_DEPART});
-    }
+//    {
+//
+//        @Override
+//        public void gridSelectionChange() {
+//            int row = getSelectedRow();
+//            try{
+//            if (row<0){
+//                subject_id=null;
+//            } else {
+//                subject_id=getValues().getInteger("subject_id");
+//            }
+//            commandMng.updateActionList();
+//            System.out.println(subject_id);
+//            } catch (Exception e){
+//                e.printStackTrace();
+//            }
+//        }
+//    };
+
     
     @Override
     public void open() throws Exception{
         Dataset dataset = DataModule.getDataset("v_curriculum_detail");
         grid.setDataset(dataset);
         tree.open();
+        commandMng.updateActionList();
         
     }
     

@@ -102,7 +102,8 @@ public class TimeTableGrid extends TimeGrid {
         if (filter!=null)
             reload();
         else{
-            avalableCells.clear();
+            avalableCells=null;
+            //avalableCells.clear();
             emptyCells.clear();
             cells.clear();
             realign();

@@ -14,7 +14,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -427,26 +426,9 @@ public class Grid extends JTable implements CommandListener,IAppCommand {
             
         }
         
-//        int row = getSelectedRow();
-//        if (row>=0){
-//            model.dataset.remove(convertRowIndexToModel(row));
-//            model.fireTableDataChanged();
-//            if (row>getRowCount()-1){
-//                row = getRowCount()-1;
-//            }
-//            if (row>=0){
-//                getSelectionModel().setSelectionInterval(row, row);
-//            }
-//        }
     }
 
     public void gridSelectionChange() {
-//        System.out.println("gridSelectionChange" + getSelectedRow());
-//        int row = getSelectedRow();
-//        if (row >= 0) {
-//            Values map = model.dataset.getValues(row);
-//            System.out.println(map);
-//        }
     }
     
     public void setFilter(Map<String,Object> filter) throws Exception{
