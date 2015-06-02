@@ -1,16 +1,4 @@
-insert into week(id,caption) values (0,'I/II нед.');
-insert into week(id,caption) values (1,'I нед.');
-insert into week(id,caption) values (2,'II нед.');
-
 insert into building (id,building_name) values (1,'Главное здание');
-
-
-
-
-insert into group_type (id,group_type_caption) values (0,'весь класс');
-insert into group_type (id,group_type_caption) values (1,'м.-д.');
-insert into group_type (id,group_type_caption) values (2,'группы');
-
 
 insert into day_list(day_no,day_short_name,day_caption) values (1,'Пн','Понедельник');
 insert into day_list(day_no,day_short_name,day_caption) values (2,'Вт','Вторник');
@@ -31,8 +19,6 @@ insert into bell_list(bell_id,time_start,time_end) values (8,'17:00','17:45');
 insert into bell_list(bell_id,time_start,time_end) values (9,'18:00','18:45');
 insert into bell_list(bell_id,time_start,time_end) values (10,'19:00','19:45');
 
-insert into profile_type(id,caption,default_profile_id) values (1,'Профиль преподавателя',1);
-insert into profile_type(id,caption,default_profile_id) values (2,'Профиль помещения',8);
 
 --    Профили преподавателей
 
@@ -52,9 +38,9 @@ insert into profile(id,profile_type_id,profile_name) values (10,2,'Ком.каб
 insert into profile(id,profile_type_id,profile_name) values (11,2,'Лингофонный каб.');
 
 
-insert into shift_type(id,caption,default_shift_id) values (1,'График класса',1);
-insert into shift_type(id,caption,default_shift_id) values (2,'График преподователя',3);
-insert into shift_type(id,caption,default_shift_id) values (3,'График помещения',5);
+-- insert into shift_type(id,caption,default_shift_id) values (1,'График класса',1);
+-- insert into shift_type(id,caption,default_shift_id) values (2,'График преподователя',3);
+-- insert into shift_type(id,caption,default_shift_id) values (3,'График помещения',5);
 
 insert into shift(id,shift_type_id,shift_name) values(1,1,'Первая смена');  
 insert into shift(id,shift_type_id,shift_name) values(2,1,'Вторая смена');  
@@ -254,13 +240,4 @@ insert into subject_domain(id,domain_caption) values (4,'Филолагичес�
 insert into subject_domain(id,domain_caption) values (5,'Трудовое обучение');
 insert into subject_domain(id,domain_caption) values (6,'Физкультурв');
 insert into subject_domain(id,domain_caption) values (7,'Искуство');
-
-
-
-
-
-
-
-
-
 

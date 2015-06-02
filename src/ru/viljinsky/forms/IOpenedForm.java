@@ -191,6 +191,9 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
         String command = (String)action.getValue(Action.ACTION_COMMAND_KEY);
     
         switch (command){
+            case CREATE_ROOM:
+                action.setEnabled(DataModule.isActive());
+                break;
             case (EDIT_ROOM):
                 action.setEnabled(room_id!=null);
                 break;
@@ -671,6 +674,9 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
     public void updateAction(Action action) {
         String command = (String)action.getValue(Action.ACTION_COMMAND_KEY);
         switch (command){
+            case REFRESH:
+                action.setEnabled(DataModule.isActive());
+                break;
             case EDIT_DEPART:
                 action.setEnabled(depart_id!=null);
                 break;
@@ -779,6 +785,9 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
     public void updateAction(Action action){
         String command = (String)action.getValue(Action.ACTION_COMMAND_KEY);
         switch (command){
+            case CREATE_TEACHER:
+                action.setEnabled(DataModule.isActive());
+                break;
             case EDIT_TEACHER:
                 action.setEnabled(teacher_id!=null);
                 break;

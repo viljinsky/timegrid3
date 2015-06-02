@@ -1,5 +1,4 @@
-
-drop table if exists schedule_state;
+-- Статус расписания
 create table schedule_state (id integer primary key not null,state_description varchar(40));
 
 insert into schedule_state (id,state_description) values (0,'Новое');
@@ -9,6 +8,48 @@ insert into schedule_state (id,state_description) values (3,'Составлен�
 insert into schedule_state (id,state_description) values (4,'Действует');
 
 
+-- Тип группы;
+create table group_type(
+    id integer primary key,
+    group_type_caption varchar(40)
+);
+
+insert into group_type (id,group_type_caption) values (0,'весь класс');
+insert into group_type (id,group_type_caption) values (1,'м.-д.');
+insert into group_type (id,group_type_caption) values (2,'группы');
+
+
+-- Тип профиля для ;
+create table profile_type (
+    id integer primary key,
+    caption varchar(45),
+    default_profile_id integer
+);
+
+insert into profile_type(id,caption,default_profile_id) values (1,'Профиль преподавателя',1);
+insert into profile_type(id,caption,default_profile_id) values (2,'Профиль помещения',8);
+
+
+-- Регулярность проведения занятий
+create table group_sequence (
+    id integer primary key ,
+    group_sequence_name varchar(20)
+);
+
+insert into group_sequence (id,group_sequence_name) values (0,'Каждую неделю');
+insert into group_sequence (id,group_sequence_name) values (1,'Через неделю');
+
+-- Недели 
+create table week(
+    id integer primary key ,             -- 0 каждую неделю; 1,2,.. 1-ая.2-я .. неделя
+    caption varchar(10)
+);
+insert into week(id,caption) values (0,'I/II нед.');
+insert into week(id,caption) values (1,'I нед.');
+insert into week(id,caption) values (2,'II нед.');
+
+
+-- Предметная область
 create table subject_domain(
     id innteger primary key not null,
     domain_caption varchr(40) not null
@@ -24,18 +65,6 @@ create table stream (
     teacher_id integer references teacher(id)
 );
 
-drop table if exists group_sequence;
-create table group_sequence (id integer primary key ,group_sequence_name varchar(20));
-
-insert into group_sequence (id,group_sequence_name) values (0,'Каждую неделю');
-insert into group_sequence (id,group_sequence_name) values (1,'Через неделю');
-
-
-drop table if exists week;
-create table week(
-    id integer primary key ,             -- 0 каждую неделю; 1,2,.. 1-ая.2-я .. неделя
-    caption varchar(10)
-);
 
 drop table if exists building;
 create table building(
@@ -67,13 +96,6 @@ create table subject(
 --     color_rgb varchar(20),
 );
 
-drop table if exists profile_type;
-create table profile_type (
-    id integer primary key,
-    caption varchar(45),
-    default_profile_id integer
-);
-
 drop table if exists profile;
 create table profile(
     id integer primary key autoincrement,
@@ -89,14 +111,17 @@ create table profile_item(
     primary key (profile_id,subject_id)
 );
 
-drop table if exists shift_type;
+-- Тип графика
 create table shift_type(
     id integer primary key,
     caption varchar(45),
     default_shift_id integer 
 );
+insert into shift_type(id,caption,default_shift_id) values (1,'График класса',1);
+insert into shift_type(id,caption,default_shift_id) values (2,'График преподователя',3);
+insert into shift_type(id,caption,default_shift_id) values (3,'График помещения',5);
 
-drop table if exists shift;
+-- Графики
 create table shift(
     id integer primary key autoincrement,
     shift_type_id integer references shift_type(id),
@@ -104,7 +129,7 @@ create table shift(
     unique (shift_type_id,shift_name)
 );
 
-drop table if exists shift_detail;
+-- Дни и часы графиков
 create table shift_detail(
     shift_id integer references shift(id) on delete cascade,
     day_id integer references day_list(day_no),
@@ -114,7 +139,7 @@ create table shift_detail(
     unique (shift_id,day_id,bell_id)
 );
 
-drop table if exists teacher;
+-- Список преподавателей
 create table teacher(
     id integer primary key autoincrement,
     last_name varchar(18) not null,
@@ -129,7 +154,7 @@ create table teacher(
 );
 
 
-drop table if exists skill;
+-- Уровеь обучения
 create table skill(
     id integer primary key autoincrement,
     sort_order integer not null default 0,
@@ -163,18 +188,13 @@ create table subject_group (
     primary key (depart_id,subject_id,group_id)
 );
 
+-- Учебный план
 drop table if exists curriculum; 
 create table curriculum(
     id integer primary key autoincrement,
     caption varchar(18) not null unique
 );
-
-drop table if exists group_type;
-create table group_type(
-    id integer primary key,
-    group_type_caption varchar(40)
-);
-
+-- Ддетали учебного плана
 drop table if exists curriculum_detail;
 create table curriculum_detail(
     curriculum_id integer references curriculum(id) on delete cascade,
@@ -189,25 +209,25 @@ create table curriculum_detail(
     constraint check_hour check (hour_per_week>=hour_per_day)    
 );
 
-
+-- список дней в сетке расписания
 drop table if exists day_list;
 create table day_list (
   day_no integer primary key,
   day_short_name varchar(3),
   day_caption varchar(10)
 );
-
+-- список часо в седке расписания
 drop table if exists bell_list;
 create table bell_list (
   bell_id integer primary key,
   time_start time,
   time_end time);
 
+-- сетка расписания
 drop table if exists schedule;
 create table schedule (
     day_id integer references day_list(day_no),
     bell_id integer references bell_list(bell_id),
---     week_id integer  default 0 references week(id),
     depart_id integer references depart(id) on delete cascade,
     subject_id integer references subject(id),
     group_id integer,
@@ -217,7 +237,7 @@ create table schedule (
     primary key (day_id,bell_id,depart_id,subject_id,group_id) 
 );
 
-
+--------------------------------------------------------------------------------
 
 create view v_depart_on_schedule as
 select distinct a.depart_id,a.subject_id,c.group_type_id,

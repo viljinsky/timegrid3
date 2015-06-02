@@ -38,7 +38,7 @@ public class Main4 extends JFrame implements CommandListener{
     public static final String MENU_FILE   = "Файл";
     
     public static final String FILE_OPEN   = "FILE_OPEN";
-    public static final String FILE_NEW    = "FILE_NEW";
+//    public static final String FILE_NEW    = "FILE_NEW";
     public static final String FILE_CLOSE  = "FILE_CLOSE";
     public static final String FILE_EXIT   = "FILE_EXIT";
     public static final String LOAD_SCRIPT = "LOAD_SCRIPT";
@@ -56,7 +56,7 @@ public class Main4 extends JFrame implements CommandListener{
     CommandMngr commands = new CommandMngr(new String[]{
         FILE_CLOSE,
         FILE_EXIT,
-        FILE_NEW,
+//        FILE_NEW,
         FILE_OPEN,
         DICTIONARY,
         SHIFT,
@@ -114,7 +114,10 @@ public class Main4 extends JFrame implements CommandListener{
             case SHIFT:
                 action.setEnabled(DataModule.isActive());
                 break;
+            case LOAD_SCRIPT:
+                action.setEnabled(DataModule.isActive());
             case ATTRIBUTES:
+                action.setEnabled(DataModule.isActive());
                 break;
         }
     }
@@ -201,10 +204,17 @@ public class Main4 extends JFrame implements CommandListener{
             
             @Override
             public void doOnEntry() throws Exception {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                modalResult=RESULT_OK;
             }
         };
-        dlg.showModal(this);
+        if (dlg.showModal(this)==BaseDialog.RESULT_OK)
+            for (IOpenedForm form:forms){
+                try{
+                    form.open();
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
     }
     
     public void fileOpen(){
@@ -269,7 +279,7 @@ public class Main4 extends JFrame implements CommandListener{
     
     public JMenu createFileMenu(){
         JMenu result = new JMenu(MENU_FILE);
-        result.add(commands.getAction(FILE_NEW));
+//        result.add(commands.getAction(FILE_NEW));
         result.add(commands.getAction(FILE_OPEN));
         result.add(commands.getAction(FILE_CLOSE));
         result.addSeparator();

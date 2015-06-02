@@ -42,14 +42,14 @@ public class CommandDictionary extends HashMap<String, String> implements IAppCo
 
     // teacher
 
-        {CREATE_TEACHER,         "Создать;Добавить запись о преподавателе"},
+        {CREATE_TEACHER,         "Добавить;Добавить запись о преподавателе"},
         {EDIT_TEACHER,           "Изменить;Изменить запись о преподавателе"},
         {DELETE_TEACHER,         "Удалить;Удалить запись о преподавателе"},
 
     // room
-        {CREATE_ROOM,            "Добавить"},
-        {EDIT_ROOM,              "Изменить"},
-        {DELETE_ROOM,            "Удалить"},
+        {CREATE_ROOM,            "Добавить;Добавить запись о помещении"},
+        {EDIT_ROOM,              "Изменить;Изменить запись о попмещении"},
+        {DELETE_ROOM,            "Удалить;Удалить запись о помещении"},
 
     // shift panel
         {CREATE_SHIFT,           "Создать график"},

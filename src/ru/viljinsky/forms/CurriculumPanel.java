@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.Action;
@@ -159,6 +160,7 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
                     if (Dialogs.editCurriculum(this,curriculum_id)){
 //                        curriculumComboBox.requery();
 //                        curriculumComboBox.setValue(curriculum_id);
+                        tree.editCurriculum(new Curriculum(curriculum_id,"XXX"));
                     };
                     break;
                     
@@ -298,26 +300,37 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
         @Override
         public void treeNodesChanged(TreeModelEvent e) {
             DefaultMutableTreeNode node;
-            TreePath path = e.getTreePath();
-            if (path!=null){
-                node = (DefaultMutableTreeNode)path.getLastPathComponent();
-                System.out.println("Editing "+node.toString());
+            node = (DefaultMutableTreeNode)e.getTreePath().getLastPathComponent();
+            int index = e.getChildIndices()[0];
+            node = (DefaultMutableTreeNode)node.getChildAt(index);
+            System.out.println(node);
+            try{
+                if (curriculum_id!=null){
+                    try{
+                        DataModule.execute("update curriculum set caption='"+node.toString()+"' where id="+curriculum_id);
+                        DataModule.commit();
+                    } catch (Exception ee){
+                        DataModule.rollback();
+                        ee.printStackTrace();
+                    }
+                }
+            } catch (SQLException r){
             }
         }
 
         @Override
         public void treeNodesInserted(TreeModelEvent e) {
-//            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            System.out.println("treeNodesInserted");
         }
 
         @Override
         public void treeNodesRemoved(TreeModelEvent e) {
-//            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            System.out.println("treeNodesRemoved");
         }
 
         @Override
         public void treeStructureChanged(TreeModelEvent e) {
-//            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            System.out.println("treeStructureChanged");
         }
     }
     
@@ -418,6 +431,12 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
             }
         }
         
+        public void editCurriculum(Curriculum curriculum) throws Exception{
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)getSelectionPath().getLastPathComponent();
+            node.setUserObject(curriculum);
+            model.nodeChanged(node);
+//            model.nodeChanged(new DefaultMutableTreeNode(curriculum));
+        }
         
         public Integer addCurriculim(Curriculum curriculum) throws Exception{
             TreePath path = getSelectionPath();

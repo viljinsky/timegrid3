@@ -20,6 +20,8 @@ import ru.viljinsky.forms.CommandListener;
 import ru.viljinsky.forms.CommandMngr;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.filechooser.FileFilter;
+import ru.viljinsky.sqlite.DataModule;
 
 /**
  *
@@ -30,10 +32,12 @@ import java.util.regex.Pattern;
 public class ScriptEditor extends JEditorPane implements CommandListener{
     CommandMngr commands = new CommandMngr();
     JFileChooser fc = new JFileChooser(new File("."));
+//    SqlFilter sqlFilter = new SqlFilter();
     Document doc;
     
     public ScriptEditor(String type, String text) {
         super("text",text);
+        fc.setFileFilter(new SqlFilter());
         doc = getDocument();
         setPreferredSize(new Dimension(500,400));
         addMouseListener(new MouseAdapter() {
@@ -89,21 +93,48 @@ public class ScriptEditor extends JEditorPane implements CommandListener{
         String s = doc.getText(0, doc.getLength());
         String[] items = p.split(s);
         int n=0;
-        for (String ss:items){
-            Matcher m = p2.matcher(ss);
-            String res= m.replaceAll("");
-            if (!res.trim().isEmpty())
-                System.out.println(n+++"-> "+res.trim());
+        String res="";
+        try{
+            for (String ss:items){
+                Matcher m = p2.matcher(ss);
+                res= m.replaceAll("");
+                if (!res.trim().isEmpty()){
+                    System.out.println(n+++"-> "+res.trim());
+                    DataModule.execute(res.trim());
+                }
+            }
+            DataModule.commit();
+        } catch (Exception e){
+            DataModule.rollback();
+            throw new Exception("Ошибка при выполнении скрипта\n\""+res+"\"\n"+e.getMessage());
         }
         return true;
     }
     
+    class SqlFilter extends FileFilter{
+
+        @Override
+        public boolean accept(File f) {
+            if (f.isDirectory())
+                return true;
+            String fName = f.getName();
+            return fName.endsWith(".sql");
+        }
+
+        @Override
+        public String getDescription() {
+            return "SQL скрит";
+        }
+    }
+    
     @Override
     public void doCommand(String command) {
+        
         System.out.println(command);
         try{
             switch (command){
                 case "LOAD":
+//                    fc.setFileFilter(new SqlFilter());
                     int retval = fc.showOpenDialog(this);
                     if (retval==JFileChooser.APPROVE_OPTION){
                         loadScript(fc.getSelectedFile());
@@ -111,12 +142,12 @@ public class ScriptEditor extends JEditorPane implements CommandListener{
                     break;
                 case "EXECUTE":
                     executeScript();
-                    JOptionPane.showMessageDialog(this, "Script успешно выполнен");
+                    JOptionPane.showMessageDialog(null, "Script успешно выполнен");
                     break;
             }
         } catch (Exception e){
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, e.getMessage());
+            JOptionPane.showMessageDialog(null, e.getMessage());
         }
     }
 
