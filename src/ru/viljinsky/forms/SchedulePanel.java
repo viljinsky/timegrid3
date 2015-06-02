@@ -353,8 +353,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
     class WhoInvateGrid extends Grid {
 
         private static final String SQL_INVATE_DEPART = 
-            "select distinct b.depart_id,b.group_id,b.subject_id,a.teacher_id," +
-            "a.room_id,t.last_name,s.subject_name,r.room_name from schedule a \n" + 
+            "select * from v_schedule a \n"+    
             "inner join subject_group b on a.depart_id=b.depart_id and a.group_id=b.group_id and a.subject_id=b.subject_id\n"+
             "inner join subject s on s.id=a.subject_id\n" + "left join teacher t on t.id=a.teacher_id\n" + 
             "left join room r on r.id=a.room_id\n" + 
@@ -369,15 +368,15 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
             "            where room.id=a.room_id and m.day_id=%d and m.bell_id=%d);";
         
         private static final String SQL_INVATE_TEACHER = 
-            "select a.day_id,a.bell_id,a.depart_id,a.group_id,a.subject_id,a.teacher_id,a.room_id \n"+
-            "   from schedule a\n" +
+            "select * \n"    +
+            "   from v_schedule a\n" +
             "where a.teacher_id=%teacher_id% \n" +
             "and not exists(select * from schedule \n"+
             "where day_id=%day_id% and bell_id=%bell_id% and depart_id=a.depart_id and group_id=a.group_id);";
 
         public static final String SQL_INVATE_ROOM = 
             "select * \n"+
-            "from schedule a \n"+
+            "from v_schedule a \n"+
             "  where a.room_id=%room_id% and not exists (\n"+
             "  select * from schedule where depart_id=a.depart_id and group_id=a.group_id and day_id=%day_id% and bell_id=%bell_id% "+
             "\n) ";

@@ -60,7 +60,11 @@ abstract class SQLReader{
 
 public class CreateData {
     
-    public static final String[] scriptList = {"/ru/viljinsky/sql/schedule.sql","/ru/viljinsky/sql/data.sql"};
+    public static final String[] scriptList = {
+        "/ru/viljinsky/sql/schedule.sql",
+        "/ru/viljinsky/sql/data.sql",
+        "/ru/viljinsky/sql/view.sql"
+    };
     
     
     Connection con = null;

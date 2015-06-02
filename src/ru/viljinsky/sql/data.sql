@@ -2,8 +2,6 @@ insert into week(id,caption) values (0,'I/II нед.');
 insert into week(id,caption) values (1,'I нед.');
 insert into week(id,caption) values (2,'II нед.');
 
-
-
 insert into building (id,building_name) values (1,'Главное здание');
 
 
@@ -111,24 +109,6 @@ insert into skill(id,caption) values(3,'10-класс');
 
 
 insert into curriculum (id,caption) values (1,'Учебный план (1)');
--- insert into curriculum (id,skill_id,caption) values (2,2,'Уч. план 9-го класса');
--- insert into curriculum (id,skill_id,caption) values (3,3,'Уч. план 10-го класса');
-
--- insert into curriculum_detail(curriculum_id,skill_id,subject_id,hour_per_day,hour_per_week,group_sequence_id)
---   values(1,1,1,1,2,0);
---     
--- insert into curriculum_detail(curriculum_id,skill_id,subject_id,hour_per_day,hour_per_week,group_sequence_id)
---   values(1,1,2,1,2,0);
--- 
--- insert into curriculum_detail(curriculum_id,skill_id,subject_id,hour_per_day,hour_per_week,group_sequence_id)
---   values(1,1,3,1,2,0);
-
--- insert into depart(id,label,skill_id,shift_id,curriculum_id) values (1,'8-a',1,1,1);
--- insert into depart(id,label,skill_id,shift_id,curriculum_id) values (2,'8-б',1,1,1);
--- insert into depart(id,label,skill_id,shift_id,curriculum_id) values (3,'9-а',2,1,1);
--- insert into depart(id,label,skill_id,shift_id,curriculum_id) values (4,'9-б',2,1,1);
--- insert into depart(id,label,skill_id,shift_id,curriculum_id) values (5,'10-а',3,1,1);
--- insert into depart(id,label,skill_id,shift_id,curriculum_id) values (6,'10-б',3,1,1);
 
 --  *************************  ЗАПОЛНЕНИЕ ГРАФИКОВ  ****************************
 delete from shift_detail;

@@ -26,12 +26,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-//import static ru.viljinsky.forms.IAppCommand.CREATE_CURRICULUM;
-//import static ru.viljinsky.forms.IAppCommand.CREATE_DEPART;
-//import static ru.viljinsky.forms.IAppCommand.DELETE_CURRICULUM;
-//import static ru.viljinsky.forms.IAppCommand.EDIT_CURRICULUM;
-//import static ru.viljinsky.forms.IAppCommand.EDIT_CURRICULUM_DETAIL;
-//import static ru.viljinsky.forms.IAppCommand.FILL_CURRICULUM;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.Grid;
@@ -42,9 +36,6 @@ import ru.viljinsky.sqlite.Values;
  *
  * @author вадик
  */
-
-
-
 
 public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,CommandListener{
     
@@ -108,6 +99,14 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
     }
 
     @Override
+    public void open() throws Exception{
+        Dataset dataset = DataModule.getDataset("v_curriculum_detail");
+        grid.setDataset(dataset);
+        tree.open();
+        commandMng.updateActionList();
+    }
+    
+    @Override
     public void close() throws Exception {
         tree.clear();
     }
@@ -144,7 +143,7 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
                     a.setEnabled(subject_id!=null);
                     break;
                 default:
-                    System.out.println("ANKNOW_COMMAND:\n"+command);
+                    System.out.println("UKNOW_COMMAND:\n"+command);
             }
     }
     
@@ -211,7 +210,7 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
                     break;
                     
                 default:
-                    System.out.println("ANKNOW_COMMAND:\n"+command);
+                    System.out.println("UNKNOW_COMMAND:\n"+command);
             }  
             
         } catch (Exception e){
@@ -487,7 +486,6 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
         
         public void open() throws Exception{
             DefaultMutableTreeNode node,skillNode,departNode;
-//            root = new DefaultMutableTreeNode("Учебный план");
             root.removeAllChildren();
             
             skillList = DataModule.getSQLDataset("select * from skill order by sort_order");
@@ -531,30 +529,6 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
     }
 
     
-//    {
-//
-//        @Override
-//        public void skillChange() {
-//            System.out.println(skill_id+" "+curriculum_id);
-//            Map<String,Object> filter = new HashMap<>();
-//            
-//            if (skill_id!=null && curriculum_id!=null){
-//                filter.put("curriculum_id", curriculum_id);
-//                filter.put("skill_id",skill_id);
-//            } else {
-//                filter.put("curriculum_id", null);
-//                filter.put("skill_id",null);
-//            }
-//            System.out.println(filter);
-//            try{
-//                grid.setFilter(filter);            
-//                commandMng.updateActionList();
-//            } catch (Exception e){
-//                e.printStackTrace();
-//            }
-//            
-//        }
-//};
     
     class curriculumGrid extends Grid{
         @Override
@@ -574,34 +548,7 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
         }
     }
     
-//    {
-//
-//        @Override
-//        public void gridSelectionChange() {
-//            int row = getSelectedRow();
-//            try{
-//            if (row<0){
-//                subject_id=null;
-//            } else {
-//                subject_id=getValues().getInteger("subject_id");
-//            }
-//            commandMng.updateActionList();
-//            System.out.println(subject_id);
-//            } catch (Exception e){
-//                e.printStackTrace();
-//            }
-//        }
-//    };
 
-    
-    @Override
-    public void open() throws Exception{
-        Dataset dataset = DataModule.getDataset("v_curriculum_detail");
-        grid.setDataset(dataset);
-        tree.open();
-        commandMng.updateActionList();
-        
-    }
     
     public static void main(String[] args){
         
