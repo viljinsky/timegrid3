@@ -2,6 +2,8 @@ package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.Action;
@@ -67,7 +69,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
     MasterGrid grid = new MasterGrid();
     
     SelectRoomPanel selectPanel = new SelectRoomPanel();    
-    DetailPanel shiftPanel = new ShiftRoomPanel();
+    ShiftRoomPanel shiftPanel = new ShiftRoomPanel();
     DetailPanel profilePanel = new ProfileRoomPanel();
     
     CommandMngr commands = new CommandMngr(ROOM_COMMANDS);
@@ -172,7 +174,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
                 case EDIT_SHIFT:
 //                    shift_id= grid.getIntegerValue("shift_id");
                     if (Dialogs.editShift(this, shift_id)){
-                        shiftPanel.grid.requery();
+//                        shiftPanel.grid.requery();
                     }
                     break;
                     
@@ -230,22 +232,26 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
     
     //--------------------------------------------------------------------------
     
-    class ShiftRoomPanel extends DetailPanel{
+    class ShiftRoomPanel extends JPanel{
         DBShiftPanel shPanel = new DBShiftPanel();
         String sqlShift="select a.* from shift_detail a inner join room b on a.shift_id=b.shift_id where b.id=%room_id;";
+        JPanel commands = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         public ShiftRoomPanel() {
-            super();
-            gridPanel.add(shPanel,BorderLayout.WEST);
+            super(new BorderLayout());
+            add(commands,BorderLayout.PAGE_START);
+            add(shPanel);
         }
-
         
-        @Override
         public void reopen(Integer keyValue) throws Exception{
-            dataset = DataModule.getSQLDataset(sqlShift.replace("%room_id",keyValue.toString()));
+            Dataset dataset = DataModule.getSQLDataset(sqlShift.replace("%room_id",keyValue.toString()));
             dataset.open();
-            grid.setDataset(dataset);
             shPanel.setDataset(dataset);
+            shPanel.repaint();
+        }
+        
+        public void addAction(Action action){
+            commands.add(new JButton(action));
         }
     }
     
@@ -764,7 +770,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
     
     TeacherSelectPanel selctPanel = new TeacherSelectPanel();
     DetailPanel profilePanel = new ProfileTeacherPanel();
-    DetailPanel shiftPanel = new ShiftTeacherPanel();
+    ShiftTeacherPanel shiftPanel = new ShiftTeacherPanel();
     CommandMngr commands = new CommandMngr();
     
    
@@ -892,22 +898,25 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
         }
     }
     
-    class ShiftTeacherPanel extends DetailPanel{
+    class ShiftTeacherPanel extends JPanel{
         DBShiftPanel shPanel = new DBShiftPanel();
         String sqlTeacherShift = "select a.* from shift_detail a inner join teacher b on a.shift_id=b.shift_id where b.id=%teacher_id;";
-
+        JPanel commandPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         public ShiftTeacherPanel() {
-            super();
-            gridPanel.add(shPanel,BorderLayout.WEST);
+            super(new BorderLayout());
+            add(commandPanel,BorderLayout.PAGE_START);
+            add(shPanel);
                     
         }
         
-        @Override
         public void reopen(Integer keyValue) throws Exception{
-            dataset = DataModule.getSQLDataset(sqlTeacherShift.replace("%teacher_id", keyValue.toString()));
+            Dataset dataset = DataModule.getSQLDataset(sqlTeacherShift.replace("%teacher_id", keyValue.toString()));
             dataset.open();
-            grid.setDataset(dataset);
             shPanel.setDataset(dataset);
+        }
+        
+        public void addAction(Action action){
+            commandPanel.add(new JButton(action));
         }
         
     }

@@ -109,6 +109,7 @@ public class ShiftDialog extends BaseDialog{
 /////////////////////////   SHIFT_PANEL ///////////////////////////////////////
 class DBShiftPanel extends ShiftPanel{
     Dataset dataset;
+    
     public void setDataset(Dataset dataset) throws Exception{
         this.dataset = dataset;
         Values values;
@@ -122,6 +123,8 @@ class DBShiftPanel extends ShiftPanel{
         repaint();
     }
 }
+
+
 
 class ShiftPanel extends JPanel {
     FontMetrics fontMetrics;
@@ -238,7 +241,7 @@ class ShiftPanel extends JPanel {
         return cells.contains(cell);
     }
 
-    public boolean hitTest(int x, int y) {
+    public void hitTest(int x, int y) {
         Rectangle r;
         Point p = new Point(x, y);
         for (int day = 0; day < dayCount; day++) {
@@ -259,7 +262,6 @@ class ShiftPanel extends JPanel {
                 }
             }
         }
-        return false;
     }
 
     public Rectangle getCellBound(int day, int bell) {
