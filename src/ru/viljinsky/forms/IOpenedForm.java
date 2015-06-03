@@ -234,7 +234,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
     
     class ShiftRoomPanel extends JPanel{
         DBShiftPanel shPanel = new DBShiftPanel();
-        String sqlShift="select a.* from shift_detail a inner join room b on a.shift_id=b.shift_id where b.id=%room_id;";
+//        String sqlShift="select a.* from shift_detail a inner join room b on a.shift_id=b.shift_id where b.id=%room_id;";
         JPanel commands = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         public ShiftRoomPanel() {
@@ -244,10 +244,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
         }
         
         public void reopen(Integer keyValue) throws Exception{
-            Dataset dataset = DataModule.getSQLDataset(sqlShift.replace("%room_id",keyValue.toString()));
-            dataset.open();
-            shPanel.setDataset(dataset);
-            shPanel.repaint();
+              shPanel.setRoomId(keyValue);
         }
         
         public void addAction(Action action){
@@ -469,6 +466,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
         dataset.open();
         grid.setDataset(dataset);
         selectPanel.requery();
+        shiftPanel.shPanel.open();
         commands.updateActionList();
     }
     
@@ -900,7 +898,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
     
     class ShiftTeacherPanel extends JPanel{
         DBShiftPanel shPanel = new DBShiftPanel();
-        String sqlTeacherShift = "select a.* from shift_detail a inner join teacher b on a.shift_id=b.shift_id where b.id=%teacher_id;";
+//        String sqlTeacherShift = "select a.* from shift_detail a inner join teacher b on a.shift_id=b.shift_id where b.id=%teacher_id;";
         JPanel commandPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         public ShiftTeacherPanel() {
             super(new BorderLayout());
@@ -910,9 +908,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
         }
         
         public void reopen(Integer keyValue) throws Exception{
-            Dataset dataset = DataModule.getSQLDataset(sqlTeacherShift.replace("%teacher_id", keyValue.toString()));
-            dataset.open();
-            shPanel.setDataset(dataset);
+              shPanel.setTeacherId(keyValue);
         }
         
         public void addAction(Action action){
@@ -1182,6 +1178,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
         Dataset dataset = DataModule.getDataset("v_teacher");
         dataset.open();
         grid.setDataset(dataset);
+        shiftPanel.shPanel.open();
         selctPanel.requery();
     }
 

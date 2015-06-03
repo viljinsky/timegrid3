@@ -486,14 +486,14 @@ public class DataTask implements IDataTask, IDataTaskConstants{
      * @param included Список пар Integer[] day_id,bell_id
      * @param excluded Список пар Integer[] day_id,bell_id
      */
-    public static void editShift(Integer shift_id,List<Integer[]> included,List<Integer[]> excluded) throws Exception{
+    public static void editShift(Integer shift_id,Set<Point> included,Set<Point> excluded) throws Exception{
         Integer day_id,bell_id;
-        for (Integer[] n:excluded){
-            day_id=n[0]+1;bell_id=n[1]+1;
+        for (Point n:excluded){
+            day_id=n.x+1;bell_id=n.y+1;
             DataModule.execute(String.format("delete from shift_detail where shift_id=%d and day_id=%d and bell_id=%d;",shift_id,day_id,bell_id));
         }
-        for (Integer[] n:included){
-            day_id=n[0]+1;bell_id=n[1]+1;
+        for (Point n:included){
+            day_id=n.x+1;bell_id=n.y+1;
             DataModule.execute(String.format("insert into shift_detail (shift_id,day_id,bell_id)values (%d,%d,%d);",shift_id,day_id,bell_id));
         }
     }

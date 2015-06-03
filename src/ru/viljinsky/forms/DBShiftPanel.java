@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package ru.viljinsky.test;
+package ru.viljinsky.forms;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -66,6 +66,10 @@ abstract class AbstractShiftPanel extends JPanel{
         cells.points=points;
         oldPoints = new HashSet<>(points);
         repaint();
+    }
+    
+    public Set<Point> getOldPoints(){
+        return oldPoints;
     }
     
     public Set<Point> getAdded(){
@@ -316,7 +320,7 @@ public class DBShiftPanel extends ShiftPanel {
         setRowHeader(bellList.toArray(new String[bellList.size()]));
     }
 
-    public void setShidtId(Integer shift_id) throws Exception {
+    public void setShiftId(Integer shift_id) throws Exception {
         Dataset dataset;
         dataset = DataModule.getSQLDataset("select day_id,bell_id from shift_detail where shift_id=" + shift_id);
         dataset.open();
@@ -325,13 +329,13 @@ public class DBShiftPanel extends ShiftPanel {
             points.add(new Point(dataset.getValues(i).getInteger("day_id") - 1, dataset.getValues(i).getInteger("bell_id") - 1));
         }
         setPoints(points);
-        setAllowEdit(false);
+//        setAllowEdit(false);
     }
 
     public void setTeacherId(Integer teacher_id) throws Exception {
         Recordset r = DataModule.getRecordet("select shift_id from teacher where id=" + teacher_id);
         Integer shift_id = r.getInteger(0);
-        setShidtId(shift_id);
+        setShiftId(shift_id);
         usedPoints = new HashSet<>();
         Dataset dataset = DataModule.getSQLDataset("select day_id,bell_id from schedule where teacher_id=" + teacher_id);
         dataset.open();
@@ -346,13 +350,30 @@ public class DBShiftPanel extends ShiftPanel {
     public void setDepartId(Integer depart_id) throws Exception {
         Recordset r = DataModule.getRecordet("select shift_id from depart where id=" + depart_id);
         Integer shift_id = r.getInteger(0);
-        setShidtId(shift_id);
+        setShiftId(shift_id);
     }
 
     public void setRoomId(Integer room_id) throws Exception {
         Recordset r = DataModule.getRecordet("select shift_id from room where id=" + room_id);
         Integer shift_id = r.getInteger(0);
-        setShidtId(shift_id);
+        setShiftId(shift_id);
+        usedPoints = new HashSet<>();
+        Dataset dataset = DataModule.getSQLDataset("select day_id,bell_id from schedule where room_id=" + room_id);
+        dataset.open();
+        Values v;
+        for (int i = 0; i < dataset.size(); i++) {
+            v = dataset.getValues(i);
+            usedPoints.add(new Point(v.getInteger("day_id") - 1, v.getInteger("bell_id") - 1));
+        }
+        repaint();
+    }
+
+    void selectAll() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    void unSelectAll() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

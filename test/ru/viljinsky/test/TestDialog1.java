@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -95,14 +96,14 @@ public class TestDialog1  extends JFrame implements ActionListener{
             public void doOnEntry() throws Exception {
                 int day,bell;
                 try{
-                    for (Integer[] n:getAdded()){
-                        System.out.println("ADDED :"+n[0]+" "+n[1]);
-                        day=n[0]+1;bell=n[1]+1;
+                    for (Point n:getAdded()){
+                        System.out.println("ADDED :"+n.x+" "+n.y);
+                        day=n.x+1;bell=n.y+1;
                         dataModule.execute("insert into shift_detail(shift_id,day_id,bell_id) values("+shift_id+","+day+","+bell+")");
                     }
-                    for (Integer[] n:getRemoved()){
-                        day=n[0]+1;bell=n[1]+1;
-                        System.out.println("REMOVED :"+n[0]+" "+n[1]);
+                    for (Point n:getRemoved()){
+                        day=n.x+1;bell=n.y+1;
+                        System.out.println("REMOVED :"+n.x+" "+n.y);
                         dataModule.execute("delete from shift_detail where shift_id="+shift_id+" and day_id="+day+" and bell_id="+bell + ";");
                     }
                     dataModule.commit();

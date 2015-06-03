@@ -141,6 +141,11 @@ abstract class AbstractShiftDialog extends ShiftDialog{
             Dataset dataset = DataModule.getDataset("shift");
             dataset.test();
             entryPanel.setDataset(dataset);
+            
+            drawPanel.setAllowEdit(true);
+            drawPanel.open();
+            drawPanel.setShiftId(shift_id);
+   
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -435,6 +440,7 @@ public class Dialogs implements IAppError{
         dataset.open();
 //        dlg.entryPanel.setDataset(dataset);
         dlg.entryPanel.setValues(dataset.getValues(0));
+       
         
         Recordset rs = DataModule.getRecordet(String.format("select day_id,bell_id from shift_detail where shift_id=%d;",shift_id));
         Object[] values;

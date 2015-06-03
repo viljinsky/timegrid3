@@ -6,6 +6,7 @@
 
 package ru.viljinsky.test;
 
+import ru.viljinsky.forms.DBShiftPanel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -115,7 +116,7 @@ public class TestShift  extends JFrame implements CommandListener{
                }
                break;
            case CMD_CANCEL:
-               shiftPanel.setPoints(shiftPanel.oldPoints);
+               shiftPanel.setPoints(shiftPanel.getOldPoints());
                shiftPanel.setAllowEdit(false);
                break;
        }
@@ -126,13 +127,13 @@ public class TestShift  extends JFrame implements CommandListener{
         String command = (String)action.getValue(Action.ACTION_COMMAND_KEY);
         switch (command){
            case CMD_EDIT:
-               action.setEnabled(!shiftPanel.allowEdit);
+               action.setEnabled(!shiftPanel.isAllowEdit());
                break;
            case CMD_SAVE:
-               action.setEnabled(shiftPanel.allowEdit);
+               action.setEnabled(shiftPanel.isAllowEdit());
                break;
            case CMD_CANCEL:
-               action.setEnabled(shiftPanel.allowEdit);
+               action.setEnabled(shiftPanel.isAllowEdit());
                break;
         }
     }
