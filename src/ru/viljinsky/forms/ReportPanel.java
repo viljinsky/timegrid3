@@ -88,6 +88,7 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder,Co
 
     @Override
     public void close() throws Exception {
+        browser.clear();
     }
  
     public void doCommand(String command){

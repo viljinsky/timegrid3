@@ -21,8 +21,6 @@ abstract class SQLReader{
     public abstract void sqlredy(String sql) throws Exception;
 
     public void execute(String fileName) throws Exception{
-//        URL url = SQLReader.class.getResource(fileName);
-//        String path = url.getPath();
         
         System.out.println("SCRIPT_EXECUTING \""+fileName +"\"");
         String line;

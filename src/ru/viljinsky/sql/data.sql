@@ -193,8 +193,18 @@ insert into profile_item (profile_id,subject_id) values(6,8);
 -- информатика
 insert into profile_item (profile_id,subject_id) values(7,9);
 
-insert into profile_item (profile_id,subject_id) select a.id,b.id
-from profile a ,subject b where a.id in (8,9,10,11);
+-- преподаватель мл.классов
+insert into profile_item (profile_id,subject_id) select 8,id from subject where id in(1,22,10,11,14,15);
+
+-- изо
+insert into profile_item (profile_id,subject_id) values(10,12);
+
+-- музыка
+insert into profile_item (profile_id,subject_id) values(9,13);
+
+
+-- insert into profile_item (profile_id,subject_id) select a.id,b.id
+-- from profile a ,subject b where a.id in (8,9,10,11);
 
 -- графики помещений
 

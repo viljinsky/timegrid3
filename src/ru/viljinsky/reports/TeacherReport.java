@@ -27,6 +27,7 @@ class TeacherReport extends AbstractReport {
      * @throws Exception
      */
     public String getTeacherTable(Integer teacher_id) throws Exception {
+        String emptyString ="";
         StringBuilder result = new StringBuilder();
         int min_bell_id,max_bell_id,recNo;
         Recordset r;
@@ -38,6 +39,10 @@ class TeacherReport extends AbstractReport {
         // заголовок
         day_list = DataModule.getSQLDataset("select * from day_list where exists (select * from schedule where day_id=day_list.day_no and teacher_id=" + teacher_id + ");");
         day_list.open();
+        
+        if (day_list.size()==0)
+            return emptyString;
+        
         String day_caption;
         Integer day_id;
         String bell_caption;
@@ -84,9 +89,12 @@ class TeacherReport extends AbstractReport {
         Dataset teacher = DataModule.getDataset("v_teacher");
         teacher.open();
         Values values;
+        String subReport ;
         for (int i = 0; i < teacher.size(); i++) {
             values = teacher.getValues(i);
-            result.append(getTeacherTable(values.getInteger("id")));
+            subReport = getTeacherTable(values.getInteger("id"));
+            if (!subReport.isEmpty())
+                result.append(subReport);
         }
         html = result.toString();
     }

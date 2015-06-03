@@ -27,6 +27,7 @@ import javax.swing.event.HyperlinkListener;
 import ru.viljinsky.forms.CommandMngr;
 import ru.viljinsky.forms.IAppCommand;
 import ru.viljinsky.forms.CommandListener;
+import ru.viljinsky.sqlite.DataModule;
 
 /**
  *
@@ -69,14 +70,16 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
         String command = (String)action.getValue(Action.ACTION_COMMAND_KEY);
         switch (command){
             case PAGE_HOME:
+                action.setEnabled(DataModule.isActive());
                 break;
             case PAGE_NEXT:
-                action.setEnabled(pageIndex<stack.size()-1);
+                action.setEnabled(DataModule.isActive() && (pageIndex<stack.size()-1));
                 break;
             case PAGE_PRIOR:
-                action.setEnabled(pageIndex>0);
+                action.setEnabled(DataModule.isActive() && (pageIndex>0));
                 break;
             case PAGE_RELOAD:
+                action.setEnabled(DataModule.isActive());
                 break;
         }
     }
@@ -199,6 +202,10 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
     
     protected void setHtml(String html){
         text.setText(html);
+    }
+    
+    public void clear(){
+        text.setText("<h1>Составитель Расписания 2015</h1>");
     }
     
 }

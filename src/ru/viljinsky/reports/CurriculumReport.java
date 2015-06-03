@@ -15,6 +15,7 @@ import ru.viljinsky.sqlite.Values;
  * @author вадик
  */
 class CurriculumReport extends AbstractReport {
+    String emptyString = "";
     Dataset curriculumDetails;
     Integer[] summary;
     private static final String SQL_SKILS = "select distinct a.id,a.caption \n" + "from skill a inner join curriculum_detail b on a.id=b.skill_id \n" + "where b.curriculum_id=%d";
@@ -27,6 +28,9 @@ class CurriculumReport extends AbstractReport {
         filter.put("curriculum_id", vCurriculum.getInteger("id"));
         Dataset skillList = DataModule.getSQLDataset(String.format(SQL_SKILS, vCurriculum.getInteger("id")));
         skillList.open();
+        if (skillList.size()==0){
+            return emptyString;
+        }
         summary = new Integer[skillList.size()];
         for (int i = 0; i < summary.length; i++) {
             summary[i] = 0;
@@ -81,10 +85,15 @@ class CurriculumReport extends AbstractReport {
         result.append(getReportHeader());
         Dataset curriculumList = DataModule.getSQLDataset("select * from curriculum");
         curriculumList.open();
+        String subReport;
+        
         for (int i = 0; i < curriculumList.size(); i++) {
             v = curriculumList.getValues(i);
-            result.append("<b>" + v.getString("caption") + "</b>");
-            result.append(getCurriculumDetails(v));
+            subReport = getCurriculumDetails(v);
+            if (!subReport.isEmpty()){
+                result.append("<b>" + v.getString("caption") + "</b>");
+                result.append(subReport);
+            }
         }
         html = result.toString();
     }
