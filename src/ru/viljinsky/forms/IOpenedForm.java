@@ -463,6 +463,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
         dataset.open();
         grid.setDataset(dataset);
         selectPanel.requery();
+        commands.updateActionList();
     }
     
     @Override
@@ -619,45 +620,31 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
                     break;
                     
                 case ADD_GROUP:
-//                    depart_id= grid2.getIntegerValue("depart_id");
-//                    subject_id = grid2.getIntegerValue("subject_id");
                     DataTask.addSubjectGroup(depart_id,subject_id);
                     grid2.requery();
                     break;
                     
                 case EDIT_GROUP:
-//                    depart_id = grid1.getIntegerValue("depart_id");
-//                    subject_id = grid2.getIntegerValue("subject_id");
-//                    group_id = grid2.getIntegerValue("group_id");
                     if (Dialogs.editSubjectGroup(this,depart_id,subject_id,group_id))
                         grid2.requery();
                     break;
                     
                 case DELETE_GROUP:
-//                    depart_id=grid2.getIntegerValue("depart_id");
-//                    subject_id=grid2.getIntegerValue("subject_id");
-//                    group_id = grid2.getIntegerValue("group_id");
                     DataTask.deleteSubjectGroup(depart_id,subject_id,group_id);
                     grid2.requery();
                     break;
                     
                 case ADD_STREAM:
-//                    depart_id=grid2.getIntegerValue("depart_id");
-//                    subject_id=grid2.getIntegerValue("subject_id");
-//                    group_id=grid2.getIntegerValue("group_id");
                     if (Dialogs.createStream(this, depart_id, subject_id, group_id))
                       grid2.requery();
                     break;
                     
                 case REMOVE_STREAM:
-//                    depart_id=grid2.getIntegerValue("depart_id");
-//                    subject_id=grid2.getIntegerValue("subject_id");
                     DataTask.deleteStream(depart_id,subject_id);
                     grid2.requery();
                     break;
                     
                 case EDIT_STREAM:
-//                    stream_id= grid2.getIntegerValue("stream_id");
                     if (Dialogs.editStream(this, stream_id))
                         grid2.requery();
                     break;

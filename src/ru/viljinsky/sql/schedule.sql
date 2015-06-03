@@ -88,12 +88,12 @@ drop table if exists subject;
 create table subject(
     id integer primary key autoincrement,
     subject_name varchar(20) not null unique,
-    default_hour_per_week integer ,
-    default_group_type_id integer references group_type(id),
-    default_hour_per_day integer ,
+    default_hour_per_week integer default 2 ,
+    default_group_type_id integer references group_type(id) default 0,
+    default_hour_per_day integer default 1 ,
     subject_domain_id integer references subject_domain(id),
-    color varchar(11) default '240 240 240'
---     color_rgb varchar(20),
+    color varchar(11) default '240 240 240',
+    sort_order integer default 0
 );
 
 drop table if exists profile;

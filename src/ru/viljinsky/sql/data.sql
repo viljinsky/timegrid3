@@ -29,18 +29,20 @@ insert into profile(id,profile_type_id,profile_name) values (4,1,'Химия');
 insert into profile(id,profile_type_id,profile_name) values (5,1,'Иностранный яз');
 insert into profile(id,profile_type_id,profile_name) values (6,1,'Физкультура');
 insert into profile(id,profile_type_id,profile_name) values (7,1,'Информатика');
+insert into profile(id,profile_type_id,profile_name) values (8,1,'Преподаватель мл.классов');
+
+insert into profile(id,profile_type_id,profile_name) values (9,1,'ИЗО');
+insert into profile(id,profile_type_id,profile_name) values (10,1,'Музыка');
+
+
+
 
 --    Профили помещений
 
-insert into profile(id,profile_type_id,profile_name) values (8,2,'Общ назн.');
-insert into profile(id,profile_type_id,profile_name) values (9,2,'Спортзал');
-insert into profile(id,profile_type_id,profile_name) values (10,2,'Ком.кабинет');
-insert into profile(id,profile_type_id,profile_name) values (11,2,'Лингофонный каб.');
-
-
--- insert into shift_type(id,caption,default_shift_id) values (1,'График класса',1);
--- insert into shift_type(id,caption,default_shift_id) values (2,'График преподователя',3);
--- insert into shift_type(id,caption,default_shift_id) values (3,'График помещения',5);
+insert into profile(id,profile_type_id,profile_name) values (11,2,'Общ назн.');
+insert into profile(id,profile_type_id,profile_name) values (12,2,'Спортзал');
+insert into profile(id,profile_type_id,profile_name) values (13,2,'Ком.кабинет');
+insert into profile(id,profile_type_id,profile_name) values (14,2,'Лингофонный каб.');
 
 insert into shift(id,shift_type_id,shift_name) values(1,1,'Первая смена');  
 insert into shift(id,shift_type_id,shift_name) values(2,1,'Вторая смена');  
@@ -49,52 +51,105 @@ insert into shift(id,shift_type_id,shift_name) values(4,2,'График преп
 insert into shift(id,shift_type_id,shift_name) values(5,3,'Обычный кабинет');  
 
 
-insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (1,1,'каб 31',5,8,30);
-insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (2,1,'каб 32',5,8,30);
-insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (3,1,'каб 33',5,8,30);
-insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (4,1,'каб 34',5,8,30);
-insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (5,1,'каб 35',5,8,30);
-insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (6,1,'каб 36',5,8,30);
-insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (7,1,'каб 37',5,8,30);
-insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (8,1,'каб 38',5,8,30);
-insert into room(id,building_id,room_name,shift_id,profile_id)          values (9,1,'каб 39',5,8);
-insert into room(id,building_id,room_name,shift_id,profile_id)          values (10,1,'спорт.зал',5,8);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (1,1,'каб 31',5,11,30);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (2,1,'каб 32',5,11,30);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (3,1,'каб 33',5,11,30);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (4,1,'каб 34',5,11,30);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (5,1,'каб 35',5,11,30);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (6,1,'каб 36',5,11,30);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (7,1,'каб 37',5,11,30);
+insert into room(id,building_id,room_name,shift_id,profile_id,capacity) values (8,1,'каб 38',5,11,30);
+insert into room(id,building_id,room_name,shift_id,profile_id)          values (9,1,'каб 39',5,11);
+insert into room(id,building_id,room_name,shift_id,profile_id)          values (10,1,'спорт.зал',5,12);
+
+
+
+insert into subject_domain(id,domain_caption) values (1,'Математические');
+insert into subject_domain(id,domain_caption) values (2,'Естественно-научные');
+insert into subject_domain(id,domain_caption) values (3,'Гуманитарные');
+insert into subject_domain(id,domain_caption) values (4,'Филолагические');
+insert into subject_domain(id,domain_caption) values (5,'Трудовое обучение');
+insert into subject_domain(id,domain_caption) values (6,'Физкультурв');
+insert into subject_domain(id,domain_caption) values (7,'Искуство');
 
 
 --
 --                Предметы
 --                 
 
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color) 
-    values (1,'Русский яз',     1,0,4,'255 200 170');
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
-    values (2,'Литература',     1,0,2,'255 170 200');
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
-    values (3,'Алгебра'   ,     1,0,2,'200 255 170');
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
-    values (4,'Геометрия' ,     1,0,2,'170 255 200');
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
-    values (5,'Физика'    ,     1,0,2,'200 170 255');
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
-    values (6,'Химия',          1,0,2,'170 200 255');
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
-    values (7,'Иностранный яз.',1,2,2,'200 200 255');
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
-     values (8,'Физ.культура',  1,1,2,'200 255 200');
-insert into subject(id,subject_name,default_hour_per_day,default_group_type_id,default_hour_per_week,color)
-     values (9,'Информатика',   1,2,1,'255 200 200');
+
+
+insert into subject(id,subject_name,color) 
+    values (1,'Русский яз',  '255 200 170');
+insert into subject(id,subject_name,color)
+    values (2,'Литература',  '255 170 200');
+insert into subject(id,subject_name,color)
+    values (3,'Алгебра'   ,   '200 255 170');
+insert into subject(id,subject_name,color)
+    values (4,'Геометрия' ,     '170 255 200');
+insert into subject(id,subject_name,color)
+    values (5,'Физика'    ,     '200 170 255');
+insert into subject(id,subject_name,color)
+    values (6,'Химия'     ,     '170 200 255');
+insert into subject(id,subject_name,default_group_type_id,color)
+    values (7,'Иностранный яз.',2,'200 200 255');
+insert into subject(id,subject_name,default_group_type_id,color)
+     values (8,'Физ.культура',  1,'200 255 200');
+insert into subject(id,subject_name,default_group_type_id,color)
+     values (9,'Информатика',   2,'255 200 200');
+
+
+
+insert into subject(id,subject_name,color)
+     values (22,'Чтение',  '255 200 200');
+insert into subject(id,subject_name,color)
+     values (10,'Математика',  '255 200 200');
+insert into subject(id,subject_name,color)
+     values (11,'Окружающий мир',   '255 200 200');
+insert into subject(id,subject_name,color)
+     values (12,'Музыка',   '255 200 200');
+insert into subject(id,subject_name,color)
+     values (13,'ИЗО',   '255 200 200');
+insert into subject(id,subject_name,color)
+     values (14,'Технология', '255 200 200');
+insert into subject(id,subject_name,color)
+     values (15,'Этика',   '255 200 200');
+
+
+insert into subject(id,subject_name,color)
+     values (16,'История',   '255 200 200');
+insert into subject(id,subject_name,color)
+     values (17,'Обществознание',   '255 200 200');
+insert into subject(id,subject_name,color)
+     values (18,'География',   '255 200 200');
+insert into subject(id,subject_name,color)
+     values (19,'Природоведение',   '255 200 200');
+insert into subject(id,subject_name,color)
+     values (20,'Биология',   '255 200 200');
+insert into subject(id,subject_name,color)
+     values (21,'ОБЖ',   '255 200 200');
 
 
 
 
 
+insert into skill(id,caption) values(1,'1-класс');
+insert into skill(id,caption) values(2,'2-класс');
+insert into skill(id,caption) values(3,'3-класс');
+insert into skill(id,caption) values(4,'4-класс');
+insert into skill(id,caption) values(5,'5-класс');
+insert into skill(id,caption) values(6,'6-класс');
+insert into skill(id,caption) values(7,'7-класс');
+insert into skill(id,caption) values(8,'8-класс');
+insert into skill(id,caption) values(9,'9-класс');
+insert into skill(id,caption) values(10,'10-класс');
+insert into skill(id,caption) values(11,'11-класс');
 
-insert into skill(id,caption) values(1,'8-класс');
-insert into skill(id,caption) values(2,'9-класс');
-insert into skill(id,caption) values(3,'10-класс');
 
+insert into curriculum (id,caption) values (1,'1-4 классы');
+insert into curriculum (id,caption) values (2,'5-9 классы');
+insert into curriculum (id,caption) values (3,'10-11 классы');
 
-insert into curriculum (id,caption) values (1,'Учебный план (1)');
 
 --  *************************  ЗАПОЛНЕНИЕ ГРАФИКОВ  ****************************
 delete from shift_detail;
@@ -197,6 +252,25 @@ where  not a.day_no in (6,7);
 
 -- Преподаватели
 
+-- младшие классы
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) 
+    values (20,'Ласточкина','Ирина','Ивановна',8,10);
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) 
+    values (21,'Быкова','Ирина','Ивановна',8,10);
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) 
+    values (22,'Снигерёва','Ирина','Ивановна',8,10);
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) 
+    values (23,'Пеликанова','Ирина','Ивановна',8,10);
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) 
+    values (24,'Зябликова','Ирина','Ивановна',8,10);
+
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) 
+    values (25,'Мухина','Ирина','Ивановна',9,10);
+insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) 
+    values (26,'Шмелёва','Ирина','Ивановна',10,10);
+
+
+
 -- русский и лит.        
 insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id) 
     values (1,'Ежёва','Ирина','Ивановна',1,10);
@@ -233,11 +307,5 @@ insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
 insert into teacher (id,last_name,first_name,patronymic,profile_id,shift_id)
     values (11,'Карпова','Вероника','Маврикиевна',7,15);
 
-insert into subject_domain(id,domain_caption) values (1,'Математические');
-insert into subject_domain(id,domain_caption) values (2,'Естественно-научные');
-insert into subject_domain(id,domain_caption) values (3,'Гуманитарные');
-insert into subject_domain(id,domain_caption) values (4,'Филолагические');
-insert into subject_domain(id,domain_caption) values (5,'Трудовое обучение');
-insert into subject_domain(id,domain_caption) values (6,'Физкультурв');
-insert into subject_domain(id,domain_caption) values (7,'Искуство');
+
 
