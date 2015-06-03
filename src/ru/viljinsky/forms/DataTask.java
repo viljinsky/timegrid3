@@ -340,15 +340,18 @@ public class DataTask implements IDataTask, IDataTaskConstants{
     }
 
     ///////////////////////////  CURRICULUM PANEL //////////////////////////////
+    private static final String SQL_INCLUDE_SUBJECT_TO_CURRICULUM =
+        "insert into curriculum_detail (curriculum_id,skill_id,subject_id,hour_per_week,hour_per_day,group_type_id )\n"+
+        "select ?,?,id,default_hour_per_week,default_hour_per_day,default_group_type_id from subject where id=?;";
     
     public static void includeSubjectToCurriculumn(Integer curriculum_id, Integer skill_id,Integer subject_id) throws Exception{
-       String sql = "insert into curriculum_detail (curriculum_id,skill_id,subject_id,hour_per_week,hour_per_day,group_type_id )\n"+
-                 "select ?,?,id,default_hour_per_week,default_hour_per_day,default_group_type_id from subject where id=?;";
+//       String sql = "insert into curriculum_detail (curriculum_id,skill_id,subject_id,hour_per_week,hour_per_day,group_type_id )\n"+
+//                 "select ?,?,id,default_hour_per_week,default_hour_per_day,default_group_type_id from subject where id=?;";
        KeyMap map= new KeyMap();
        map.put(1, curriculum_id);
        map.put(2, skill_id);
        map.put(3, subject_id);
-       DataModule.execute(sql, map);
+       DataModule.execute(SQL_INCLUDE_SUBJECT_TO_CURRICULUM, map);
        
        Recordset r = DataModule.getRecordet(String.format("select id from depart where skill_id=%d and curriculum_id=%d",skill_id,curriculum_id));
        Integer depart_id;
@@ -358,13 +361,14 @@ public class DataTask implements IDataTask, IDataTaskConstants{
        }
     }
 
+    private static final String SQL_EXCLUDE_SUBJECT_FROM_CURRICULUM =
+            "delete from curriculum_detail where curriculum_id=? and skill_id=? and subject_id=?;";
     public static void excludeSubjectFromCurriculumn(Integer curriculum_id, Integer skill_id, Integer subject_id) throws Exception {
-       String sql = "delete from curriculum_detail where curriculum_id=? and skill_id=? and subject_id=?;";
        KeyMap map= new KeyMap();
        map.put(1, curriculum_id);
        map.put(2, skill_id);
        map.put(3, subject_id);       
-       DataModule.execute(sql, map);
+       DataModule.execute(SQL_EXCLUDE_SUBJECT_FROM_CURRICULUM, map);
        
        Recordset r = DataModule.getRecordet(String.format("select id from depart where skill_id=%d and curriculum_id=%d",skill_id,curriculum_id));
        Integer depart_id;
@@ -534,7 +538,8 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         Set<Point> result = new HashSet<>();
         Object[] p;
         try {
-            Recordset resordset = DataModule.getRecordet(String.format(SQL_DEPART_AVALABLE_CELLS, depart_id));
+            Recordset resordset = DataModule.getRecordet(
+                    String.format(SQL_DEPART_AVALABLE_CELLS, depart_id));
             for (int i = 0; i < resordset.size(); i++) {
                 p = resordset.get(i);
                 result.add(new Point((Integer) p[0], (Integer) p[1]));

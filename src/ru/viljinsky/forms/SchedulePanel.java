@@ -249,7 +249,10 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
                 }
             }
             unplacedGrid.requery();
-            JOptionPane.showMessageDialog(null, String.format("Успешно расставлено %d (из %d)", placed, unplaced));
+            if (placed<unplaced){
+                JOptionPane.showMessageDialog(null, String.format("Размещено %d из %d ",placed,unplaced), "Внимание", JOptionPane.WARNING_MESSAGE);
+            } else
+                JOptionPane.showMessageDialog(null, String.format("Успешно расставлено %d (из %d)", placed, unplaced));
         }
 
         @Override
