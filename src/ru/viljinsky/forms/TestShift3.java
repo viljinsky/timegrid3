@@ -19,6 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import ru.viljinsky.dialogs.BaseDialog;
+import ru.viljinsky.dialogs.EntryDialog;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.Grid;
@@ -30,7 +31,7 @@ import ru.viljinsky.sqlite.Values;
  */
 
 abstract class AbstractPanel extends JPanel implements CommandListener{
-    String[] SHIFT_ACTIONS = {"ADD","EDIT","DELET","POST","CANCEL"};
+    String[] SHIFT_ACTIONS   = {"ADD","EDIT","DELET","POST","CANCEL"};
     String[] PROFILE_ACTIONS = {"ADD","EDIT","DELETE"};
     String[] SUBJECT_ACTIONS = {"ADD","EDIT","DELETE","MOVE_UP","MOVE_DOUN","COLORISE"};
     
@@ -74,17 +75,53 @@ public class TestShift3 extends BaseDialog{
     }
     
     class SubjectPanel extends AbstractPanel{
-        Grid subjectList = new Grid();
+        String SQL_SUBJECT_LIST =
+                 "select a.subject_name,a.id,b.domain_caption,\n"+
+                 "a.subject_domain_id,a.sort_order,a.color\n" +
+                 "from subject a \n"+
+                 "left join subject_domain b on a.subject_domain_id=b.id\n"
+                + "order by a.sort_order";
+        String SQL_MOVE_UP_DOWN_1 = "update subject set sort_order = %d where sort_order=%d";
+        String SQL_MOVE_UP_DOWN_2 = "update subject set sort_order=%d where id=%d;";
+        
+        Integer subject_id = null;
+        Integer subject_domain_id=null;
+        Grid subjectList = new Grid(){
+
+            @Override
+            public void gridSelectionChange() {
+                Values values = getValues();
+                try{
+                    if (values == null){
+                        subject_id=null;
+                    } else { 
+                        subject_id=values.getInteger("id");
+                    }
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+                manager.updateActionList();
+                    
+            }
+            
+        };
         Grid domainList = new Grid(){
 
             @Override
             public void gridSelectionChange() {
                 Values values = getValues();
                 try{
-                    subjectList.setFilter(new Values("subject_domain_id", values.getInteger("id")));
+                    if (values==null){
+                        subject_domain_id=null;
+                        subjectList.close();
+                    } else {
+                        subject_domain_id=values.getInteger("id");
+                        subjectList.setFilter(new Values("subject_domain_id", subject_domain_id));
+                    }
                 } catch (Exception e){
                     e.printStackTrace();
                 }
+                manager.updateActionList();
             }
             
         };
@@ -107,18 +144,162 @@ public class TestShift3 extends BaseDialog{
             domainList.setDataset(dataset);
             dataset.open();
             
-            dataset = DataModule.getDataset("subject");
+            dataset = DataModule.getSQLDataset(SQL_SUBJECT_LIST);
             subjectList.setDataset(dataset);
             dataset.open();
             setCommands(SUBJECT_ACTIONS);
         }
+        
+        public void colorise() throws Exception{
+            String sql = "update subject set color='%s' where id=%d";
+            String color;
+            String[] s ={"190","210","230","255"};
+            Integer n=0;
+            Dataset dataset = DataModule.getDataset("subject");
+            dataset.open();
+            Values values;
+            
+            try{
+                loop:
+                for (int i=0;i<s.length;i++)
+                    for (int j=0;j<s.length;j++)
+                        for (int k=0;k<s.length;k++){
+                            color = s[i]+" "+s[j]+" "+s[k];
+                            System.out.println(color);
+                            values = dataset.getValues(n++);
+                            DataModule.execute(String.format(sql,color,values.getInteger("id")));
+                            if (n>=dataset.size()-1)
+                                break loop;
+                        }
+                
+                DataModule.commit();
+            } catch (Exception e){
+                DataModule.rollback();
+                throw new Exception("COLORISE_ERROR\n"+e.getMessage());
+            }
+            subjectList.requery();
+                    
+        }
+        
+        private void move_up() throws Exception{
+            Integer order = subjectList.getIntegerValue("sort_order");
+            Integer oldId = subject_id;
+            try{
+                DataModule.execute(String.format(SQL_MOVE_UP_DOWN_1, order,order-1 ));
+                DataModule.execute(String.format(SQL_MOVE_UP_DOWN_2, order-1,subject_id));
+                DataModule.commit();
+                subjectList.requery();
+                subjectList.locate(new Values("id",oldId));
+            } catch (Exception e){
+                DataModule.rollback();
+                throw new Exception("SORT_ERROR\n"+e.getMessage());
+            }
+        }
+        
+        private void move_doun() throws Exception{
+            Integer order = subjectList.getIntegerValue("sort_order");
+            Integer oldId = subject_id;
+            try{
+                DataModule.execute(String.format(SQL_MOVE_UP_DOWN_1, order,order+1 ));
+                DataModule.execute(String.format(SQL_MOVE_UP_DOWN_2, order+1,subject_id));
+                DataModule.commit();
+                subjectList.requery();
+                subjectList.locate(new Values("id",oldId));
+            } catch (Exception e){
+                DataModule.rollback();
+                throw new Exception("SORT_ERROR\n"+e.getMessage());
+            }
+        }
 
         @Override
         public void doCommand(String command) {
+            EntryDialog dlg;
+            Dataset dataset;
+            try{
+                switch (command){
+                    case "ADD":
+                        dlg = new EntryDialog() {
+
+                            @Override
+                            public void doOnEntry() throws Exception {
+                                try{
+                                    getDataset().appned(getValues());
+                                    DataModule.commit();
+                                } catch (Exception e){
+                                    DataModule.rollback();
+                                    throw new Exception("ADD_COMMAND_ERROR"+e.getMessage());
+                                }
+                            }
+                        };
+                        dataset =DataModule.getDataset("subject");
+                        dataset.test();
+                        dlg.setDataset(dataset);
+                        if (dlg.showModal(rootPane)==BaseDialog.RESULT_OK){
+                            subjectList.requery();
+                        }
+                        
+                        break;
+                    case "EDIT":
+                        dlg = new EntryDialog() {
+
+                            @Override
+                            public void doOnEntry() throws Exception {
+                                try{
+                                    getDataset().edit(0, getValues());
+                                    DataModule.commit();
+                                } catch (Exception e){
+                                    DataModule.rollback();
+                                    throw new Exception("EDIT_ERROR\n"+e.getMessage());
+                                }
+                            }
+                        };
+                        dataset =DataModule.getDataset("subject");
+                        dataset.test();
+                        Values values = subjectList.getValues();
+                        dataset.open(new Values("id",values.getInteger("id")));
+                        dlg.setDataset(dataset);
+                        dlg.setValues(dataset.getValues(0));
+                        if (dlg.showModal(rootPane)==BaseDialog.RESULT_OK){
+                            subjectList.requery();
+                        }
+                        break;
+                        
+                    case "DELETE":
+                        break;
+                    case "MOVE_UP":
+                        move_up();
+                        break;
+                    case "MOVE_DOUN":
+                        move_doun();
+                        break;
+                    case "COLORISE":
+                        colorise();
+                        break;
+                    default:
+                        throw new Exception("UNKNOW_COMMAND\n"+command);
+                        
+                }
+                System.out.println(command);
+                        
+            } catch (Exception e){
+                JOptionPane.showMessageDialog(rootPane,e.getMessage(),"Ошибка",JOptionPane.ERROR_MESSAGE);
+            }
         }
 
         @Override
         public void updateAction(Action action) {
+            String command = (String)action.getValue(Action.ACTION_COMMAND_KEY);
+            switch (command){
+                case "ADD":
+                    action.setEnabled(subject_domain_id!=null);
+                case ("EDIT"):
+                case ("DELETE"):
+                case ("MOVE_UP"):
+                case ("MOVE_DOUN"):
+                    action.setEnabled(subject_id!=null);
+                    break;
+                
+            }
         }
     }
     
