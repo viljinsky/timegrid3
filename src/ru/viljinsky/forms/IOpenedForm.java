@@ -174,7 +174,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
                 case EDIT_SHIFT:
 //                    shift_id= grid.getIntegerValue("shift_id");
                     if (Dialogs.editShift(this, shift_id)){
-//                        shiftPanel.grid.requery();
+                        grid.requery();
                     }
                     break;
                     
