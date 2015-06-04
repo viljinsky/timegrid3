@@ -9,6 +9,7 @@ package ru.viljinsky.forms;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -27,10 +28,11 @@ import ru.viljinsky.sqlite.Values;
 abstract class AbstractShiftPanel extends JPanel{
     
     Boolean allowEdit = false;
+    Boolean hasChange = false;
     
     public static final Integer CELL_WIDTH=30;
     public static final Integer CELL_HEIGHT=30;
-    public static final Integer COLUMN_HEADER_HEIGHT=30;
+    public static final Integer COLUMN_HEADER_HEIGHT=18;
     public static final Integer ROW_HEADER_WIDTH = 60;
     
     public abstract void rowClick(int row);
@@ -41,9 +43,16 @@ abstract class AbstractShiftPanel extends JPanel{
     Cells cells = new Cells();
     Set<Point> oldPoints = null;
     
+    
+    
+    public boolean isHasChange(){
+        return hasChange;
+    }
+    
     public void setAllowEdit(boolean value){
         allowEdit = value;
         if (allowEdit){
+            hasChange=false;
             oldPoints = new HashSet<>(cells.points);
             setCursor(new Cursor(Cursor.HAND_CURSOR));
         } else
@@ -101,7 +110,8 @@ abstract class AbstractShiftPanel extends JPanel{
         
         public void draw(Graphics g){
             int w,h;
-            h=10;w=10;
+            h=g.getFontMetrics().getHeight() ;w=10;
+            h = (CELL_HEIGHT+h)/2;
             Rectangle bound = new Rectangle(0,COLUMN_HEADER_HEIGHT,ROW_HEADER_WIDTH,CELL_HEIGHT);
             g.setColor(Color.black);
             for (int i=0;i<headers.length;i++){
@@ -124,11 +134,12 @@ abstract class AbstractShiftPanel extends JPanel{
         
         public void draw(Graphics g){
             int w,h;
-            h=10;w=10;
+            h=g.getFontMetrics().getHeight();w=10;
+            h = (COLUMN_HEADER_HEIGHT + h)/2;
             Rectangle bound = new Rectangle(ROW_HEADER_WIDTH,0,CELL_WIDTH,COLUMN_HEADER_HEIGHT);
             for (int i=0;i<headers.length;i++){
                 g.drawRect(bound.x,bound.y,bound.width,bound.height);
-                g.drawString(headers[i], bound.x+h,bound.y+w);
+                g.drawString(headers[i], bound.x+w,bound.y+h-3);
                 bound.x+=bound.width;
             }
         }
@@ -141,13 +152,15 @@ abstract class AbstractShiftPanel extends JPanel{
     
     public void drawCell(Graphics g,Rectangle bound,int col,int row){
         Point p;
-        g.setColor(Color.blue);
+        g.setColor(Color.black);
         g.drawRect(bound.x,bound.y,bound.width,bound.height);
         p = new Point(col,row);
         if (cells.points.contains(p)){
             g.setColor(Color.green);
-            g.fillRect(bound.x+1,bound.y+1,bound.width-1,bound.height-1);
+        } else {
+            g.setColor(Color.white);
         }
+        g.fillRect(bound.x+1,bound.y+1,bound.width-1,bound.height-1);
     }
     
     class Cells{
@@ -214,11 +227,12 @@ abstract class AbstractShiftPanel extends JPanel{
     @Override
     public void paint(Graphics g){
         super.paint(g);
-        g.setColor(Color.red);
-        g.drawRect(0,0, getWidth()-1, getHeight()-1);
+        g.setFont(new Font(Font.SANS_SERIF,Font.PLAIN,12));
         rows.draw(g);
         columns.draw(g);
         cells.draw(g);
+        g.setColor(Color.gray);
+        g.drawRect(0,0, getWidth()-1, getHeight()-1);
         
     }
 }
@@ -227,8 +241,8 @@ class ShiftPanel extends AbstractShiftPanel{
 
     public ShiftPanel() {
         super();
-        rows.headers=new String[]{"row 1","row 2","row 3","row 5","row 6"};
-        columns.headers=new String[]{"col 1","col 2","col 3"};
+        rows.headers=new String[]{"row 1"};
+        columns.headers=new String[]{"col 1"};
     }
 
     @Override
@@ -246,6 +260,8 @@ class ShiftPanel extends AbstractShiftPanel{
                 else
                     cells.points.add(p);
             }
+            hasChange=true;
+            changing();
         }
     }
 
@@ -263,6 +279,8 @@ class ShiftPanel extends AbstractShiftPanel{
                 else
                     cells.points.add(p);
             }
+            hasChange=true;
+            changing();
         }
     }
 
@@ -275,16 +293,65 @@ class ShiftPanel extends AbstractShiftPanel{
                 cells.points.remove(p);
             } else
                 cells.points.add(p);
+            hasChange=true;
+            changing();
         }
     }
+    
+    void selectAll() {
+        Point p;
+        cells.points.clear();
+        for (int col=0;col<columns.getCount();col++)
+            for (int row=0;row<rows.getCount();row++){
+                p=new Point(col,row);
+                cells.points.add(p);
+            }
+        repaint();
+    }
+
+    void unSelectAll() {
+        cells.points.clear();
+        repaint();
+    }
+    
+    public void post() throws Exception{
+        hasChange=false;
+        changing();
+    }
+    
+    public void cancel(){
+        cells.points=oldPoints;
+        hasChange=false;
+        changing();
+    }
+    
+    public void changing(){
+    }
+    
+    
 }
 
 
 /**
- * Для работы с базой таймтаблер
+ * Редактор графиков
+ * <code>
+ *  ShiftEditor editr = new ShiftEditor();
+ *  Dataset dataset = DataModule.getDataset("teacher");
+ *  .....
+ *  editor.open();<br>
+ *  .....
+ *  // Получение чистого графика<br>
+ *  int shift_id = dataset.getValues(row).getIntegerValue("shift_id");<br>
+ *  editor.setShiftID(shift_id);<br>
+ * <br>
+ *  // Получение графика с отмеками о занятых часах<br>
+ *  int teacher_id = dataset.getValues(row).getIntegerValue("teacher_id");<br>
+ *  editor.setTeacherID(teacher_id);<br>
+ * </code>
+ * 
  * @author вадик
  */
-public class DBShiftPanel extends ShiftPanel {
+public class ShiftEditor extends ShiftPanel {
     Set<Point> usedPoints = null;
     public static final String SQL_DAY_LIST = "select day_no,day_short_name from day_list";
     public static final String SQL_BELL_LIST = "select time_start from bell_list";
@@ -310,6 +377,8 @@ public class DBShiftPanel extends ShiftPanel {
         for (int i = 0; i < r.size(); i++) {
             dayList.add(r.getValues(i).getString("day_short_name"));
         }
+        int w = ROW_HEADER_WIDTH+dayList.size()*CELL_WIDTH;
+        
         setColumnHeaders(dayList.toArray(new String[dayList.size()]));
         r = DataModule.getSQLDataset(SQL_BELL_LIST);
         r.open();
@@ -318,6 +387,8 @@ public class DBShiftPanel extends ShiftPanel {
             bellList.add(r.getValues(i).getString("time_start"));
         }
         setRowHeader(bellList.toArray(new String[bellList.size()]));
+        int h = COLUMN_HEADER_HEIGHT+bellList.size()*CELL_HEIGHT;
+        setPreferredSize(new Dimension(w,h));
     }
 
     public void setShiftId(Integer shift_id) throws Exception {
@@ -368,12 +439,5 @@ public class DBShiftPanel extends ShiftPanel {
         repaint();
     }
 
-    void selectAll() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    void unSelectAll() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
     
 }

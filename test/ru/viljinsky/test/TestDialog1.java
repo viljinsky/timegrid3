@@ -121,6 +121,7 @@ public class TestDialog1  extends JFrame implements ActionListener{
             v=rs.get(i);
             list.add(new Integer[]{(Integer)v[0]-1,(Integer)v[1]-1});
         }
+        
         dlg.setSelected(list);
         dlg.showModal(rootPane);
         

@@ -24,14 +24,18 @@ import ru.viljinsky.dialogs.BaseDialog;
  */
 
 public class ShiftDialog extends BaseDialog{
-    protected DBShiftPanel drawPanel;
+    protected ShiftEditor shiftEditor;
     JPanel controls;
 
     @Override
     public Container getPanel() {
         JButton btn;
         controls =  new JPanel(new FlowLayout(FlowLayout.LEFT));
-        drawPanel = new DBShiftPanel();
+        shiftEditor = new ShiftEditor();
+        try{
+            shiftEditor.open();
+        } catch (Exception e){
+        }
         btn = new JButton("SELECT_ALL");
         controls.add(btn);
         btn.addActionListener(this);
@@ -40,11 +44,11 @@ public class ShiftDialog extends BaseDialog{
         controls.add(btn);
         btn.addActionListener(this);
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(drawPanel,BorderLayout.CENTER);
+        panel.add(shiftEditor,BorderLayout.CENTER);
         panel.add(controls,BorderLayout.PAGE_END);
         
         getContentPane().add(panel,BorderLayout.CENTER);
-        drawPanel.setAllowEdit(true);
+        shiftEditor.setAllowEdit(true);
         return panel;
         
     }
@@ -61,11 +65,11 @@ public class ShiftDialog extends BaseDialog{
     }
     
     public Set<Point> getAdded(){
-        return drawPanel.getAdded();
+        return shiftEditor.getAdded();
     }
     
     public Set<Point> getRemoved(){
-        return drawPanel.getRemoved();
+        return shiftEditor.getRemoved();
     }
     
     @Override
@@ -78,10 +82,10 @@ public class ShiftDialog extends BaseDialog{
         String command = e.getActionCommand();
         switch (command){
             case "SELECT_ALL":
-                drawPanel.selectAll();
+                shiftEditor.selectAll();
                 break;
             case "UNSELECT_ALL":
-                drawPanel.unSelectAll();
+                shiftEditor.unSelectAll();
                 break;
             default:
                 super.actionPerformed(e);

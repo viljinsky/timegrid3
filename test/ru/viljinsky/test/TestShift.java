@@ -6,7 +6,7 @@
 
 package ru.viljinsky.test;
 
-import ru.viljinsky.forms.DBShiftPanel;
+import ru.viljinsky.forms.ShiftEditor;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -37,7 +37,7 @@ public class TestShift  extends JFrame implements CommandListener{
     public static final String CMD_CANCEL = "CANCEL";
     public static final String CMD_EDIT = "EDIT";
     
-    DBShiftPanel shiftPanel = new DBShiftPanel();
+    ShiftEditor shiftPanel = new ShiftEditor();
     CommandMngr mmngr = new CommandMngr();
     
     Grid grid = new Grid(){
@@ -60,7 +60,7 @@ public class TestShift  extends JFrame implements CommandListener{
         JPanel panel = new JPanel(new BorderLayout());
         panel.setPreferredSize(new Dimension(800,600));
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setLeftComponent(shiftPanel);
+        splitPane.setLeftComponent(new JScrollPane(shiftPanel));
         splitPane.setRightComponent(new JScrollPane(grid));
         
         JPanel commandPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));

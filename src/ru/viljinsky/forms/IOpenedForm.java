@@ -233,7 +233,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
     //--------------------------------------------------------------------------
     
     class ShiftRoomPanel extends JPanel{
-        DBShiftPanel shPanel = new DBShiftPanel();
+        ShiftEditor shPanel = new ShiftEditor();
 //        String sqlShift="select a.* from shift_detail a inner join room b on a.shift_id=b.shift_id where b.id=%room_id;";
         JPanel commands = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
@@ -897,8 +897,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
     }
     
     class ShiftTeacherPanel extends JPanel{
-        DBShiftPanel shPanel = new DBShiftPanel();
-//        String sqlTeacherShift = "select a.* from shift_detail a inner join teacher b on a.shift_id=b.shift_id where b.id=%teacher_id;";
+        ShiftEditor shPanel = new ShiftEditor();
         JPanel commandPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         public ShiftTeacherPanel() {
             super(new BorderLayout());

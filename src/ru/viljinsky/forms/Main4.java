@@ -147,7 +147,8 @@ public class Main4 extends JFrame implements CommandListener{
                     break;
                     
                 case SHIFT:
-                    TestShift2.showShiftDialog(rootPane);
+//                    TestShift2.showShiftDialog(rootPane);
+                    TestShift3.showDialog(rootPane);
                     
                     break;
                     

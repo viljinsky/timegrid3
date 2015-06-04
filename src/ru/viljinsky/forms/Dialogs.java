@@ -142,9 +142,9 @@ abstract class AbstractShiftDialog extends ShiftDialog{
             dataset.test();
             entryPanel.setDataset(dataset);
             
-            drawPanel.setAllowEdit(true);
-            drawPanel.open();
-            drawPanel.setShiftId(shift_id);
+            shiftEditor.setAllowEdit(true);
+            shiftEditor.open();
+            shiftEditor.setShiftId(shift_id);
    
         } catch (Exception e){
             e.printStackTrace();
@@ -285,7 +285,7 @@ public class Dialogs implements IAppError{
         Dataset dataset;
         dataset = DataModule.getDataset("subject");
         dlg.setDataset(dataset, "id", "subject_name");
-        
+        if (profile_id!=null){
         Recordset recordset = DataModule.getRecordet("select a.caption,\n" +
         "(select count(*) from profile where profile_type_id=a.id) as count,\n" +
         "b.profile_type_id from profile_type a inner join profile b\n" +
@@ -295,6 +295,7 @@ public class Dialogs implements IAppError{
         values.put("profile_name",recordset.getString(0)+"("+recordset.getString(1)+")");
         values.put("profile_type_id", recordset.getInteger(2));
         dlg.entryPanel.setValues(values);
+        }
         dlg.setTitle(PROFILE_DLG_CAPTION);
         dlg.showModal(owner);
         if (dlg.modalResult==SelectDialog.RESULT_OK)
@@ -402,14 +403,17 @@ public class Dialogs implements IAppError{
             
         };
 
-        Recordset recordset = DataModule.getRecordet("select a.caption,b.shift_type_id,(select count(*) from shift where shift_type_id=a.id) as count\n" +
-        " from shift_type a inner join shift b on a.id=b.shift_type_id\n" +
-        "where b.id="+shift_id+";");
-        
-        Values values = new Values();
-        values.put("shift_name", recordset.getString(0)+"("+recordset.getString(2)+")");
-        values.put("shift_type_id", recordset.getInteger(1));
-        dlg.setValues(values);
+        if (shift_id!=null){
+            Recordset recordset = DataModule.getRecordet("select a.caption,b.shift_type_id,(select count(*) from shift where shift_type_id=a.id) as count\n" +
+            " from shift_type a inner join shift b on a.id=b.shift_type_id\n" +
+            "where b.id="+shift_id+";");
+
+
+            Values values = new Values();
+            values.put("shift_name", recordset.getString(0)+"("+recordset.getString(2)+")");
+            values.put("shift_type_id", recordset.getInteger(1));
+            dlg.setValues(values);
+        }
         dlg.showModal(owner);
         if (dlg.modalResult==SelectDialog.RESULT_OK){
             return dlg.shift_id;
