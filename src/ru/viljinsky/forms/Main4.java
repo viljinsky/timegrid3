@@ -10,8 +10,11 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.File;
+import java.net.URL;
+import javax.imageio.ImageIO;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -56,7 +59,6 @@ public class Main4 extends JFrame implements CommandListener{
     CommandMngr commands = new CommandMngr(new String[]{
         FILE_CLOSE,
         FILE_EXIT,
-//        FILE_NEW,
         FILE_OPEN,
         DICTIONARY,
         SHIFT,
@@ -73,7 +75,6 @@ public class Main4 extends JFrame implements CommandListener{
         new DepartPanel(),
         new TeacherPanel(),
         new RoomPanel(),
-//        new TimeGridPanel2(),
         new SchedulePanel(),
         new ReportPanel(),
     };
@@ -81,6 +82,7 @@ public class Main4 extends JFrame implements CommandListener{
     public Main4(String title){
         super(title);
         intComponents();
+        
     }
     
     public void intComponents(){
@@ -93,6 +95,22 @@ public class Main4 extends JFrame implements CommandListener{
             tabbedPane.addTab(form.getCaption(), form.getPanel());
         }
         setJMenuBar(createMenuBar());
+        setIconImage(createImageIcon());
+    }
+    
+    private Image createImageIcon(){
+        URL url= Main4.class.getResource("/ru/viljinsky/images/icon.png");
+        
+        try{
+            if (url!=null){
+                return ImageIO.read(url);
+            } else {
+                System.err.println("Image not found");
+            }
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return null;       
     }
 
     @Override
@@ -142,14 +160,13 @@ public class Main4 extends JFrame implements CommandListener{
                 case LOAD_SCRIPT:
                     loadScript();
                     break;
+
                 case MONITOR:
                     SQLMonitor2.showSQLMonitor(rootPane);
                     break;
                     
                 case SHIFT:
-//                    TestShift2.showShiftDialog(rootPane);
                     TestShift3.showDialog(rootPane);
-                    
                     break;
                     
                 case FILE_EXIT:

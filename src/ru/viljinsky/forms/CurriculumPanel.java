@@ -158,8 +158,6 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
                     
                 case EDIT_CURRICULUM:
                     if (Dialogs.editCurriculum(this,curriculum_id)){
-//                        curriculumComboBox.requery();
-//                        curriculumComboBox.setValue(curriculum_id);
                         tree.editCurriculum(new Curriculum(curriculum_id,"XXX"));
                     };
                     break;

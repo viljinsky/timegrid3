@@ -68,8 +68,8 @@ public class ColumnMap extends HashMap<String, String[]> {
 
         // profile
         {"profile.id",""},
-        {"profile.profile_type_id",""},
-        {"profile.profile_name",""},
+        {"profile.profile_type_id","Тип профиля"},
+        {"profile.profile_name","Назание профиля"},
 
         // profile_item
         {"profile_item.profile_id",""},

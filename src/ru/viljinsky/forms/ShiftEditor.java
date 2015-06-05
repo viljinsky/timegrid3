@@ -77,6 +77,14 @@ abstract class AbstractShiftPanel extends JPanel{
         repaint();
     }
     
+    public void clear(){
+        hasChange=false;
+        cells.points.clear();
+        oldPoints.clear();
+        repaint();
+        
+    }
+    
     public Set<Point> getOldPoints(){
         return oldPoints;
     }
@@ -370,6 +378,14 @@ public class ShiftEditor extends ShiftPanel {
         }
     }
 
+    @Override
+    public void clear() {
+        if (usedPoints!=null){
+            usedPoints.clear();
+        }
+        super.clear();
+    }
+
     public void open() throws Exception {
         Dataset r = DataModule.getSQLDataset(SQL_DAY_LIST);
         r.open();
@@ -400,7 +416,6 @@ public class ShiftEditor extends ShiftPanel {
             points.add(new Point(dataset.getValues(i).getInteger("day_id") - 1, dataset.getValues(i).getInteger("bell_id") - 1));
         }
         setPoints(points);
-//        setAllowEdit(false);
     }
 
     public void setTeacherId(Integer teacher_id) throws Exception {

@@ -435,6 +435,7 @@ public class Grid extends JTable implements CommandListener,IAppCommand {
         model.dataset.setFilter(filter);
         model.dataset.open();
         model.fireTableDataChanged();
+        gridSelectionChange();
     }
     /**
      * Поиск первой строки соответвующей фильтру

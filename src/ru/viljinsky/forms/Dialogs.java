@@ -57,9 +57,10 @@ class CurriculumDetailDialg extends SelectDialog{
         Dataset ds = DataModule.getSQLDataset("select subject_id from curriculum_detail where skill_id="+skill_id+" and curriculum_id="+curriculum_id);
         ds.open();
         Set<Object> set= ds.getColumnSet("subject_id");
-        Dataset dataDataset = DataModule.getSQLDataset("select id,subject_name from subject");
+        Dataset dataDataset = DataModule.getSQLDataset("select id,subject_name from subject order by sort_order");
         setDataset(dataDataset, "id", "subject_name");
         setSelected(set);
+        setTitle("Редактор учебного плана");
     }
 
 
@@ -86,7 +87,7 @@ class CurriculumDetailDialg extends SelectDialog{
 
 
 abstract class CopyCurriculumDialog extends BaseDialog{
-    public static final String sql = 
+    public static final String SQL_COPY_CURRICULUM = 
             "select a.id as skill_id,b.id as curriculum_id,\n" +
 "b.caption || ' ' || a.caption as caption from skill a,curriculum b\n" +
 "where exists (select * from curriculum_detail where skill_id=a.id and curriculum_id=b.id);";
@@ -118,7 +119,7 @@ abstract class CopyCurriculumDialog extends BaseDialog{
         panel.add(new JScrollPane(grid));
         panel.setBorder(new EmptyBorder(10,10,10, 10));
         try{
-            dataset = DataModule.getSQLDataset(sql);
+            dataset = DataModule.getSQLDataset(SQL_COPY_CURRICULUM);
             grid.setDataset(dataset);
             dataset.open();
         } catch (Exception e){
@@ -252,7 +253,9 @@ public class Dialogs implements IAppError{
     public static final String NOT_READY_YET = "Не готово ещё";
     
     public static final String CONFIRM_REMOVE_STREAM = "CONFIRM_REMOVE_STREAM";
-    public static final String PROFILE_DLG_CAPTION="Профиль";
+    public static final String PROFILE_DLG_CAPTION   = "Редактор профиля";
+    public static final String SHIFT_DLG_CAPTION     = "Редактор графика";
+    public static final String TYTLE_COPY_CURRICULUM = "Копирование учебного плана";
     
     public static Integer createProfile(JComponent owner,Integer profile_id) throws Exception{
         AbstractProfileDialog dlg = new AbstractProfileDialog(profile_id) {
@@ -276,14 +279,14 @@ public class Dialogs implements IAppError{
                     DataModule.commit();
                 } catch (Exception e){
                     DataModule.rollback();
-                    throw new Exception("CREATE_PROFILE_ERROR\n"+e.getMessage());
+                    throw new Exception(CREATE_PROFILE_ERROR+e.getMessage());
                 }
             }
         };
 
         
         Dataset dataset;
-        dataset = DataModule.getDataset("subject");
+        dataset = DataModule.getSQLDataset("select * from subject order by sort_order");
         dlg.setDataset(dataset, "id", "subject_name");
         if (profile_id!=null){
         Recordset recordset = DataModule.getRecordet("select a.caption,\n" +
@@ -346,10 +349,11 @@ public class Dialogs implements IAppError{
         for (int i=0;i<rs.size();i++){
             set.add(rs.get(i)[0]);
         }
-        dataset = DataModule.getDataset("subject");
+        dataset = DataModule.getSQLDataset("select * from subject order by sort_order");
         dlg.setDataset(dataset, "id", "subject_name");
         dlg.setSelected(set);
         dlg.profile_id=profile_id;
+        dlg.setTitle(PROFILE_DLG_CAPTION);
         return (dlg.showModal(owner)==SelectDialog.RESULT_OK);
         
     }
@@ -414,6 +418,7 @@ public class Dialogs implements IAppError{
             values.put("shift_type_id", recordset.getInteger(1));
             dlg.setValues(values);
         }
+        dlg.setTitle(SHIFT_DLG_CAPTION);
         dlg.showModal(owner);
         if (dlg.modalResult==SelectDialog.RESULT_OK){
             return dlg.shift_id;
@@ -459,6 +464,7 @@ public class Dialogs implements IAppError{
         }
         
         dlg.setSelected(list);
+        dlg.setTitle(SHIFT_DLG_CAPTION);
         dlg.showModal(owner);
         return (dlg.modalResult==SelectDialog.RESULT_OK);
     }
@@ -501,7 +507,7 @@ public class Dialogs implements IAppError{
     
     ///////////////////////////////////////////////////////////////////////////
     
-    private static final String sqlSubjectGroupToStream = 
+    private static final String SQL_SUBJECT_GROUP_TO_STREAM = 
             "select a.depart_id || '-' || a.subject_id || '-' ||a.group_id as key," 
           + " c.label ||' ' || b.subject_name  || a.subject_id || a.group_id as value \n" 
           + "from subject_group a "
@@ -511,12 +517,10 @@ public class Dialogs implements IAppError{
           + "   order by a.subject_id,a.depart_id ;";
 
     public static boolean createStream(JComponent owner, Integer depart_id, Integer subject_id, Integer group_id) throws Exception {
-        String sql = sqlSubjectGroupToStream;
         AbstractStreamDialog dlg = new AbstractStreamDialog() {
             @Override
             public void doOnEntry() throws Exception {
                 Integer depart_id,subject_id,group_id;
-//                List<Integer[]> list = new ArrayList<>();
                 for (Object obj : getSelected()) {
                     String s = (String) obj;
                     String[] ss = s.split("-");
@@ -525,18 +529,15 @@ public class Dialogs implements IAppError{
                     group_id = Integer.valueOf(ss[2]);
                     System.out.println(String.format("depart %d group_id %d subject_id %d ", depart_id, group_id, subject_id));
                     DataModule.execute(String.format("update subject_group set stream_id=%d where depart_id=%d and subject_id=%d and group_id=%d",stream_id,depart_id,subject_id,group_id));
-//                    list.add(new Integer[]{depart_id, subject_id, group_id});
                 }
-                
-//                DataTask.createStream("StreanNew", list);
             }
         };
-        // моздание записи нового стрима
+        // создание записи нового стрима
         DataModule.execute("insert into stream (stream_caption,subject_id) values ('поток "+subject_id+"',"+subject_id+")");
         Recordset recordset = DataModule.getRecordet("select id from stream where id=(select max(id) from stream)");
         
         String s = String.format("%d-%d-%d", depart_id, subject_id, group_id);
-        Dataset dataset = DataModule.getSQLDataset(String.format(sql,subject_id));
+        Dataset dataset = DataModule.getSQLDataset(String.format(SQL_SUBJECT_GROUP_TO_STREAM,subject_id));
         dlg.setDataset(dataset, "key", "value");
         Set set = new HashSet();
         set.add(s);
@@ -590,7 +591,7 @@ public class Dialogs implements IAppError{
             set.add(rs.get(i)[0]);
         }
         
-        Dataset dataset = DataModule.getSQLDataset(String.format(sqlSubjectGroupToStream,subject_id));
+        Dataset dataset = DataModule.getSQLDataset(String.format(SQL_SUBJECT_GROUP_TO_STREAM,subject_id));
         dlg.setDataset(dataset, "key", "value");
         dlg.setSelected(set);
         dlg.setStreamId(stream_id);
@@ -651,7 +652,7 @@ public class Dialogs implements IAppError{
                 
             }
         };
-        
+        dlg.setTitle(TYTLE_COPY_CURRICULUM);
         return dlg.showModal(owner)==BaseDialog.RESULT_OK;
     }
 

@@ -13,16 +13,20 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.im.InputContext;
+import java.net.URL;
 import java.util.Locale;
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import ru.viljinsky.forms.IAppError;
+import sun.awt.image.SurfaceManager;
 
 /**
  *
@@ -74,6 +78,7 @@ public abstract class BaseDialog extends JDialog implements ActionListener,IAppE
         if(iCon.selectInputMethod(ru)){
             System.out.println("Locale OK");
         }
+        setIconImage(createFrameIcon());
         setModal(true);
         Container content = getContentPane();
         content.setLayout(new BorderLayout());
@@ -123,6 +128,18 @@ public abstract class BaseDialog extends JDialog implements ActionListener,IAppE
         JPanel panel = new JPanel();
         panel.setBackground(Color.red);
         return panel;
+    }
+    
+    private Image createFrameIcon(){
+        URL url = BaseDialog.class.getResource("/ru/viljinsky/images/icon.png");
+        try{
+        if (url!=null){
+            
+            return ImageIO.read(url);
+        }
+        } catch (Exception e){
+        }
+        return null;
     }
     
 }

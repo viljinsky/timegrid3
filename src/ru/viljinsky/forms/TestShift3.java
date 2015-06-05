@@ -7,6 +7,8 @@
 package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -18,6 +20,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import ru.viljinsky.dialogs.BaseDialog;
 import ru.viljinsky.dialogs.EntryDialog;
 import ru.viljinsky.sqlite.DataModule;
@@ -86,8 +91,37 @@ public class TestShift3 extends BaseDialog{
         
         Integer subject_id = null;
         Integer subject_domain_id=null;
+        SubjectRenderer subjectRenderer = new SubjectRenderer();
+        
+        class SubjectRenderer extends DefaultTableCellRenderer{
+
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                Values v = subjectList.getDataset().getValues(row) ;
+                try{
+                    setText(v.getString("color"));
+                    String[] ss = v.getString("color").split(" ");
+                    Color c= new Color(Integer.valueOf(ss[0]) ,Integer.valueOf(ss[1]), Integer.valueOf(ss[2]));
+                    setBackground(c);
+                    
+                } catch (Exception e){
+                }
+                return this;
+            }
+            
+        }
         Grid subjectList = new Grid(){
 
+            @Override
+            public TableCellRenderer getCellRenderer(int row, int column) {
+                if (column==1){
+                    return subjectRenderer;
+                }
+                return super.getCellRenderer(row, column);
+            }
+
+            
             @Override
             public void gridSelectionChange() {
                 Values values = getValues();
@@ -153,7 +187,7 @@ public class TestShift3 extends BaseDialog{
         public void colorise() throws Exception{
             String sql = "update subject set color='%s' where id=%d";
             String color;
-            String[] s ={"190","210","230","255"};
+            String[] s ={"210","220","230","255"};
             Integer n=0;
             Dataset dataset = DataModule.getDataset("subject");
             dataset.open();

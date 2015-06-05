@@ -1,12 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -23,8 +19,11 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.DefaultMutableTreeNode;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
@@ -50,7 +49,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
     
     public static final String[] UNPLACED_CMD = {TT_PLACE, TT_PLACE_ALL, TT_CLEAR, TT_DELETE};
     // Дерево группы переподаватели помещения
-    ScheduleTree tree = new ScheduleTree();
+    ScheduleTree scheduleTree = new ScheduleTree();
     // Сетка расписания
     ScheduleGrid scheduleGrid = new ScheduleGrid();
     // Не размещённые предметы
@@ -158,7 +157,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
         JPanel panel = new JPanel(new BorderLayout());
         
         splitTop = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitTop.setLeftComponent(new JScrollPane(tree));
+        splitTop.setLeftComponent(new JScrollPane(scheduleTree));
         splitTop.setRightComponent(scrollPane);
         splitTop.setDividerLocation(200);
         
@@ -182,11 +181,12 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
 
     @Override
     public void open() throws Exception {
-        tree.open();
+        scheduleTree.open();
         scheduleGrid.open();
         whoIsThereGrid.init();
         whoInvateGrid.init();
         unplacedGrid.init();
+        commands.updateActionList();
     }
 
     @Override
@@ -201,7 +201,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
 
     @Override
     public void close() throws Exception {
-        tree.clear();
+        scheduleTree.clear();
         scheduleGrid.SetFilter(null);
         
     }
@@ -312,10 +312,45 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
         }
     }
 
+    class UnplacedGridCellRenderer extends DefaultTableCellRenderer{
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            Grid g =(Grid)table;
+            if (g.getColumnName(column).equals("unplaced")){
+                Values v = g.getDataset().getValues(row);
+                try{
+                if (v.getInteger("unplaced")>0)
+                    setBackground(Color.yellow);
+                else 
+                    setBackground(Color.white);
+                } catch (Exception e){
+                }
+            } else {
+                setBackground(Color.white);
+            };
+                
+            return this;
+        }
+        
+    }
     class UnplacedGrid extends Grid {
+        UnplacedGridCellRenderer renderer = new UnplacedGridCellRenderer();
+
+        @Override
+        public TableCellRenderer getCellRenderer(int row, int column) {
+//            return super.getCellRenderer(row, column); 
+            return renderer;
+        }
 
         Dataset dataset;
-        String sql = "select b.label,a.group_label,c.subject_name,a.unplaced,a.depart_id,a.subject_id,a.group_id," + " a.default_teacher_id as teacher_id,a.default_room_id as room_id ,a.group_type_id " + " from v_subject_group_on_schedule a " + " inner join depart b on b.id = a.depart_id" + " inner join subject c on c.id=a.subject_id";
+        String sql = 
+            "select b.label,a.group_label,c.subject_name,a.unplaced,a.depart_id,a.subject_id,a.group_id,"+
+            " a.default_teacher_id as teacher_id,a.default_room_id as room_id ,a.group_type_id "+
+            " from v_subject_group_on_schedule a "+
+            " inner join depart b on b.id = a.depart_id" + 
+            " inner join subject c on c.id=a.subject_id";
 
         public void init() throws Exception {
             dataset = DataModule.getSQLDataset(sql);
@@ -377,7 +412,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
             "and not exists(select * from schedule \n"+
             "where day_id=%day_id% and bell_id=%bell_id% and depart_id=a.depart_id and group_id=a.group_id);";
 
-        public static final String SQL_INVATE_ROOM = 
+        private static final String SQL_INVATE_ROOM = 
             "select * \n"+
             "from v_schedule a \n"+
             "  where a.room_id=%room_id% and not exists (\n"+
@@ -427,8 +462,8 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
 
     class WhoIsTherePanel extends JPanel implements CommandListener{
         public static final String CMD_GO_TEACHER = "CMD_GO_TEACHER";
-        public static final String  CMD_GO_DEPART = "CMD_GO_DEPART";
-        public static final String CMD_GO_ROOM ="CMD_GO_ROOM";
+        public static final String CMD_GO_DEPART  = "CMD_GO_DEPART";
+        public static final String CMD_GO_ROOM    = "CMD_GO_ROOM";
         Grid grid;
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
         Action[] actions= new Action[]{};
@@ -439,7 +474,6 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
         
         public WhoIsTherePanel(Grid grid){
             setLayout(new BorderLayout());
-            this.actions=actions;
             this.grid=grid;
             grid.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
@@ -553,7 +587,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
     Integer room_id = null;
 
     public void scheduleStatus() throws Exception {
-        TreeElement element = tree.getSelectedElement();
+        TreeElement element = scheduleTree.getSelectedElement();
         Integer depart_id = element.id;
         Dialogs.scheduleState(this, depart_id);
         Recordset r = DataModule.getRecordet("select schedule_state_id from depart where id =" + depart_id);
@@ -566,7 +600,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
     }
     
     public void setDepartScheduleState(Integer depart_id,Integer schedule_state_id){
-        DefaultMutableTreeNode node = tree.departNodes;
+        DefaultMutableTreeNode node = scheduleTree.departNodes;
         DefaultMutableTreeNode n;
         for (int i=0;i<node.getChildCount();i++){
             n = (DefaultMutableTreeNode)node.getChildAt(i);
@@ -574,7 +608,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
             if (d.id==depart_id)
                 d.schedule_status_id=schedule_state_id;
         }
-        tree.repaint();
+        scheduleTree.repaint();
     }
 
     @Override
@@ -611,7 +645,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
                     scheduleGrid.unfix();
                     break;
                 case REFRESH_TREE:
-                    tree.requery();
+                    scheduleTree.requery();
                     break;
             }
             System.out.println(scheduleGrid.getScheduleTitle());
@@ -623,9 +657,12 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
     @Override
     public void updateAction(Action action) {
         String command = (String) action.getValue(Action.ACTION_COMMAND_KEY);
-        TreeElement element = tree.getSelectedElement();
+        TreeElement element = scheduleTree.getSelectedElement();
         Boolean b = (element != null) && (element instanceof Depart);
         switch (command) {
+            case REFRESH_TREE:
+                action.setEnabled(DataModule.isActive());
+                break;
             case CMD_PRIOR:
                 action.setEnabled(history.index>0);
                 break;
@@ -691,6 +728,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
                     unplacedGrid.close();
                 }
                 commands.updateActionList();
+                unplacedGrid.gridSelectionChange();
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -716,45 +754,73 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
             return !(group.isRedy() || group.isUsed());
         }
 
-        public static final String MSG_TEACHER_HAS_NOT_HOUR="Преподаватель выходной";
-        public static final String MSG_TEACHER_IS_BUSY="Преподаватель занят (проводит заняти в другом классе)";
-        public static final String MSG_ROOM_HAS_NOT_HOUR="Помещение недоступно (в графике в эти часы нельзя проводить занятия)";
-        public static final String MSG_ROOM_IS_BUSY="Помещения занято (проходят занятия в другом класе)";
-        public static final String MSG_DEPART_HAS_NOT_HOUR="Время на соответсвует графику(смене) класса";
-        public static final String MSG_DEPART_IS_BUSY="В классе в это время проходят другие занятия";
-        public static final String MSG_OTHER_PLACE_ERROR ="Непонятная причина!?";
+        public static final String MSG_TEACHER_HAS_NOT_HOUR=
+                "Преподаватель выходной";
+        public static final String MSG_TEACHER_IS_BUSY=
+                "Преподаватель занят (проводит заняти в другом классе)";
+        public static final String MSG_ROOM_HAS_NOT_HOUR=
+                "Помещение недоступно (в графике в эти часы нельзя проводить занятия)";
+        public static final String MSG_ROOM_IS_BUSY=
+                "Помещения занято (проходят занятия в другом класе)";
+        public static final String MSG_DEPART_HAS_NOT_HOUR=
+                "Время на соответсвует графику(смене) класса";
+        public static final String MSG_DEPART_IS_BUSY=
+                "В классе в это время проходят другие занятия";
+        public static final String MSG_OTHER_PLACE_ERROR =
+                "Непонятная причина!?";
+
+        public static final String SQL_TEACHER_HAS_NOT_HOUR =
+            "select count(*) \n"+
+            "from teacher a inner join shift_detail b on a.shift_id=b.shift_id \n"+
+            "where a.id=%d and b.day_id=%d and b.bell_id=%d";
+        
+        public static final String SQL_TEACHER_IS_BUSY = 
+            "select count(*) from schedule \n"+
+            "where teacher_id=%d and day_id=%d and bell_id=%d";
+        
+        public static final String SQL_ROOM_HAS_NOT_HOUR =
+            "select count(*) from \n"+
+            "room a inner join shift_detail b on a.shift_id=b.shift_id \n"+
+            "where a.id=%d and b.day_id=%d and b.bell_id=%d";
+        
+        public static final String SQL_ROOM_IS_BUSY = 
+            "select count(*) from schedule \n"+
+            "where room_id=%d and day_id=%d and bell_id=%d";
+            
+        public static final String SQL_DEPART_HAS_NOT_HOUR = 
+            "select count(*) \n"+
+            "from depart a inner join shift_detail b on a.shift_id=b.shift_id \n"+
+            "where a.id=%d and b.day_id=%d and b.bell_id=%d";
         
         private String getPlaceErrorMesage(TimeTableGroup group,int day_id,int bell_id){
             String result = MSG_OTHER_PLACE_ERROR;
-            String sql1 = "select count(*) from teacher a inner join shift_detail b on a.shift_id=b.shift_id where a.id=%d and b.day_id=%d and b.bell_id=%d";
-            String sql4 = "select count(*) from schedule where teacher_id=%d and day_id=%d and bell_id=%d";
-            String sql2 = "select count(*) from room a inner join shift_detail b on a.shift_id=b.shift_id where a.id=%d and b.day_id=%d and b.bell_id=%d";
-            String sql5 = "select count(*) from schedule where room_id=%d and day_id=%d and bell_id=%d";
-            
-            String sql3 = "select count(*) from depart a inner join shift_detail b on a.shift_id=b.shift_id where a.id=%d and b.day_id=%d and b.bell_id=%d";
-            
             Recordset  r;
             try{
-                r=DataModule.getRecordet(String.format(sql1,group.teacher_id,day_id,bell_id));
+                r=DataModule.getRecordet(String.format(
+                        SQL_TEACHER_HAS_NOT_HOUR,group.teacher_id,day_id,bell_id));
                 if (r.getInteger(0)==0)
                     return MSG_TEACHER_HAS_NOT_HOUR;
-                r=DataModule.getRecordet(String.format(sql2,group.room_id,day_id,bell_id));
+                
+                r=DataModule.getRecordet(String.format(
+                        SQL_ROOM_HAS_NOT_HOUR,group.room_id,day_id,bell_id));
                 if (r.getInteger(0)==0)
                     return MSG_ROOM_HAS_NOT_HOUR;
-                r=DataModule.getRecordet(String.format(sql3,group.depart_id,day_id,bell_id));
+                
+                r=DataModule.getRecordet(String.format(
+                        SQL_DEPART_HAS_NOT_HOUR,group.depart_id,day_id,bell_id));
                 if (r.getInteger(0)==0)
                     return MSG_DEPART_HAS_NOT_HOUR;
                 
-                r=DataModule.getRecordet(String.format(sql4,group.teacher_id,day_id,bell_id));
+                r=DataModule.getRecordet(String.format(
+                        SQL_TEACHER_IS_BUSY,group.teacher_id,day_id,bell_id));
                 if (r.getInteger(0)>0)
                     return MSG_TEACHER_IS_BUSY;
                 
-                r=DataModule.getRecordet(String.format(sql5,group.room_id,day_id,bell_id));
+                r=DataModule.getRecordet(String.format(
+                        SQL_ROOM_IS_BUSY,group.room_id,day_id,bell_id));
+                
                 if (r.getInteger(0)>0)
                     return MSG_ROOM_IS_BUSY;
-                
-                
-                
                 
             } catch (Exception e){
                 e.printStackTrace();
@@ -825,7 +891,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
         Cell cell = scheduleGrid.getSelectedCell();
         int day_id  = cell.getCol() + 1;
         int bell_id = cell.getRow() + 1;
-        TreeElement el = tree.getSelectedElement();
+        TreeElement el = scheduleTree.getSelectedElement();
         if (el == null) {
             return;
         }

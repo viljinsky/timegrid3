@@ -40,19 +40,19 @@ public class ScheduleState implements IScheduleState {
         String path = "";
         switch (state) {
             case STATE_NEW:
-                path = "../images/state_new.png";
+                path = "/ru/viljinsky/images/state_new.png";
                 break;
             case STATE_WORK:
-                path = "../images/state_work.png";
+                path = "/ru/viljinsky/images/state_work.png";
                 break;
             case STATE_ERROR:
-                path = "../images/state_error.png";
+                path = "/ru/viljinsky/images/state_error.png";
                 break;
             case STATE_READY:
-                path = "../images/state_ready.png";
+                path = "/ru/viljinsky/images/state_ready.png";
                 break;
             case STATE_USED:
-                path = "../images/state_used.png";
+                path = "/ru/viljinsky/images/state_used.png";
                 break;
         }
         

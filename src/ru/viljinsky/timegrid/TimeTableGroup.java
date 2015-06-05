@@ -22,8 +22,8 @@ import ru.viljinsky.sqlite.Values;
  */
 
 class GroupImages{
-    public static final Image image1 = createImage("../images/check_box.png");
-    public static final Image image2= createImage("../images/check_box_checked.png");
+    public static final Image image1 = createImage("/ru/viljinsky/images/check_box.png");
+    public static final Image image2= createImage("/ru/viljinsky/images/check_box_checked.png");
     
     public static Image createImage(String path){
         URL url = GroupImages.class.getResource(path);
