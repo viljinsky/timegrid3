@@ -54,7 +54,7 @@ public class Main4 extends JFrame implements CommandListener{
     public static final String TIMEGRID    = "TIME_GRID";
     public static final String MONITOR     = "MONITOR";
     
-    public static String APP_NAME = "TimeTable2015";
+    public static String APP_NAME = "Составитель расписания";
     
     CommandMngr commands = new CommandMngr(new String[]{
         FILE_CLOSE,

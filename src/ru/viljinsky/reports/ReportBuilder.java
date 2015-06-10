@@ -1,15 +1,12 @@
 package ru.viljinsky.reports;
 
+import java.util.HashMap;
+import java.util.Map;
+import ru.viljinsky.forms.ReportPanel;
 import ru.viljinsky.sqlite.Column;
-import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
-import ru.viljinsky.sqlite.Recordset;
 import ru.viljinsky.sqlite.Values;
 
-/**
- *
- * @author вадик
- */
 
 public class ReportBuilder{
     
@@ -20,7 +17,36 @@ public class ReportBuilder{
     public static final String RP_SCHEDULE_TEACHER = "RP_SCHEDULE_TEACHER";
     public static final String RP_SCHEDULE_ERRORS = "RP_SCHEDULE_ERRORS";
     
+    public static ReportInfo[] reportInfoList = {
+        new ReportInfo(RP_HOME),
+        new ReportInfo(RP_CURRICULUM),
+        new ReportInfo(RP_SCHEDULE_VAR_1),
+        new ReportInfo(RP_SCHEDULE_VAR_2),
+        new ReportInfo(RP_SCHEDULE_TEACHER),
+        new ReportInfo(RP_SCHEDULE_ERRORS),
+        
+    };
     
+    public static String getReportName(String urlPath){
+        if (urlPath.equals("/"))
+            return RP_HOME;
+        if (urlPath.startsWith("/"))
+            urlPath = urlPath.substring(1);
+        for (ReportInfo info:reportInfoList){
+            if (info.page.equals(urlPath))
+                return info.name;
+        }
+        return null;
+    }
+    
+    public Map<String,String> getReportMap(){
+        Map<String,String> result = new HashMap<>();
+        result.put(RP_CURRICULUM, "curriculum.html");
+        result.put(RP_SCHEDULE_VAR_1, "schedule_1.html");
+        result.put(RP_SCHEDULE_VAR_2, "schedule_2.html");
+        result.put(RP_SCHEDULE_TEACHER, "teacher_2.html");
+        return result;
+    }
     
     public String getReport(String reportName) throws Exception{
         AbstractReport report = null;
@@ -73,7 +99,7 @@ public class ReportBuilder{
        
         "[body]"+   
         
-        "<div font='small' align='center'><a href='http://www.timetabler.narod.ru'>Составитель расписания</a> &copy; 2015</div>"+    
+        "<div font='small' align='center'><a href='http://www.составительрасписания.рф'>Составитель расписания</a> &copy; 2015</div>"+    
         "</body>"+
         "</html>";
     
@@ -86,38 +112,51 @@ public class ReportBuilder{
 
     
     public static String createPage(String reportContent){
-        return HTML_PATTERN.replace("[body]", reportContent).replace("[style]", STYLE).replace("[navigator]", HTML_NAVIGATOR);
+        return HTML_PATTERN
+                .replace("[body]", reportContent)
+                .replace("[style]", STYLE)
+                .replace("[navigator]",getNavigator());
     }
     
+    public static String getNavigator(){
+        StringBuilder result = new StringBuilder();
+        result.append("<ul class='navigator'>");
+        for (ReportInfo info:reportInfoList){
+            result.append("<li><a href='"+info.page+"'>"+info.title+"</a></li>");
+        }
+        result.append("</ul>");
+        return result.toString();
+    }
     
-    public static String HTML_NAVIGATOR =
-                "<ul class='navigator'>"
-
-                + "<li>"
-                + "<a href='.'>Начальная страница</a>"
-                + "</li>"
-            
-                + "<li>"
-                + "<a href='page5.html'>Учебный план</a>"
-                + "</li>"
-            
-                + "<li>"
-                + "<a href='page1.html'>Расписание (вариант1)</a>"
-                + "</li>"
-                
-                + "<li>"
-                + "<a href='page2.html'>Расписание (вариант2)</a>"
-                + "</li>"
-                
-                + "<li>"                
-                + "<a href='page3.html'>Расписание преподователей</a>"
-                + "</li>"
-                
-                + "<li>"
-                + "<a href='page4.html'>Расписание ошибки</a>"
-                + "</li>"
-                
-                + "</ul>";
+//    public static String HTML_NAVIGATOR =
+//            
+//                "<ul class='navigator'>"
+//
+//                + "<li>"
+//                + "<a href='/'>Начальная страница</a>"
+//                + "</li>"
+//            
+//                + "<li>"
+//                + "<a href='page5.html'>Учебный план</a>"
+//                + "</li>"
+//            
+//                + "<li>"
+//                + "<a href='page1.html'>Расписание (вариант1)</a>"
+//                + "</li>"
+//                
+//                + "<li>"
+//                + "<a href='page2.html'>Расписание (вариант2)</a>"
+//                + "</li>"
+//                
+//                + "<li>"                
+//                + "<a href='page3.html'>Расписание преподователей</a>"
+//                + "</li>"
+//                
+//                + "<li>"
+//                + "<a href='page4.html'>Расписание ошибки</a>"
+//                + "</li>"
+//                
+//                + "</ul>";
 
     
     
@@ -209,5 +248,6 @@ abstract class AbstractReport {
     public String getHtml(){
         return html;
     }
+    
    
 }

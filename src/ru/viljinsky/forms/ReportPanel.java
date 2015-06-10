@@ -13,8 +13,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -24,6 +22,7 @@ import javax.swing.JPanel;
 import ru.viljinsky.reports.IReportBuilder;
 import ru.viljinsky.reports.ReportBuilder;
 import ru.viljinsky.reports.Browser;
+import ru.viljinsky.reports.ReportInfo;
 
 
 
@@ -35,19 +34,22 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder,Co
 
         @Override
         public String getContentHtml(URL url) throws Exception{
-            Map<String,String> linkMap = new HashMap<>();
-            linkMap.put("/.", RP_HOME);
-            linkMap.put("/page5.html", RP_CURRICULUM);            
-            linkMap.put("/page1.html", RP_SCHEDULE_VAR_1);
-            linkMap.put("/page2.html", RP_SCHEDULE_VAR_2);
-            linkMap.put("/page3.html", RP_SCHEDULE_TEACHER);
-            linkMap.put("/page4.html", RP_SCHEDULE_ERRORS);
+            
+            String reportName;
             
             String path = url.getPath();
-            String reportName = linkMap.get(path);
+            // По пути урла нужно определить имя отчётв
+            reportName = ReportBuilder.getReportName(path);
+            if (reportName==null){
+                throw new Exception("URL_PATH_NOT_FOUND\n"+path);
+            }
+            
             System.out.println("-->"+reportName);
+            ReportBuilder reportBuilder = new ReportBuilder();
             try{
-                String reportText = new ReportBuilder().getReport(linkMap.get(path));
+                // Получить содержимое отчёта
+                String reportText = reportBuilder.getReport(reportName);
+                // Сгенерировать HTML код страницы
                 return ReportBuilder.createPage(reportText);
             } catch (Exception e){
                 e.printStackTrace();
@@ -134,30 +136,21 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder,Co
             }
             
         
-            Map<String,String> reportMap = new HashMap<>();
-            reportMap.put(RP_HOME  , "/index.html");        
-            reportMap.put(RP_CURRICULUM  , "/page5.html");
-            reportMap.put(RP_SCHEDULE_VAR_1  , "/page1.html");
-            reportMap.put(RP_SCHEDULE_VAR_2  , "/page2.html");
-            reportMap.put(RP_SCHEDULE_TEACHER, "/page3.html");
-            reportMap.put(RP_SCHEDULE_ERRORS , "/page4.html");
-
-
+            String[] reports = {RP_HOME,RP_CURRICULUM,RP_SCHEDULE_VAR_1,RP_SCHEDULE_TEACHER};
             ReportBuilder repopBuilder = new ReportBuilder();
             String txt,html;
-            try{
-                for (String reportName:reportMap.keySet()){
+            
+            ReportInfo info;
+            for (String reportName:reports){
+                info = new ReportInfo(reportName);
+                txt = repopBuilder.getReport(info.getName());
+                html=ReportBuilder.createPage(txt);
+                String s = info.getPage();
+                path = file.getPath()+"/"+(s=="/" ?"index.html":s);
 
-                    txt = repopBuilder.getReport(reportName);
-                    html = ReportBuilder.createPage(txt);
-                    path = file.getPath()+reportMap.get(reportName);
-
-                    printReport(path, html);
-                }
-                JOptionPane.showMessageDialog(this, "OK");
-            } catch (Exception e){
-                JOptionPane.showMessageDialog(this, e.getMessage());
+                printReport(path, html);
             }
+            JOptionPane.showMessageDialog(this, "OK");
         }
     }
     

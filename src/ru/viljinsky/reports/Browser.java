@@ -9,6 +9,7 @@ package ru.viljinsky.reports;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.net.URI;
 import java.net.URL;
@@ -91,13 +92,15 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
     public String protocol = "http";
     public int port = 8080;
     URL address = null;
-    String homePage = "http://localhost:8080/.";
+    String currentPath = "/";
+    String homePage = protocol+"://"+host+":"+port+"/";
 
     public void addControl(JComponent control){
         controls.add(control);
     }
     public Browser() {
         setLayout(new BorderLayout());
+        setPreferredSize(new Dimension(400,300));
         
         maneger = new CommandMngr(REPORT_COMMANDS);
         maneger.addCommandListener(this);
@@ -120,9 +123,10 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
                     if (e.getURL() == null) {
                         path = e.getDescription();
                         if (!path.startsWith("/")) {
-                            path = "/" + path;
+                            path = currentPath + path;
                         }
                         link = new URL(protocol, host, port, path);
+                        System.out.println("**LINK HAS GENERATED***>"+link.toString());
                     } else {
                         link = e.getURL();
                     }
@@ -150,16 +154,20 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
                 stack.add(address);
                 pageIndex=stack.indexOf(address);
             }
-//            System.out.println("-->"+pageIndex);
 
             if (!address.getHost().equals(host)){
                 Desktop desktop = Desktop.getDesktop();
                 URI uri = new URI(address.toString());
                 desktop.browse(uri);
             } else {
+        
                 text.setText(getContentHtml(address));
                 text.setCaretPosition(0);
             }
+        
+//                text.setText(getContentHtml(address));
+//                text.setCaretPosition(0);
+
         } catch (Exception e){
             text.setText("<h1>Error page</h1><b>"+e.getMessage()+"</b>");
         } finally {
