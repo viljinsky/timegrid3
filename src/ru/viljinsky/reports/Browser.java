@@ -40,6 +40,17 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
     Cursor defaultCursor = Cursor.getDefaultCursor();
     List<URL> stack = new ArrayList<>();
     int pageIndex = -1;
+    JEditorPane text = new JEditorPane();
+    JLabel statusLabel = new JLabel();
+    public String host = "localhost";
+    public String protocol = "http";
+    public int port = 8080;
+    URL address = null;
+    String currentPath = "/";
+    String homePage = protocol+"://"+host+":"+port+"/";
+    
+    
+    
     
     CommandMngr maneger;
     JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -86,14 +97,6 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
     }
     
     
-    JEditorPane text = new JEditorPane();
-    JLabel statusLabel = new JLabel();
-    public String host = "localhost";
-    public String protocol = "http";
-    public int port = 8080;
-    URL address = null;
-    String currentPath = "/";
-    String homePage = protocol+"://"+host+":"+port+"/";
 
     public void addControl(JComponent control){
         controls.add(control);
@@ -126,7 +129,6 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
                             path = currentPath + path;
                         }
                         link = new URL(protocol, host, port, path);
-                        System.out.println("**LINK HAS GENERATED***>"+link.toString());
                     } else {
                         link = e.getURL();
                     }
@@ -138,9 +140,6 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
                         setAddress(link);
                 else if (t == HyperlinkEvent.EventType.ENTERED) 
                         statusLabel.setText(link.toString());
-                
-//                    hyperlinkEnter(link);
-                
             }
         });
     }
@@ -165,9 +164,6 @@ public abstract class Browser extends JPanel implements IAppCommand,CommandListe
                 text.setCaretPosition(0);
             }
         
-//                text.setText(getContentHtml(address));
-//                text.setCaretPosition(0);
-
         } catch (Exception e){
             text.setText("<h1>Error page</h1><b>"+e.getMessage()+"</b>");
         } finally {

@@ -12,13 +12,14 @@ import ru.viljinsky.sqlite.Recordset;
 import ru.viljinsky.sqlite.Values;
 
 /**
- *
+ * Отчет РАСПИСАНИЕ ПРЕПОДАВАТЕЛЕЙ
  * @author вадик
  */
 class TeacherReport extends AbstractReport {
     Dataset schedule;
     Dataset day_list;
     Dataset bell_list;
+    String  REPORT_TYTLE = "Расписание преподавателей";
 
     /**
      * Таблица расписания преподавателя
@@ -82,8 +83,9 @@ class TeacherReport extends AbstractReport {
     @Override
     public void prepare() throws Exception {
         StringBuilder result = new StringBuilder();
-        result.append("<h1>Расписание занятий по преподавателям</h1>");
+        result.append("<h1>"+REPORT_TYTLE+"</h1>");
         result.append(getReportHeader());
+        
         schedule = DataModule.getDataset("v_schedule");
         schedule.open();
         Dataset teacher = DataModule.getDataset("v_teacher");

@@ -22,6 +22,7 @@ import javax.swing.JPanel;
 import ru.viljinsky.reports.IReportBuilder;
 import ru.viljinsky.reports.ReportBuilder;
 import ru.viljinsky.reports.Browser;
+import ru.viljinsky.reports.PageProducer;
 import ru.viljinsky.reports.ReportInfo;
 
 
@@ -121,32 +122,77 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder,Co
                 bw.close();
         }
     }
+
+    class Producer extends PageProducer{
+        
+        ReportInfo info;
+        String[] reports;
+        String navigator;
+        
+        public Producer(ReportInfo info,String[] reports){
+            super();
+            this.info=info;
+            this.reports = reports;
+            
+//            try{
+//                loadPattern("d:\\development\\schedule2\\site\\site3\\pattern.html");
+//            } catch(Exception e){
+//                e.printStackTrace();
+//            }    
+
+            ReportInfo ri;
+            StringBuilder nav = new StringBuilder();
+            nav.append("<ul>");
+            for (String reportName:reports){
+                ri=new ReportInfo(reportName);
+                nav.append("<li><a href='"+ri.getPage()+"'>"+ri.getTitle()+"</a></li>");
+            }
+            nav.append("</ul>");
+            navigator=nav.toString();
+            
+            
+            
+        }
+
+        @Override
+        public String getReplaceText(String tag) {
+            try{
+            switch(tag){
+                case "$TITLE$":
+                    return info.getTitle();
+                case "$PAGE_CONTENT$":
+                    return new ReportBuilder().getReport(info.getName());
+                case "$NAVIGATOR$":
+                    return navigator;
+            }
+            return "";
+            } catch (Exception e){
+                return "<b>ERROR_ON_TAG<b>";
+            }
+        }
+        
+        
+    }
     
     public void publichReport() throws Exception{
-        String path = System.getProperty("user.dir");
-        File file = new File(path);
-        JFileChooser fc = new JFileChooser(file);
-        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int retValue = fc.showSaveDialog(this);
-        if (retValue == JFileChooser.APPROVE_OPTION){
-            file=fc.getSelectedFile();
-            if (!file.exists()){
-                if (!file.mkdir())
-                    throw new Exception("CAN_NOT_CREATE_DIR");
-            }
-            
+        
+        String path ;
+        String patternFileName = "D:\\development\\schedule2\\site\\current\\pattern.html";
+        String destanationPath = "D:\\development\\schedule2\\site\\current\\example\\";
+        if (JOptionPane.showConfirmDialog(null, String.format("%s \n %s ",destanationPath,patternFileName),"Продолжать",JOptionPane.YES_NO_OPTION)!=JOptionPane.YES_OPTION){
         
             String[] reports = {RP_HOME,RP_CURRICULUM,RP_SCHEDULE_VAR_1,RP_SCHEDULE_TEACHER};
-            ReportBuilder repopBuilder = new ReportBuilder();
-            String txt,html;
-            
+            String html;
             ReportInfo info;
             for (String reportName:reports){
                 info = new ReportInfo(reportName);
-                txt = repopBuilder.getReport(info.getName());
-                html=ReportBuilder.createPage(txt);
+                
+                Producer p = new Producer(info,reports);
+                p.loadPattern(patternFileName);
+                html = p.execute();
+                
                 String s = info.getPage();
-                path = file.getPath()+"/"+(s=="/" ?"index.html":s);
+                path = destanationPath+(s=="/" ?"index.html":s);
 
                 printReport(path, html);
             }

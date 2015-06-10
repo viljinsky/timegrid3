@@ -21,6 +21,7 @@ class ScheduleReport2 extends AbstractReport {
     Dataset bell_list;
     Dataset depart;
     Dataset schedule;
+    String REPORT_TYTLE = "Расписание занятий (вар 2)";
 
     private String getRoomLabel(int depart_id, int day_id, int bell_id) throws Exception {
         Recordset r = DataModule.getRecordet("select distinct room_name from room a inner join schedule b on a.id=b.room_id\n" + "where day_id=" + day_id + " and bell_id=" + bell_id + " and depart_id=" + depart_id);
@@ -77,7 +78,7 @@ class ScheduleReport2 extends AbstractReport {
         schedule = DataModule.getSQLDataset("select day_id,bell_id,depart_id,subject_name from schedule a inner join subject b on a.subject_id=b.id");
         StringBuilder result = new StringBuilder();
         result.append(getReportHeader());
-        result.append("<h1>Расписание занятий по классам(2)</h1>");
+        result.append("<h1>"+REPORT_TYTLE+"</h1>");
         result.append("<table>");
         Values values;
         // заголовки колонок
