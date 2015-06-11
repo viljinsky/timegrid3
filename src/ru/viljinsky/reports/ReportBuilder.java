@@ -32,43 +32,63 @@ public class ReportBuilder{
             urlPath = urlPath.substring(1);
         for (ReportInfo info:reportInfoList){
             if (info.page.equals(urlPath))
-                return info.name;
+                return info.getReportName();
         }
         return null;
     }
     
+    
     /**
      * Поллучение HTML кода котента отчёта
-     * @param reportName
+     * @param info reportInfo
      * @return
      * @throws Exception 
      */
-    public String getReport(String reportName) throws Exception{
-        AbstractReport report = null;
-        switch(reportName){
-            case RP_HOME:
-                return getIndexPage();
-            case RP_CURRICULUM:
-                report = new CurriculumReport();
-                break;
-            case RP_SCHEDULE_VAR_1:
-                report = new ScheduleReport();
-                break;
-            case RP_SCHEDULE_VAR_2:
-                report = new ScheduleReport2();
-                break;
-            case RP_SCHEDULE_TEACHER:
-                report = new TeacherReport();
-                break;
-            case RP_SCHEDULE_ERRORS:
-                report = new ErrorsReport();
-                break;
-            default:
-                throw new Exception("UNKNOW_REPORT_NAME\n"+reportName);
+    public String getReport(ReportInfo info) throws Exception{
+        if (info.getPage().equals("/"))
+            return getIndexPage();
+        AbstractReport report ;
+        Class reportClass = info.getReportClass();
+        if (reportClass!=null){
+            report =  (AbstractReport)reportClass.newInstance();
+            report.prepare();
+            return report.getHtml();
         }
-        report.prepare();
-        return report.getHtml();
+        return null;
     }
+    
+//    /**
+//     * Поллучение HTML кода котента отчёта
+//     * @param reportName
+//     * @return
+//     * @throws Exception 
+//     */
+//    public String getReport(String reportName) throws Exception{
+//        AbstractReport report = null;
+//        switch(reportName){
+//            case RP_HOME:
+//                return getIndexPage();
+//            case RP_CURRICULUM:
+//                report = new CurriculumReport();
+//                break;
+//            case RP_SCHEDULE_VAR_1:
+//                report = new ScheduleReport();
+//                break;
+//            case RP_SCHEDULE_VAR_2:
+//                report = new ScheduleReport2();
+//                break;
+//            case RP_SCHEDULE_TEACHER:
+//                report = new TeacherReport();
+//                break;
+//            case RP_SCHEDULE_ERRORS:
+//                report = new ErrorsReport();
+//                break;
+//            default:
+//                throw new Exception("UNKNOW_REPORT_NAME\n"+reportName);
+//        }
+//        report.prepare();
+//        return report.getHtml();
+//    }
     
     
     

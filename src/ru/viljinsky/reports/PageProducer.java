@@ -35,6 +35,7 @@ public class PageProducer {
     public void setHtmlPattern(String htmlPattern){
         this.htmlPattern=htmlPattern;
     }
+    
     public void loadPattern(String fileName) throws Exception{
         BufferedReader bufr = null;
         String line;
@@ -51,7 +52,10 @@ public class PageProducer {
         }
         
     }
-    
+    /**
+     * Зпуск компиляции
+     * @return 
+     */
     public String execute(){
         String result = htmlPattern;
         Pattern p = Pattern.compile("\\$.*?\\$");
@@ -65,14 +69,22 @@ public class PageProducer {
             end=m.end();
             tag = htmlPattern.substring(start, end);
             substr = getReplaceText(tag);
-            map.put(tag, substr);
+            if (substr!=null)
+                map.put(tag, substr);
         }
         for (String s:map.keySet()){
             result=result.replace(s, map.get(s));
         }
         return result;
     }
-    
+    /**
+     * Получение строки подстановки
+     * @param tag $таг_имя$
+     * @return  Возвращает строку постановки<br>
+     *          таг без изменений - null <br>
+     *          удалить таг - пустая строка
+     *            
+     */
     public String getReplaceText(String tag){
         System.out.println(tag);
         return "xxx";

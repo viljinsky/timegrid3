@@ -46,10 +46,11 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder,Co
             }
             
             System.out.println("-->"+reportName);
+            ReportInfo info = new ReportInfo(reportName);
             ReportBuilder reportBuilder = new ReportBuilder();
             try{
                 // Получить содержимое отчёта
-                String reportText = reportBuilder.getReport(reportName);
+                String reportText = reportBuilder.getReport(info);
                 // Сгенерировать HTML код страницы
                 return ReportBuilder.createPage(reportText);
             } catch (Exception e){
@@ -161,7 +162,7 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder,Co
                 case "$TITLE$":
                     return info.getTitle();
                 case "$PAGE_CONTENT$":
-                    return new ReportBuilder().getReport(info.getName());
+                    return new ReportBuilder().getReport(info);
                 case "$NAVIGATOR$":
                     return navigator;
             }
