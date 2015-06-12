@@ -117,11 +117,13 @@ class ScheduleReport extends AbstractReport {
         Values values;
         depart = DataModule.getDataset("depart");
         depart.open();
+        result.append("<div style='overflow-x:scroll;'>");
         for (int i = 0; i < depart.size(); i++) {
             values = depart.getValues(i);
             result.append(getScheduleReport(values.getInteger("id")));
             result.append("<br>");
         }
+        result.append("</div>");
         html = result.toString();
     }
     

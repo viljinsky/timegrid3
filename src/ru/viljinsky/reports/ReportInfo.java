@@ -11,6 +11,16 @@ package ru.viljinsky.reports;
  * @author вадик
  */
 public class ReportInfo {
+    
+    public static final String RP_HOME = "RP_HOME";
+    public static final String RP_CURRICULUM ="RP_CURRICULUM";
+    public static final String RP_SCHEDULE_VAR_1 = "RP_SCHEDULE_VAR_1";
+    public static final String RP_SCHEDULE_VAR_2 = "RP_SCHEDULE_VAR_2";
+    public static final String RP_SCHEDULE_TEACHER = "RP_SCHEDULE_TEACHER";
+    public static final String RP_SCHEDULE_ERRORS = "RP_SCHEDULE_ERRORS";
+    
+    
+    
     String reportName;
     String title;
     String page;
@@ -48,31 +58,31 @@ public class ReportInfo {
     public ReportInfo(String reportName) {
         this.reportName = reportName;
         switch (reportName) {
-            case ReportBuilder.RP_HOME:
+            case RP_HOME:
                 title = "индекс";
                 page = "/";
                 break;
-            case ReportBuilder.RP_CURRICULUM:
+            case RP_CURRICULUM:
                 title = "учебный план";
                 page = "curriculum.html";
                 reportClass = CurriculumReport.class;
                 break;
-            case ReportBuilder.RP_SCHEDULE_TEACHER:
+            case RP_SCHEDULE_TEACHER:
                 title = "преподаватели";
                 page = "teacher.html";
                 reportClass=TeacherReport.class;
                 break;
-            case ReportBuilder.RP_SCHEDULE_VAR_1:
+            case RP_SCHEDULE_VAR_1:
                 title = "расписание вар 1.";
                 page = "schedule_var1.html";
                 reportClass=ScheduleReport.class;
                 break;
-            case ReportBuilder.RP_SCHEDULE_VAR_2:
+            case RP_SCHEDULE_VAR_2:
                 title = "расписание вар 2.";
                 page = "schedule_var2.html";
                 reportClass = ScheduleReport2.class;
                 break;
-            case ReportBuilder.RP_SCHEDULE_ERRORS:
+            case RP_SCHEDULE_ERRORS:
                 title = "ошибки";
                 page = "errors.html";
                 reportClass=ErrorsReport.class;

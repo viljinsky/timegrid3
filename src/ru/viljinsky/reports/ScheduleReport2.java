@@ -79,6 +79,9 @@ class ScheduleReport2 extends AbstractReport {
         StringBuilder result = new StringBuilder();
         result.append(getReportHeader());
         result.append("<h1>"+REPORT_TYTLE+"</h1>");
+        
+        result.append("<div style='overflow-x:scroll;'>");
+        
         result.append("<table>");
         Values values;
         // заголовки колонок
@@ -124,6 +127,7 @@ class ScheduleReport2 extends AbstractReport {
         }
         // заголовки строк
         result.append("</table>");
+        result.append("</div>");
         html = result.toString();
     }
     

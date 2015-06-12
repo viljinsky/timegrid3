@@ -16,10 +16,8 @@ import java.net.URL;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import ru.viljinsky.reports.IReportBuilder;
 import ru.viljinsky.reports.ReportBuilder;
 import ru.viljinsky.reports.Browser;
 import ru.viljinsky.reports.PageProducer;
@@ -27,7 +25,7 @@ import ru.viljinsky.reports.ReportInfo;
 
 
 
-public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder,CommandListener {
+public class ReportPanel extends JPanel implements IOpenedForm,CommandListener {
     public static final String RP_PUBLISH = "RP_PUBLISH";
     public static final String RP_RELOAD = "RP_RELOAD";
     
@@ -134,12 +132,6 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder,Co
             super();
             this.info=info;
             this.reports = reports;
-            
-//            try{
-//                loadPattern("d:\\development\\schedule2\\site\\site3\\pattern.html");
-//            } catch(Exception e){
-//                e.printStackTrace();
-//            }    
 
             ReportInfo ri;
             StringBuilder nav = new StringBuilder();
@@ -166,7 +158,7 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder,Co
                 case "$NAVIGATOR$":
                     return navigator;
             }
-            return "";
+            return null;
             } catch (Exception e){
                 return "<b>ERROR_ON_TAG<b>";
             }
@@ -180,9 +172,16 @@ public class ReportPanel extends JPanel implements IOpenedForm,IReportBuilder,Co
         String path ;
         String patternFileName = "D:\\development\\schedule2\\site\\current\\pattern.html";
         String destanationPath = "D:\\development\\schedule2\\site\\current\\example\\";
-        if (JOptionPane.showConfirmDialog(null, String.format("%s \n %s ",destanationPath,patternFileName),"Продолжать",JOptionPane.YES_NO_OPTION)!=JOptionPane.YES_OPTION){
+        if (JOptionPane.showConfirmDialog(null, String.format("%s \n %s ",destanationPath,patternFileName),"Продолжать",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
         
-            String[] reports = {RP_HOME,RP_CURRICULUM,RP_SCHEDULE_VAR_1,RP_SCHEDULE_TEACHER};
+            String[] reports = {
+                ReportInfo.RP_HOME,
+                ReportInfo.RP_CURRICULUM,
+                ReportInfo.RP_SCHEDULE_VAR_1,
+                ReportInfo.RP_SCHEDULE_VAR_2,
+                ReportInfo.RP_SCHEDULE_TEACHER
+            };
+            
             String html;
             ReportInfo info;
             for (String reportName:reports){

@@ -14,6 +14,8 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.File;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -26,6 +28,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import ru.viljinsky.dialogs.BaseDialog;
+import ru.viljinsky.dialogs.EntryForm;
+import ru.viljinsky.reports.ScheduleParams;
 import ru.viljinsky.sqlite.CreateData;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.util.SQLMonitor2;
@@ -173,14 +177,35 @@ public class Main4 extends JFrame implements CommandListener{
                     System.exit(0);
                     break;
                 case ATTRIBUTES:
-                    BaseDialog dlg = new TestAttr();
-                    dlg.showModal(rootPane);
+                    showAttrDlg();
+//                    BaseDialog dlg = new TestAttr();
+//                    dlg.showModal(rootPane);
             }
         } catch (Exception e){
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
     
+    public void showAttrDlg() throws Exception{
+        String[] fieldNames = new String[]{
+            ScheduleParams.DATE_BEGIN+";Дата начала;FC_DATE",
+            ScheduleParams.DATE_END+";Дата окончания;FC_DATE",
+            ScheduleParams.SCHEDULE_TITLE+";Заголовок",
+            ScheduleParams.SCHEDULE_SPAN+";Период",
+            ScheduleParams.EDUCATIONAL_INSTITUTION+";Название заведения",
+        };
+        
+        
+        EntryForm eform = new EntryForm();
+        eform.pack();
+        eform.setFields(fieldNames);
+        eform.setValues(ScheduleParams.getValues());
+        eform.setVisible(true);
+        if (eform.resultValue==EntryForm.RESULT_OK){
+           System.out.println(eform.getValues());
+           ScheduleParams.setValues(eform.getValues());
+        }
+    }
     
     protected void fileNew() throws Exception{
         File file;
@@ -269,10 +294,11 @@ public class Main4 extends JFrame implements CommandListener{
             }
     }
     
-    public void showAttrDlg(){
-        BaseDialog dlg = new TestAttr();
-        dlg.showModal(rootPane);
-    }
+//    public void showAttrDlg(){
+//        BaseDialog dlg = new TestAttr();
+//        dlg.showModal(rootPane);
+//    }
+    
     protected void fileClose() throws Exception{
         if (DataModule.isActive()){
             close();

@@ -7,27 +7,20 @@ import ru.viljinsky.sqlite.Values;
 
 public class ReportBuilder{
     
-    public static final String RP_HOME = "RP_HOME";
-    public static final String RP_CURRICULUM ="RP_CURRICULUM";
-    public static final String RP_SCHEDULE_VAR_1 = "RP_SCHEDULE_VAR_1";
-    public static final String RP_SCHEDULE_VAR_2 = "RP_SCHEDULE_VAR_2";
-    public static final String RP_SCHEDULE_TEACHER = "RP_SCHEDULE_TEACHER";
-    public static final String RP_SCHEDULE_ERRORS = "RP_SCHEDULE_ERRORS";
-    
     public static ReportInfo[] reportInfoList = {
-        new ReportInfo(RP_HOME),
-        new ReportInfo(RP_CURRICULUM),
-        new ReportInfo(RP_SCHEDULE_VAR_1),
-        new ReportInfo(RP_SCHEDULE_VAR_2),
-        new ReportInfo(RP_SCHEDULE_TEACHER),
-        new ReportInfo(RP_SCHEDULE_ERRORS),
+        new ReportInfo(ReportInfo.RP_HOME),
+        new ReportInfo(ReportInfo.RP_CURRICULUM),
+        new ReportInfo(ReportInfo.RP_SCHEDULE_VAR_1),
+        new ReportInfo(ReportInfo.RP_SCHEDULE_VAR_2),
+        new ReportInfo(ReportInfo.RP_SCHEDULE_TEACHER),
+        new ReportInfo(ReportInfo.RP_SCHEDULE_ERRORS),
         
     };
     
     
     public static String getReportName(String urlPath){
         if (urlPath.equals("/"))
-            return RP_HOME;
+            return ReportInfo.RP_HOME;
         if (urlPath.startsWith("/"))
             urlPath = urlPath.substring(1);
         for (ReportInfo info:reportInfoList){
@@ -57,42 +50,6 @@ public class ReportBuilder{
         return null;
     }
     
-//    /**
-//     * Поллучение HTML кода котента отчёта
-//     * @param reportName
-//     * @return
-//     * @throws Exception 
-//     */
-//    public String getReport(String reportName) throws Exception{
-//        AbstractReport report = null;
-//        switch(reportName){
-//            case RP_HOME:
-//                return getIndexPage();
-//            case RP_CURRICULUM:
-//                report = new CurriculumReport();
-//                break;
-//            case RP_SCHEDULE_VAR_1:
-//                report = new ScheduleReport();
-//                break;
-//            case RP_SCHEDULE_VAR_2:
-//                report = new ScheduleReport2();
-//                break;
-//            case RP_SCHEDULE_TEACHER:
-//                report = new TeacherReport();
-//                break;
-//            case RP_SCHEDULE_ERRORS:
-//                report = new ErrorsReport();
-//                break;
-//            default:
-//                throw new Exception("UNKNOW_REPORT_NAME\n"+reportName);
-//        }
-//        report.prepare();
-//        return report.getHtml();
-//    }
-    
-    
-    
-
     public static final String HTML_PATTERN = 
         "<!DOCTYPE html>"+
         "<html lang='ru'>"+

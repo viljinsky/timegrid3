@@ -1,5 +1,7 @@
 package ru.viljinsky.reports;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -42,6 +44,34 @@ public class ScheduleParams {
         }
     }
     
+    public static void setValues(Map<String,Object> values) throws Exception{
+        instance.map = new HashMap<>(values);
+        Object value;
+        String param_value;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        try{
+            for (String param_name:values.keySet()){
+                value = values.get(param_name);
+                if (value!=null){
+                    if (value instanceof Date){
+                        param_value = "'"+sdf.format((Date)value)+"'";
+                    } else {
+                        param_value = "'"+value.toString()+"'";
+                    }
+                } else 
+                    param_value = "'null'";
+                DataModule.execute("update attr set param_value="+param_value+" where param_name='"+param_name+"'");
+            }
+            DataModule.commit();
+        } catch (Exception e){
+            DataModule.rollback();
+            throw new Exception("SAVE_PARAMS_ERROR\n"+e.getMessage());
+        }
+    }
+    
+    public static Map<String,Object> getValues() throws Exception{
+        return getInstance().map;
+    }
     public static ScheduleParams getInstance() throws Exception{
         if (instance==null){
             instance=new ScheduleParams();
