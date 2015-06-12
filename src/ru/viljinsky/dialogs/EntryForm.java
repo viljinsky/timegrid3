@@ -86,6 +86,8 @@ interface IFieldControl{
     public static final String FC_LIST = "FC_LIST";
     public static final String FC_BOOLEAN = "FC_BOOLEAN";
     public static final String FC_PATH = "FC_PATH";
+    public static final String FC_DIR = "FC_DIR";
+    
     public static final String FC_DATE = "FC_DATE";
     public static final String FC_TIME = "FC_TIME";
     
@@ -237,59 +239,113 @@ class DateControl extends JPanel implements IFieldControl{
     }
     
 }
+
+class DirControl extends JPanel implements IFieldControl{
+    File file = null;
+    JTextField text = new JTextField();
+    LabelButton label = new LabelButton(" ... "){
+
+        @Override
+        public void mouseClick() {
+            selectDir();
+        }
+        
+    };
+    
+    protected void selectDir(){
+        JFileChooser fc = new JFileChooser(file);
+        if (file!=null){
+            fc.setSelectedFile(file);
+        }
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int retVal = fc.showOpenDialog(null);
+        if (retVal==JFileChooser.APPROVE_OPTION){
+            setValue(fc.getSelectedFile());
+        }
+    }
+    
+    public DirControl(){
+        setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
+        add(text);
+        add(label);
+    }
+
+    @Override
+    public void setValue(Object value) {
+        if (value instanceof File){
+            file = (File)value;
+        } else if (value instanceof String){
+            file = new File((String)value);
+        }
+        if (file==null){
+            text.setText("");
+        } else {
+            text.setText(file.getPath());
+        }
+    }
+
+    @Override
+    public Object getValue() {
+        return file;
+    }
+
+    @Override
+    public Integer getIntegerValue() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Boolean getBooleanValue() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+}
+
 /**
  * Отображает путь
  * @author вадик
  */
 class PathControl extends JPanel implements IFieldControl{
+    File file = null;
     JTextField textField = new JTextField();
-    JButton button = new JButton("...");
-//    JLabel label = new JLabel("...");
-    LabelButton label = new LabelButton(".."){
+    LabelButton label = new LabelButton(" ... "){
 
         @Override
         public void mouseClick() {
-            super.mouseClick(); //To change body of generated methods, choose Tools | Templates.
-            buttonClick();
+            select();
         }
     
     };
-    File file = null;
     
     public PathControl(){
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        button.setSize(18, 18);
         add(textField);
         add(label);
-//        add(button);
-        button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                buttonClick();
-            }
-        });
     }
 
     @Override
     public void setValue(Object value) {
-        if (value == null)
-            textField.setText("");
-        else if (value instanceof File){
-            file=(File)value;
+        if (value!=null){
+            if (value instanceof File){
+                file=(File)value;
+            } else if (value instanceof String){
+                file = new File((String)value);
+            }
             textField.setText(file.getPath());
-        } else
-            textField.setText(value.toString());
+        } else {
+            file = null;
+            textField.setText("");
+        }
     }
     
-    public void buttonClick(){
-        file = new File(textField.getText());
+    public void select(){
         JFileChooser fileChooser = new JFileChooser(file);
-        int retVal = fileChooser.showDialog(this,"Селект");
+        if (file!=null)
+            fileChooser.setSelectedFile(file);
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        
+        int retVal = fileChooser.showDialog(null,"Селект");
         if (retVal==JFileChooser.APPROVE_OPTION){
-            file = fileChooser.getSelectedFile();
-            textField.setText(file.getPath());
-            
+            setValue(fileChooser.getSelectedFile());
         }
     }
 
@@ -361,6 +417,8 @@ class ValuePanel extends JPanel{
                     return new BooleanControl();
                 case (IFieldControl.FC_PATH):
                     return new PathControl();
+                case (IFieldControl.FC_DIR):
+                    return new DirControl();
                 case (IFieldControl.FC_DATE):
                     return new DateControl();
             }

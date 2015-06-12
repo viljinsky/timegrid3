@@ -13,11 +13,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Map;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import ru.viljinsky.dialogs.EntryForm;
 import ru.viljinsky.reports.ReportBuilder;
 import ru.viljinsky.reports.Browser;
 import ru.viljinsky.reports.PageProducer;
@@ -167,11 +169,29 @@ public class ReportPanel extends JPanel implements IOpenedForm,CommandListener {
         
     }
     
+    
     public void publichReport() throws Exception{
-        
         String path ;
         String patternFileName = "D:\\development\\schedule2\\site\\current\\pattern.html";
         String destanationPath = "D:\\development\\schedule2\\site\\current\\example\\";
+        
+        EntryForm form = new EntryForm();
+        form.setFields(new String[]{"patternFileName;Шаблон;FC_PATH","destanationPath;Путь к папке;FC_DIR"} );
+        
+        form.setValue("patternFileName", patternFileName);
+        form.setValue("destanationPath",destanationPath);
+        
+        form.pack();
+        form.setVisible(true);
+        String retVal =form.resultValue;
+        if (retVal!=EntryForm.RESULT_OK)
+            return;
+        Map<String,Object> values = form.getValues();
+        patternFileName = values.get("patternFileName").toString();
+        destanationPath = values.get("destanationPath").toString();
+        
+        
+        
         if (JOptionPane.showConfirmDialog(null, String.format("%s \n %s ",destanationPath,patternFileName),"Продолжать",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
         
             String[] reports = {
