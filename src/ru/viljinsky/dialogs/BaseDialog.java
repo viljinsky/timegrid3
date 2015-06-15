@@ -26,7 +26,6 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import ru.viljinsky.forms.IAppError;
-import sun.awt.image.SurfaceManager;
 
 /**
  *

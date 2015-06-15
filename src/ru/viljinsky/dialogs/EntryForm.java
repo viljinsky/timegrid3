@@ -7,11 +7,9 @@
 package ru.viljinsky.dialogs;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -19,18 +17,21 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  *
@@ -118,6 +119,97 @@ class DefaultFieldControl extends JTextField implements IFieldControl{
     public Boolean getBooleanValue() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+}
+
+class TimeControl extends JPanel implements IFieldControl,ChangeListener{
+    JSpinner fldHour = new JSpinner(new SpinnerNumberModel(0,0,24,1));
+    JSpinner fldMinute = new JSpinner(new SpinnerNumberModel(0,0,59,1));
+    Calendar calendar = Calendar.getInstance();
+    
+    public TimeControl(){
+        Integer h = calendar.get(Calendar.HOUR_OF_DAY);
+        Integer m = calendar.get(Calendar.MINUTE);
+        calendar.setTimeZone(TimeZone.getTimeZone("GMT+4:00"));
+        
+        
+        
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        
+        add(fldHour);
+        add(Box.createHorizontalStrut(6));
+        add(new JLabel("час."));
+        add(Box.createHorizontalStrut(6));
+        
+        add(fldMinute);
+        add(Box.createHorizontalStrut(6));
+        add(new JLabel("мин."));        
+        add(Box.createHorizontalGlue());
+        
+        fldHour.setValue(h);
+        fldMinute.setValue(m);
+        calendar.setTime(calendar.getTime());
+        
+        fldHour.addChangeListener(this);
+        fldMinute.addChangeListener(this);
+    }
+
+    public void clear(){
+        fldHour.setValue(0);
+        fldMinute.setValue(0);
+//        calendar.clear();
+    }
+    
+    @Override
+    public void setValue(Object value) {
+        clear();
+        if (value==null){
+            return;
+        }
+            
+        if (value instanceof Date){
+            calendar.setTime((Date)value);
+            fldHour.setValue(calendar.get(Calendar.HOUR_OF_DAY));
+            fldMinute.setValue(calendar.get(Calendar.MINUTE));
+        } else if (value instanceof String){
+            String[] s = ((String)value).split(":");
+            if (s.length==2){
+                int h=Integer.valueOf(s[0]);
+                fldHour.setValue(h);
+                int m = Integer.valueOf(s[1]);
+                fldMinute.setValue(m);
+//                calendar.set(Calendar.HOUR, h);
+//                calendar.set(Calendar.MINUTE, m);
+            }
+            
+        }
+        
+    }
+
+    @Override
+    public Object getValue() {
+        calendar.set(Calendar.HOUR, (Integer)fldHour.getValue());
+        calendar.set(Calendar.MINUTE,(Integer)fldMinute.getValue());
+        return calendar.getTime();
+    }
+
+    @Override
+    public Integer getIntegerValue() {
+        return null;
+    }
+
+    @Override
+    public Boolean getBooleanValue() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void stateChanged(ChangeEvent e) {
+         SpinnerNumberModel model ;
+         int h = (Integer)fldHour.getValue();
+         int m = (Integer)fldMinute.getValue();
+         System.out.println(String.format("%2d %2d",h,m));
+    }
+    
 }
 
 /**
@@ -398,7 +490,7 @@ class ValuePanel extends JPanel{
     public void setFields(Map<String,String> fields){
     }
     
-    protected IFieldControl createField(String[] params){
+    protected IFieldControl createField(String[] params) throws Exception{
         if (params.length>2){
             switch (params[2]){
                 case (IFieldControl.FC_BOOLEAN):
@@ -409,6 +501,10 @@ class ValuePanel extends JPanel{
                     return new DirControl();
                 case (IFieldControl.FC_DATE):
                     return new DateControl();
+                case (IFieldControl.FC_TIME):
+                    return new TimeControl();
+                default:
+                    throw new Exception("UNKNOW_FIRL_TYPE\n"+params[2]);
             }
         }
         return new DefaultFieldControl();
@@ -418,7 +514,7 @@ class ValuePanel extends JPanel{
      * Сформировать список полей из строки
      * @param fields 
      */
-    public void setFields(String[] fieldNames){
+    public void setFields(String[] fieldNames) throws Exception{
         IFieldControl fieldControl;
         Box box;
         String fieldName;
@@ -483,17 +579,20 @@ class ValuePanel extends JPanel{
     }
 }
 
-public class EntryForm extends JDialog implements ActionListener{
-    public static final String RESULT_NONE = "NONE" ;
-    public static final String RESULT_OK = "OK" ;
-    public static final String RESULT_CANCEL = "CANCEL" ;
-    public String resultValue = RESULT_NONE;
+public class EntryForm extends BaseDialog{
     
     ValuePanel valuesPanel;
     
+    @Override
+    public void doOnEntry() throws Exception {
+       
+        doCommand("save");
+    }
+    
+    
     JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     
-    public void setFields(String[] fieldNames){
+    public void setFields(String[] fieldNames) throws Exception{
         valuesPanel.setFields(fieldNames);
     }
     
@@ -509,47 +608,27 @@ public class EntryForm extends JDialog implements ActionListener{
         }
     }
     
+    public Object getValue(String fieldName){
+        Object result = null;
+        try{
+            result= valuesPanel.fields.get(fieldName).getValue();
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(rootPane, e.getMessage());
+        }
+        return result;
+    }
+    
     public Map<String,Object> getValues(){
         return valuesPanel.getValues();
     }
 
+
     @Override
-    public void actionPerformed(ActionEvent e) {
-        switch (e.getActionCommand()){
-            case RESULT_OK:
-                try{
-                    doCommand("save");
-                    resultValue = RESULT_OK;
-                    setVisible(false);
-                } catch (Exception ee){
-                    JOptionPane.showMessageDialog(rootPane, ee.getMessage());
-                }
-                break;
-            case RESULT_CANCEL:
-                resultValue=RESULT_CANCEL;
-                setVisible(false);
-                break;
-
-        }
-
-    }
-    
-    public EntryForm(){
-        setModal(true);
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setPreferredSize(new Dimension(400,300));
+    public Container getPanel() {
         valuesPanel=new ValuePanel();
+        JPanel panel = new JPanel(new BorderLayout());
         panel.add(valuesPanel,BorderLayout.PAGE_START);
-        panel.add(controlPanel,BorderLayout.PAGE_END);
-        JButton button = new JButton(RESULT_OK);
-        button.addActionListener(this);
-        
-
-        controlPanel.add(button);
-        button = new JButton(RESULT_CANCEL);
-        controlPanel.add(button);
-                
-        setContentPane(panel);
+        return panel;
     }
     
     public void doCommand(String command){
@@ -564,26 +643,33 @@ public class EntryForm extends JDialog implements ActionListener{
             "field3;Поле3",
             "field4;Источник;FC_PATH",
             "field5;Путь;FC_PATH",
-            "field6;Дата;FC_DATE"
+            "field6;Дата;FC_DATE",
+            "field7;Время;FC_TIME"
         };
         
         Map<String,Object> values= new HashMap<>();
         values.put("field3",123.4);
+        Calendar c=Calendar.getInstance();
+        c.setTimeZone(TimeZone.getTimeZone("GTM+4:00"));
+        values.put("field7",c.getTime());
         
         EntryForm frame = new EntryForm();
-        frame.pack();
-        frame.setFields(sFields);
+        try{
+            frame.setFields(sFields);
         frame.setValues(values);
         frame.setValue("field2", true);
-        frame.setVisible(true);
-        if (frame.resultValue==EntryForm.RESULT_OK){
+        if (frame.showModal(null)==BaseDialog.RESULT_OK){
             System.out.println(frame.getValues());
         }
         frame.dispose();
         frame=null;
         System.out.println("OK");
+        } catch (Exception e){
+            e.printStackTrace();
+        }
         
         
     }
+
     
 }

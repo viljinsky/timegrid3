@@ -19,6 +19,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import ru.viljinsky.dialogs.BaseDialog;
 import ru.viljinsky.dialogs.EntryForm;
 import ru.viljinsky.reports.ReportBuilder;
 import ru.viljinsky.reports.Browser;
@@ -124,6 +125,31 @@ public class ReportPanel extends JPanel implements IOpenedForm,CommandListener {
         }
     }
 
+    /**
+     * Продьюсер для счётчиков
+     */
+    class ExtPoducer extends PageProducer{
+
+
+        public ExtPoducer(String source) throws Exception{
+            TestTag.readSource(source);
+            for (String s:TestTag.getTagSet()){
+                System.out.println(s);
+                System.out.println(TestTag.getTagText(s));
+            }
+        }
+        
+        @Override
+        public String getReplaceText(String tag) {
+            System.out.println("*********>"+tag);
+            String result = TestTag.getTagText(tag);
+            if (result!=null)
+                return result;
+            return tag;
+        }
+        
+    
+    }
     class Producer extends PageProducer{
         
         ReportInfo info;
@@ -152,15 +178,15 @@ public class ReportPanel extends JPanel implements IOpenedForm,CommandListener {
         @Override
         public String getReplaceText(String tag) {
             try{
-            switch(tag){
-                case "$TITLE$":
-                    return info.getTitle();
-                case "$PAGE_CONTENT$":
-                    return new ReportBuilder().getReport(info);
-                case "$NAVIGATOR$":
-                    return navigator;
-            }
-            return null;
+                switch(tag){
+                    case "$TITLE$":
+                        return info.getTitle();
+                    case "$PAGE_CONTENT$":
+                        return new ReportBuilder().getReport(info);
+                    case "$NAVIGATOR$":
+                        return navigator;
+                }
+                return tag;
             } catch (Exception e){
                 return "<b>ERROR_ON_TAG<b>";
             }
@@ -169,30 +195,42 @@ public class ReportPanel extends JPanel implements IOpenedForm,CommandListener {
         
     }
     
+
+    public static final String EXT_PATTERN = "extPattern";
     
     public void publichReport() throws Exception{
         String path ;
+        String extPattern = "D:\\development\\schedule2\\site\\share.txt";
         String patternFileName = "D:\\development\\schedule2\\site\\current\\pattern.html";
         String destanationPath = "D:\\development\\schedule2\\site\\current\\example\\";
         
         EntryForm form = new EntryForm();
-        form.setFields(new String[]{"patternFileName;Шаблон;FC_PATH","destanationPath;Путь к папке;FC_DIR"} );
+        form.setFields(new String[]{"patternFileName;Шаблон;FC_PATH",
+            "destanationPath;Путь к папке;FC_DIR",
+            "extPattern;;FC_PATH"} );
         
         form.setValue("patternFileName", patternFileName);
         form.setValue("destanationPath",destanationPath);
+        form.setValue(EXT_PATTERN, extPattern);
         
-        form.pack();
-        form.setVisible(true);
-        String retVal =form.resultValue;
-        if (retVal!=EntryForm.RESULT_OK)
+        if (form.showModal(null)!=BaseDialog.RESULT_OK){
             return;
+        }
+        
+        
         Map<String,Object> values = form.getValues();
         patternFileName = values.get("patternFileName").toString();
         destanationPath = values.get("destanationPath").toString();
+        extPattern=values.get(EXT_PATTERN).toString();
         
+        if (!destanationPath.endsWith("\\")){
+            destanationPath+="\\";
+         }
         
         
         if (JOptionPane.showConfirmDialog(null, String.format("%s \n %s ",destanationPath,patternFileName),"Продолжать",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
+            
+            ExtPoducer extP = new ExtPoducer(extPattern);
         
             String[] reports = {
                 ReportInfo.RP_HOME,
@@ -210,6 +248,9 @@ public class ReportPanel extends JPanel implements IOpenedForm,CommandListener {
                 Producer p = new Producer(info,reports);
                 p.loadPattern(patternFileName);
                 html = p.execute();
+                
+                extP.setHtmlPattern(html);
+                html = extP.execute();
                 
                 String s = info.getPage();
                 path = destanationPath+(s=="/" ?"index.html":s);

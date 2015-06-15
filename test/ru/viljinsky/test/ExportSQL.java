@@ -30,7 +30,7 @@ public class ExportSQL {
         Values values;
         Object value;
         StringBuilder result = new StringBuilder();
-        result.append("\n--  table "+tableName+" \n\n");
+        result.append("\n--  table ").append(tableName).append(" \n\n");
         result.append("delete from ").append(tableName).append(";\n");
         for (int row=0;row<dataset.size();row++){
             values=dataset.getValues(row);
@@ -87,7 +87,13 @@ public class ExportSQL {
     }
     
     public static void backupCurriculum() throws Exception{
-        String[] tables = new String[]{"subject_domain","subject","skill","curriculum","curriculum_detail"};
+        String[] tables = new String[]{
+            "subject_domain",
+            "subject",
+            "skill",
+            "curriculum",
+            "curriculum_detail"
+        };
         String sql ;
         String filaName = "учебный план2.sql";
         BufferedWriter bufw = null;

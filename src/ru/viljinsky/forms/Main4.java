@@ -195,11 +195,10 @@ public class Main4 extends JFrame implements CommandListener{
         
         
         EntryForm eform = new EntryForm();
-        eform.pack();
+//        eform.pack();
         eform.setFields(fieldNames);
         eform.setValues(ScheduleParams.getValues());
-        eform.setVisible(true);
-        if (eform.resultValue==EntryForm.RESULT_OK){
+        if (eform.showModal(rootPane)==BaseDialog.RESULT_OK){
            System.out.println(eform.getValues());
            ScheduleParams.setValues(eform.getValues());
         }
