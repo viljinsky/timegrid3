@@ -61,7 +61,7 @@ public class CreateData {
     public static final String[] scriptList = {
         "/ru/viljinsky/sql/schedule.sql",
         "/ru/viljinsky/sql/view.sql",
-        "/ru/viljinsky/sql/data.sql"
+//        "/ru/viljinsky/sql/data.sql"
     };
     
     

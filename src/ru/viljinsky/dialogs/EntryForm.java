@@ -12,11 +12,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ContainerAdapter;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,21 +26,18 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.AncestorListener;
 
 /**
  *
  * @author вадик
  */
 
-class LabelButton extends JLabel{
+abstract class LabelButton extends JLabel{
     Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
     Cursor handpointCursor = new Cursor(Cursor.HAND_CURSOR);
 
@@ -67,15 +61,9 @@ class LabelButton extends JLabel{
             }
             
         });
-        
-        
-            
-        
     }
     
-    public void mouseClick(){
-        System.out.println("MouseClick");
-    };
+    public abstract void mouseClick();
     
 }
 
