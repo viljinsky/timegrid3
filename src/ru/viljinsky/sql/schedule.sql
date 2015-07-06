@@ -252,14 +252,23 @@ from subject_group a
 
 
 drop view if exists v_curriculum_detail;
-create view v_curriculum_detail as
+-- create view v_curriculum_detail as
+-- select s.subject_name,g.group_sequence_name,t.group_type_caption,a.hour_per_week,a.hour_per_day,a.is_stream,
+-- a.subject_id,a.curriculum_id,a.group_type_id,a.group_sequence_id,a.skill_id
+--  from curriculum_detail a
+--  inner join subject s on a.subject_id=s.id
+--  inner join group_sequence g on g.id=a.group_sequence_id
+--  inner join group_type t on t.id=a.group_type_id 
+-- ;
+CREATE VIEW v_curriculum_detail as
 select s.subject_name,g.group_sequence_name,t.group_type_caption,a.hour_per_week,a.hour_per_day,a.is_stream,
 a.subject_id,a.curriculum_id,a.group_type_id,a.group_sequence_id,a.skill_id
- from curriculum_detail a
- inner join subject s on a.subject_id=s.id
- inner join group_sequence g on g.id=a.group_sequence_id
- inner join group_type t on t.id=a.group_type_id 
-;
+from curriculum_detail a
+inner join subject s on a.subject_id=s.id
+inner join group_sequence g on g.id=a.group_sequence_id
+inner join group_type t on t.id=a.group_type_id
+order by s.sort_order;
+
 
 
 ---  Ноаый куррикулум
@@ -281,6 +290,18 @@ inner join curriculum_detail c
 	and c.curriculum_id=d.curriculum_id
 	and c.subject_id=a.subject_id
 order by a.day_id,a.bell_id;
+
+--  Поиск окон в расписании
+create view v_hall_list as
+select d.day_caption,l.time_start || ' ' || l.time_end as lesson_tyme,
+                           b.label,a.day_id,a.bell_id,b.id as depart_id 
+from shift_detail a inner join depart b	on a.shift_id=b.shift_id
+	inner join day_list d on a.day_id=d.day_no
+	inner join bell_list l on l.bell_id=a.bell_id
+where a.bell_id<(select max(bell_id) from schedule where day_id=a.day_id and depart_id=b.id)
+   and not exists (select * 
+	from schedule where day_id=a.day_id and bell_id=a.bell_id and depart_id=b.id);
+
 
 ------------------------security--------------------------
 
