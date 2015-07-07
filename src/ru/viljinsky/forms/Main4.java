@@ -216,7 +216,7 @@ public class Main4 extends JFrame implements CommandListener{
                 DataModule.close();
                
             }
-            CreateData.execute(path);
+            CreateData.newDatabase(path);
             DataModule.open(path);
             open();
             setTitle(APP_NAME+" ["+path+"]");
@@ -266,7 +266,7 @@ public class Main4 extends JFrame implements CommandListener{
                 if (getFileName()==null)
                     throw new Exception("Укажите файл");
                 if (isNewFile()){
-                    CreateData.execute(getFileName());
+                    CreateData.newDatabase(getFileName());
                 }
             }
         };

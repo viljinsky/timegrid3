@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package ru.viljinsky.sqlite;
 
@@ -16,6 +11,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.*;
 
+/**
+ * Чтение скрипта из файла
+ * @author вадик
+ */
 abstract class SQLReader{
     
     public abstract void sqlredy(String sql) throws Exception;
@@ -24,7 +23,7 @@ abstract class SQLReader{
         
         System.out.println("SCRIPT_EXECUTING \""+fileName +"\"");
         String line;
-        StringBuilder sql;
+        StringBuilder script;
         BufferedReader reader = null;
         
         InputStream str = null;
@@ -33,26 +32,28 @@ abstract class SQLReader{
         if (str==null){
             throw new Exception("SCRIPT_NOT_FOUND "+fileName);
         }
-
+        
         try{
-            reader = new BufferedReader(new InputStreamReader(str, "UTF-8"));
-            sql = new StringBuilder();
+            reader = new BufferedReader(new InputStreamReader(str,"UTF-8"));
+            script = new StringBuilder();
             while ((line=reader.readLine())!=null){
+                line=line.replaceAll("--.*", "");
                 if (!line.isEmpty()){
-                    line = line.trim();
-                    if (!line.startsWith("--")){
-                        sql.append(line+"\n");
-                        if (line.endsWith(";")){
-                            sqlredy(sql.toString());
-                            sql = new StringBuilder();
-                        }
-                    }
+                    script.append(line).append("\n");
                 }
             }
-
+            
+            String[] sqls = script.toString().split(";");
+            for (String sql:sqls){
+                if (!sql.trim().isEmpty())
+                    sqlredy(sql.trim());
+                
+            }
+            
         } finally {
             if (reader!=null) reader.close();
         }
+
     }
 }
 
@@ -63,104 +64,44 @@ public class CreateData {
         "/ru/viljinsky/sql/view.sql",
 //        "/ru/viljinsky/sql/data.sql"
     };
-    
-    
-    Connection con = null;
-    Statement  stmt = null;
-    SQLReader  reader;
-    
-    public void run(String fileName,boolean force,String[] SQLscript) throws Exception {
-        
-        try{
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e){
-            throw new Exception("ERROR_CLASS_NOT_FOUND");
+
+    public static void newDatabase(String fileName) throws Exception{
+        if (DataModule.active){
+            throw new Exception("DATA_MODULE_IS_ACTIVE");
         }
+        Class.forName("org.sqlite.JDBC");
+        
+        SQLReader reader = new SQLReader() {
+
+            @Override
+            public void sqlredy(String sql) throws Exception {
+                DataModule.execute(sql);
+            }
+        };
         
         File file = new File(fileName);
         if (file.exists()){
-            if (force) {
-                if (!file.delete()){
-                    throw new Exception("ERROR_FILE_CAN_NOT_DELETED '"+fileName+"'");
-                }
-            } else {
-                throw new Exception("ERROR_FILE_EXISTS '"+fileName+"'");
-            }
+            throw new Exception("FILE_ALREADY_EXISTS\n"+fileName);
+        }
+        Connection con =null;
+        try{
+            DriverManager.getConnection("jdbc:sqlite:"+fileName);
+        }finally {
+            if (con!=null) con.close();
         }
         
-        
-        Connection con = null;
-        try{
-            con = DriverManager.getConnection(String.format("jdbc:sqlite:%s",fileName));
-            stmt = con.createStatement();
-            
-            stmt.execute("pragma foreign_keys = ON;");
-            
-            reader = new SQLReader() {
-
-                @Override
-                public void sqlredy(String sql) throws Exception {
-                    try{
-                        stmt.execute(sql);
-                    } catch (SQLException e){
-                        throw new Exception("ERROR_SQL_EXECUTING\nSQL : '"+sql+"'\nMessage:"+e.getMessage());
-                    }
-                }
-            };
-            
-            
-            con.setAutoCommit(false);
+        if (file.exists()){
             try{
-                for (String script:SQLscript) {
-                    try{
-                        reader.execute(script);
-                        con.commit();
-                    } catch (Exception e){
-                        con.rollback();
-                        throw new Exception("ERROR_SCRIPT_EXECUTING '"+script+"'\n"+e.getMessage());
-                    }
+                DataModule.open(fileName);
+                for (String script:scriptList){
+                    reader.execute(script);
                 }
-            } finally {
-                con.setAutoCommit(true);
-            }
-            
-        } catch (Exception e){
-            throw new Error(e.getMessage());
-        } finally {
-            if (stmt!=null)
-                try {
-                    stmt.close();
-                } catch (Exception e){};
-            if (con!=null){
-                try {
-                    con.close();
-                } catch (Exception e){};
+                DataModule.commit();
+                DataModule.close();
+            } catch (Exception ex){
+                file.delete();
+                throw new Exception(ex);
             }
         }
     }
-    
-    public static void execute(String fileName) throws Exception{
-        CreateData cd = new CreateData();
-        System.out.println("Создаётся новая база данных...");
-        try{
-            cd.run(fileName,false,scriptList);
-            System.out.println("База данных создана '"+fileName+"'");
-        } catch (Exception e){
-            throw new Exception("CREARE_DATABASE_ERROR:\n"+e.getMessage());
-        }
-    }
-
-
-    public static void main(String[] args){
-        String fileName = DataModule.DEFAULT_DATA;//  "example.db";
-        CreateData cd = new CreateData();
-        System.out.println("Создаётся новая база данных...");
-        try{
-            cd.run(fileName,true,scriptList);
-            System.out.println("База данных создана '"+fileName+"'");
-        } catch (Exception e){
-            System.err.println("Ошибка при создании базы данных:\n"+e.getMessage());
-        }
-    }
-    
 }

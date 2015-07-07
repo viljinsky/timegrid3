@@ -170,7 +170,7 @@ public class DataTask implements IDataTask, IDataTaskConstants{
 
             for (int i=0;i<dataset.size();i++){
                 values=dataset.getValues(i);
-                System.out.println(values);
+//                System.out.println(values);
                 group_id=1;
                 group_type_id = (Integer)values.get("group_type_id");
                 

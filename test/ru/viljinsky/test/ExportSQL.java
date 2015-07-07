@@ -95,7 +95,7 @@ public class ExportSQL {
             "curriculum_detail"
         };
         String sql ;
-        String filaName = "учебный план2.sql";
+        String filaName = "учебный план3.sql";
         BufferedWriter bufw = null;
         try{
         bufw = new BufferedWriter(new FileWriter(new File(filaName)));

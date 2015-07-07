@@ -6,7 +6,9 @@
 
 package ru.viljinsky.sqlite;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -66,7 +68,11 @@ public class DataModule implements IDataModuleConsts {
     public static boolean isActive(){
         return active;
     }
-    
+    /**
+     * Создание болванки
+     * @param path
+     * @throws Exception 
+     */
     public static void createData(String path) throws Exception{
         if (active){
             throw new Exception(DATABASE_IS_ACTIVE);
@@ -311,6 +317,49 @@ public class DataModule implements IDataModuleConsts {
         } 
         
     }
+    /**
+     * Выполнение внешнего скрипта SQL  из файла
+     * @param fileName - скрипт SQL
+     * @throws Exception 
+     */
+    public static void executeScript(String script) throws Exception{
+        
+    }
+    
+    public static void executeScript(File file) throws Exception{
+        if (!active){
+            throw new Exception(DATABASE_IS_NOT_ACTIVE);
+        }
+        if (!file.exists()){
+            throw new Exception("FILE_NOT_FOUND\n"+fileName);
+        }
+        BufferedReader reader = null;
+        String line;
+        StringBuilder result = new StringBuilder();
+        Statement stmt = null;
+        try{
+            stmt = con.createStatement();
+            reader= new BufferedReader(new FileReader(file));
+            while ((line= reader.readLine())!=null){
+                line=line.replaceAll("--.*", "");
+                if (!line.isEmpty())
+                    result.append(line).append("\n");
+            }
+            String[] sql = (result.toString()).split(";");
+            for (String s:sql){
+                String ss = s.trim();
+                if (!ss.isEmpty()){
+                    System.out.println("-->"+ s.trim());
+                    stmt.execute(s.trim());
+                }
+            }
+            
+        } finally{
+            if (stmt!=null) stmt.close();
+            if (reader!=null) reader.close();
+        }
+    }
+    
     
     public static Recordset getRecordet(String sql) throws Exception{
         Statement stmt= null;

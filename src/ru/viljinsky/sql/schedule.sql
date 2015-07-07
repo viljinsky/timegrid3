@@ -78,8 +78,8 @@ create table room(
     room_name varchar(18) not null unique,
     capacity integer,
     building_id integer not null references building(id),
-    profile_id integer references profile(id),
-    shift_id integer references shift(id)
+    profile_id integer not null references profile(id),
+    shift_id integer not null references shift(id)
 --    constraint unique (building_id) 
 
 );
