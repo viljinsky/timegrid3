@@ -345,12 +345,16 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
         }
 
         Dataset dataset;
-        String sql = 
-            "select b.label,a.group_label,c.subject_name,a.unplaced,a.depart_id,a.subject_id,a.group_id,"+
-            " a.default_teacher_id as teacher_id,a.default_room_id as room_id ,a.group_type_id "+
-            " from v_subject_group_on_schedule a "+
-            " inner join depart b on b.id = a.depart_id" + 
-            " inner join subject c on c.id=a.subject_id";
+        
+        String   sql = "select b.label,a.group_label,c.subject_name,\n" +
+                    "t.last_name || ' ' || substr(t.first_name,1,1) ||'.'|| substr(t.patronymic,1,1)||'.' as teacher_name,r.room_name,\n" +
+                    "a.unplaced,a.depart_id,a.subject_id,a.group_id,\n" +
+                    " a.default_teacher_id as teacher_id,a.default_room_id as room_id ,a.group_type_id \n" +
+                    " from v_subject_group_on_schedule a \n" +
+                    " inner join depart b on b.id = a.depart_id \n" +
+                    " inner join subject c on c.id=a.subject_id\n" +
+                    " left join teacher t on a.default_teacher_id=t.id\n" +
+                    " left join room r on a.default_room_id=r.id";
 
         public void init() throws Exception {
             dataset = DataModule.getSQLDataset(sql);

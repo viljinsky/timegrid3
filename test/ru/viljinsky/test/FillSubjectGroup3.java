@@ -51,7 +51,7 @@ public class FillSubjectGroup3 {
         
         BufferedReader reader = null;
         try{
-            String sql = "insert into teacher (first_name,last_name,patronymic,profile_id) \n"
+            String sql = "insert into teacher (last_name,first_name,patronymic,profile_id) \n"
                     +"values(?,?,?,?)";
             PreparedStatement stmt = DataModule.getConnection().prepareStatement(sql);
             String[] values ;
@@ -89,7 +89,7 @@ public class FillSubjectGroup3 {
     
     public static void main(String[] args){
         FillSubjectGroup3 fsg = new FillSubjectGroup3();
-        String fileName = "новая 41.db";
+        String fileName = "новая 4.db";
         try{
             File file = new File(fileName);
             if (file.exists()){

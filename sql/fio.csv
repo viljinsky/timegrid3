@@ -1,7 +1,8 @@
+//@param last_name;first_name;patronymic;profile_id;shift_id=4;
+//@sql insert into teacher (first_name,last_name,patronymic,shift_id) values (?,?,?,?,?)
 // Фамилия Имя Отчество Профиль Кабинет График
 
 // Преподаватель мл. классов
-
 Щукина;Ирина;Птровна;12
 Акулова;Галина;Игоревна;12
 Скатова;Светлана;Викторовна;12
