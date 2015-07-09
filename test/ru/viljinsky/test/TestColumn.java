@@ -99,10 +99,6 @@ class GridColumnInfoList extends ArrayList<GridColumnInfo>{
         try{
             wr= new BufferedWriter(new FileWriter(file));
             wr.write(result.toString());
-//            wr= new BufferedWriter(new FileWriter(file));
-//            for (GridColumnInfo info:this){
-//                wr.write(String.format("%s;%d;%s;%s;%d;%s\n",grid_id, info.columnOrder,info.columnName,info.displayName,info.size,info.visible));
-//            }
         } finally {
             if (wr!=null) wr.close();
         }
