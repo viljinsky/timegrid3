@@ -4,15 +4,13 @@
  * and open the template in the editor.
  */
 
-package ru.viljinsky.test;
+package ru.viljinsky.sqlite;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
@@ -22,35 +20,26 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.TableColumn;
 import ru.viljinsky.dialogs.BaseDialog;
 import ru.viljinsky.forms.CommandListener;
 import ru.viljinsky.forms.CommandMngr;
-import ru.viljinsky.sqlite.Column;
-import ru.viljinsky.sqlite.DataModule;
-import ru.viljinsky.sqlite.Dataset;
-import ru.viljinsky.sqlite.Grid;
 
 /**
  *
  * @author вадик
  */
-
 
 class GridColumnInfo{
     Integer columnOrder;
@@ -267,19 +256,18 @@ abstract class ColumnDialog extends  BaseDialog implements CommandListener{
     @Override
     public void updateAction(Action action) {
         String command = (String)action.getValue(Action.ACTION_COMMAND_KEY);
-//        System.out.println(command);
         switch (command){
             case "MOVE_UP":
                 action.setEnabled(list.getSelectedIndex()>0);
                 break;
             case "MOVE_DOWN":
-                action.setEnabled(list.getSelectedIndex()>=0 && list.getSelectedIndex()<model.size()-1);
+                action.setEnabled(list.getSelectedIndex()>=0 
+                        && list.getSelectedIndex()<model.size()-1);
                 break;
             case "RENAME":
                 action.setEnabled(list.getSelectedIndices().length==1);
                 break;
             case "VISIBLE":
-                
                 action.setEnabled(list.getSelectedIndices().length>0);
                 break;
             default:
@@ -288,170 +276,3 @@ abstract class ColumnDialog extends  BaseDialog implements CommandListener{
     }
 };
 
-
-            
-class ColumnGrid extends Grid{
-
-    public String grid_id = null; 
-    public static final String COLUMNS_INI_FILE = "columns.ini";
-
-    public ColumnGrid(String grid_id) {
-        super();
-        this.grid_id=grid_id;
-    }
-
-    public ColumnGrid() {
-        super();
-    }
-    
-    Action actSaveColumns = new AbstractAction("Сохранить"){
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            try{
-                readColumnInfoList().saveToFile(COLUMNS_INI_FILE,grid_id);
-                JOptionPane.showMessageDialog(null,"Настройки сохранены");
-            } catch (Exception ex){
-                ex.printStackTrace();
-            }
-        }
-    };
-    Action actColumnDisiner = new AbstractAction("Настройка") {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            testColumn();
-        }
-    };
-
-    @Override
-    public void setDataset(Dataset dataset) throws Exception {
-        super.setDataset(dataset); 
-        if (grid_id!=null)
-            try{
-                GridColumnInfoList list = new GridColumnInfoList();
-                if (list.loadFromFile(COLUMNS_INI_FILE,grid_id)){
-                    applyColumnInfoList(list);
-                }
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-    }
-
-    @Override
-    public JPopupMenu getPopupMenu() {
-        JPopupMenu result = super.getPopupMenu();
-        if (grid_id!=null){
-            result.addSeparator();
-            result.add(actColumnDisiner);
-            result.add(actSaveColumns);
-        }
-        return result; 
-    }
-
-    public void testColumn(){
-
-        // Это всё в гриде
-        ColumnDialog columnDialog = new ColumnDialog(){
-
-            @Override
-            public void doOnEntry() throws Exception {
-                applyColumnInfoList(getColumnInfoList());
-            }
-        };
-
-        columnDialog.setColumnInfoList(readColumnInfoList());
-        columnDialog.setTitle(grid_id);
-        columnDialog.showModal(null);
-    }
-
-    /**
-     * Применить сохранённые настройки полей к таблице
-     * @param list 
-     */
-    public void applyColumnInfoList(GridColumnInfoList list){
-        Dataset dataset = getDataset();
-        for (GridColumnInfo info:list){
-
-            Column column = dataset.getColumn(info.columnName);
-
-            for (int i=0;i<columnModel.getColumnCount();i++){
-                TableColumn tcolumn = columnModel.getColumn(i);
-                if (tcolumn.getIdentifier()==column){
-                    if (info.visible && tcolumn.getWidth()==0){
-                        tcolumn.setMinWidth(15);
-                        tcolumn.setMaxWidth(600);
-                        tcolumn.setPreferredWidth(75);
-                    } else if (info.visible){
-                        tcolumn.setPreferredWidth(info.size);
-                    } else if (!info.visible){
-                        tcolumn.setMinWidth(0);
-                        tcolumn.setMaxWidth(0);
-                        tcolumn.setPreferredWidth(0);
-                    }
-                    tcolumn.setHeaderValue(info.displayName);
-                    columnModel.moveColumn(i, info.columnOrder);
-                    break;
-                }
-            }
-        }
-        setColumnModel(columnModel);
-    }
-
-    /**
-     * Прочитать текущее настройки колонок
-     */
-    public GridColumnInfoList readColumnInfoList(){
-        GridColumnInfoList result = new GridColumnInfoList();
-        GridColumnInfo info;
-        TableColumn tcolumn;
-        for (int i=0;i<columnModel.getColumnCount();i++){
-            tcolumn = columnModel.getColumn(i);
-            Object t = tcolumn.getIdentifier();
-            if ( t instanceof Column){
-                Column c = (Column)t;
-                info= new GridColumnInfo(i,c.getColumnName() );
-                info.displayName = (String)tcolumn.getHeaderValue();
-                info.size = tcolumn.getWidth();
-                info.visible = (info.size>0);
-                result.add(info);
-            }
-        }
-        return result;
-    }
-}
-    
-public class TestColumn  extends JPanel{
-    
-    ColumnGrid grid = new ColumnGrid("v_schedule");
-
-    public TestColumn() {
-        setPreferredSize(new Dimension(800,600));
-        setLayout(new BorderLayout());
-        add(new JScrollPane(grid));
-    }
-    
-    public void open() throws Exception{
-        grid.setAutoCreateRowSorter(true);
-        DataModule.open();
-        Dataset dataset = DataModule.getDataset("v_schedule");
-        grid.setDataset(dataset);
-        dataset.open();
-        
-    }
-    
-    public static void main(String[] args){
-        TestColumn panel = new TestColumn();
-        JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setContentPane(panel);
-        frame.pack();
-        frame.setVisible(true);
-        try{           
-           panel.open();
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-    
-}

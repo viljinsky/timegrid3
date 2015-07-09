@@ -473,6 +473,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
     public void open() throws Exception {
         Dataset dataset=DataModule.getDataset("v_room");
         dataset.open();
+        grid.grid_id="v_room";
         grid.setDataset(dataset);
         selectPanel.requery();
         shiftPanel.shiftEditor.open();
@@ -732,9 +733,11 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
     public void open() throws Exception {
         Dataset dataset = DataModule.getDataset("v_depart");
         dataset.open();
+        grid1.grid_id="v_depart";
         grid1.setDataset(dataset);
         
         dataset = DataModule.getDataset("v_subject_group");
+        grid2.grid_id="v_subject_group";
         grid2.setDataset(dataset);
         commands.updateActionList();
     }
@@ -1184,6 +1187,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
     public void open() throws Exception {
         Dataset dataset = DataModule.getDataset("v_teacher");
         dataset.open();
+        grid.grid_id="v_teacher";
         grid.setDataset(dataset);
         shiftPanel.schiftEditor.open();
         selectPanel.requery();

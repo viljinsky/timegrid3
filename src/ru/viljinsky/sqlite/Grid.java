@@ -9,6 +9,7 @@ package ru.viljinsky.sqlite;
 import ru.viljinsky.dialogs.BaseDialog;
 import ru.viljinsky.dialogs.EntryDialog;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -18,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -39,6 +41,9 @@ import ru.viljinsky.forms.IAppCommand;
 
 
 public class Grid extends JTable implements CommandListener,IAppCommand {
+
+    public String grid_id = null; 
+    public static final String COLUMNS_INI_FILE = "columns.ini";
     
     
     protected Component owner = null;
@@ -203,8 +208,20 @@ public class Grid extends JTable implements CommandListener,IAppCommand {
     
 }
 
+    
     public Grid() {
         super();
+        initGrid();
+    }
+    
+    public Grid(String grid_id) {
+        super();
+        this.grid_id=grid_id;
+        initGrid();
+    }
+    
+    
+    private void initGrid(){
         commands.setCommands(new String[]{GRID_APPEND,GRID_EDIT,GRID_DELETE,GRID_REFRESH,GRID_REQUERY});
         commands.addCommandListener(this);
         commands.updateActionList();
@@ -279,6 +296,15 @@ public class Grid extends JTable implements CommandListener,IAppCommand {
         for (Action a:commands.getActions()){
             result.add(a);
         }
+        
+        if (grid_id!=null){
+            result.addSeparator();
+            result.add(actColumnDisiner);
+            result.add(actSaveColumns);
+        }
+
+        
+        
         return result;
     }
 
@@ -317,6 +343,17 @@ public class Grid extends JTable implements CommandListener,IAppCommand {
                 }
             }
         }
+        
+        if (grid_id!=null)
+            try{
+                GridColumnInfoList list = new GridColumnInfoList();
+                if (list.loadFromFile(COLUMNS_INI_FILE,grid_id)){
+                    applyColumnInfoList(list);
+                }
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
     }
 
     public Dataset getDataset(){
@@ -492,6 +529,100 @@ public class Grid extends JTable implements CommandListener,IAppCommand {
     public Object getObjectValue(String columnName) throws Exception{
         Values values = getSelectedValues();
         return values.getObject(columnName);
+    }
+    
+    
+    ///////////////////   GRID COLUMNS //////////////////////////////////
+    Action actSaveColumns = new AbstractAction("Сохранить"){
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try{
+                readColumnInfoList().saveToFile(COLUMNS_INI_FILE,grid_id);
+                JOptionPane.showMessageDialog(null,"Настройки сохранены");
+            } catch (Exception ex){
+                ex.printStackTrace();
+            }
+        }
+    };
+    Action actColumnDisiner = new AbstractAction("Настройка") {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            configColumns();
+        }
+    };
+    
+    // Открыть диалоговое окно настройки колонок
+    public void configColumns(){
+
+        // Это всё в гриде
+        ColumnDialog columnDialog = new ColumnDialog(){
+
+            @Override
+            public void doOnEntry() throws Exception {
+                applyColumnInfoList(getColumnInfoList());
+}
+        };
+    
+        columnDialog.setColumnInfoList(readColumnInfoList());
+        columnDialog.setTitle(grid_id);
+        columnDialog.showModal(null);
+    }
+
+    /**
+     * Применить сохранённые настройки полей к таблице
+     * @param list 
+     */
+    public void applyColumnInfoList(GridColumnInfoList list){
+        Dataset dataset = getDataset();
+        for (GridColumnInfo info:list){
+
+            Column column = dataset.getColumn(info.columnName);
+
+            for (int i=0;i<columnModel.getColumnCount();i++){
+                TableColumn tcolumn = columnModel.getColumn(i);
+                if (tcolumn.getIdentifier()==column){
+                    if (info.visible && tcolumn.getWidth()==0){
+                        tcolumn.setMinWidth(15);
+                        tcolumn.setMaxWidth(600);
+                        tcolumn.setPreferredWidth(75);
+                    } else if (info.visible){
+                        tcolumn.setPreferredWidth(info.size);
+                    } else if (!info.visible){
+                        tcolumn.setMinWidth(0);
+                        tcolumn.setMaxWidth(0);
+                        tcolumn.setPreferredWidth(0);
+                    }
+                    tcolumn.setHeaderValue(info.displayName);
+                    columnModel.moveColumn(i, info.columnOrder);
+                    break;
+                }
+            }
+        }
+        setColumnModel(columnModel);
+    }
+
+    /**
+     * Прочитать текущее настройки колонок
+     */
+    public GridColumnInfoList readColumnInfoList(){
+        GridColumnInfoList result = new GridColumnInfoList();
+        GridColumnInfo info;
+        TableColumn tcolumn;
+        for (int i=0;i<columnModel.getColumnCount();i++){
+            tcolumn = columnModel.getColumn(i);
+            Object t = tcolumn.getIdentifier();
+            if ( t instanceof Column){
+                Column c = (Column)t;
+                info= new GridColumnInfo(i,c.getColumnName() );
+                info.displayName = (String)tcolumn.getHeaderValue();
+                info.size = tcolumn.getWidth();
+                info.visible = (info.size>0);
+                result.add(info);
+            }
+        }
+        return result;
     }
     
 }

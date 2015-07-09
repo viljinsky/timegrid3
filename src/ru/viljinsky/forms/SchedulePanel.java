@@ -358,6 +358,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
 
         public void init() throws Exception {
             dataset = DataModule.getSQLDataset(sql);
+            grid_id="v_unplaced_group";
             setDataset(dataset);
         }
 

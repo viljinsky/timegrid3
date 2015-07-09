@@ -101,7 +101,9 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
 
     @Override
     public void open() throws Exception{
-        Dataset dataset = DataModule.getDataset("v_curriculum_detail");
+        grid.grid_id="v_curriculum_detail";
+        Dataset dataset = DataModule.getDataset(grid.grid_id);
+        
         grid.setDataset(dataset);
         tree.open();
         commandMng.updateActionList();
