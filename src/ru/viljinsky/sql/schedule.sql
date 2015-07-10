@@ -147,7 +147,7 @@ create table teacher(
     patronymic varchar(18),
     photo binary,
     profile_id integer not null references profile(id),
-    shift_id integer  references shift(id),
+    shift_id integer  not null references shift(id),
     teacher_room_id integer references room(id) on delete set null,
     comments blob
     

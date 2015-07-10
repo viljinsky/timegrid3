@@ -244,6 +244,15 @@ public class Main4 extends JFrame implements CommandListener{
             
             @Override
             public void doOnEntry() throws Exception {
+                
+                for (IOpenedForm form:forms){
+                    try{
+                        form.requery();
+                    } catch (Exception ex){
+                        System.err.println(ex.getMessage());
+                    }
+                }
+                
                 modalResult=RESULT_OK;
             }
         };

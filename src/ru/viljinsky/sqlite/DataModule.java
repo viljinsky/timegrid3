@@ -349,7 +349,7 @@ public class DataModule implements IDataModuleConsts {
             for (String s:sql){
                 String ss = s.trim();
                 if (!ss.isEmpty()){
-                    System.out.println("-->"+ s.trim());
+//                    System.out.println("-->"+ s.trim());
                     stmt.execute(s.trim());
                 }
             }

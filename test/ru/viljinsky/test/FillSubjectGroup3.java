@@ -49,26 +49,26 @@ public class FillSubjectGroup3 {
             throw new Exception("file not found");
         }
         
+        String line = "";
+        Map<Integer,Object> map = new HashMap<>();
         BufferedReader reader = null;
         try{
-            String sql = "insert into teacher (last_name,first_name,patronymic,profile_id) \n"
-                    +"values(?,?,?,?)";
+            String sql = "insert into teacher (last_name,first_name,patronymic,profile_id,shift_id) \n"
+                    +"values(?,?,?,?,?)";
             PreparedStatement stmt = DataModule.getConnection().prepareStatement(sql);
             String[] values ;
-            Map<Integer,Object> map = new HashMap<>();
-            String[] columns = new String[]{"last_name;0","first_name;1","patronymic;2","profile_id;3"};
+            String[] columns = new String[]{"last_name","first_name","patronymic","profile_id","shift_id"};
+            Object[] defaults= new Object[]{null,null,null,null,4};
             reader = new BufferedReader(new FileReader(file));
-            String line;
             StringBuilder result = new StringBuilder();
             while ((line = reader.readLine())!=null){
                 if (line.startsWith("//"))
                     line ="";
                 if (!line.isEmpty()){
                     values = line.split(";");
-                    for (String column:columns){
-                        String columnName = column.split(";")[0];
-                        Integer columnIndex = Integer.valueOf(column.split(";")[1]);
-                        Object value = values.length>columnIndex?values[columnIndex]:null;
+                    for (int columnIndex=0;columnIndex<columns.length;columnIndex++){
+                        String columnName = columns[columnIndex];
+                        Object value = values.length>columnIndex?values[columnIndex]:defaults[columnIndex];
                         map.put(columnIndex,value);
                         stmt.setObject(columnIndex+1, value);
                     }
@@ -78,18 +78,18 @@ public class FillSubjectGroup3 {
                 }
             }
             System.out.println(result.toString());
-            
+        } catch (Exception e){
+            System.err.println("Ошибка при чтении фио"+e.getMessage()+"/n '"+line+"'" +" "+map);
+            throw new Exception(e);
         } finally {
-            if (reader!=null){
-                reader.close();
-            }
-        }
+           if (reader!=null) reader.close();
+        }    
         
     }
     
     public static void main(String[] args){
         FillSubjectGroup3 fsg = new FillSubjectGroup3();
-        String fileName = "новая 4.db";
+        String fileName = "новая 5.db";
         try{
             File file = new File(fileName);
             if (file.exists()){
@@ -106,6 +106,7 @@ public class FillSubjectGroup3 {
                 DataModule.executeScript(new File("./sql/графики.sql"));
                 DataModule.executeScript(new File("./sql/классы.sql"));
                 DataModule.executeScript(new File("./sql/помещения.sql"));
+
                 
                 fsg.execute("./sql/fio.csv");
                 

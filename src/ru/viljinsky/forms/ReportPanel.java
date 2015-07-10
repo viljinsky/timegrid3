@@ -125,6 +125,11 @@ public class ReportPanel extends JPanel implements IOpenedForm,CommandListener {
         }
     }
 
+    @Override
+    public void requery() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     /**
      * Продьюсер для счётчиков
      */

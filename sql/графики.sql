@@ -4,6 +4,7 @@ delete from shift_detail;
 insert into shift (id,shift_type_id,shift_name) values (1,1,'Первая смена (мл.кл)');
 insert into shift (id,shift_type_id,shift_name) values (2,1,'Первая смена');
 insert into shift (id,shift_type_id,shift_name) values (3,1,'Вторая смена');
+update shift_type set default_shift_id=1 where id=1;
 
 -- Понедельник
 insert into shift_detail (shift_id,day_id,bell_id) values (1,1,1);
@@ -131,9 +132,18 @@ insert into shift (id,shift_type_id,shift_name) values (7,2,'ПН ВТ СР    �
 insert into shift (id,shift_type_id,shift_name) values (8,2,'ПН ВТ    ЧТ ПТ СБ');
 insert into shift (id,shift_type_id,shift_name) values (9,2,'ПН    СР ЧТ ПТ СБ');
 insert into shift (id,shift_type_id,shift_name) values (10,2,'   ВТ СР ЧТ ПТ СБ');
+update shift_type set default_shift_id=4 where id=2;
+
 
 -- Графики помещений
 insert into shift (id,shift_type_id,shift_name) values (11,3,'Кабинет');
+update shift_type set default_shift_id=11 where id=3;
+
+
+--  Зполнение графиков по умолчанию
+insert into shift_detail (shift_id,day_id,bell_id)
+select default_shift_id,day_no,bell_id 
+from day_list,bell_list,shift_type where shift_type.id in (2,3)  ;
 
 
 select * from shift;

@@ -66,6 +66,11 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
     JTabbedPane tabbedPane = new JTabbedPane();
     // Лейбл расписания 
     JLabel lblSchedule = new JLabel("Расписание");
+
+    @Override
+    public void requery() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     class ScheduleHistory{
         Values v;
@@ -216,7 +221,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
         public UnplacedPanel(Grid grid) {
             super(new BorderLayout());
             this.grid = grid;
-            grid.getSelectionModel().addListSelectionListener(this);
+            grid.addSelectionListener(this);
             add(commandPanel, BorderLayout.PAGE_START);
             add(new JScrollPane(grid));
             commands.setCommands(UNPLACED_CMD);
@@ -279,6 +284,9 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
                             unplacedGrid.requery();
                         }
                         break;
+                    case TT_DELETE:
+                        JOptionPane.showMessageDialog(SchedulePanel.this,"OPSS");
+                        break;
                 }
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, e.getMessage());
@@ -318,25 +326,45 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             Grid g =(Grid)table;
-            if (g.getColumnName(column).equals("unplaced")){
-                Values v = g.getDataset().getValues(row);
-                try{
-                if (v.getInteger("unplaced")>0)
-                    setBackground(Color.yellow);
-                else 
-                    setBackground(Color.white);
-                } catch (Exception e){
-                }
-            } else {
-                setBackground(Color.white);
-            };
+            Values v = g.getDataset().getValues(row);
+            Color c = table.getForeground();
+            try{
+                if (v.getInteger("unplaced")>0) c= Color.RED;
+            } catch ( Exception e){
+            }
+            
+            if (isSelected){
+                setBackground(table.getSelectionBackground());
+                setForeground(table.getSelectionForeground());
+            } else   {
+                setBackground(table.getBackground());
+                setForeground(c);
                 
+            }
             return this;
         }
         
     }
+    
+    public static final String SQL_UNPLACED_GROUP = 
+            "select b.label,a.group_label,c.subject_name,\n" +
+            " a.placed || ' из ' || a.hour_per_week as hour_per_week,\n" +
+            " t.last_name || ' ' || substr(t.first_name,1,1) ||'.'|| substr(t.patronymic,1,1)||'.' as teacher_name,\n" +
+            " r.room_name, \n" +
+            " a.unplaced,a.depart_id,a.subject_id,a.group_id,\n" +
+            " a.default_teacher_id as teacher_id,a.default_room_id as room_id ,a.group_type_id,\n" +
+            " a.group_sequence_id ,\n" +
+            " g.group_sequence_name\n" +
+            " from v_subject_group_on_schedule a\n" +
+            " inner join depart b on b.id = a.depart_id \n" +
+            " inner join subject c on c.id=a.subject_id\n" +
+            " inner join group_sequence g on g.id=a.group_sequence_id \n" +
+            " left join teacher t on a.default_teacher_id=t.id\n" +
+            " left join room r on a.default_room_id=r.id;";
+    
     class UnplacedGrid extends Grid {
         UnplacedGridCellRenderer renderer = new UnplacedGridCellRenderer();
+
 
         @Override
         public TableCellRenderer getCellRenderer(int row, int column) {
@@ -346,18 +374,18 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
 
         Dataset dataset;
         
-        String   sql = "select b.label,a.group_label,c.subject_name,\n" +
-                    "t.last_name || ' ' || substr(t.first_name,1,1) ||'.'|| substr(t.patronymic,1,1)||'.' as teacher_name,r.room_name,\n" +
-                    "a.unplaced,a.depart_id,a.subject_id,a.group_id,\n" +
-                    " a.default_teacher_id as teacher_id,a.default_room_id as room_id ,a.group_type_id \n" +
-                    " from v_subject_group_on_schedule a \n" +
-                    " inner join depart b on b.id = a.depart_id \n" +
-                    " inner join subject c on c.id=a.subject_id\n" +
-                    " left join teacher t on a.default_teacher_id=t.id\n" +
-                    " left join room r on a.default_room_id=r.id";
+//        String   sql = "select b.label,a.group_label,c.subject_name,\n" +
+//                    "t.last_name || ' ' || substr(t.first_name,1,1) ||'.'|| substr(t.patronymic,1,1)||'.' as teacher_name,r.room_name,\n" +
+//                    "a.unplaced,a.depart_id,a.subject_id,a.group_id,\n" +
+//                    " a.default_teacher_id as teacher_id,a.default_room_id as room_id ,a.group_type_id \n" +
+//                    " from v_subject_group_on_schedule a \n" +
+//                    " inner join depart b on b.id = a.depart_id \n" +
+//                    " inner join subject c on c.id=a.subject_id\n" +
+//                    " left join teacher t on a.default_teacher_id=t.id\n" +
+//                    " left join room r on a.default_room_id=r.id";
 
         public void init() throws Exception {
-            dataset = DataModule.getSQLDataset(sql);
+            dataset = DataModule.getSQLDataset(SQL_UNPLACED_GROUP);
             grid_id="v_unplaced_group";
             setDataset(dataset);
         }
@@ -435,6 +463,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
         public void setTimeLocation(Integer depart_id, int day_id, int bell_id) throws Exception {
             String sql = String.format(SQL_INVATE_DEPART, depart_id, day_id, bell_id, day_id, bell_id, day_id, bell_id, day_id, bell_id);
             Dataset dataset = DataModule.getSQLDataset(sql);
+            grid_id="sql_invite_depart";            
             setDataset(dataset);
             dataset.open();
         }
@@ -445,6 +474,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
                     .replace("%bell_id%", bell_id.toString());
             System.out.println(sql);
             Dataset dataset = DataModule.getSQLDataset(sql);
+            grid_id="sql_invite_teacher";
             setDataset(dataset);
             dataset.open();
         }
@@ -455,12 +485,14 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
                     .replace("%bell_id%", bell_id.toString());
             System.out.println(sql);
             Dataset dataset = DataModule.getSQLDataset(sql);
+            grid_id="sql_invite_room";
             setDataset(dataset);
             dataset.open();
             
         }
 
         private void init() throws Exception {
+//            grid_id="v_who_invate";
             setDataset(DataModule.getDataset("subject_group"));
         }
     }
@@ -572,6 +604,7 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
 
         public void init() throws Exception {
             Dataset dataset = DataModule.getDataset("v_schedule");
+            grid_id="v_who_is_there";
             setDataset(dataset);
         }
 
@@ -728,12 +761,13 @@ public class SchedulePanel extends JPanel implements CommandListener, IAppComman
                             break;
                     }
                     unplacedGrid.setFilter(element.getFilter());
+                   
                 } else {
                     scheduleGrid.SetFilter(null);
                     unplacedGrid.close();
                 }
                 commands.updateActionList();
-                unplacedGrid.gridSelectionChange();
+                unplacedGrid.setSelection(0);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

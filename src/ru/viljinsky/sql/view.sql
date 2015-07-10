@@ -15,6 +15,35 @@ inner join subject s on s.id=a.subject_id;
 
 -- v_subject_group
 
+-- drop view if exists v_subject_group;
+-- create view v_subject_group as
+-- select 
+-- s.subject_name,
+-- case 
+-- 	when c.group_type_id = 0 then ''
+-- 	when c.group_type_id = 1  and a.group_id=1 then 'М'
+-- 	when c.group_type_id = 1  and a.group_id=2 then 'Д'
+-- 	when c.group_type_id = 2 then 'ГР.' || a.group_id
+-- end as group_label,
+-- case when a.week_id = 0 then '' 
+--      else w.caption end as week_caption,
+-- -- g.group_sequence_name,
+-- t.last_name || ' ' || substr(t.first_name,1,1) ||'. ' || substr(t.patronymic,1,1) ||'.' as teacher,
+-- r.room_name as room,
+-- a.group_id,a.depart_id,a.subject_id,c.group_type_id,a.stream_id,c.hour_per_week,c.hour_per_day,c.group_sequence_id,
+-- a.default_teacher_id,a.default_room_id,a.pupil_count,
+-- a.week_id,
+-- c.is_stream
+--  from subject_group a 
+-- 	inner join depart b on a.depart_id=b.id 
+-- 	inner join curriculum_detail c
+--  		on c.curriculum_id=b.curriculum_id and c.subject_id=a.subject_id and c.skill_id=b.skill_id
+-- 	inner join subject s on a.subject_id=s.id
+-- 	inner join week w on w.id = a.week_id
+--         left join teacher t on t.id=a.default_teacher_id
+--         left join room r on r.id = a.default_room_id
+--         order by a.depart_id,s.subject_name,a.group_id;
+
 drop view if exists v_subject_group;
 create view v_subject_group as
 select 
@@ -33,7 +62,8 @@ r.room_name as room,
 a.group_id,a.depart_id,a.subject_id,c.group_type_id,a.stream_id,c.hour_per_week,c.hour_per_day,c.group_sequence_id,
 a.default_teacher_id,a.default_room_id,a.pupil_count,
 a.week_id,
-c.is_stream
+c.is_stream,
+m.id as tream_id,m.stream_caption
  from subject_group a 
 	inner join depart b on a.depart_id=b.id 
 	inner join curriculum_detail c
@@ -42,7 +72,9 @@ c.is_stream
 	inner join week w on w.id = a.week_id
         left join teacher t on t.id=a.default_teacher_id
         left join room r on r.id = a.default_room_id
+        left join stream m on a.stream_id=m.id
         order by a.depart_id,s.subject_name,a.group_id;
+
 
 -- v_subject_group_on_schedule
 drop view if exists v_subject_group_on_schedule;

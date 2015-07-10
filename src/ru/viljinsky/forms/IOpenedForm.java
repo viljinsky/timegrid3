@@ -1,8 +1,11 @@
 package ru.viljinsky.forms;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.sql.SQLException;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -10,10 +13,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import ru.viljinsky.dialogs.BaseDialog;
+import ru.viljinsky.dialogs.EntryPanel;
+import ru.viljinsky.sqlite.DBCheckList;
 import ru.viljinsky.sqlite.DataModule;
 import ru.viljinsky.sqlite.Dataset;
 import ru.viljinsky.sqlite.Grid;
 import ru.viljinsky.sqlite.IDataset;
+import ru.viljinsky.sqlite.KeyMap;
 import ru.viljinsky.sqlite.Values;
 
 /**
@@ -29,6 +36,7 @@ public interface IOpenedForm {
     public static final String REPORTS      = "Отчёты";
     
     public void open() throws Exception;
+    public void requery() throws Exception;
     public String getCaption();
     public JComponent getPanel();
     public void close() throws Exception;
@@ -229,6 +237,11 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
                 
         }
     }
+
+    @Override
+    public void requery() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     
     //--------------------------------------------------------------------------
@@ -326,7 +339,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
         
         int room_id=-1;
         
-        public static final String sqlSource = 
+        public static final String SQL_SELECT_ROOM_SOURCE = 
             "select distinct s.subject_name,d.label,v.group_label,\n"+
             "v.teacher,\n"+    
             "v.hour_per_week,v.pupil_count,v.depart_id,v.subject_id,v.group_id,v.stream_id,v.group_sequence_id "+
@@ -338,7 +351,7 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
             "where v.default_room_id is null";
         
         
-        public static final String sqlDest =
+        public static final String SQL_SELECT_ROOM_DESTANATION =
             "select s.subject_name,d.label,\n"+
             "a.teacher,\n"+    
             "a.hour_per_week,a.subject_id,a.depart_id,a.group_id\n"+
@@ -456,15 +469,17 @@ class RoomPanel extends JPanel implements IOpenedForm,ISchedulePanel,IAppCommand
         public void requery() throws Exception {
             Dataset dataset;
             if (chProfileOnly.isSelected())
-                dataset = DataModule.getSQLDataset(sqlSource+" and a.id="+room_id);
+                dataset = DataModule.getSQLDataset(SQL_SELECT_ROOM_SOURCE+" and a.id="+room_id);
             else
-                dataset = DataModule.getSQLDataset(sqlSource);
+                dataset = DataModule.getSQLDataset(SQL_SELECT_ROOM_SOURCE);
                 
             dataset.open();
+            sourceGrid.grid_id="sql_select_room_source";
             sourceGrid.setDataset(dataset);
             
-            dataset = DataModule.getSQLDataset(sqlDest+room_id);
+            dataset = DataModule.getSQLDataset(SQL_SELECT_ROOM_DESTANATION+room_id);
             dataset.open();
+            destanationGrid.grid_id="sql_select_room_destanation";
             destanationGrid.setDataset(dataset);
         }
     }
@@ -597,6 +612,94 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
         
 }
     
+    public boolean createStream(int depart_id,int subject_id,int group_id) throws Exception{
+        try{
+            String sql =
+                "insert into stream (stream_caption,subject_id,skill_id,room_id,teacher_id)\n" +
+                "select b.subject_name,a.subject_id ,d.skill_id,a.default_room_id,a.default_teacher_id\n" +
+                "from subject_group a inner join subject b on b.id=a.a.subject_id\n" +
+                "inner join depart d on d.id=a.depart_id\n" +
+                "where a.subject_id=? and depart_id=? and group_id=?;\n";
+            KeyMap map = new KeyMap();
+            map.put(1, subject_id);
+            map.put(2, depart_id);
+            map.put(3, group_id);
+            DataModule.execute(sql, map);
+
+            sql = "update subject_group set stream_id=(select max(id) from stream) where subject_id=? and depart_id=? and group_id=?";
+            DataModule.execute(sql,map);
+            DataModule.commit();
+            return true;
+        } catch (Exception e){
+            DataModule.rollback();
+            throw new Exception("Ошибка при создании потока");
+        }
+        
+    }
+    
+    public boolean editStream(JComponent owner,int stream_id){
+        class StreamD extends BaseDialog{
+            EntryPanel entryPanel;
+            DBCheckList checkList;
+            Integer stream_id;
+            
+            public void setStreamId(int stream_id){
+                this.stream_id=stream_id;
+                try{
+                    Dataset dataset = DataModule.getSQLDataset("select * from stream where id="+stream_id);
+                    dataset.open();
+                    Values v = dataset.getValues(0);
+                    entryPanel.setDataset(dataset);
+                    entryPanel.setValues(v);
+                    KeyMap map = new KeyMap();
+                    map.put(1, v.getInteger("subject_id"));
+                    map.put(2, v.getInteger("skill_id"));
+                    dataset= DataModule.getSQLDataset(
+                       String.format(
+                       "select b.label,a.depart_id,a.group_id,a.subject_id,a.stream_id,d.* "
+                     + "from subject_group a inner join depart b on a.depart_id=b.id\n" 
+                     + "inner join curriculum_detail d on d.skill_id=b.skill_id and d.subject_id=a.subject_id \n"          
+                     + "where a.subject_id=%d and b.skill_id=%d and ((a.stream_id is null) or (a.stream_id=%d))",
+                        v.getInteger("subject_id"),v.getInteger("skill_id"),stream_id));
+                    dataset.open();
+                    checkList.setDataset(dataset);
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+            
+            @Override
+            public Container getPanel() {
+                JPanel panel = new JPanel(new GridLayout(-1, 1));
+                entryPanel = new EntryPanel();
+                checkList = new DBCheckList();
+                panel.add(entryPanel);
+                panel.add(checkList);
+                        
+                return panel;
+            }
+
+
+            @Override
+            public void doOnEntry() throws Exception {
+                String sql = "update subject_group set stream_id=%d where depart_id=%d and subject_id=%d and group_id=%d";
+                try{
+                    for (Values v:checkList.getSelected()){
+                        System.out.println(stream_id+" "+ v.getInteger("depart_id")+" "+v.getInteger("group_id")+" "+v.getInteger("subject_id"));
+                        DataModule.execute(String.format(sql,stream_id,v.getInteger("depart_id"),v.getInteger("subject_id"),v.getInteger("group_id")));
+                    }
+                    
+                    DataModule.commit();
+                } catch (SQLException e){
+                    DataModule.rollback();
+                }
+            }
+        };
+        StreamD dlg = new StreamD();
+        dlg.setStreamId(stream_id);
+        return dlg.showModal(owner)==BaseDialog.RESULT_OK;
+    }
+    
     @Override
     public void doCommand(String commad){
         try{
@@ -651,8 +754,10 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
                     break;
                     
                 case ADD_STREAM:
-                    if (Dialogs.createStream(this, depart_id, subject_id, group_id))
-                      grid2.requery();
+                    if (createStream(depart_id, subject_id, group_id))
+                            grid2.requery();
+//                    if (Dialogs.createStream(this, depart_id, subject_id, group_id))
+//                      grid2.requery();
                     break;
                     
                 case REMOVE_STREAM:
@@ -661,8 +766,11 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
                     break;
                     
                 case EDIT_STREAM:
-                    if (Dialogs.editStream(this, stream_id))
+                    if (editStream(this,stream_id)){
                         grid2.requery();
+                    }
+//                    if (Dialogs.editStream(this, stream_id))
+//                        grid2.requery();
                     break;
                     
                 default:
@@ -746,6 +854,11 @@ class DepartPanel extends JPanel implements IOpenedForm,IAppCommand,CommandListe
     public void close() throws Exception {
         grid1.close();
         commands.updateActionList();
+    }
+
+    @Override
+    public void requery() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 
@@ -882,6 +995,11 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
     
     private static final String SQL_TEACHER_PROFILE = 
             "select * from v_teacher_profile where teacher_id=%teacher_id";
+
+    @Override
+    public void requery() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     class ProfileTeacherPanel extends DetailPanel{
         
         @Override
@@ -968,7 +1086,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
 
     class TeacherSelectPanel extends SelectPanel{
         int teacher_id = -1;
-        String sourceSQL = 
+        String SQL_TEACHER_SOURCE = 
         
           "select distinct s.subject_name,d.label,sg.group_label,sg.hour_per_week,\n" +
             "sg.depart_id,sg.group_id,sg.subject_id,\n" +
@@ -980,7 +1098,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
             "inner join depart d on d.id=sg.depart_id\n" +
             "where sg.default_teacher_id is null "; 
         
-        String destanationSQL = 
+        String SQL_TEACHER_DESTANATION = 
             "select b.subject_name,d.label,a.group_label,a.hour_per_week,r.room_name, \n"+
             "a.subject_id,a.group_id,a.group_type_id,a.default_room_id,a.depart_id \n"+
             "from v_subject_group a \n"+
@@ -1005,15 +1123,17 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
             Dataset dataset;
             
             if (chProfileOnly.isSelected()){
-                dataset = DataModule.getSQLDataset(sourceSQL+" and a.id="+teacher_id);
+                dataset = DataModule.getSQLDataset(SQL_TEACHER_SOURCE+" and a.id="+teacher_id);
             } else {
-                dataset = DataModule.getSQLDataset(sourceSQL);
+                dataset = DataModule.getSQLDataset(SQL_TEACHER_SOURCE);
             }
-            dataset.open();            
+            dataset.open();  
+            sourceGrid.grid_id="sql_teacher_source";
             sourceGrid.setDataset(dataset);
             
-            dataset = DataModule.getSQLDataset(destanationSQL+teacher_id);
+            dataset = DataModule.getSQLDataset(SQL_TEACHER_DESTANATION+teacher_id);
             dataset.open();
+            destanationGrid.grid_id="sql_teacher_destanation";
             destanationGrid.setDataset(dataset);
         }
         
@@ -1185,6 +1305,7 @@ class TeacherPanel extends JPanel implements IOpenedForm,ISchedulePanel, IAppCom
 
     @Override
     public void open() throws Exception {
+//        grid.setAutoCreateRowSorter(true);
         Dataset dataset = DataModule.getDataset("v_teacher");
         dataset.open();
         grid.grid_id="v_teacher";

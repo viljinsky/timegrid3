@@ -117,7 +117,7 @@ insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subj
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,2,1,7,2,2,8,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
-	 values (0,1,1,8,2,2,8,'false');
+	 values (0,1,1,8,2,2,8,'true');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,2,1,9,2,2,8,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
@@ -133,7 +133,7 @@ insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subj
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,2,1,7,2,2,9,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
-	 values (0,1,1,8,2,2,9,'false');
+	 values (0,1,1,8,2,2,9,'true');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,2,1,9,2,2,9,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
@@ -141,7 +141,7 @@ insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subj
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,0,1,22,1,4,1,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
-	 values (0,0,1,8,1,3,1,'false');
+	 values (0,0,1,8,1,3,1,'true');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,0,1,10,1,4,1,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
@@ -157,7 +157,7 @@ insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subj
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,2,1,7,1,2,2,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
-	 values (0,0,1,8,1,3,2,'false');
+	 values (0,0,1,8,1,3,2,'true');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,0,1,10,1,4,2,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
@@ -175,7 +175,7 @@ insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subj
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,2,1,7,1,2,3,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
-	 values (0,0,1,8,1,3,3,'false');
+	 values (0,0,1,8,1,3,3,'true');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,0,1,10,1,4,3,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
@@ -193,7 +193,7 @@ insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subj
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,2,1,7,1,2,4,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
-	 values (0,0,1,8,1,3,4,'false');
+	 values (0,0,1,8,1,3,4,'true');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,0,1,10,1,4,4,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
@@ -219,7 +219,7 @@ insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subj
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,2,1,7,2,3,5,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
-	 values (0,1,1,8,2,3,5,'false');
+	 values (0,1,1,8,2,3,5,'true');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,0,1,10,2,5,5,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
@@ -237,7 +237,7 @@ insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subj
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,2,1,7,3,3,10,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
-	 values (0,1,1,8,3,3,10,'false');
+	 values (0,1,1,8,3,3,10,'true');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,0,1,17,3,2,10,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
@@ -261,7 +261,7 @@ insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subj
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,2,1,7,3,3,11,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
-	 values (0,1,1,8,3,3,11,'false');
+	 values (0,1,1,8,3,3,11,'true');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,2,1,9,3,2,11,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
@@ -281,7 +281,7 @@ insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subj
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,2,1,7,2,3,6,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
-	 values (0,1,1,8,2,3,6,'false');
+	 values (0,1,1,8,2,3,6,'true');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,0,1,10,2,5,6,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
@@ -299,7 +299,7 @@ insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subj
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,2,1,7,2,3,7,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
-	 values (0,1,1,8,2,3,7,'false');
+	 values (0,1,1,8,2,3,7,'true');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)
 	 values (0,0,1,10,2,5,7,'false');
 insert into curriculum_detail (group_sequence_id,group_type_id,hour_per_day,subject_id,curriculum_id,hour_per_week,skill_id,is_stream)

@@ -56,6 +56,10 @@ public class Grid extends JTable implements CommandListener,IAppCommand {
         this.realNames = realNames;
     }
     
+    public void checkUpdates(){
+        getSelectionModel().setAnchorSelectionIndex(-1);
+    }
+    
     public Values getValues(){
         int row = getSelectedRow();
         if (row>=0){
@@ -220,11 +224,19 @@ public class Grid extends JTable implements CommandListener,IAppCommand {
         initGrid();
     }
     
+    public void addSelectionListener(ListSelectionListener listener){
+        getSelectionModel().addListSelectionListener(listener);
+    }
+    
+    public void setSelection(Integer rowIndex){
+        getSelectionModel().setSelectionInterval(rowIndex,rowIndex);
+    }
     
     private void initGrid(){
         commands.setCommands(new String[]{GRID_APPEND,GRID_EDIT,GRID_DELETE,GRID_REFRESH,GRID_REQUERY});
         commands.addCommandListener(this);
         commands.updateActionList();
+        
         
         setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -595,7 +607,12 @@ public class Grid extends JTable implements CommandListener,IAppCommand {
                         tcolumn.setPreferredWidth(0);
                     }
                     tcolumn.setHeaderValue(info.displayName);
-                    columnModel.moveColumn(i, info.columnOrder);
+                    try{
+                        columnModel.moveColumn(i, info.columnOrder);
+                    } catch (Exception e){
+                        System.err.println(e.getMessage());
+                        System.out.println(String.format("%s c %d на %d %s ",grid_id, i,info.columnOrder,info.columnName));
+                    }
                     break;
                 }
             }

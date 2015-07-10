@@ -219,6 +219,11 @@ public class CurriculumPanel extends JPanel implements IAppCommand,IOpenedForm,C
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
+
+    @Override
+    public void requery() throws Exception {
+        tree.open();
+    }
     
     class CommandPanel extends JPanel{
 

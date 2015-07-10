@@ -48,6 +48,9 @@ insert into profile_item (profile_id,subject_id) values (12,10);
 insert into profile_item (profile_id,subject_id) values (12,4);
 insert into profile_item (profile_id,subject_id) values (12,11);
 
+insert into profile_item (profile_id,subject_id) values (12,1);
+insert into profile_item (profile_id,subject_id) values (12,14);
+
 insert into profile(id,profile_type_id,profile_name) values (13,1,'ОБЖ');
 insert into profile_item (profile_id,subject_id) values (13,21);
 

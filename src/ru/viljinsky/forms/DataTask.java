@@ -303,9 +303,10 @@ public class DataTask implements IDataTask, IDataTaskConstants{
         map.put(3, subject_id);
         map.put(4, group_id);
         DataModule.execute(sql, map);
+        
         sql = "update subject_group set default_room_id =(\n" +
               "select teacher_room_id from teacher where id=?)\n" +
-              "where depart_id=? and subject_id=? and group_id=?;";
+              "where depart_id=? and subject_id=? and group_id=? and default_room_id is null;";
         map.clear();
         map.put(1,teacher_id);
         map.put(2,depart_id);

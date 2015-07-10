@@ -95,7 +95,7 @@ public class ExportSQL {
             "curriculum_detail"
         };
         String sql ;
-        String filaName = "учебный план3.sql";
+        String filaName = "учебный план4.sql";
         BufferedWriter bufw = null;
         try{
         bufw = new BufferedWriter(new FileWriter(new File(filaName)));
@@ -117,7 +117,7 @@ public class ExportSQL {
     }
     
     public static void main(String[] args) throws Exception{
-        DataModule.open();
+        DataModule.open("новая 4.db");
         backupCurriculum();
     }
     
