@@ -6,7 +6,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import javax.swing.Action;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
@@ -32,7 +33,6 @@ import ru.viljinsky.sqlite.DataModule;
 public class ScriptEditor extends JEditorPane implements CommandListener{
     CommandMngr commands = new CommandMngr();
     JFileChooser fc = new JFileChooser(new File("."));
-//    SqlFilter sqlFilter = new SqlFilter();
     Document doc;
     
     public ScriptEditor(String type, String text) {
@@ -77,14 +77,21 @@ public class ScriptEditor extends JEditorPane implements CommandListener{
     }
     
     private void loadScript(File file) throws Exception{
-        BufferedReader r = new BufferedReader(new FileReader(file));
-        String l;
-        doc.remove(0, doc.getLength());
-        while ((l=r.readLine())!=null){
-            doc.insertString(doc.getLength(), l+"\n", null);
+        BufferedReader r = null;
+        InputStreamReader istr = null ;
+        try {
+            istr = new InputStreamReader(new FileInputStream(file),"UTF-8");
+            r = new BufferedReader(istr);
+            String line;
+            doc.remove(0, doc.getLength());
+            while ((line=r.readLine())!=null){
+                doc.insertString(doc.getLength(), line+"\n", null);
+            }
+        } finally {
+            if (istr!=null) istr.close();
+            if (r!=null) r.close();
+            setCaretPosition(0);
         }
-        r.close();
-        setCaretPosition(0);
     }
     
     public boolean executeScript() throws Exception{
@@ -134,8 +141,7 @@ public class ScriptEditor extends JEditorPane implements CommandListener{
         try{
             switch (command){
                 case "LOAD":
-//                    fc.setFileFilter(new SqlFilter());
-                    int retval = fc.showOpenDialog(this);
+                    int retval = fc.showOpenDialog(null);
                     if (retval==JFileChooser.APPROVE_OPTION){
                         loadScript(fc.getSelectedFile());
                     }
